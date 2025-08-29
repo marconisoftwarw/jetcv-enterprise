@@ -250,7 +250,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               SizedBox(height: 8),
               Text('4. Modifica il file:'),
               SizedBox(height: 8),
-              Container(
+rm               const Container(
                 padding: EdgeInsets.all(4),
                 decoration: BoxDecoration(
                   color: Colors.grey,
