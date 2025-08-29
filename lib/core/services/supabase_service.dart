@@ -1,9 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:gotrue/src/types/user.dart' as gotrue;
 import '../../shared/models/user_model.dart';
 import '../../shared/models/legal_entity_model.dart';
 import '../config/app_config.dart';
-import '../constants/app_constants.dart';
 
 class SupabaseService {
   static final SupabaseService instance = SupabaseService._();
@@ -15,6 +13,7 @@ class SupabaseService {
   
   SupabaseClient? get client => _client;
   bool get isInitialized => _isInitialized;
+  bool get isAuthenticated => _isInitialized && currentUser != null;
   
   Future<void> initialize() async {
     try {
@@ -39,7 +38,7 @@ class SupabaseService {
   }
   
   // Authentication methods
-  Future<gotrue.AuthResponse> signUpWithEmail({
+  Future<AuthResponse> signUpWithEmail({
     required String email,
     required String password,
     required Map<String, dynamic> userData,
@@ -55,7 +54,7 @@ class SupabaseService {
     );
   }
   
-  Future<gotrue.AuthResponse> signInWithEmail({
+  Future<AuthResponse> signInWithEmail({
     required String email,
     required String password,
   }) async {
@@ -74,14 +73,14 @@ class SupabaseService {
     await _client!.auth.signOut();
   }
   
-  gotrue.User? get currentUser {
+  User? get currentUser {
     if (!_isInitialized) return null;
     return _client!.auth.currentUser;
   }
   
-  Stream<gotrue.User?> get authStateChanges {
-    if (!_isInitialized) return Stream.value(null);
-    return _client!.auth.onAuthStateChange.map((event) => event.session?.user);
+  Stream<AuthState> get authStateChanges {
+    if (!_isInitialized) return Stream.empty();
+    return _client!.auth.onAuthStateChange;
   }
   
   // User data methods
@@ -228,13 +227,3 @@ class SupabaseService {
     }
   }
 }
-
-// Provider for SupabaseService
-final supabaseServiceProvider = Provider<SupabaseService>((ref) {
-  return SupabaseService.instance;
-});
-
-// Provider for SupabaseClient
-final supabaseClientProvider = Provider<SupabaseClient?>((ref) {
-  return ref.watch(supabaseServiceProvider).client;
-});
