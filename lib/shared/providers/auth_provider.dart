@@ -11,6 +11,15 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserModel?>> {
   }
   
   void _initializeAuth() {
+    // Check if Supabase is initialized
+    if (!_supabaseService.isInitialized) {
+      state = AsyncValue.error(
+        'Supabase non è configurato. Configura le credenziali per utilizzare l\'app.',
+        StackTrace.current,
+      );
+      return;
+    }
+    
     _supabaseService.authStateChanges.listen((authState) async {
       if (authState.event == AuthChangeEvent.signedIn) {
         await _loadCurrentUser();
@@ -43,6 +52,10 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserModel?>> {
     required String firstName,
     required String lastName,
   }) async {
+    if (!_supabaseService.isInitialized) {
+      throw Exception('Supabase non è configurato. Configura le credenziali per utilizzare l\'app.');
+    }
+    
     try {
       state = const AsyncValue.loading();
       
@@ -75,6 +88,10 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserModel?>> {
     required String email,
     required String password,
   }) async {
+    if (!_supabaseService.isInitialized) {
+      throw Exception('Supabase non è configurato. Configura le credenziali per utilizzare l\'app.');
+    }
+    
     try {
       state = const AsyncValue.loading();
       
@@ -104,6 +121,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserModel?>> {
   }
   
   bool get isAuthenticated => _supabaseService.isAuthenticated;
+  bool get isSupabaseInitialized => _supabaseService.isInitialized;
   UserModel? get currentUser => state.value;
   bool get isLoading => state.isLoading;
   bool get hasError => state.hasError;
@@ -131,4 +149,8 @@ final isAdminProvider = Provider<bool>((ref) {
 
 final isLoadingProvider = Provider<bool>((ref) {
   return ref.watch(authProvider).isLoading;
+});
+
+final isSupabaseInitializedProvider = Provider<bool>((ref) {
+  return ref.watch(authProvider).isSupabaseInitialized;
 });

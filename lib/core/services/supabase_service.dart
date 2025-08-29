@@ -11,16 +11,33 @@ class SupabaseService {
   
   SupabaseService._();
   
-  late final SupabaseClient _client;
+  SupabaseClient? _client;
+  bool _isInitialized = false;
   
-  SupabaseClient get client => _client;
+  SupabaseClient? get client => _client;
+  bool get isInitialized => _isInitialized;
   
   Future<void> initialize() async {
-    await Supabase.initialize(
-      url: AppConfig.supabaseUrl,
-      anonKey: AppConfig.supabaseAnonKey,
-    );
-    _client = Supabase.instance.client;
+    try {
+      // Check if credentials are properly configured
+      if (AppConfig.supabaseUrl == 'https://skqsuxmdfqxbkhmselaz.supabase.co' &&
+          AppConfig.supabaseAnonKey == 'your-anon-key') {
+        print('⚠️ Supabase credentials not configured. Running in demo mode.');
+        _isInitialized = false;
+        return;
+      }
+      
+      await Supabase.initialize(
+        url: AppConfig.supabaseUrl,
+        anonKey: AppConfig.supabaseAnonKey,
+      );
+      _client = Supabase.instance.client;
+      _isInitialized = true;
+      print('✅ Supabase initialized successfully');
+    } catch (e) {
+      print('❌ Error initializing Supabase: $e');
+      _isInitialized = false;
+    }
   }
   
   // Authentication methods
@@ -29,7 +46,11 @@ class SupabaseService {
     required String password,
     required Map<String, dynamic> userData,
   }) async {
-    return await _client.auth.signUp(
+    if (!_isInitialized) {
+      throw Exception('Supabase non è configurato. Configura le credenziali per utilizzare l\'app.');
+    }
+    
+    return await _client!.auth.signUp(
       email: email,
       password: password,
       data: userData,
@@ -40,24 +61,32 @@ class SupabaseService {
     required String email,
     required String password,
   }) async {
-    return await _client.auth.signInWithPassword(
+    if (!_isInitialized) {
+      throw Exception('Supabase non è configurato. Configura le credenziali per utilizzare l\'app.');
+    }
+    
+    return await _client!.auth.signInWithPassword(
       email: email,
       password: password,
     );
   }
   
   Future<void> signOut() async {
-    await _client.auth.signOut();
+    if (!_isInitialized) return;
+    await _client!.auth.signOut();
   }
   
-  User? get currentUser => _client.auth.currentUser;
+  User? get currentUser => _isInitialized ? _client!.auth.currentUser : null;
   
-  Stream<AuthState> get authStateChanges => _client.auth.onAuthStateChange;
+  Stream<AuthState> get authStateChanges => 
+      _isInitialized ? _client!.auth.onAuthStateChange : Stream.empty();
   
   // User management
   Future<UserModel?> getUserById(String userId) async {
+    if (!_isInitialized) return null;
+    
     try {
-      final response = await _client
+      final response = await _client!
           .from(AppConstants.usersTable)
           .select()
           .eq('idUser', userId)
@@ -71,6 +100,8 @@ class SupabaseService {
   }
   
   Future<UserModel?> getCurrentUserData() async {
+    if (!_isInitialized) return null;
+    
     final user = currentUser;
     if (user == null) return null;
     
@@ -78,7 +109,9 @@ class SupabaseService {
   }
   
   Future<void> updateUser(String userId, Map<String, dynamic> data) async {
-    await _client
+    if (!_isInitialized) return;
+    
+    await _client!
         .from(AppConstants.usersTable)
         .update(data)
         .eq('idUser', userId);
@@ -86,8 +119,10 @@ class SupabaseService {
   
   // Legal Entity management
   Future<List<LegalEntity>> getLegalEntities() async {
+    if (!_isInitialized) return [];
+    
     try {
-      final response = await _client
+      final response = await _client!
           .from(AppConstants.legalEntitiesTable)
           .select()
           .order('createdAt', ascending: false);
@@ -100,8 +135,10 @@ class SupabaseService {
   }
   
   Future<LegalEntity?> getLegalEntityById(String id) async {
+    if (!_isInitialized) return null;
+    
     try {
-      final response = await _client
+      final response = await _client!
           .from(AppConstants.legalEntitiesTable)
           .select()
           .eq('idLegalEntity', id)
@@ -115,13 +152,19 @@ class SupabaseService {
   }
   
   Future<void> createLegalEntity(Map<String, dynamic> data) async {
-    await _client
+    if (!_isInitialized) {
+      throw Exception('Supabase non è configurato. Configura le credenziali per utilizzare l\'app.');
+    }
+    
+    await _client!
         .from(AppConstants.legalEntitiesTable)
         .insert(data);
   }
   
   Future<void> updateLegalEntity(String id, Map<String, dynamic> data) async {
-    await _client
+    if (!_isInitialized) return;
+    
+    await _client!
         .from(AppConstants.legalEntitiesTable)
         .update(data)
         .eq('idLegalEntity', id);
@@ -133,6 +176,8 @@ class SupabaseService {
     String? rejectionReason,
     String adminUserId,
   ) async {
+    if (!_isInitialized) return;
+    
     final updateData = {
       'status': status,
       'statusUpdatedAt': DateTime.now().toIso8601String(),
@@ -151,8 +196,12 @@ class SupabaseService {
     String functionName, 
     Map<String, dynamic> params,
   ) async {
+    if (!_isInitialized) {
+      throw Exception('Supabase non è configurato. Configura le credenziali per utilizzare l\'app.');
+    }
+    
     try {
-      final response = await _client.functions.invoke(
+      final response = await _client!.functions.invoke(
         functionName,
         body: params,
       );
@@ -174,6 +223,10 @@ class SupabaseService {
     required String legalEntityName,
     required String invitationLink,
   }) async {
+    if (!_isInitialized) {
+      throw Exception('Supabase non è configurato. Configura le credenziali per utilizzare l\'app.');
+    }
+    
     await callEdgeFunction('send-legal-entity-invitation', {
       'email': email,
       'legalEntityName': legalEntityName,
@@ -183,8 +236,10 @@ class SupabaseService {
   
   // Admin functions
   Future<List<UserModel>> getUsers() async {
+    if (!_isInitialized) return [];
+    
     try {
-      final response = await _client
+      final response = await _client!
           .from(AppConstants.usersTable)
           .select()
           .order('createdAt', ascending: false);
@@ -197,6 +252,8 @@ class SupabaseService {
   }
   
   Future<void> updateUserType(String userId, String userType) async {
+    if (!_isInitialized) return;
+    
     await updateUser(userId, {
       'type': userType,
       'updatedAt': DateTime.now().toIso8601String(),
@@ -204,12 +261,13 @@ class SupabaseService {
   }
   
   // Utility methods
-  bool get isAuthenticated => currentUser != null;
+  bool get isAuthenticated => _isInitialized && currentUser != null;
   
   String? get currentUserId => currentUser?.id;
   
   Future<void> refreshSession() async {
-    await _client.auth.refreshSession();
+    if (!_isInitialized) return;
+    await _client!.auth.refreshSession();
   }
 }
 
@@ -219,6 +277,6 @@ final supabaseServiceProvider = Provider<SupabaseService>((ref) {
 });
 
 // Provider for SupabaseClient
-final supabaseClientProvider = Provider<SupabaseClient>((ref) {
+final supabaseClientProvider = Provider<SupabaseClient?>((ref) {
   return ref.watch(supabaseServiceProvider).client;
 });

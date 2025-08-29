@@ -6,10 +6,25 @@ class LegalEntityNotifier extends StateNotifier<AsyncValue<List<LegalEntity>>> {
   final SupabaseService _supabaseService;
   
   LegalEntityNotifier(this._supabaseService) : super(const AsyncValue.loading()) {
-    loadLegalEntities();
+    if (_supabaseService.isInitialized) {
+      loadLegalEntities();
+    } else {
+      state = AsyncValue.error(
+        'Supabase non è configurato. Configura le credenziali per utilizzare l\'app.',
+        StackTrace.current,
+      );
+    }
   }
   
   Future<void> loadLegalEntities() async {
+    if (!_supabaseService.isInitialized) {
+      state = AsyncValue.error(
+        'Supabase non è configurato. Configura le credenziali per utilizzare l\'app.',
+        StackTrace.current,
+      );
+      return;
+    }
+    
     try {
       state = const AsyncValue.loading();
       final entities = await _supabaseService.getLegalEntities();
@@ -20,6 +35,10 @@ class LegalEntityNotifier extends StateNotifier<AsyncValue<List<LegalEntity>>> {
   }
   
   Future<void> createLegalEntity(Map<String, dynamic> data) async {
+    if (!_supabaseService.isInitialized) {
+      throw Exception('Supabase non è configurato. Configura le credenziali per utilizzare l\'app.');
+    }
+    
     try {
       await _supabaseService.createLegalEntity(data);
       await loadLegalEntities(); // Refresh the list
@@ -30,6 +49,10 @@ class LegalEntityNotifier extends StateNotifier<AsyncValue<List<LegalEntity>>> {
   }
   
   Future<void> updateLegalEntity(String id, Map<String, dynamic> data) async {
+    if (!_supabaseService.isInitialized) {
+      throw Exception('Supabase non è configurato. Configura le credenziali per utilizzare l\'app.');
+    }
+    
     try {
       await _supabaseService.updateLegalEntity(id, data);
       await loadLegalEntities(); // Refresh the list
@@ -45,6 +68,10 @@ class LegalEntityNotifier extends StateNotifier<AsyncValue<List<LegalEntity>>> {
     String? rejectionReason,
     String adminUserId,
   ) async {
+    if (!_supabaseService.isInitialized) {
+      throw Exception('Supabase non è configurato. Configura le credenziali per utilizzare l\'app.');
+    }
+    
     try {
       await _supabaseService.updateLegalEntityStatus(
         id, 
@@ -72,6 +99,10 @@ class LegalEntityNotifier extends StateNotifier<AsyncValue<List<LegalEntity>>> {
     required String legalEntityName,
     required String invitationLink,
   }) async {
+    if (!_supabaseService.isInitialized) {
+      throw Exception('Supabase non è configurato. Configura le credenziali per utilizzare l\'app.');
+    }
+    
     try {
       await _supabaseService.sendLegalEntityInvitation(
         email: email,

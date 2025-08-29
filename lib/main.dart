@@ -26,15 +26,12 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authProvider);
-    
     return MaterialApp.router(
       title: AppConfig.appName,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
         useMaterial3: true,
-        fontFamily: 'Inter',
         appBarTheme: const AppBarTheme(
           elevation: 0,
           centerTitle: true,
@@ -56,28 +53,13 @@ class MyApp extends ConsumerWidget {
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         ),
       ),
-      routerConfig: _createRouter(authState),
+      routerConfig: _createRouter(),
     );
   }
   
-  GoRouter _createRouter(AsyncValue<UserModel?> authState) {
+  GoRouter _createRouter() {
     return GoRouter(
-      initialLocation: '/',
-      redirect: (context, state) {
-        final isAuthenticated = authState.value != null;
-        final isAuthRoute = state.matchedLocation == '/login' || 
-                           state.matchedLocation == '/signup';
-        
-        if (!isAuthenticated && !isAuthRoute) {
-          return '/login';
-        }
-        
-        if (isAuthenticated && isAuthRoute) {
-          return '/';
-        }
-        
-        return null;
-      },
+      initialLocation: '/login',
       routes: [
         GoRoute(
           path: '/',

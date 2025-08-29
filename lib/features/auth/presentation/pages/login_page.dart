@@ -20,6 +20,79 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isSupabaseInitialized = ref.watch(isSupabaseInitializedProvider);
+    
+    // Show configuration message if Supabase is not initialized
+    if (!isSupabaseInitialized) {
+      return Scaffold(
+        body: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.settings_outlined,
+                    size: 80,
+                    color: Colors.orange,
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Configurazione Richiesta',
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.orange,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Per utilizzare JetCV Enterprise, devi configurare le credenziali Supabase.',
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: Colors.grey[600],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  const Card(
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Passi per la configurazione:',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                          SizedBox(height: 12),
+                          Text('1. Crea un progetto su supabase.com'),
+                          Text('2. Ottieni URL e Anon Key dal dashboard'),
+                          Text('3. Modifica lib/core/config/app_config.dart'),
+                          Text('4. Riavvia l\'applicazione'),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      // Show configuration details
+                      _showConfigurationDialog(context);
+                    },
+                    icon: const Icon(Icons.info_outline),
+                    label: const Text('Dettagli Configurazione'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -150,6 +223,54 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _showConfigurationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Configurazione Supabase'),
+        content: const SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Per configurare Supabase:',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 16),
+              Text('1. Vai su supabase.com e crea un nuovo progetto'),
+              SizedBox(height: 8),
+              Text('2. Nel dashboard, vai su Settings > API'),
+              SizedBox(height: 8),
+              Text('3. Copia Project URL e anon/public key'),
+              SizedBox(height: 8),
+              Text('4. Modifica il file:'),
+              SizedBox(height: 8),
+              Text(
+                'lib/core/config/app_config.dart',
+                style: TextStyle(
+                  fontFamily: 'monospace',
+                  backgroundColor: Colors.grey,
+                  padding: EdgeInsets.all(4),
+                ),
+              ),
+              SizedBox(height: 8),
+              Text('5. Sostituisci le credenziali placeholder'),
+              SizedBox(height: 8),
+              Text('6. Riavvia l\'applicazione'),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Chiudi'),
+          ),
+        ],
       ),
     );
   }

@@ -38,19 +38,19 @@ abstract class EnvironmentConfig {
 
 class TestEnvironmentConfig implements EnvironmentConfig {
   @override
-  String get supabaseUrl => 'YOUR_TEST_SUPABASE_URL';
+  String get supabaseUrl => 'https://skqsuxmdfqxbkhmselaz.supabase.co';
   
   @override
-  String get supabaseAnonKey => 'YOUR_TEST_SUPABASE_ANON_KEY';
+  String get supabaseAnonKey => 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcXN1eG1kZnF4YmtobXNlbGF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwNjQxMDMsImV4cCI6MjA3MTY0MDEwM30.NkwMkK6wZVPv2G_U39Q-rOMT5yUKLvPePnfXHKMR6JU';
   
   @override
-  String get supabaseServiceRoleKey => 'YOUR_TEST_SUPABASE_SERVICE_ROLE_KEY';
+  String get supabaseServiceRoleKey => 'your-service-role-key';
   
   @override
-  String get emailServiceUrl => 'YOUR_TEST_EMAIL_SERVICE_URL';
+  String get emailServiceUrl => 'https://api.sendgrid.com/v3/mail/send';
   
   @override
-  String get emailServiceApiKey => 'YOUR_TEST_EMAIL_SERVICE_API_KEY';
+  String get emailServiceApiKey => 'your-sendgrid-api-key';
   
   @override
   String get appName => 'JetCV Enterprise (Test)';
@@ -64,19 +64,19 @@ class TestEnvironmentConfig implements EnvironmentConfig {
 
 class ProductionEnvironmentConfig implements EnvironmentConfig {
   @override
-  String get supabaseUrl => 'YOUR_PROD_SUPABASE_URL';
+  String get supabaseUrl => 'https://skqsuxmdfqxbkhmselaz.supabase.co';
   
   @override
-  String get supabaseAnonKey => 'YOUR_PROD_SUPABASE_ANON_KEY';
+  String get supabaseAnonKey => 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcXN1eG1kZnF4YmtobXNlbGF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwNjQxMDMsImV4cCI6MjA3MTY0MDEwM30.NkwMkK6wZVPv2G_U39Q-rOMT5yUKLvPePnfXHKMR6JU';
   
   @override
-  String get supabaseServiceRoleKey => 'YOUR_PROD_SUPABASE_SERVICE_ROLE_KEY';
+  String get supabaseServiceRoleKey => 'your-service-role-key';
   
   @override
-  String get emailServiceUrl => 'YOUR_PROD_EMAIL_SERVICE_URL';
+  String get emailServiceUrl => 'https://api.sendgrid.com/v3/mail/send';
   
   @override
-  String get emailServiceApiKey => 'YOUR_PROD_EMAIL_SERVICE_API_KEY';
+  String get emailServiceApiKey => 'your-sendgrid-api-key';
   
   @override
   String get appName => 'JetCV Enterprise';
