@@ -250,12 +250,17 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               SizedBox(height: 8),
               Text('4. Modifica il file:'),
               SizedBox(height: 8),
-              Text(
-                'lib/core/config/app_config.dart',
-                style: TextStyle(
-                  fontFamily: 'monospace',
-                  backgroundColor: Colors.grey,
-                  padding: EdgeInsets.all(4),
+              Container(
+                padding: EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Colors.grey,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  'lib/core/config/app_config.dart',
+                  style: TextStyle(
+                    fontFamily: 'monospace',
+                  ),
                 ),
               ),
               SizedBox(height: 8),

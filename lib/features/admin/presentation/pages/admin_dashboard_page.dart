@@ -265,8 +265,8 @@ class AdminDashboardPage extends ConsumerWidget {
         currentUser.idUser,
       );
 
-      if (ref.mounted) {
-        ScaffoldMessenger.of(ref.context).showSnackBar(
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${entity.legalName} è stato approvato'),
             backgroundColor: Colors.green,
@@ -274,8 +274,8 @@ class AdminDashboardPage extends ConsumerWidget {
         );
       }
     } catch (e) {
-      if (ref.mounted) {
-        ScaffoldMessenger.of(ref.context).showSnackBar(
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Errore durante l\'approvazione: ${e.toString()}'),
             backgroundColor: Colors.red,
@@ -299,8 +299,8 @@ class AdminDashboardPage extends ConsumerWidget {
         currentUser.idUser,
       );
 
-      if (ref.mounted) {
-        ScaffoldMessenger.of(ref.context).showSnackBar(
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${entity.legalName} è stato rifiutato'),
             backgroundColor: Colors.orange,
@@ -308,8 +308,8 @@ class AdminDashboardPage extends ConsumerWidget {
         );
       }
     } catch (e) {
-      if (ref.mounted) {
-        ScaffoldMessenger.of(ref.context).showSnackBar(
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Errore durante il rifiuto: ${e.toString()}'),
             backgroundColor: Colors.red,
