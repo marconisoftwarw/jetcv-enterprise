@@ -111,7 +111,35 @@ class SupabaseService {
         'createdAt': DateTime.now().toIso8601String(),
       };
 
-      await _client.from('user').insert(recordData);
+      // Use HTTP client with proper headers to avoid 406 error
+      final url = '${AppConfig.supabaseUrl}/rest/v1/user';
+
+      // Get the current user's access token
+      final session = _client.auth.currentSession;
+      if (session == null) {
+        print('❌ No active session found for _createUserRecord');
+        throw Exception('No active session');
+      }
+
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer ${session.accessToken}',
+          'apikey': AppConfig.supabaseAnonKey,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode(recordData),
+      );
+
+      print('🔍 _createUserRecord response status: ${response.statusCode}');
+
+      if (response.statusCode != 201 && response.statusCode != 200) {
+        print('❌ _createUserRecord error: Status ${response.statusCode}');
+        print('❌ Response body: ${response.body}');
+        throw Exception('Failed to create user record: ${response.statusCode}');
+      }
+
       print('User record created successfully for ID: ${user.id}');
     } catch (e) {
       print('Error creating user record for ID ${user.id}: $e');
@@ -210,16 +238,8 @@ class SupabaseService {
         return null;
       }
 
-      final response = await _client
-          .from('user')
-          .select('*')
-          .eq('idUser', userId)
-          .single();
-
-      print(
-        '✅ SupabaseService: User retrieved successfully: ${response['firstName']} ${response['lastName']}',
-      );
-      return app_models.AppUser.fromJson(response);
+      // Use Edge Function to bypass RLS and 406 errors
+      return await getUserViaEdgeFunction(userId);
     } catch (e) {
       print('❌ SupabaseService: Error getting user $userId: $e');
       print('❌ SupabaseService: Error type: ${e.runtimeType}');
@@ -232,6 +252,126 @@ class SupabaseService {
         return null;
       }
       print('Error getting user $userId: $e');
+      return null;
+    }
+  }
+
+  // Metodo per creare utenti via Edge Function (bypass RLS)
+  Future<app_models.AppUser?> createUserViaEdgeFunction(
+    Map<String, dynamic> userData,
+  ) async {
+    try {
+      print('🔄 SupabaseService: Creating user via Edge Function...');
+      print('🔄 SupabaseService: User data: $userData');
+
+      final response = await _client.functions.invoke(
+        'create-user',
+        body: userData,
+      );
+
+      print(
+        '🔄 SupabaseService: Edge Function response status: ${response.status}',
+      );
+      print(
+        '🔄 SupabaseService: Edge Function response data: ${response.data}',
+      );
+
+      if (response.status != 200 && response.status != 201) {
+        print(
+          '❌ SupabaseService: Edge Function error: Status ${response.status}',
+        );
+        return null;
+      }
+
+      final data = response.data;
+      if (data == null || data['ok'] != true) {
+        print(
+          '❌ SupabaseService: Edge Function error: ${data?['message'] ?? 'Unknown error'}',
+        );
+        return null;
+      }
+
+      print('✅ SupabaseService: User created successfully via Edge Function');
+      return app_models.AppUser.fromJson(data['user']);
+    } catch (e) {
+      print('❌ SupabaseService: Error creating user via Edge Function: $e');
+      return null;
+    }
+  }
+
+  // Metodo per recuperare utenti via Edge Function (bypass RLS)
+  Future<app_models.AppUser?> getUserViaEdgeFunction(String userId) async {
+    try {
+      print('🔍 SupabaseService: Getting user via Edge Function: $userId');
+
+      final response = await _client.functions.invoke(
+        'get-user',
+        body: {'idUser': userId},
+      );
+
+      print(
+        '🔍 SupabaseService: Edge Function response status: ${response.status}',
+      );
+
+      if (response.status != 200) {
+        print(
+          '❌ SupabaseService: Edge Function error: Status ${response.status}',
+        );
+        return null;
+      }
+
+      final data = response.data;
+      if (data == null || data['ok'] != true) {
+        print(
+          '❌ SupabaseService: Edge Function error: ${data?['message'] ?? 'Unknown error'}',
+        );
+        return null;
+      }
+
+      print('✅ SupabaseService: User retrieved successfully via Edge Function');
+      return app_models.AppUser.fromJson(data['user']);
+    } catch (e) {
+      print('❌ SupabaseService: Error getting user via Edge Function: $e');
+      return null;
+    }
+  }
+
+  // Metodo per aggiornare utenti via Edge Function (bypass RLS)
+  Future<app_models.AppUser?> updateUserViaEdgeFunction(
+    String userId,
+    Map<String, dynamic> updates,
+  ) async {
+    try {
+      print('🔄 SupabaseService: Updating user via Edge Function: $userId');
+
+      final response = await _client.functions.invoke(
+        'update-user',
+        body: {'idUser': userId, ...updates},
+      );
+
+      print(
+        '🔍 SupabaseService: Edge Function response status: ${response.status}',
+      );
+
+      if (response.status != 200) {
+        print(
+          '❌ SupabaseService: Edge Function error: Status ${response.status}',
+        );
+        return null;
+      }
+
+      final data = response.data;
+      if (data == null || data['ok'] != true) {
+        print(
+          '❌ SupabaseService: Edge Function error: ${data?['message'] ?? 'Unknown error'}',
+        );
+        return null;
+      }
+
+      print('✅ SupabaseService: User updated successfully via Edge Function');
+      return app_models.AppUser.fromJson(data['user']);
+    } catch (e) {
+      print('❌ SupabaseService: Error updating user via Edge Function: $e');
       return null;
     }
   }
@@ -259,7 +399,17 @@ class SupabaseService {
           'languageCode': 'it',
         };
 
-        await _createUserRecord(supabaseUser, userData);
+        // Try Edge Function first, then fallback to direct method
+        var createdUser = await createUserViaEdgeFunction(userData);
+        if (createdUser == null) {
+          print(
+            '⚠️ SupabaseService: Edge Function failed, trying direct method',
+          );
+          await _createUserRecord(supabaseUser, userData);
+        } else {
+          print('✅ SupabaseService: User created via Edge Function');
+          return createdUser;
+        }
 
         // Riprova a recuperare l'utente appena creato
         return await getUserById(userId);
@@ -283,16 +433,31 @@ class SupabaseService {
         return null;
       }
 
-      final response = await _client
-          .from('user')
-          .select()
-          .eq('email', email)
-          .single();
+      // Use Edge Function to bypass RLS and 406 errors
+      final response = await _client.functions.invoke(
+        'get-user-by-email',
+        body: {'email': email},
+      );
+
+      if (response.status != 200) {
+        print(
+          '❌ getUserByEmail Edge Function error: Status ${response.status}',
+        );
+        return null;
+      }
+
+      final data = response.data;
+      if (data == null || data['ok'] != true) {
+        print(
+          '❌ getUserByEmail Edge Function error: ${data?['message'] ?? 'Unknown error'}',
+        );
+        return null;
+      }
 
       print(
-        '✅ SupabaseService: User retrieved by email successfully: ${response['firstName']} ${response['lastName']}',
+        '✅ SupabaseService: User retrieved by email successfully via Edge Function',
       );
-      return app_models.AppUser.fromJson(response);
+      return app_models.AppUser.fromJson(data['user']);
     } catch (e) {
       print('❌ SupabaseService: Error getting user by email $email: $e');
       print('❌ SupabaseService: Error type: ${e.runtimeType}');
@@ -318,16 +483,47 @@ class SupabaseService {
         return null;
       }
 
-      final response = await _client
-          .from('user')
-          .insert(userData)
-          .select()
-          .single();
+      // Use HTTP client with proper headers to avoid 406 error
+      final url = '${AppConfig.supabaseUrl}/rest/v1/user';
 
-      print(
-        '✅ SupabaseService: User created successfully: ${response['firstName']} ${response['lastName']}',
+      // Get the current user's access token
+      final session = _client.auth.currentSession;
+      if (session == null) {
+        print('❌ No active session found for createUser');
+        return null;
+      }
+
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer ${session.accessToken}',
+          'apikey': AppConfig.supabaseAnonKey,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Prefer': 'return=representation',
+        },
+        body: jsonEncode(userData),
       );
-      return app_models.AppUser.fromJson(response);
+
+      print('🔍 createUser response status: ${response.statusCode}');
+
+      if (response.statusCode != 201 && response.statusCode != 200) {
+        print('❌ createUser error: Status ${response.statusCode}');
+        print('❌ Response body: ${response.body}');
+        return null;
+      }
+
+      final data = jsonDecode(response.body);
+      if (data is List && data.isNotEmpty) {
+        final userData = data.first;
+        print(
+          '✅ SupabaseService: User created successfully: ${userData['firstName']} ${userData['lastName']}',
+        );
+        return app_models.AppUser.fromJson(userData);
+      } else {
+        print('❌ createUser: No user data in response');
+        return null;
+      }
     } catch (e) {
       print('❌ SupabaseService: Error creating user: $e');
       print('❌ SupabaseService: Error type: ${e.runtimeType}');
@@ -353,17 +549,47 @@ class SupabaseService {
         return null;
       }
 
-      final response = await _client
-          .from('user')
-          .update(updates)
-          .eq('idUser', userId)
-          .select()
-          .single();
+      // Use HTTP client with proper headers to avoid 406 error
+      final url = '${AppConfig.supabaseUrl}/rest/v1/user?idUser=eq.$userId';
 
-      print(
-        '✅ SupabaseService: User updated successfully: ${response['firstName']} ${response['lastName']}',
+      // Get the current user's access token
+      final session = _client.auth.currentSession;
+      if (session == null) {
+        print('❌ No active session found for updateUser');
+        return null;
+      }
+
+      final response = await http.patch(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer ${session.accessToken}',
+          'apikey': AppConfig.supabaseAnonKey,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Prefer': 'return=representation',
+        },
+        body: jsonEncode(updates),
       );
-      return app_models.AppUser.fromJson(response);
+
+      print('🔍 updateUser response status: ${response.statusCode}');
+
+      if (response.statusCode != 200) {
+        print('❌ updateUser error: Status ${response.statusCode}');
+        print('❌ Response body: ${response.body}');
+        return null;
+      }
+
+      final data = jsonDecode(response.body);
+      if (data is List && data.isNotEmpty) {
+        final userData = data.first;
+        print(
+          '✅ SupabaseService: User updated successfully: ${userData['firstName']} ${userData['lastName']}',
+        );
+        return app_models.AppUser.fromJson(userData);
+      } else {
+        print('❌ updateUser: No user data in response');
+        return null;
+      }
     } catch (e) {
       print('❌ SupabaseService: Error updating user $userId: $e');
       print('❌ SupabaseService: Error type: ${e.runtimeType}');

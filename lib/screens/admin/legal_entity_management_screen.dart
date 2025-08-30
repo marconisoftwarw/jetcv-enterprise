@@ -1137,9 +1137,7 @@ class _LegalEntityFormDialogState extends State<LegalEntityFormDialog> {
         ),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Errore nel salvataggio dell\'entità')),
-      );
+      Navigator.of(context).pop();
     }
   }
 }
