@@ -339,6 +339,98 @@ jobs:
    - Verify RLS policies
    - Check user permissions
 
+## SMTP Email Configuration
+
+JetCV Enterprise utilizza AWS SES (Simple Email Service) per l'invio di email tramite SendGrid API.
+
+### Credenziali AWS SES
+
+Le seguenti credenziali sono già configurate nell'applicazione:
+
+- **Nome utente IAM**: `ses-smtp-user.20250830-162216`
+- **Nome utente SMTP**: `AKIAW7RD7Q2X765RMDPT`
+- **Password SMTP**: `BLKakh10pvzFJmkSWNxzY3U57oxCtrpHAt/KNo+JknXr`
+
+### Configurazione Ambiente
+
+#### Variabili d'Ambiente (Produzione)
+
+Per configurare le credenziali SMTP in produzione, utilizzare le seguenti variabili d'ambiente:
+
+```bash
+# SMTP Configuration
+SMTP_HOST=email-smtp.us-east-1.amazonaws.com
+SMTP_PORT=587
+SMTP_USERNAME=AKIAW7RD7Q2X765RMDPT
+SMTP_PASSWORD=BLKakh10pvzFJmkSWNxzY3U57oxCtrpHAt/KNo+JknXr
+SMTP_FROM_EMAIL=noreply@jetcv.com
+```
+
+#### Configurazione Flutter Web
+
+Per build di produzione:
+
+```bash
+flutter build web \
+  --dart-define=SMTP_HOST=email-smtp.us-east-1.amazonaws.com \
+  --dart-define=SMTP_PORT=587 \
+  --dart-define=SMTP_USERNAME=AKIAW7RD7Q2X765RMDPT \
+  --dart-define=SMTP_PASSWORD=BLKakh10pvzFJmkSWNxzY3U57oxCtrpHAt/KNo+JknXr \
+  --dart-define=SMTP_FROM_EMAIL=noreply@jetcv.com
+```
+
+### Funzionalità Email
+
+L'applicazione supporta l'invio dei seguenti tipi di email:
+
+1. **Inviti Entità Legale**: Email di invito per nuovi membri
+2. **Inviti Certificatori**: Email per diventare certificatore
+3. **Email di Notifica**: Email generiche di notifica
+
+### Modalità Sviluppo vs Produzione
+
+- **Sviluppo**: Utilizza MailHog (localhost:8025) se `ENVIRONMENT=development` e `enableDebugMode=true`
+- **Produzione**: Utilizza AWS SES tramite SendGrid API
+
+### Verifica Configurazione
+
+Per verificare che le email vengano inviate correttamente:
+
+1. Controllare i log dell'applicazione per messaggi di conferma
+2. In produzione, verificare la console AWS SES per le statistiche di invio
+3. Testare l'invio tramite l'interfaccia dell'applicazione
+
+### Sicurezza
+
+⚠️ **Importante**: Le credenziali SMTP sono sensibili e dovrebbero essere:
+- Memorizzate in variabili d'ambiente
+- Non committate nel codice sorgente
+- Ruotate regolarmente per motivi di sicurezza
+
+### Troubleshooting Email
+
+#### Problemi Comuni
+
+1. **Email non inviate**: Verificare le credenziali AWS SES e i limiti di invio
+2. **Errore 401**: Credenziali SMTP non valide
+3. **Errore 429**: Limite di invio superato
+4. **Errore di connessione**: Verificare la configurazione del firewall e la regione AWS
+
+#### Log Email
+
+Tutte le operazioni email vengono loggate nella console con i seguenti prefissi:
+- ✅ `Email sent successfully`: Invio riuscito
+- ❌ `Failed to send email`: Invio fallito con codice errore
+- ⚠️ `Error sending via external service`: Errore generico
+
+### Configurazione AWS SES
+
+Assicurarsi che:
+1. L'utente IAM abbia i permessi appropriati per SES
+2. Il dominio sia verificato in SES
+3. I limiti di invio siano sufficienti per il volume previsto
+4. La regione AWS corrisponda a quella configurata (us-east-1)
+
 ### Support
 
 For additional help:

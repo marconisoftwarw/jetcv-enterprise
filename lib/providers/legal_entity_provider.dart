@@ -165,6 +165,63 @@ class LegalEntityProvider extends ChangeNotifier {
     }
   }
 
+  Future<LegalEntity?> updateLegalEntity({
+    required String id,
+    required Map<String, dynamic> entityData,
+  }) async {
+    _setLoading(true);
+    _clearError();
+
+    try {
+      final entity = await _supabaseService.updateLegalEntity(
+        id: id,
+        entityData: entityData,
+      );
+
+      if (entity != null) {
+        final index = _legalEntities.indexWhere(
+          (e) => e.idLegalEntity == id,
+        );
+        if (index != -1) {
+          _legalEntities[index] = entity;
+          notifyListeners();
+        }
+        return entity;
+      }
+
+      _setError('Failed to update legal entity');
+      return null;
+    } catch (e) {
+      _setError('Failed to update legal entity: $e');
+      return null;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<bool> deleteLegalEntity(String id) async {
+    _setLoading(true);
+    _clearError();
+
+    try {
+      final success = await _supabaseService.deleteLegalEntity(id);
+
+      if (success) {
+        _legalEntities.removeWhere((entity) => entity.idLegalEntity == id);
+        notifyListeners();
+        return true;
+      }
+
+      _setError('Failed to delete legal entity');
+      return false;
+    } catch (e) {
+      _setError('Failed to delete legal entity: $e');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   Future<bool> sendInvitation({
     required String email,
     required String legalEntityId,

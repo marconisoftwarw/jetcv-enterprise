@@ -5,6 +5,7 @@ import '../../config/app_config.dart';
 
 import '../certification/create_certification_screen.dart';
 import '../certification/certification_list_screen.dart';
+import '../admin/legal_entity_management_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,50 +19,92 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Row(
-        children: [
-          // Navigation Rail
-          NavigationRail(
-            selectedIndex: _selectedIndex,
-            onDestinationSelected: (int index) {
-              setState(() {
-                _selectedIndex = index;
-              });
-            },
-            labelType: NavigationRailLabelType.all,
-            destinations: const [
-              NavigationRailDestination(
-                icon: Icon(Icons.dashboard),
-                label: Text('Dashboard'),
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, child) {
+        // Controllo sicuro per verificare se l'utente è admin basato sul database
+        final isAdmin = authProvider.isCurrentUserAdmin;
+
+        return Scaffold(
+          body: Row(
+            children: [
+              // Navigation Rail
+              NavigationRail(
+                selectedIndex: _selectedIndex,
+                onDestinationSelected: (int index) {
+                  setState(() {
+                    _selectedIndex = index;
+                  });
+                },
+                labelType: NavigationRailLabelType.all,
+                destinations: _buildNavigationDestinations(isAdmin),
               ),
-              NavigationRailDestination(
-                icon: Icon(Icons.business),
-                label: Text('My Company'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.verified_user),
-                label: Text('Certifications'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.person),
-                label: Text('Profile'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.settings),
-                label: Text('Settings'),
-              ),
+
+              // Main Content
+              Expanded(child: _buildContent(isAdmin)),
             ],
           ),
-
-          // Main Content
-          Expanded(child: _buildContent()),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildContent() {
+  List<NavigationRailDestination> _buildNavigationDestinations(bool isAdmin) {
+    final destinations = [
+      const NavigationRailDestination(
+        icon: Icon(Icons.dashboard),
+        label: Text('Dashboard'),
+      ),
+      const NavigationRailDestination(
+        icon: Icon(Icons.business),
+        label: Text('My Company'),
+      ),
+      const NavigationRailDestination(
+        icon: Icon(Icons.verified_user),
+        label: Text('Certifications'),
+      ),
+      const NavigationRailDestination(
+        icon: Icon(Icons.person),
+        label: Text('Profile'),
+      ),
+      const NavigationRailDestination(
+        icon: Icon(Icons.settings),
+        label: Text('Settings'),
+      ),
+    ];
+
+    // Aggiungi menu admin se l'utente è amministratore
+    if (isAdmin) {
+      destinations.add(
+        const NavigationRailDestination(
+          icon: Icon(Icons.admin_panel_settings),
+          label: Text('Legal Entities'),
+        ),
+      );
+    }
+
+    return destinations;
+  }
+
+  Widget _buildContent(bool isAdmin) {
+    // Se l'utente non è admin, gli indici rimangono gli stessi
+    if (!isAdmin) {
+      switch (_selectedIndex) {
+        case 0:
+          return const _DashboardContent();
+        case 1:
+          return const CertificationListScreen();
+        case 2:
+          return const Center(child: Text('Certificazioni'));
+        case 3:
+          return const Center(child: Text('Profilo'));
+        case 4:
+          return const Center(child: Text('Impostazioni'));
+        default:
+          return const _DashboardContent();
+      }
+    }
+
+    // Se l'utente è admin, l'ultimo indice (5) è per il pannello admin
     switch (_selectedIndex) {
       case 0:
         return const _DashboardContent();
@@ -73,6 +116,8 @@ class _HomeScreenState extends State<HomeScreen> {
         return const Center(child: Text('Profilo'));
       case 4:
         return const Center(child: Text('Impostazioni'));
+      case 5:
+        return const LegalEntityManagementScreen();
       default:
         return const _DashboardContent();
     }

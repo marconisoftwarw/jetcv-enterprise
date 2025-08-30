@@ -18,6 +18,9 @@ class AuthProvider extends ChangeNotifier {
       _supabaseService.isUserAuthenticated && _currentUser != null;
   bool get isUserDataLoaded => _currentUser != null;
 
+  // Getter per controllare se l'utente corrente è admin
+  bool get isCurrentUserAdmin => _currentUser?.isAdminFromDatabase ?? false;
+
   // Method to check and refresh authentication status
   Future<bool> checkAuthenticationStatus() async {
     try {
@@ -344,12 +347,37 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> _loadUserData(String userId) async {
     try {
-      final user = await _supabaseService.getUserById(userId);
+      // Prima prova a recuperare l'utente esistente
+      var user = await _supabaseService.getUserById(userId);
+
+      // Se l'utente non esiste, prova a crearlo automaticamente
+      if (user == null) {
+        final supabaseUser = _supabaseService.currentUser;
+        if (supabaseUser != null) {
+          print('AuthProvider: User not found, attempting to create record automatically');
+          user = await _supabaseService.ensureUserExists(userId, supabaseUser: supabaseUser);
+        }
+      }
+
       if (user != null) {
         _currentUser = user;
+
+        // Debug info per il controllo admin
+        print('AuthProvider Debug - User loaded:');
+        print('  ID: ${user.idUser}');
+        print('  Type: ${user.type}');
+        print('  Type String: ${user.type?.toString().split('.').last}');
+        print('  Is Admin (method): ${user.isAdmin}');
+        print('  Is Admin (database): ${user.isAdminFromDatabase}');
+        print('  Raw type value: ${user.type?.toString()}');
+
         notifyListeners();
+      } else {
+        print('AuthProvider Debug - Failed to load or create user data for ID: $userId');
+        _setError('User data not found and could not be created');
       }
     } catch (e) {
+      print('AuthProvider: Error in _loadUserData: $e');
       _setError('Failed to load user data: $e');
     }
   }

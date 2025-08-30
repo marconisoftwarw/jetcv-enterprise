@@ -205,7 +205,13 @@ class AppUser {
   }) : createdAt = createdAt ?? DateTime.now();
 
   factory AppUser.fromJson(Map<String, dynamic> json) {
-    return AppUser(
+    // Debug per verificare i dati ricevuti dal database
+    print('AppUser.fromJson Debug:');
+    print('  Raw JSON: $json');
+    print('  Type field: ${json['type']}');
+    print('  Type field type: ${json['type'].runtimeType}');
+    
+    final user = AppUser(
       idUser: json['idUser'],
       firstName: json['firstName'],
       lastName: json['lastName'],
@@ -240,6 +246,13 @@ class AppUser {
           ? DateTime.parse(json['updatedAt'])
           : null,
     );
+    
+    // Debug per verificare l'oggetto creato
+    print('  Parsed user type: ${user.type}');
+    print('  Is admin: ${user.isAdmin}');
+    print('  Is admin from database: ${user.isAdminFromDatabase}');
+    
+    return user;
   }
 
   Map<String, dynamic> toJson() {
@@ -444,6 +457,28 @@ class AppUser {
   }
 
   bool get isAdmin => type == UserType.admin;
+
+  // Metodo per controllare se l'utente è admin basato sul valore del database
+  bool get isAdminFromDatabase => _checkAdminFromDatabaseType();
+
+  bool _checkAdminFromDatabaseType() {
+    if (type == null) return false;
+
+    // Controllo diretto sul valore enum
+    if (type == UserType.admin) return true;
+
+    // Controllo sul valore stringa del database
+    final typeString = type.toString().split('.').last;
+    
+    // Debug per verificare il valore effettivo
+    print('Admin Check Debug:');
+    print('  Type enum: $type');
+    print('  Type string: $typeString');
+    print('  Is admin enum: ${type == UserType.admin}');
+    print('  Is admin string: ${typeString == 'admin'}');
+    
+    return typeString == 'admin' || typeString == 'administrator';
+  }
   bool get isUser => type == UserType.user;
   bool get hasWalletAccess => this.hasWallet;
   bool get hasCvAccess => this.hasCv;

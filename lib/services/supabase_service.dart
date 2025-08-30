@@ -47,6 +47,8 @@ class SupabaseService {
 
       if (response.user != null && userData != null) {
         // Crea il record utente nella tabella users
+        await _createUserRecord(response.user!, userData);
+        print('User registration completed successfully');
       }
 
       return response;
@@ -82,22 +84,29 @@ class SupabaseService {
     Map<String, dynamic> userData,
   ) async {
     try {
+      // Prima verifica se l'utente esiste già
+      final existingUser = await getUserById(user.id);
+      if (existingUser != null) {
+        print('User record already exists for ID: ${user.id}');
+        return;
+      }
+
       final recordData = {
         'idUser': user.id,
-        'firstName': userData['firstName'],
-        'lastName': userData['lastName'],
-        'email': userData['email'],
-        'type': 'user',
+        'firstName': userData['firstName'] ?? user.userMetadata?['first_name'] ?? '',
+        'lastName': userData['lastName'] ?? user.userMetadata?['last_name'] ?? '',
+        'email': userData['email'] ?? user.email ?? '',
+        'type': userData['type'] ?? 'user',
         'idUserHash': _generateUserHash(user.id),
         'profileCompleted': false,
-        'languageCode': 'it',
+        'languageCode': userData['languageCode'] ?? 'it',
         'createdAt': DateTime.now().toIso8601String(),
       };
 
       await _client.from('user').insert(recordData);
-      print('User record created successfully');
+      print('User record created successfully for ID: ${user.id}');
     } catch (e) {
-      print('Error creating user record: $e');
+      print('Error creating user record for ID ${user.id}: $e');
       rethrow;
     }
   }
@@ -193,7 +202,46 @@ class SupabaseService {
 
       return app_models.AppUser.fromJson(response);
     } catch (e) {
-      print('Error getting user: $e');
+      // Gestisci il caso in cui l'utente non esiste
+      if (e.toString().contains('PGRST116') || e.toString().contains('0 rows')) {
+        print('User not found in database: $userId');
+        return null;
+      }
+      print('Error getting user $userId: $e');
+      return null;
+    }
+  }
+
+  // Metodo per garantire che esista un record utente
+  Future<app_models.AppUser?> ensureUserExists(String userId, {User? supabaseUser}) async {
+    try {
+      // Prima prova a recuperare l'utente esistente
+      var user = await getUserById(userId);
+      if (user != null) {
+        return user;
+      }
+
+      // Se non esiste, crealo automaticamente se abbiamo i dati di Supabase
+      if (supabaseUser != null) {
+        print('Creating missing user record for: $userId');
+        final userData = {
+          'firstName': supabaseUser.userMetadata?['first_name'] ?? '',
+          'lastName': supabaseUser.userMetadata?['last_name'] ?? '',
+          'email': supabaseUser.email ?? '',
+          'type': 'user',
+          'languageCode': 'it',
+        };
+
+        await _createUserRecord(supabaseUser, userData);
+
+        // Riprova a recuperare l'utente appena creato
+        return await getUserById(userId);
+      }
+
+      print('Cannot create user record: no Supabase user data available');
+      return null;
+    } catch (e) {
+      print('Error ensuring user exists: $e');
       return null;
     }
   }
@@ -325,6 +373,42 @@ class SupabaseService {
     } catch (e) {
       print('Error updating legal entity status: $e');
       return null;
+    }
+  }
+
+  Future<LegalEntity?> updateLegalEntity({
+    required String id,
+    required Map<String, dynamic> entityData,
+  }) async {
+    try {
+      final updates = Map<String, dynamic>.from(entityData);
+      updates['updated_at'] = DateTime.now().toIso8601String();
+
+      final response = await _client
+          .from('legal_entities')
+          .update(updates)
+          .eq('id_legal_entity', id)
+          .select()
+          .single();
+
+      return LegalEntity.fromJson(response);
+    } catch (e) {
+      print('Error updating legal entity: $e');
+      return null;
+    }
+  }
+
+  Future<bool> deleteLegalEntity(String id) async {
+    try {
+      final response = await _client
+          .from('legal_entities')
+          .delete()
+          .eq('id_legal_entity', id);
+
+      return response != null;
+    } catch (e) {
+      print('Error deleting legal entity: $e');
+      return false;
     }
   }
 
