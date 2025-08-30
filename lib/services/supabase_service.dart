@@ -302,9 +302,55 @@ class SupabaseService {
   }
 
   // Legal Entity management
+  /// Upsert a legal entity using the upsert-legal-entity Edge Function
+  /// This method handles both creation and updates automatically
+  Future<LegalEntity?> upsertLegalEntity(
+    Map<String, dynamic> entityData,
+  ) async {
+    try {
+      final response = await _client.functions.invoke(
+        'upsert-legal-entity',
+        body: entityData,
+      );
+
+      if (response.status != 200 && response.status != 201) {
+        print('Error upserting legal entity: Status ${response.status}');
+        return null;
+      }
+
+      final data = response.data;
+      if (data == null || data['ok'] != true) {
+        print(
+          'Error upserting legal entity: ${data?['message'] ?? 'Unknown error'}',
+        );
+        return null;
+      }
+
+      // Return the entity with the response data
+      if (data['operation'] == 'create') {
+        return LegalEntity.fromJson({
+          'id_legal_entity': data['id_legal_entity'],
+          'id_legal_entity_hash': data['id_legal_entity_hash'],
+          'created_at': data['created_at'],
+          'updated_at': data['updated_at'],
+          ...entityData,
+        });
+      } else {
+        return LegalEntity.fromJson({
+          'id_legal_entity': data['id_legal_entity'],
+          'updated_at': data['updated_at'],
+          ...entityData,
+        });
+      }
+    } catch (e) {
+      print('Error upserting legal entity: $e');
+      return null;
+    }
+  }
+
   Future<List<LegalEntity>> getLegalEntities({String? status}) async {
     try {
-      var query = _client.from('legal_entities').select();
+      var query = _client.from('legal_entity').select();
 
       if (status != null) {
         query = query.eq('status', status);
@@ -324,7 +370,7 @@ class SupabaseService {
   Future<LegalEntity?> getLegalEntityById(String id) async {
     try {
       final response = await _client
-          .from('legal_entities')
+          .from('legal_entity')
           .select()
           .eq('id_legal_entity', id)
           .single();
@@ -340,13 +386,33 @@ class SupabaseService {
     Map<String, dynamic> entityData,
   ) async {
     try {
-      final response = await _client
-          .from('legal_entities')
-          .insert(entityData)
-          .select()
-          .single();
+      // Call the upsert-legal-entity Edge Function for creation
+      final response = await _client.functions.invoke(
+        'upsert-legal-entity',
+        body: entityData,
+      );
 
-      return LegalEntity.fromJson(response);
+      if (response.status != 201) {
+        print('Error creating legal entity: Status ${response.status}');
+        return null;
+      }
+
+      final data = response.data;
+      if (data == null || data['ok'] != true) {
+        print(
+          'Error creating legal entity: ${data?['message'] ?? 'Unknown error'}',
+        );
+        return null;
+      }
+
+      // Return the created entity with the generated ID and hash
+      return LegalEntity.fromJson({
+        'id_legal_entity': data['id_legal_entity'],
+        'id_legal_entity_hash': data['id_legal_entity_hash'],
+        'created_at': data['created_at'],
+        'updated_at': data['updated_at'],
+        ...entityData,
+      });
     } catch (e) {
       print('Error creating legal entity: $e');
       return null;
@@ -359,23 +425,39 @@ class SupabaseService {
     String? rejectionReason,
   }) async {
     try {
-      final updates = {
-        'status': status,
-        'updated_at': DateTime.now().toIso8601String(),
-      };
+      // Prepare update data with the ID
+      final updateData = {'id_legal_entity': id, 'status': status};
 
       if (rejectionReason != null) {
-        updates['rejection_reason'] = rejectionReason;
+        updateData['rejection_reason'] = rejectionReason;
       }
 
-      final response = await _client
-          .from('legal_entities')
-          .update(updates)
-          .eq('id_legal_entity', id)
-          .select()
-          .single();
+      // Call the upsert-legal-entity Edge Function for update
+      final response = await _client.functions.invoke(
+        'upsert-legal-entity',
+        body: updateData,
+      );
 
-      return LegalEntity.fromJson(response);
+      if (response.status != 200) {
+        print('Error updating legal entity status: Status ${response.status}');
+        return null;
+      }
+
+      final data = response.data;
+      if (data == null || data['ok'] != true) {
+        print(
+          'Error updating legal entity status: ${data?['message'] ?? 'Unknown error'}',
+        );
+        return null;
+      }
+
+      // Return the updated entity
+      return LegalEntity.fromJson({
+        'id_legal_entity': data['id_legal_entity'],
+        'updated_at': data['updated_at'],
+        'status': status,
+        if (rejectionReason != null) 'rejection_reason': rejectionReason,
+      });
     } catch (e) {
       print('Error updating legal entity status: $e');
       return null;
@@ -387,17 +469,35 @@ class SupabaseService {
     required Map<String, dynamic> entityData,
   }) async {
     try {
-      final updates = Map<String, dynamic>.from(entityData);
-      updates['updated_at'] = DateTime.now().toIso8601String();
+      // Prepare update data with the ID
+      final updateData = Map<String, dynamic>.from(entityData);
+      updateData['id_legal_entity'] = id;
 
-      final response = await _client
-          .from('legal_entities')
-          .update(updates)
-          .eq('id_legal_entity', id)
-          .select()
-          .single();
+      // Call the upsert-legal-entity Edge Function for update
+      final response = await _client.functions.invoke(
+        'upsert-legal-entity',
+        body: updateData,
+      );
 
-      return LegalEntity.fromJson(response);
+      if (response.status != 200) {
+        print('Error updating legal entity: Status ${response.status}');
+        return null;
+      }
+
+      final data = response.data;
+      if (data == null || data['ok'] != true) {
+        print(
+          'Error updating legal entity: ${data?['message'] ?? 'Unknown error'}',
+        );
+        return null;
+      }
+
+      // Return the updated entity
+      return LegalEntity.fromJson({
+        'id_legal_entity': data['id_legal_entity'],
+        'updated_at': data['updated_at'],
+        ...entityData,
+      });
     } catch (e) {
       print('Error updating legal entity: $e');
       return null;
@@ -407,7 +507,7 @@ class SupabaseService {
   Future<bool> deleteLegalEntity(String id) async {
     try {
       final response = await _client
-          .from('legal_entities')
+          .from('legal_entity')
           .delete()
           .eq('id_legal_entity', id);
 
@@ -488,7 +588,7 @@ class SupabaseService {
   Stream<List<LegalEntity>> subscribeToLegalEntities({String? status}) {
     final query = _client
         .from('legal_entity')
-        .stream(primaryKey: ['idLegalEntity']);
+        .stream(primaryKey: ['id_legal_entity']);
 
     return query.map(
       (event) => event.map((entity) => LegalEntity.fromJson(entity)).toList(),

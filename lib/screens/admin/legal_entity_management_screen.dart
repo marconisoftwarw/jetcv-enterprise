@@ -517,7 +517,7 @@ class _LegalEntityManagementScreenState
 
     final success = await context
         .read<LegalEntityProvider>()
-        .approveLegalEntity(entity.idLegalEntity, adminId);
+        .approveLegalEntity(entity.idLegalEntity);
 
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -576,7 +576,6 @@ class _LegalEntityManagementScreenState
                   .read<LegalEntityProvider>()
                   .rejectLegalEntity(
                     entity.idLegalEntity,
-                    adminId,
                     reasonController.text,
                   );
 
@@ -674,19 +673,20 @@ class _LegalEntityFormDialogState extends State<LegalEntityFormDialog> {
 
   void _initializeControllers() {
     final fields = [
-      'legalName',
-      'identifierCode',
-      'operationalAddress',
-      'operationalCity',
-      'operationalPostalCode',
-      'operationalState',
-      'operationalCountry',
-      'headquarterAddress',
-      'headquarterCity',
-      'headquarterPostalCode',
-      'headquarterState',
-      'headquarterCountry',
-      'legalRapresentative',
+      'status',
+      'legal_name',
+      'identifier_code',
+      'operational_address',
+      'operational_city',
+      'operational_postal_code',
+      'operational_state',
+      'operational_country',
+      'headquarter_address',
+      'headquarter_city',
+      'headquarter_postal_code',
+      'headquarter_state',
+      'headquarter_country',
+      'legal_rapresentative',
       'email',
       'phone',
       'pec',
@@ -700,43 +700,46 @@ class _LegalEntityFormDialogState extends State<LegalEntityFormDialog> {
       if (widget.entity != null) {
         String? value;
         switch (field) {
-          case 'legalName':
+          case 'status':
+            value = widget.entity!.status.toString().split('.').last;
+            break;
+          case 'legal_name':
             value = widget.entity!.legalName;
             break;
-          case 'identifierCode':
+          case 'identifier_code':
             value = widget.entity!.identifierCode;
             break;
-          case 'operationalAddress':
+          case 'operational_address':
             value = widget.entity!.operationalAddress;
             break;
-          case 'operationalCity':
+          case 'operational_city':
             value = widget.entity!.operationalCity;
             break;
-          case 'operationalPostalCode':
+          case 'operational_postal_code':
             value = widget.entity!.operationalPostalCode;
             break;
-          case 'operationalState':
+          case 'operational_state':
             value = widget.entity!.operationalState;
             break;
-          case 'operationalCountry':
+          case 'operational_country':
             value = widget.entity!.operationalCountry;
             break;
-          case 'headquarterAddress':
+          case 'headquarter_address':
             value = widget.entity!.headquarterAddress;
             break;
-          case 'headquarterCity':
+          case 'headquarter_city':
             value = widget.entity!.headquarterCity;
             break;
-          case 'headquarterPostalCode':
+          case 'headquarter_postal_code':
             value = widget.entity!.headquarterPostalCode;
             break;
-          case 'headquarterState':
+          case 'headquarter_state':
             value = widget.entity!.headquarterState;
             break;
-          case 'headquarterCountry':
+          case 'headquarter_country':
             value = widget.entity!.headquarterCountry;
             break;
-          case 'legalRapresentative':
+          case 'legal_rapresentative':
             value = widget.entity!.legalRapresentative;
             break;
           case 'email':
@@ -816,7 +819,7 @@ class _LegalEntityFormDialogState extends State<LegalEntityFormDialog> {
                         children: [
                           Expanded(
                             child: CustomTextField(
-                              controller: _controllers['legalName'],
+                              controller: _controllers['legal_name'],
                               labelText: 'Nome Legale *',
                               hintText:
                                   'Inserisci il nome legale dell\'azienda',
@@ -831,7 +834,7 @@ class _LegalEntityFormDialogState extends State<LegalEntityFormDialog> {
                           const SizedBox(width: 16),
                           Expanded(
                             child: CustomTextField(
-                              controller: _controllers['identifierCode'],
+                              controller: _controllers['identifier_code'],
                               labelText: 'Codice Identificativo *',
                               hintText: 'P.IVA, Codice Fiscale, etc.',
                               validator: (value) {
@@ -906,7 +909,7 @@ class _LegalEntityFormDialogState extends State<LegalEntityFormDialog> {
                       const SizedBox(height: 16),
 
                       CustomTextField(
-                        controller: _controllers['legalRapresentative'],
+                        controller: _controllers['legal_rapresentative'],
                         labelText: 'Rappresentante Legale',
                         hintText: 'Nome e cognome del rappresentante legale',
                       ),
@@ -924,7 +927,7 @@ class _LegalEntityFormDialogState extends State<LegalEntityFormDialog> {
                       const SizedBox(height: 16),
 
                       CustomTextField(
-                        controller: _controllers['operationalAddress'],
+                        controller: _controllers['operational_address'],
                         labelText: 'Indirizzo',
                         hintText: 'Via/Piazza, numero civico',
                       ),
@@ -936,7 +939,7 @@ class _LegalEntityFormDialogState extends State<LegalEntityFormDialog> {
                           Expanded(
                             flex: 2,
                             child: CustomTextField(
-                              controller: _controllers['operationalCity'],
+                              controller: _controllers['operational_city'],
                               labelText: 'Città',
                               hintText: 'Roma',
                             ),
@@ -944,7 +947,8 @@ class _LegalEntityFormDialogState extends State<LegalEntityFormDialog> {
                           const SizedBox(width: 16),
                           Expanded(
                             child: CustomTextField(
-                              controller: _controllers['operationalPostalCode'],
+                              controller:
+                                  _controllers['operational_postal_code'],
                               labelText: 'CAP',
                               hintText: '00100',
                             ),
@@ -958,7 +962,7 @@ class _LegalEntityFormDialogState extends State<LegalEntityFormDialog> {
                         children: [
                           Expanded(
                             child: CustomTextField(
-                              controller: _controllers['operationalState'],
+                              controller: _controllers['operational_state'],
                               labelText: 'Provincia',
                               hintText: 'RM',
                             ),
@@ -966,7 +970,7 @@ class _LegalEntityFormDialogState extends State<LegalEntityFormDialog> {
                           const SizedBox(width: 16),
                           Expanded(
                             child: CustomTextField(
-                              controller: _controllers['operationalCountry'],
+                              controller: _controllers['operational_country'],
                               labelText: 'Paese',
                               hintText: 'Italia',
                             ),
@@ -987,7 +991,7 @@ class _LegalEntityFormDialogState extends State<LegalEntityFormDialog> {
                       const SizedBox(height: 16),
 
                       CustomTextField(
-                        controller: _controllers['headquarterAddress'],
+                        controller: _controllers['headquarter_address'],
                         labelText: 'Indirizzo',
                         hintText: 'Via/Piazza, numero civico',
                       ),
@@ -999,7 +1003,7 @@ class _LegalEntityFormDialogState extends State<LegalEntityFormDialog> {
                           Expanded(
                             flex: 2,
                             child: CustomTextField(
-                              controller: _controllers['headquarterCity'],
+                              controller: _controllers['headquarter_city'],
                               labelText: 'Città',
                               hintText: 'Milano',
                             ),
@@ -1007,7 +1011,8 @@ class _LegalEntityFormDialogState extends State<LegalEntityFormDialog> {
                           const SizedBox(width: 16),
                           Expanded(
                             child: CustomTextField(
-                              controller: _controllers['headquarterPostalCode'],
+                              controller:
+                                  _controllers['headquarter_postal_code'],
                               labelText: 'CAP',
                               hintText: '20100',
                             ),
@@ -1021,7 +1026,7 @@ class _LegalEntityFormDialogState extends State<LegalEntityFormDialog> {
                         children: [
                           Expanded(
                             child: CustomTextField(
-                              controller: _controllers['headquarterState'],
+                              controller: _controllers['headquarter_state'],
                               labelText: 'Provincia',
                               hintText: 'MI',
                             ),
@@ -1029,7 +1034,7 @@ class _LegalEntityFormDialogState extends State<LegalEntityFormDialog> {
                           const SizedBox(width: 16),
                           Expanded(
                             child: CustomTextField(
-                              controller: _controllers['headquarterCountry'],
+                              controller: _controllers['headquarter_country'],
                               labelText: 'Paese',
                               hintText: 'Italia',
                             ),
@@ -1078,6 +1083,11 @@ class _LegalEntityFormDialogState extends State<LegalEntityFormDialog> {
         entityData[key] = controller.text;
       }
     });
+
+    // Assicurati che il campo status sia sempre presente per le nuove entità
+    if (widget.entity == null && !entityData.containsKey('status')) {
+      entityData['status'] = 'pending';
+    }
 
     bool success;
     if (widget.entity != null) {

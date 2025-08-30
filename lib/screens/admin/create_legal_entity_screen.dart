@@ -78,12 +78,22 @@ class _CreateLegalEntityScreenState extends State<CreateLegalEntityScreen> {
     final provider = context.read<LegalEntityProvider>();
 
     final entityData = {
-      'idLegalEntityHash': _generateHash(_legalNameController.text),
-      'legalName': _legalNameController.text.trim(),
-      'identifierCode': _identifierCodeController.text.trim(),
-      'operationalAddress': _operationalAddressController.text.trim(),
-      'headquartersAddress': _headquartersAddressController.text.trim(),
-      'legalRepresentative': _legalRepresentativeController.text.trim(),
+      'status': 'pending', // Campo richiesto dalla Edge Function
+      'legal_name': _legalNameController.text.trim(),
+      'identifier_code': _identifierCodeController.text.trim(),
+      'operational_address': _operationalAddressController.text.trim(),
+      'operational_city': _cityController.text.trim().isEmpty
+          ? null
+          : _cityController.text.trim(),
+      'operational_state': _stateController.text.trim().isEmpty
+          ? null
+          : _stateController.text.trim(),
+      'operational_postal_code': _postalCodeController.text.trim().isEmpty
+          ? null
+          : _postalCodeController.text.trim(),
+      'operational_country': _selectedCountryCode,
+      'headquarter_address': _headquartersAddressController.text.trim(),
+      'legal_rapresentative': _legalRepresentativeController.text.trim(),
       'email': _emailController.text.trim(),
       'phone': _phoneController.text.trim(),
       'pec': _pecController.text.trim().isEmpty
@@ -92,21 +102,6 @@ class _CreateLegalEntityScreenState extends State<CreateLegalEntityScreen> {
       'website': _websiteController.text.trim().isEmpty
           ? null
           : _websiteController.text.trim(),
-      'requestingIdUser': 'admin_user_id', // Replace with actual admin user ID
-      'status': 'pending',
-      'address': _addressController.text.trim().isEmpty
-          ? null
-          : _addressController.text.trim(),
-      'city': _cityController.text.trim().isEmpty
-          ? null
-          : _cityController.text.trim(),
-      'state': _stateController.text.trim().isEmpty
-          ? null
-          : _stateController.text.trim(),
-      'postalcode': _postalCodeController.text.trim().isEmpty
-          ? null
-          : _postalCodeController.text.trim(),
-      'countrycode': _selectedCountryCode,
     };
 
     final entity = await provider.createLegalEntity(entityData);
@@ -120,11 +115,6 @@ class _CreateLegalEntityScreenState extends State<CreateLegalEntityScreen> {
       );
       Navigator.pop(context);
     }
-  }
-
-  String _generateHash(String input) {
-    // Simple hash generation (in production, use a proper hash function)
-    return input.hashCode.abs().toString();
   }
 
   @override

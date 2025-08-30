@@ -559,10 +559,7 @@ class _LegalEntityListScreenState extends State<LegalEntityListScreen> {
     );
 
     if (confirmed == true) {
-      final success = await provider.approveLegalEntity(
-        entity.idLegalEntity,
-        'admin_user_id', // Replace with actual admin user ID
-      );
+      final success = await provider.approveLegalEntity(entity.idLegalEntity);
 
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -619,7 +616,6 @@ class _LegalEntityListScreenState extends State<LegalEntityListScreen> {
     if (rejectionReason != null && rejectionReason.isNotEmpty) {
       final success = await provider.rejectLegalEntity(
         entity.idLegalEntity,
-        'admin_user_id', // Replace with actual admin user ID
         rejectionReason,
       );
 

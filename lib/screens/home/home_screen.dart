@@ -84,24 +84,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildContent(bool isAdmin) {
-    // Se l'utente non è admin, gli indici rimangono gli stessi
-    if (!isAdmin) {
-      switch (_selectedIndex) {
-        case 0:
-          return const _DashboardContent();
-        case 1:
-          return const CertificationListScreen();
-        case 2:
-          return const Center(child: Text('Certificazioni'));
-        case 3:
-          return const Center(child: Text('Profilo'));
-        case 4:
-          return const Center(child: Text('Impostazioni'));
-        default:
-          return const _DashboardContent();
-      }
-    }
-
     // Se l'utente è admin, l'ultimo indice (5) è per il pannello admin
     switch (_selectedIndex) {
       case 0:

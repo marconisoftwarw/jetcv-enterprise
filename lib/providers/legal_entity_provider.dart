@@ -58,86 +58,75 @@ class LegalEntityProvider extends ChangeNotifier {
     await loadLegalEntities(status: _filterStatus);
   }
 
-  Future<LegalEntity?> createLegalEntity(
+  /// Upsert a legal entity using the upsert-legal-entity Edge Function
+  /// This method handles both creation and updates automatically
+  Future<LegalEntity?> upsertLegalEntity(
     Map<String, dynamic> entityData,
   ) async {
     _setLoading(true);
     _clearError();
 
     try {
-      final entity = await _supabaseService.createLegalEntity(entityData);
+      final entity = await _supabaseService.upsertLegalEntity(entityData);
 
       if (entity != null) {
-        _legalEntities.insert(0, entity);
+        // Check if this is an update or create operation
+        final existingIndex = _legalEntities.indexWhere(
+          (e) => e.idLegalEntity == entity.idLegalEntity,
+        );
+
+        if (existingIndex != -1) {
+          // Update existing entity
+          _legalEntities[existingIndex] = entity;
+        } else {
+          // Add new entity at the beginning
+          _legalEntities.insert(0, entity);
+        }
+
         notifyListeners();
         return entity;
       }
 
-      _setError('Failed to create legal entity');
+      _setError('Failed to upsert legal entity');
       return null;
     } catch (e) {
-      _setError('Failed to create legal entity: $e');
+      _setError('Failed to upsert legal entity: $e');
       return null;
     } finally {
       _setLoading(false);
     }
+  }
+
+  Future<LegalEntity?> createLegalEntity(
+    Map<String, dynamic> entityData,
+  ) async {
+    return await upsertLegalEntity(entityData);
   }
 
   Future<bool> updateLegalEntityStatus({
     required String id,
     required String status,
-    required String updatedByIdUser,
     String? rejectionReason,
   }) async {
-    _setLoading(true);
-    _clearError();
+    // Prepare update data with the ID
+    final updateData = {'id_legal_entity': id, 'status': status};
 
-    try {
-      final updatedEntity = await _supabaseService.updateLegalEntityStatus(
-        id: id,
-        status: status,
-
-        rejectionReason: rejectionReason,
-      );
-
-      if (updatedEntity != null) {
-        final index = _legalEntities.indexWhere(
-          (entity) => entity.idLegalEntity == id,
-        );
-        if (index != -1) {
-          _legalEntities[index] = updatedEntity;
-          notifyListeners();
-        }
-        return true;
-      }
-
-      _setError('Failed to update legal entity status');
-      return false;
-    } catch (e) {
-      _setError('Failed to update legal entity status: $e');
-      return false;
-    } finally {
-      _setLoading(false);
+    if (rejectionReason != null) {
+      updateData['rejection_reason'] = rejectionReason;
     }
+
+    final updatedEntity = await upsertLegalEntity(updateData);
+    return updatedEntity != null;
   }
 
-  Future<bool> approveLegalEntity(String id, String adminUserId) async {
-    return await updateLegalEntityStatus(
-      id: id,
-      status: 'approved',
-      updatedByIdUser: adminUserId,
-    );
+  Future<bool> approveLegalEntity(String id) async {
+    return await updateLegalEntityStatus(id: id, status: 'approved');
   }
 
-  Future<bool> rejectLegalEntity(
-    String id,
-    String adminUserId,
-    String rejectionReason,
-  ) async {
+  Future<bool> rejectLegalEntity(String id, String rejectionReason) async {
     return await updateLegalEntityStatus(
       id: id,
       status: 'rejected',
-      updatedByIdUser: adminUserId,
       rejectionReason: rejectionReason,
     );
   }
@@ -169,32 +158,11 @@ class LegalEntityProvider extends ChangeNotifier {
     required String id,
     required Map<String, dynamic> entityData,
   }) async {
-    _setLoading(true);
-    _clearError();
+    // Prepare update data with the ID
+    final updateData = Map<String, dynamic>.from(entityData);
+    updateData['id_legal_entity'] = id;
 
-    try {
-      final entity = await _supabaseService.updateLegalEntity(
-        id: id,
-        entityData: entityData,
-      );
-
-      if (entity != null) {
-        final index = _legalEntities.indexWhere((e) => e.idLegalEntity == id);
-        if (index != -1) {
-          _legalEntities[index] = entity;
-          notifyListeners();
-        }
-        return entity;
-      }
-
-      _setError('Failed to update legal entity');
-      return null;
-    } catch (e) {
-      _setError('Failed to update legal entity: $e');
-      return null;
-    } finally {
-      _setLoading(false);
-    }
+    return await upsertLegalEntity(updateData);
   }
 
   Future<bool> deleteLegalEntity(String id) async {
