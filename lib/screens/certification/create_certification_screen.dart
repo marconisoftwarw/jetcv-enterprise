@@ -156,7 +156,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
 
       // Usa dati utente mock per permettere la creazione senza autenticazione
       final currentUser = AppUser(
-        idUser: 'temp_user_${DateTime.now().millisecondsSinceEpoch}',
+        idUser: '550e8400-e29b-41d4-a716-446655440002', // UUID valido per utente temporaneo
         firstName: 'Utente',
         lastName: 'Temporaneo',
         email: 'temp@example.com',
@@ -247,9 +247,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     // Permetti sempre la creazione per utenti temporanei o admin
     if (user.type == UserType.admin) return true;
 
-    // Permetti la creazione per utenti temporanei (che iniziano con 'temp_user_')
-    if (user.idUser != null && user.idUser.startsWith('temp_user_'))
-      return true;
+    // Permetti la creazione per utenti temporanei (con UUID specifico)
+    if (user.idUser == '550e8400-e29b-41d4-a716-446655440002') return true;
 
     // Check company role permissions
     // Check if user has permission to create certifications
