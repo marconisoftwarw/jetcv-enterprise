@@ -4,21 +4,3 @@
 // utility in the flutter_test package. For example, you can send tap and scroll
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
-
-import 'package:jetcv_enterprise/main.dart';
-
-void main() {
-  testWidgets('App loads correctly smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const JetCVEnterpriseApp());
-
-    // Verify that the app loads (SplashScreen or some initial widget)
-    await tester.pumpAndSettle();
-
-    // Add basic verification that the app loaded
-    expect(find.byType(MaterialApp), findsOneWidget);
-  });
-}

@@ -354,8 +354,13 @@ class AuthProvider extends ChangeNotifier {
       if (user == null) {
         final supabaseUser = _supabaseService.currentUser;
         if (supabaseUser != null) {
-          print('AuthProvider: User not found, attempting to create record automatically');
-          user = await _supabaseService.ensureUserExists(userId, supabaseUser: supabaseUser);
+          print(
+            'AuthProvider: User not found, attempting to create record automatically',
+          );
+          user = await _supabaseService.ensureUserExists(
+            userId,
+            supabaseUser: supabaseUser,
+          );
         }
       }
 
@@ -373,7 +378,9 @@ class AuthProvider extends ChangeNotifier {
 
         notifyListeners();
       } else {
-        print('AuthProvider Debug - Failed to load or create user data for ID: $userId');
+        print(
+          'AuthProvider Debug - Failed to load or create user data for ID: $userId',
+        );
         _setError('User data not found and could not be created');
       }
     } catch (e) {

@@ -93,8 +93,10 @@ class SupabaseService {
 
       final recordData = {
         'idUser': user.id,
-        'firstName': userData['firstName'] ?? user.userMetadata?['first_name'] ?? '',
-        'lastName': userData['lastName'] ?? user.userMetadata?['last_name'] ?? '',
+        'firstName':
+            userData['firstName'] ?? user.userMetadata?['first_name'] ?? '',
+        'lastName':
+            userData['lastName'] ?? user.userMetadata?['last_name'] ?? '',
         'email': userData['email'] ?? user.email ?? '',
         'type': userData['type'] ?? 'user',
         'idUserHash': _generateUserHash(user.id),
@@ -203,7 +205,8 @@ class SupabaseService {
       return app_models.AppUser.fromJson(response);
     } catch (e) {
       // Gestisci il caso in cui l'utente non esiste
-      if (e.toString().contains('PGRST116') || e.toString().contains('0 rows')) {
+      if (e.toString().contains('PGRST116') ||
+          e.toString().contains('0 rows')) {
         print('User not found in database: $userId');
         return null;
       }
@@ -213,7 +216,10 @@ class SupabaseService {
   }
 
   // Metodo per garantire che esista un record utente
-  Future<app_models.AppUser?> ensureUserExists(String userId, {User? supabaseUser}) async {
+  Future<app_models.AppUser?> ensureUserExists(
+    String userId, {
+    User? supabaseUser,
+  }) async {
     try {
       // Prima prova a recuperare l'utente esistente
       var user = await getUserById(userId);

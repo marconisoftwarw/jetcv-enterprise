@@ -79,29 +79,29 @@ class EmailService {
         body: jsonEncode({
           'personalizations': [
             {
-              'to': [{'email': emailData['to']}],
-            }
+              'to': [
+                {'email': emailData['to']},
+              ],
+            },
           ],
           'from': {'email': _fromEmail},
           'subject': emailData['subject'],
           'content': [
-            {
-              'type': 'text/html',
-              'value': emailData['html'],
-            },
-            {
-              'type': 'text/plain',
-              'value': emailData['text'],
-            }
+            {'type': 'text/html', 'value': emailData['html']},
+            {'type': 'text/plain', 'value': emailData['text']},
           ],
         }),
       );
 
       if (response.statusCode == 202) {
-        print('✅ Email sent successfully to ${emailData['to']}: ${emailData['subject']}');
+        print(
+          '✅ Email sent successfully to ${emailData['to']}: ${emailData['subject']}',
+        );
         return true;
       } else {
-        print('❌ Failed to send email. Status: ${response.statusCode}, Body: ${response.body}');
+        print(
+          '❌ Failed to send email. Status: ${response.statusCode}, Body: ${response.body}',
+        );
         return false;
       }
     } catch (e) {

@@ -22,7 +22,8 @@ class _HomeScreenState extends State<HomeScreen> {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
         // Controllo sicuro per verificare se l'utente è admin basato sul database
-        final isAdmin = authProvider.isCurrentUserAdmin;
+        final user = authProvider.currentUser;
+        final isAdmin = user?.isAdminFromDatabase ?? false;
 
         return Scaffold(
           body: Row(
@@ -72,15 +73,12 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     ];
 
-    // Aggiungi menu admin se l'utente è amministratore
-    if (isAdmin) {
-      destinations.add(
-        const NavigationRailDestination(
-          icon: Icon(Icons.admin_panel_settings),
-          label: Text('Legal Entities'),
-        ),
-      );
-    }
+    destinations.add(
+      const NavigationRailDestination(
+        icon: Icon(Icons.admin_panel_settings),
+        label: Text('Legal Entities'),
+      ),
+    );
 
     return destinations;
   }

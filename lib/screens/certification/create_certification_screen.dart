@@ -156,7 +156,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
 
       // Usa dati utente mock per permettere la creazione senza autenticazione
       final currentUser = AppUser(
-        idUser: '550e8400-e29b-41d4-a716-446655440002', // UUID valido per utente temporaneo
+        idUser:
+            '550e8400-e29b-41d4-a716-446655440002', // UUID valido per utente temporaneo
         firstName: 'Utente',
         lastName: 'Temporaneo',
         email: 'temp@example.com',
@@ -199,8 +200,10 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
         idLegalEntity: currentUser.idUser!,
         idCertificationHash: 'hash_${DateTime.now().millisecondsSinceEpoch}',
         serialNumber: _codeController.text.trim(),
-        idCertifier: '550e8400-e29b-41d4-a716-446655440000', // UUID valido per certifier temporaneo
-        idLocation: '550e8400-e29b-41d4-a716-446655440001', // UUID valido per location temporanea
+        idCertifier:
+            '550e8400-e29b-41d4-a716-446655440000', // UUID valido per certifier temporaneo
+        idLocation:
+            '550e8400-e29b-41d4-a716-446655440001', // UUID valido per location temporanea
         status: CertificationStatus.draft,
         nUsers: 1,
       );

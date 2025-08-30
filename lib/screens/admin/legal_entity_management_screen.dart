@@ -10,10 +10,12 @@ class LegalEntityManagementScreen extends StatefulWidget {
   const LegalEntityManagementScreen({super.key});
 
   @override
-  State<LegalEntityManagementScreen> createState() => _LegalEntityManagementScreenState();
+  State<LegalEntityManagementScreen> createState() =>
+      _LegalEntityManagementScreenState();
 }
 
-class _LegalEntityManagementScreenState extends State<LegalEntityManagementScreen> {
+class _LegalEntityManagementScreenState
+    extends State<LegalEntityManagementScreen> {
   final TextEditingController _searchController = TextEditingController();
   String? _selectedStatus;
   List<LegalEntity> _filteredEntities = [];
@@ -48,9 +50,12 @@ class _LegalEntityManagementScreenState extends State<LegalEntityManagementScree
         _filteredEntities = provider.searchLegalEntities(query);
 
         if (_selectedStatus != null) {
-          _filteredEntities = _filteredEntities.where((entity) =>
-            entity.status.toString().split('.').last == _selectedStatus
-          ).toList();
+          _filteredEntities = _filteredEntities
+              .where(
+                (entity) =>
+                    entity.status.toString().split('.').last == _selectedStatus,
+              )
+              .toList();
         }
       }
     });
@@ -77,9 +82,7 @@ class _LegalEntityManagementScreenState extends State<LegalEntityManagementScree
               _buildHeader(provider),
 
               // Lista delle entità
-              Expanded(
-                child: _buildEntityList(provider),
-              ),
+              Expanded(child: _buildEntityList(provider)),
             ],
           );
         },
@@ -153,10 +156,22 @@ class _LegalEntityManagementScreenState extends State<LegalEntityManagementScree
                   hint: const Text('Tutti gli Stati'),
                   underline: const SizedBox(),
                   items: [
-                    const DropdownMenuItem(value: null, child: Text('Tutti gli Stati')),
-                    const DropdownMenuItem(value: 'pending', child: Text('In Attesa')),
-                    const DropdownMenuItem(value: 'approved', child: Text('Approvate')),
-                    const DropdownMenuItem(value: 'rejected', child: Text('Rifiutate')),
+                    const DropdownMenuItem(
+                      value: null,
+                      child: Text('Tutti gli Stati'),
+                    ),
+                    const DropdownMenuItem(
+                      value: 'pending',
+                      child: Text('In Attesa'),
+                    ),
+                    const DropdownMenuItem(
+                      value: 'approved',
+                      child: Text('Approvate'),
+                    ),
+                    const DropdownMenuItem(
+                      value: 'rejected',
+                      child: Text('Rifiutate'),
+                    ),
                   ],
                   onChanged: (value) {
                     setState(() {
@@ -203,10 +218,7 @@ class _LegalEntityManagementScreenState extends State<LegalEntityManagementScree
             ),
             Text(
               label,
-              style: TextStyle(
-                fontSize: 12,
-                color: color.withOpacity(0.8),
-              ),
+              style: TextStyle(fontSize: 12, color: color.withOpacity(0.8)),
               textAlign: TextAlign.center,
             ),
           ],
@@ -221,28 +233,18 @@ class _LegalEntityManagementScreenState extends State<LegalEntityManagementScree
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.business,
-              size: 64,
-              color: Colors.grey[300],
-            ),
+            Icon(Icons.business, size: 64, color: Colors.grey[300]),
             const SizedBox(height: 16),
             Text(
               'Nessuna entità legale trovata',
-              style: TextStyle(
-                fontSize: 18,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 18, color: Colors.grey[600]),
             ),
             const SizedBox(height: 8),
             Text(
               _searchController.text.isNotEmpty || _selectedStatus != null
-                ? 'Prova a modificare i filtri di ricerca'
-                : 'Crea la tua prima entità legale',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[500],
-              ),
+                  ? 'Prova a modificare i filtri di ricerca'
+                  : 'Crea la tua prima entità legale',
+              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
             ),
           ],
         ),
@@ -284,10 +286,7 @@ class _LegalEntityManagementScreenState extends State<LegalEntityManagementScree
                       const SizedBox(height: 4),
                       Text(
                         entity.identifierCode ?? 'Codice non specificato',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                       ),
                     ],
                   ),
@@ -295,7 +294,10 @@ class _LegalEntityManagementScreenState extends State<LegalEntityManagementScree
 
                 // Stato
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: _getStatusColor(entity.status).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
@@ -324,19 +326,13 @@ class _LegalEntityManagementScreenState extends State<LegalEntityManagementScree
                   if (entity.email != null) ...[
                     const Icon(Icons.email, size: 16, color: Colors.grey),
                     const SizedBox(width: 4),
-                    Text(
-                      entity.email!,
-                      style: const TextStyle(fontSize: 14),
-                    ),
+                    Text(entity.email!, style: const TextStyle(fontSize: 14)),
                     const SizedBox(width: 16),
                   ],
                   if (entity.phone != null) ...[
                     const Icon(Icons.phone, size: 16, color: Colors.grey),
                     const SizedBox(width: 4),
-                    Text(
-                      entity.phone!,
-                      style: const TextStyle(fontSize: 14),
-                    ),
+                    Text(entity.phone!, style: const TextStyle(fontSize: 14)),
                   ],
                 ],
               ),
@@ -440,16 +436,28 @@ class _LegalEntityManagementScreenState extends State<LegalEntityManagementScree
               _buildDetailRow('Telefono', entity.phone),
               _buildDetailRow('PEC', entity.pec),
               _buildDetailRow('Sito Web', entity.website),
-              _buildDetailRow('Rappresentante Legale', entity.legalRapresentative),
+              _buildDetailRow(
+                'Rappresentante Legale',
+                entity.legalRapresentative,
+              ),
               const SizedBox(height: 16),
-              const Text('Indirizzo Operativo:', style: TextStyle(fontWeight: FontWeight.bold)),
+              const Text(
+                'Indirizzo Operativo:',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
               Text(entity.displayAddress),
               const SizedBox(height: 8),
-              const Text('Sede Legale:', style: TextStyle(fontWeight: FontWeight.bold)),
+              const Text(
+                'Sede Legale:',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
               Text(entity.displayHeadquarters),
               const SizedBox(height: 16),
               _buildDetailRow('Stato', entity.statusDisplayName),
-              _buildDetailRow('Data Creazione', entity.createdAt.toString().split(' ')[0]),
+              _buildDetailRow(
+                'Data Creazione',
+                entity.createdAt.toString().split(' ')[0],
+              ),
             ],
           ),
         ),
@@ -476,9 +484,7 @@ class _LegalEntityManagementScreenState extends State<LegalEntityManagementScree
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
-          Expanded(
-            child: Text(value ?? 'Non specificato'),
-          ),
+          Expanded(child: Text(value ?? 'Non specificato')),
         ],
       ),
     );
@@ -509,10 +515,9 @@ class _LegalEntityManagementScreenState extends State<LegalEntityManagementScree
       return;
     }
 
-    final success = await context.read<LegalEntityProvider>().approveLegalEntity(
-      entity.idLegalEntity,
-      adminId,
-    );
+    final success = await context
+        .read<LegalEntityProvider>()
+        .approveLegalEntity(entity.idLegalEntity, adminId);
 
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -560,27 +565,35 @@ class _LegalEntityManagementScreenState extends State<LegalEntityManagementScree
 
               if (adminId == null) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Errore: utente non autenticato')),
+                  const SnackBar(
+                    content: Text('Errore: utente non autenticato'),
+                  ),
                 );
                 return;
               }
 
-              final success = await context.read<LegalEntityProvider>().rejectLegalEntity(
-                entity.idLegalEntity,
-                adminId,
-                reasonController.text,
-              );
+              final success = await context
+                  .read<LegalEntityProvider>()
+                  .rejectLegalEntity(
+                    entity.idLegalEntity,
+                    adminId,
+                    reasonController.text,
+                  );
 
               Navigator.of(context).pop();
 
               if (success) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Entità rifiutata con successo')),
+                  const SnackBar(
+                    content: Text('Entità rifiutata con successo'),
+                  ),
                 );
                 _loadLegalEntities();
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Errore nel rifiuto dell\'entità')),
+                  const SnackBar(
+                    content: Text('Errore nel rifiuto dell\'entità'),
+                  ),
                 );
               }
             },
@@ -608,19 +621,25 @@ class _LegalEntityManagementScreenState extends State<LegalEntityManagementScree
           TextButton(
             onPressed: () async {
               final provider = context.read<LegalEntityProvider>();
-              final success = await provider.deleteLegalEntity(entity.idLegalEntity);
+              final success = await provider.deleteLegalEntity(
+                entity.idLegalEntity,
+              );
 
               Navigator.of(context).pop();
 
               if (success) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Entità eliminata con successo')),
+                  const SnackBar(
+                    content: Text('Entità eliminata con successo'),
+                  ),
                 );
                 // Ricarica la lista
                 await provider.refreshLegalEntities();
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Errore nell\'eliminazione dell\'entità')),
+                  const SnackBar(
+                    content: Text('Errore nell\'eliminazione dell\'entità'),
+                  ),
                 );
               }
             },
@@ -799,7 +818,8 @@ class _LegalEntityFormDialogState extends State<LegalEntityFormDialog> {
                             child: CustomTextField(
                               controller: _controllers['legalName'],
                               labelText: 'Nome Legale *',
-                              hintText: 'Inserisci il nome legale dell\'azienda',
+                              hintText:
+                                  'Inserisci il nome legale dell\'azienda',
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Il nome legale è obbligatorio';
@@ -1063,10 +1083,12 @@ class _LegalEntityFormDialogState extends State<LegalEntityFormDialog> {
     if (widget.entity != null) {
       // Modifica entità esistente
       final provider = context.read<LegalEntityProvider>();
-      success = await provider.updateLegalEntity(
-        id: widget.entity!.idLegalEntity,
-        entityData: entityData,
-      ) != null;
+      success =
+          await provider.updateLegalEntity(
+            id: widget.entity!.idLegalEntity,
+            entityData: entityData,
+          ) !=
+          null;
     } else {
       // Crea nuova entità
       success = await provider.createLegalEntity(entityData) != null;
@@ -1078,8 +1100,8 @@ class _LegalEntityFormDialogState extends State<LegalEntityFormDialog> {
         SnackBar(
           content: Text(
             widget.entity != null
-              ? 'Entità modificata con successo'
-              : 'Entità creata con successo'
+                ? 'Entità modificata con successo'
+                : 'Entità creata con successo',
           ),
         ),
       );

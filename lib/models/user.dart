@@ -210,7 +210,7 @@ class AppUser {
     print('  Raw JSON: $json');
     print('  Type field: ${json['type']}');
     print('  Type field type: ${json['type'].runtimeType}');
-    
+
     final user = AppUser(
       idUser: json['idUser'],
       firstName: json['firstName'],
@@ -246,12 +246,12 @@ class AppUser {
           ? DateTime.parse(json['updatedAt'])
           : null,
     );
-    
+
     // Debug per verificare l'oggetto creato
     print('  Parsed user type: ${user.type}');
     print('  Is admin: ${user.isAdmin}');
     print('  Is admin from database: ${user.isAdminFromDatabase}');
-    
+
     return user;
   }
 
@@ -317,6 +317,12 @@ class AppUser {
     if (value == null) return UserType.user;
 
     final String stringValue = value.toString().toLowerCase();
+
+    // Debug per verificare il parsing
+    print('_parseUserType Debug:');
+    print('  Input value: $value');
+    print('  Input type: ${value.runtimeType}');
+    print('  String value: $stringValue');
 
     // Mappatura dei valori del database ai valori dell'enum
     switch (stringValue) {
@@ -469,16 +475,17 @@ class AppUser {
 
     // Controllo sul valore stringa del database
     final typeString = type.toString().split('.').last;
-    
+
     // Debug per verificare il valore effettivo
     print('Admin Check Debug:');
     print('  Type enum: $type');
     print('  Type string: $typeString');
     print('  Is admin enum: ${type == UserType.admin}');
     print('  Is admin string: ${typeString == 'admin'}');
-    
+
     return typeString == 'admin' || typeString == 'administrator';
   }
+
   bool get isUser => type == UserType.user;
   bool get hasWalletAccess => this.hasWallet;
   bool get hasCvAccess => this.hasCv;

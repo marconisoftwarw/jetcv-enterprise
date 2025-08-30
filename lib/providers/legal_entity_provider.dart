@@ -179,9 +179,7 @@ class LegalEntityProvider extends ChangeNotifier {
       );
 
       if (entity != null) {
-        final index = _legalEntities.indexWhere(
-          (e) => e.idLegalEntity == id,
-        );
+        final index = _legalEntities.indexWhere((e) => e.idLegalEntity == id);
         if (index != -1) {
           _legalEntities[index] = entity;
           notifyListeners();
