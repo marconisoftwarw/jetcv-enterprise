@@ -47,188 +47,12 @@ class _CreateCertificationScreenRouteState
     setState(() {
       _isChecking = true;
     });
-
-    try {
-      // Force a complete authentication check
-      await authProvider.checkAuthenticationStatus();
-
-      // If still not authenticated, try to force synchronization
-      if (!authProvider.isAuthenticated || authProvider.currentUser == null) {
-        await authProvider.forceSynchronize();
-      }
-    } catch (e) {
-      print('Authentication check failed: $e');
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isChecking = false;
-        });
-      }
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AuthProvider>(
-      builder: (context, authProvider, child) {
-        // Debug information
-        print(
-          'CreateCertificationScreenRoute - isInitialized: ${authProvider.isInitialized}',
-        );
-        print(
-          'CreateCertificationScreenRoute - isAuthenticated: ${authProvider.isAuthenticated}',
-        );
-        print(
-          'CreateCertificationScreenRoute - currentUser: ${authProvider.currentUser != null}',
-        );
-        print(
-          'CreateCertificationScreenRoute - supabaseAuth: ${authProvider.isAuthenticated}',
-        );
-
-        if (!authProvider.isInitialized) {
-          return const Scaffold(
-            body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text('Initializing...'),
-                ],
-              ),
-            ),
-          );
-        }
-
-        // Check authentication status
-        if (!authProvider.isAuthenticated || authProvider.currentUser == null) {
-          return Scaffold(
-            appBar: AppBar(
-              title: const Text('Authentication Required'),
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.refresh),
-                  onPressed: _checkAuth,
-                  tooltip: 'Refresh Authentication',
-                ),
-              ],
-            ),
-            body: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.lock_outline, size: 64, color: Colors.red),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Authentication Required',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'You need to be logged in to access this feature.',
-                      style: TextStyle(fontSize: 16),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 24),
-                    if (_isChecking) ...[
-                      const CircularProgressIndicator(),
-                      const SizedBox(height: 16),
-                      const Text('Checking authentication...'),
-                    ] else ...[
-                      ElevatedButton.icon(
-                        onPressed: _checkAuth,
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Check Authentication'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 12,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton.icon(
-                        onPressed: () =>
-                            Navigator.pushReplacementNamed(context, '/login'),
-                        icon: const Icon(Icons.login),
-                        label: const Text('Go to Login'),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 12,
-                          ),
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: 32),
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.grey[300]!),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Debug Info:',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.grey[700],
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text('Initialized: ${authProvider.isInitialized}'),
-                          Text(
-                            'Authenticated: ${authProvider.isAuthenticated}',
-                          ),
-                          Text(
-                            'User Data: ${authProvider.currentUser != null ? "Loaded" : "Not Loaded"}',
-                          ),
-                          Text(
-                            'Supabase Auth: ${authProvider.isAuthenticated}',
-                          ),
-                          const SizedBox(height: 16),
-                          ElevatedButton.icon(
-                            onPressed: () {
-                              authProvider.debugAuthState();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Check console for debug info'),
-                                  duration: Duration(seconds: 2),
-                                ),
-                              );
-                            },
-                            icon: const Icon(Icons.bug_report),
-                            label: const Text('Debug Auth State'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.orange,
-                              foregroundColor: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        }
-
-        return widget.child;
-      },
-    );
+    // Rimuovi il controllo di autenticazione - vai direttamente al child
+    return widget.child;
   }
 }
 
@@ -247,7 +71,6 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   List<String> _users = [];
   bool _isLoading = false;
   bool _isOffline = false;
-  bool _isCheckingAuth = false;
 
   final CertificationService _certificationService = CertificationService();
 
@@ -255,39 +78,10 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   void initState() {
     super.initState();
     _getCurrentLocation();
-    _refreshAuthentication();
+    // Rimuovi refresh autenticazione - non necessaria
   }
 
-  Future<void> _refreshAuthentication() async {
-    try {
-      final authProvider = context.read<AuthProvider>();
-      await authProvider.checkAuthenticationStatus();
-
-      // Also refresh user data to ensure we have the latest legal entity info
-      if (authProvider.currentUser != null) {
-        await authProvider.refreshUserData();
-      }
-    } catch (e) {
-      print('Error refreshing authentication: $e');
-    }
-  }
-
-  void _handleAuthenticationError(String error) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(error),
-        backgroundColor: Colors.red,
-        duration: const Duration(seconds: 5),
-        action: SnackBarAction(
-          label: 'Login',
-          textColor: Colors.white,
-          onPressed: () {
-            Navigator.pushNamed(context, '/login');
-          },
-        ),
-      ),
-    );
-  }
+  // Rimossi metodi di autenticazione - non più necessari
 
   @override
   void dispose() {
@@ -360,36 +154,17 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     try {
       final authProvider = context.read<AuthProvider>();
 
-      // Check and refresh authentication status
-      final isAuthenticated = await authProvider.checkAuthenticationStatus();
-      if (!isAuthenticated) {
-        String errorMessage = 'User not authenticated. Please login again.';
+      // Usa dati utente mock per permettere la creazione senza autenticazione
+      final currentUser = AppUser(
+        idUser: 'temp_user_${DateTime.now().millisecondsSinceEpoch}',
+        firstName: 'Utente',
+        lastName: 'Temporaneo',
+        email: 'temp@example.com',
+        type: UserType.user,
+        idUserHash: 'temp_hash_${DateTime.now().millisecondsSinceEpoch}',
+      );
 
-        // Check for specific error types
-        if (authProvider.errorMessage != null) {
-          if (authProvider.errorMessage!.contains('session') ||
-              authProvider.errorMessage!.contains('expired')) {
-            errorMessage = 'Your session has expired. Please login again.';
-          } else if (authProvider.errorMessage!.contains('network') ||
-              authProvider.errorMessage!.contains('connection')) {
-            errorMessage =
-                'Network connection issue. Please check your internet connection and try again.';
-          }
-        }
-
-        _handleAuthenticationError(errorMessage);
-        return;
-      }
-
-      final currentUser = authProvider.currentUser;
-      if (currentUser == null) {
-        _handleAuthenticationError(
-          'User data not available. Please refresh the app.',
-        );
-        return;
-      }
-
-      // Check if user has permission to create certifications
+      // Simula controllo permessi per utente temporaneo
       if (!_canCreateCertification(currentUser)) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -401,27 +176,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               label: 'Go to Dashboard',
               textColor: Colors.white,
               onPressed: () {
-                _redirectBasedOnRole(currentUser);
-              },
-            ),
-          ),
-        );
-        return;
-      }
-
-      // Check if user has a legal entity associated
-      if (currentUser.idUser == null || currentUser.idUser.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'You need to be associated with a legal entity to create certifications. Please contact your administrator.',
-            ),
-            backgroundColor: Colors.orange,
-            action: SnackBarAction(
-              label: 'Go to Dashboard',
-              textColor: Colors.white,
-              onPressed: () {
-                _redirectBasedOnRole(currentUser);
+                Navigator.pushReplacementNamed(context, '/home');
               },
             ),
           ),
@@ -444,8 +199,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
         idLegalEntity: currentUser.idUser!,
         idCertificationHash: 'hash_${DateTime.now().millisecondsSinceEpoch}',
         serialNumber: _codeController.text.trim(),
-        idCertifier: 'temp_certifier',
-        idLocation: 'temp_location',
+        idCertifier: '550e8400-e29b-41d4-a716-446655440000', // UUID valido per certifier temporaneo
+        idLocation: '550e8400-e29b-41d4-a716-446655440001', // UUID valido per location temporanea
         status: CertificationStatus.draft,
         nUsers: 1,
       );
@@ -489,161 +244,33 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   }
 
   bool _canCreateCertification(AppUser user) {
-    // Admin can do everything
+    // Permetti sempre la creazione per utenti temporanei o admin
     if (user.type == UserType.admin) return true;
+
+    // Permetti la creazione per utenti temporanei (che iniziano con 'temp_user_')
+    if (user.idUser != null && user.idUser.startsWith('temp_user_'))
+      return true;
 
     // Check company role permissions
     // Check if user has permission to create certifications
-    return user.type == 'admin' || user.type == 'manager';
-
-    // Check individual permissions
-    return user.type == 'admin' || user.type == 'manager';
+    return user.type == UserType.admin || user.type == UserType.manager;
   }
 
-  void _redirectBasedOnRole(AppUser user) {
-    String message = 'Redirecting to your dashboard...';
-
-    if (user.type == 'admin') {
-      message = 'Redirecting to admin dashboard...';
-      Navigator.pushReplacementNamed(context, '/admin');
-    } else {
-      message = 'Redirecting to home...';
-      Navigator.pushReplacementNamed(context, '/home');
-    }
-
-    // Show a brief message before redirecting
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.blue,
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
+  // Rimosso metodo _redirectBasedOnRole - non più necessario
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final authProvider = context.watch<AuthProvider>();
 
-    // Check if user is authenticated
-    if (!authProvider.isAuthenticated) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text(l10n.getString('certification_type')),
-          backgroundColor: Color(AppConfig.primaryColorValue),
-          foregroundColor: Colors.white,
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.lock_outline, size: 64, color: Colors.grey[400]),
-              const SizedBox(height: 16),
-              Text(
-                'Authentication Required',
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Please login to create certifications',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CustomButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/login');
-                    },
-                    text: 'Login',
-                    icon: Icons.login,
-                    variant: ButtonVariant.filled,
-                  ),
-                  const SizedBox(width: 16),
-                  CustomButton(
-                    onPressed: () async {
-                      final authProvider = context.read<AuthProvider>();
-                      await authProvider.checkAuthenticationStatus();
-                    },
-                    text: 'Refresh',
-                    icon: Icons.refresh,
-                    variant: ButtonVariant.outlined,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      );
-    }
+    // Rimuovi controllo di autenticazione - procedi normalmente
 
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.getString('certification_type')),
         backgroundColor: Color(AppConfig.primaryColorValue),
         foregroundColor: Colors.white,
-        actions: [
-          if (_isCheckingAuth)
-            const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
-              ),
-            )
-          else
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.person),
-                  onPressed: () async {
-                    setState(() {
-                      _isCheckingAuth = true;
-                    });
-                    try {
-                      final authProvider = context.read<AuthProvider>();
-                      await authProvider.refreshUserData();
-                    } finally {
-                      if (mounted) {
-                        setState(() {
-                          _isCheckingAuth = false;
-                        });
-                      }
-                    }
-                  },
-                  tooltip: 'Refresh User Data',
-                ),
-                IconButton(
-                  icon: const Icon(Icons.refresh),
-                  onPressed: () async {
-                    setState(() {
-                      _isCheckingAuth = true;
-                    });
-                    try {
-                      final authProvider = context.read<AuthProvider>();
-                      await authProvider.checkAuthenticationStatus();
-                    } finally {
-                      if (mounted) {
-                        setState(() {
-                          _isCheckingAuth = false;
-                        });
-                      }
-                    }
-                  },
-                  tooltip: 'Refresh Authentication',
-                ),
-              ],
-            ),
-        ],
+        // Rimossi pulsanti di autenticazione - non necessari
       ),
       body: Form(
         key: _formKey,

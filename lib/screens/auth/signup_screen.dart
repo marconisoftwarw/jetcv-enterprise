@@ -313,7 +313,9 @@ class _SignupScreenState extends State<SignupScreen> {
 
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Timeout verifica - reindirizzamento alla pagina di login...'),
+              content: Text(
+                'Timeout verifica - reindirizzamento alla pagina di login...',
+              ),
               duration: Duration(seconds: 2),
             ),
           );
@@ -351,11 +353,11 @@ class _SignupScreenState extends State<SignupScreen> {
               _veriffWindowClosed = true;
             });
 
-            // Mostra un messaggio e reindirizza alla home dopo un breve delay
+            // Mostra un messaggio e reindirizza alla pagina di login dopo un breve delay
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text(
-                  'Verifica annullata - reindirizzamento alla home...',
+                  'Verifica annullata - reindirizzamento alla pagina di login...',
                 ),
                 duration: Duration(seconds: 2),
               ),
@@ -363,7 +365,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
             Future.delayed(const Duration(seconds: 2), () {
               if (mounted) {
-                Navigator.pushReplacementNamed(context, '/home');
+                Navigator.pushReplacementNamed(context, '/login');
               }
             });
           }
@@ -397,7 +399,9 @@ class _SignupScreenState extends State<SignupScreen> {
 
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Timeout verifica - reindirizzamento alla pagina di login...'),
+              content: Text(
+                'Timeout verifica - reindirizzamento alla pagina di login...',
+              ),
               duration: Duration(seconds: 2),
             ),
           );
@@ -606,12 +610,12 @@ class _SignupScreenState extends State<SignupScreen> {
                             ),
                             child: Text(
                               _veriffWindowClosed
-                                  ? 'Hai chiuso la finestra di verifica.\nSarai reindirizzato alla home tra poco.'
+                                  ? 'Hai chiuso la finestra di verifica.\nSarai reindirizzato alla pagina di login tra poco.'
                                   : _isVeriffComplete
                                   ? 'La tua identità è stata verificata con successo!\nSarai reindirizzato alla home tra poco.'
                                   : _isVeriffWaiting
-                                                                        ? 'Stiamo monitorando automaticamente lo stato della tua verifica.\nDopo 3 secondi verrai reindirizzato alla pagina di login se non completata.'
-                                      : 'La verifica si aprirà automaticamente in una nuova scheda.\nCompleta tutti i passaggi richiesti entro 3 secondi.',
+                                  ? 'Stiamo monitorando automaticamente lo stato della tua verifica.\nDopo 3 secondi verrai reindirizzato alla pagina di login se non completata.'
+                                  : 'La verifica si aprirà automaticamente in una nuova scheda.\nCompleta tutti i passaggi richiesti entro 3 secondi.',
                               style: const TextStyle(
                                 fontSize: 16,
                                 color: Colors.white,
@@ -775,7 +779,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                 ),
                                 SizedBox(width: 12),
                                 Text(
-                                  'Reindirizzamento automatico alla home...',
+                                  'Reindirizzamento automatico alla pagina di login...',
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w600,
