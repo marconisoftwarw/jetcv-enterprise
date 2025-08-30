@@ -349,21 +349,21 @@ class SupabaseService {
     }
   }
 
-    Future<List<LegalEntity>> getLegalEntities({String? status}) async {
+  Future<List<LegalEntity>> getLegalEntities({String? status}) async {
     try {
       print('🔍 Attempting to fetch legal entities via Edge Function...');
       print('🔍 Status filter: ${status ?? 'none'}');
-      
+
       // Call the get-legal-entities Edge Function using HTTP client
       final url = '${AppConfig.supabaseUrl}/functions/v1/get-legal-entities';
-      
+
       // Get the current user's access token
       final session = _client.auth.currentSession;
       if (session == null) {
         print('❌ No active session found');
         return [];
       }
-      
+
       final response = await http.get(
         Uri.parse(url),
         headers: {
@@ -373,7 +373,7 @@ class SupabaseService {
       );
 
       print('🔍 Edge Function response status: ${response.statusCode}');
-      
+
       if (response.statusCode != 200) {
         print('❌ Edge Function error: Status ${response.statusCode}');
         print('❌ Response body: ${response.body}');
@@ -408,7 +408,7 @@ class SupabaseService {
         );
         return LegalEntity.fromJson(entity);
       }).toList();
-      
+
       print('🔍 Successfully processed ${entities.length} entities');
       return entities;
     } catch (e) {
@@ -418,20 +418,20 @@ class SupabaseService {
     }
   }
 
-    Future<LegalEntity?> getLegalEntityById(String id) async {
+  Future<LegalEntity?> getLegalEntityById(String id) async {
     try {
       print('🔍 Attempting to fetch legal entity by ID: $id');
-      
+
       // Call the get-legal-entities Edge Function using HTTP client
       final url = '${AppConfig.supabaseUrl}/functions/v1/get-legal-entities';
-      
+
       // Get the current user's access token
       final session = _client.auth.currentSession;
       if (session == null) {
         print('❌ No active session found');
         return null;
       }
-      
+
       final response = await http.get(
         Uri.parse(url),
         headers: {
