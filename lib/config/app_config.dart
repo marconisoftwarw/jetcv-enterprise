@@ -32,6 +32,32 @@ class AppConfig {
     defaultValue: 'https://skqsuxmdfqxbkhmselaz.supabase.co',
   );
 
+  // SMTP configuration for AWS SES
+  static const String smtpHost = String.fromEnvironment(
+    'SMTP_HOST',
+    defaultValue: 'email-smtp.us-east-1.amazonaws.com',
+  );
+
+  static const int smtpPort = int.fromEnvironment(
+    'SMTP_PORT',
+    defaultValue: 587, // TLS port
+  );
+
+  static const String smtpUsername = String.fromEnvironment(
+    'SMTP_USERNAME',
+    defaultValue: 'AKIAW7RD7Q2X765RMDPT',
+  );
+
+  static const String smtpPassword = String.fromEnvironment(
+    'SMTP_PASSWORD',
+    defaultValue: 'BLKakh10pvzFJmkSWNxzY3U57oxCtrpHAt/KNo+JknXr',
+  );
+
+  static const String smtpFromEmail = String.fromEnvironment(
+    'SMTP_FROM_EMAIL',
+    defaultValue: 'noreply@jetcv.com',
+  );
+
   // Feature flags
   static const bool enableGoogleSignIn = true;
   static const bool enableEmailSignIn = true;

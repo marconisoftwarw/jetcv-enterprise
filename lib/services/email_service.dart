@@ -9,11 +9,12 @@ class EmailService {
   factory EmailService() => _instance;
   EmailService._internal();
 
-  // Configurazione SMTP interna (placeholder per implementazione reale)
-  static const String _smtpHost = 'localhost';
-  static const int _smtpPort = 1025; // MailHog per sviluppo
-  static const String _smtpUsername = 'test@example.com';
-  static const String _smtpPassword = 'password';
+  // Configurazione SMTP AWS SES
+  static const String _smtpHost = AppConfig.smtpHost;
+  static const int _smtpPort = AppConfig.smtpPort;
+  static const String _smtpUsername = AppConfig.smtpUsername;
+  static const String _smtpPassword = AppConfig.smtpPassword;
+  static const String _fromEmail = AppConfig.smtpFromEmail;
 
   // Metodo per inviare invito via email
   Future<bool> sendLegalEntityInvitation(
@@ -31,11 +32,11 @@ class EmailService {
       };
 
       // Opzione 1: MailHog per sviluppo locale
-      if (AppConfig.enableDebugMode) {
+      if (AppConfig.environment == 'development' && AppConfig.enableDebugMode) {
         return await _sendViaMailHog(emailData);
       }
 
-      // Opzione 2: Servizio email esterno (SendGrid, etc.)
+      // Opzione 2: Servizio email esterno (AWS SES tramite SendGrid)
       return await _sendViaExternalService(emailData);
     } catch (e) {
       print('Error sending invitation email: $e');
@@ -50,7 +51,7 @@ class EmailService {
         Uri.parse('http://localhost:8025/api/v1/messages'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'from': 'noreply@jetcv.com',
+          'from': _fromEmail,
           'to': [emailData['to']],
           'subject': emailData['subject'],
           'html': emailData['html'],
@@ -65,16 +66,14 @@ class EmailService {
     }
   }
 
-  // Metodo per inviare via servizio esterno
+  // Metodo per inviare via servizio esterno (AWS SES tramite SendGrid API)
   Future<bool> _sendViaExternalService(Map<String, dynamic> emailData) async {
     try {
-      // Placeholder per integrazione con servizi reali
-      // Esempio con SendGrid:
-      /*
+      // Utilizzo SendGrid API con credenziali SMTP AWS SES
       final response = await http.post(
         Uri.parse('https://api.sendgrid.com/v3/mail/send'),
         headers: {
-          'Authorization': 'Bearer ${AppConfig.sendgridApiKey}',
+          'Authorization': 'Bearer ${_generateSendGridApiKey()}',
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
@@ -83,27 +82,40 @@ class EmailService {
               'to': [{'email': emailData['to']}],
             }
           ],
-          'from': {'email': 'noreply@jetcv.com'},
+          'from': {'email': _fromEmail},
           'subject': emailData['subject'],
           'content': [
             {
               'type': 'text/html',
               'value': emailData['html'],
+            },
+            {
+              'type': 'text/plain',
+              'value': emailData['text'],
             }
           ],
         }),
       );
-      */
 
-      // Per ora simuliamo l'invio
-      await Future.delayed(const Duration(seconds: 1));
-      print('Email sent to ${emailData['to']}: ${emailData['subject']}');
-
-      return true;
+      if (response.statusCode == 202) {
+        print('✅ Email sent successfully to ${emailData['to']}: ${emailData['subject']}');
+        return true;
+      } else {
+        print('❌ Failed to send email. Status: ${response.statusCode}, Body: ${response.body}');
+        return false;
+      }
     } catch (e) {
       print('Error sending via external service: $e');
       return false;
     }
+  }
+
+  // Genera API key SendGrid dalle credenziali SMTP AWS SES
+  String _generateSendGridApiKey() {
+    // Per SendGrid SMTP-to-API, utilizziamo l'username e password SMTP
+    final credentials = '$_smtpUsername:$_smtpPassword';
+    final encodedCredentials = base64Encode(utf8.encode(credentials));
+    return 'Basic $encodedCredentials';
   }
 
   // Genera HTML per l'email di invito
@@ -217,7 +229,7 @@ Questo è un messaggio automatico, non rispondere a questa email.
         'text': message,
       };
 
-      if (AppConfig.enableDebugMode) {
+      if (AppConfig.environment == 'development' && AppConfig.enableDebugMode) {
         return await _sendViaMailHog(emailData);
       } else {
         return await _sendViaExternalService(emailData);
@@ -251,7 +263,7 @@ Questo è un messaggio automatico, non rispondere a questa email.
         message: message,
       );
 
-      if (AppConfig.environment == 'development') {
+      if (AppConfig.environment == 'development' && AppConfig.enableDebugMode) {
         return await _sendViaMailHog({
           'to': email,
           'subject': subject,
