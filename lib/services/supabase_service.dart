@@ -652,7 +652,7 @@ class SupabaseService {
       try {
         final response = await _client.functions.invoke(
           'get-legal-entities',
-          method: 'GET',
+          method: HttpMethod.get,
           body: {'status': status},
         );
 
@@ -661,13 +661,19 @@ class SupabaseService {
         if (response.status != 200) {
           print('❌ Edge Function error: Status ${response.status}');
           print('❌ Response data: ${response.data}');
-          throw Exception('Edge Function failed with status ${response.status}');
+          throw Exception(
+            'Edge Function failed with status ${response.status}',
+          );
         }
 
         final data = response.data;
         if (data == null || data['ok'] != true) {
-          print('❌ Edge Function error: ${data?['message'] ?? 'Unknown error'}');
-          throw Exception('Edge Function returned error: ${data?['message'] ?? 'Unknown error'}');
+          print(
+            '❌ Edge Function error: ${data?['message'] ?? 'Unknown error'}',
+          );
+          throw Exception(
+            'Edge Function returned error: ${data?['message'] ?? 'Unknown error'}',
+          );
         }
 
         final entitiesList = data['data'] as List;
@@ -697,15 +703,15 @@ class SupabaseService {
         return entities;
       } catch (e) {
         print('⚠️ Edge Function failed, trying HTTP fallback: $e');
-        
+
         // Fallback to HTTP method with proper authentication
         final url = '${AppConfig.supabaseUrl}/functions/v1/get-legal-entities';
-        
+
         // Get the current user's access token
         final session = _client.auth.currentSession;
         if (session == null) {
           print('❌ No active session found - attempting to restore session...');
-          
+
           try {
             await _auth.refreshSession();
             final restoredSession = _client.auth.currentSession;
@@ -719,7 +725,7 @@ class SupabaseService {
             return [];
           }
         }
-        
+
         // Get the session again after potential restoration
         final currentSession = _client.auth.currentSession;
         if (currentSession == null) {
@@ -727,8 +733,6 @@ class SupabaseService {
           return [];
         }
 
-
-        
         final response = await http.get(
           Uri.parse(url),
           headers: {
@@ -747,7 +751,9 @@ class SupabaseService {
 
         final data = jsonDecode(response.body);
         if (data == null || data['ok'] != true) {
-          print('❌ HTTP fallback error: ${data?['message'] ?? 'Unknown error'}');
+          print(
+            '❌ HTTP fallback error: ${data?['message'] ?? 'Unknown error'}',
+          );
           return [];
         }
 
@@ -774,9 +780,11 @@ class SupabaseService {
           return LegalEntity.fromJson(entity);
         }).toList();
 
-        print('🔍 Successfully processed ${entities.length} entities via HTTP fallback');
+        print(
+          '🔍 Successfully processed ${entities.length} entities via HTTP fallback',
+        );
         return entities;
-
+      }
     } catch (e) {
       print('❌ Error getting legal entities via Edge Function: $e');
       print('❌ Error type: ${e.runtimeType}');
@@ -799,20 +807,26 @@ class SupabaseService {
       try {
         final response = await _client.functions.invoke(
           'get-legal-entities',
-          method: 'GET',
+          method: HttpMethod.get,
           body: {},
         );
 
         if (response.status != 200) {
           print('❌ Edge Function error: Status ${response.status}');
           print('❌ Response data: ${response.data}');
-          throw Exception('Edge Function failed with status ${response.status}');
+          throw Exception(
+            'Edge Function failed with status ${response.status}',
+          );
         }
 
         final data = response.data;
         if (data == null || data['ok'] != true) {
-          print('❌ Edge Function error: ${data?['message'] ?? 'Unknown error'}');
-          throw Exception('Edge Function returned error: ${data?['message'] ?? 'Unknown error'}');
+          print(
+            '❌ Edge Function error: ${data?['message'] ?? 'Unknown error'}',
+          );
+          throw Exception(
+            'Edge Function returned error: ${data?['message'] ?? 'Unknown error'}',
+          );
         }
 
         final entitiesList = data['data'] as List;
@@ -829,19 +843,21 @@ class SupabaseService {
           return null;
         }
 
-        print('🔍 Successfully found legal entity: ${entityData['legal_name']}');
+        print(
+          '🔍 Successfully found legal entity: ${entityData['legal_name']}',
+        );
         return LegalEntity.fromJson(entityData);
       } catch (e) {
         print('⚠️ Edge Function failed, trying HTTP fallback: $e');
-        
+
         // Fallback to HTTP method with proper authentication
         final url = '${AppConfig.supabaseUrl}/functions/v1/get-legal-entities';
-        
+
         // Get the current user's access token
         final session = _client.auth.currentSession;
         if (session == null) {
           print('❌ No active session found - attempting to restore session...');
-          
+
           try {
             await _auth.refreshSession();
             final restoredSession = _client.auth.currentSession;
@@ -855,7 +871,7 @@ class SupabaseService {
             return null;
           }
         }
-        
+
         // Get the session again after potential restoration
         final currentSession = _client.auth.currentSession;
         if (currentSession == null) {
@@ -879,7 +895,9 @@ class SupabaseService {
 
         final data = jsonDecode(response.body);
         if (data == null || data['ok'] != true) {
-          print('❌ HTTP fallback error: ${data?['message'] ?? 'Unknown error'}');
+          print(
+            '❌ HTTP fallback error: ${data?['message'] ?? 'Unknown error'}',
+          );
           return null;
         }
 
@@ -897,7 +915,9 @@ class SupabaseService {
           return null;
         }
 
-        print('🔍 Successfully found legal entity via HTTP fallback: ${entityData['legal_name']}');
+        print(
+          '🔍 Successfully found legal entity via HTTP fallback: ${entityData['legal_name']}',
+        );
         return LegalEntity.fromJson(entityData);
       }
     } catch (e) {

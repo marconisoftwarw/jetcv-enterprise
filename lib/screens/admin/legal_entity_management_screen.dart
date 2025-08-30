@@ -529,13 +529,6 @@ class _LegalEntityManagementScreenState
     final authProvider = context.read<AuthProvider>();
     final adminId = authProvider.currentUser?.idUser;
 
-    if (adminId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Errore: utente non autenticato')),
-      );
-      return;
-    }
-
     final success = await context
         .read<LegalEntityProvider>()
         .approveLegalEntity(entity.idLegalEntity);
@@ -546,9 +539,7 @@ class _LegalEntityManagementScreenState
       );
       _loadLegalEntities();
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Errore nell\'approvazione dell\'entità')),
-      );
+      _loadLegalEntities();
     }
   }
 
@@ -584,15 +575,6 @@ class _LegalEntityManagementScreenState
               final authProvider = context.read<AuthProvider>();
               final adminId = authProvider.currentUser?.idUser;
 
-              if (adminId == null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Errore: utente non autenticato'),
-                  ),
-                );
-                return;
-              }
-
               final success = await context
                   .read<LegalEntityProvider>()
                   .rejectLegalEntity(
@@ -610,11 +592,7 @@ class _LegalEntityManagementScreenState
                 );
                 _loadLegalEntities();
               } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Errore nel rifiuto dell\'entità'),
-                  ),
-                );
+                _loadLegalEntities();
               }
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),

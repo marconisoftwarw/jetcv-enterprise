@@ -1155,9 +1155,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 Consumer<AuthProvider>(
                   builder: (context, authProvider, child) {
                     return CustomButton(
-                      onPressed: (authProvider.isLoading || _isVeriffLoading)
-                          ? null
-                          : _signUp,
+                      onPressed: _signUp,
                       text: _isVeriffLoading
                           ? 'Verifica in corso...'
                           : 'Create Account',
