@@ -353,6 +353,12 @@ class SupabaseService {
     try {
       print('🔍 Attempting to fetch legal entities via Edge Function...');
       print('🔍 Status filter: ${status ?? 'none'}');
+      
+      // Ensure user is authenticated
+      if (!isUserAuthenticated) {
+        print('❌ User not authenticated');
+        return [];
+      }
 
       // Call the get-legal-entities Edge Function using HTTP client
       final url = '${AppConfig.supabaseUrl}/functions/v1/get-legal-entities';
@@ -441,6 +447,12 @@ class SupabaseService {
   Future<LegalEntity?> getLegalEntityById(String id) async {
     try {
       print('🔍 Attempting to fetch legal entity by ID: $id');
+      
+      // Ensure user is authenticated
+      if (!isUserAuthenticated) {
+        print('❌ User not authenticated');
+        return null;
+      }
 
       // Call the get-legal-entities Edge Function using HTTP client
       final url = '${AppConfig.supabaseUrl}/functions/v1/get-legal-entities';
@@ -475,7 +487,7 @@ class SupabaseService {
       final response = await http.get(
         Uri.parse(url),
         headers: {
-          'Authorization': 'Bearer ${session.accessToken}',
+          'Authorization': 'Bearer ${currentSession.accessToken}',
           'Content-Type': 'application/json',
         },
       );
