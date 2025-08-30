@@ -52,7 +52,7 @@ class VeriffService {
     try {
       final supabaseService = SupabaseService();
 
-      final body = {'sessionId': sessionId};
+      final body = {'id': sessionId};
 
       // Chiama la Supabase Edge Function per controllare lo stato
       final response = await supabaseService.client.functions.invoke(
@@ -78,7 +78,7 @@ class VeriffService {
     try {
       final supabaseService = SupabaseService();
 
-      final body = {'sessionId': sessionId};
+      final body = {'id': sessionId};
 
       // Chiama la Supabase Edge Function per ottenere i risultati
       final response = await supabaseService.client.functions.invoke(

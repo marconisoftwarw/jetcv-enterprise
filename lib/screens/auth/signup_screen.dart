@@ -31,7 +31,7 @@ class _SignupScreenState extends State<SignupScreen> {
   bool _obscureConfirmPassword = true;
   bool _agreeToTerms = false;
   bool _agreeToPrivacy = false;
-  
+
   // Variabili per la verifica Veriff
   bool _showVeriffWebView = false;
   String? _veriffUrl;
@@ -41,7 +41,8 @@ class _SignupScreenState extends State<SignupScreen> {
   bool _isVeriffComplete = false;
   String? _veriffErrorMessage;
   Timer? _windowCheckTimer; // Timer per controllare se la finestra è chiusa
-  bool _veriffWindowClosed = false; // Flag per tracciare se la finestra è stata chiusa
+  bool _veriffWindowClosed =
+      false; // Flag per tracciare se la finestra è stata chiusa
 
   @override
   void dispose() {
@@ -313,7 +314,7 @@ class _SignupScreenState extends State<SignupScreen> {
             // Controlliamo se la finestra è stata chiusa o se siamo stati reindirizzati
             return window.history.length <= 1 || window.closed;
           })()
-          '''
+          ''',
         ]);
 
         if (isWindowClosed == true && !_veriffWindowClosed) {
@@ -329,7 +330,9 @@ class _SignupScreenState extends State<SignupScreen> {
             // Mostra un messaggio e reindirizza alla home dopo un breve delay
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('Verifica annullata - reindirizzamento alla home...'),
+                content: Text(
+                  'Verifica annullata - reindirizzamento alla home...',
+                ),
                 duration: Duration(seconds: 2),
               ),
             );
@@ -432,14 +435,18 @@ class _SignupScreenState extends State<SignupScreen> {
                   left: 16,
                   child: IconButton(
                     icon: const Icon(Icons.close, color: Colors.white),
-            onPressed: () {
-              setState(() {
-                _showVeriffWebView = false;
-                _veriffUrl = null;
+                    onPressed: () {
+                      // Cancella il timer del monitoraggio finestra
+                      _windowCheckTimer?.cancel();
+                      setState(() {
+                        _showVeriffWebView = false;
+                        _veriffUrl = null;
+                        _veriffSessionId = null;
                         _isVeriffWaiting = false;
                         _isVeriffComplete = false;
-              });
-            },
+                        _veriffWindowClosed = false;
+                      });
+                    },
                     style: IconButton.styleFrom(
                       backgroundColor: Colors.white.withOpacity(0.2),
                       shape: const CircleBorder(),
@@ -458,8 +465,12 @@ class _SignupScreenState extends State<SignupScreen> {
                         AnimatedContainer(
                           duration: const Duration(seconds: 1),
                           curve: Curves.elasticOut,
-                          width: (_isVeriffComplete || _veriffWindowClosed) ? 120 : 100,
-                          height: (_isVeriffComplete || _veriffWindowClosed) ? 120 : 100,
+                          width: (_isVeriffComplete || _veriffWindowClosed)
+                              ? 120
+                              : 100,
+                          height: (_isVeriffComplete || _veriffWindowClosed)
+                              ? 120
+                              : 100,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: Colors.white.withOpacity(0.9),
@@ -475,16 +486,18 @@ class _SignupScreenState extends State<SignupScreen> {
                             _veriffWindowClosed
                                 ? Icons.cancel
                                 : _isVeriffComplete
-                                    ? Icons.check_circle
-                                    : _isVeriffWaiting
-                                        ? Icons.verified_user
-                                        : Icons.open_in_new,
-                            size: (_isVeriffComplete || _veriffWindowClosed) ? 60 : 50,
+                                ? Icons.check_circle
+                                : _isVeriffWaiting
+                                ? Icons.verified_user
+                                : Icons.open_in_new,
+                            size: (_isVeriffComplete || _veriffWindowClosed)
+                                ? 60
+                                : 50,
                             color: _veriffWindowClosed
                                 ? Colors.red
                                 : _isVeriffComplete
-                                    ? Colors.green
-                                    : Color(AppConfig.primaryColorValue),
+                                ? Colors.green
+                                : Color(AppConfig.primaryColorValue),
                           ),
                         ),
 
@@ -498,10 +511,10 @@ class _SignupScreenState extends State<SignupScreen> {
                             _veriffWindowClosed
                                 ? 'Verifica Annullata'
                                 : _isVeriffComplete
-                                    ? 'Verifica Completata! 🎉'
-                                    : _isVeriffWaiting
-                                        ? 'Verifica in Corso...'
-                                        : 'Pronto per la Verifica',
+                                ? 'Verifica Completata! 🎉'
+                                : _isVeriffWaiting
+                                ? 'Verifica in Corso...'
+                                : 'Pronto per la Verifica',
                             style: const TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
@@ -535,11 +548,13 @@ class _SignupScreenState extends State<SignupScreen> {
                               ),
                             ),
                             child: Text(
-                              _isVeriffComplete
+                              _veriffWindowClosed
+                                  ? 'Hai chiuso la finestra di verifica.\nSarai reindirizzato alla home tra poco.'
+                                  : _isVeriffComplete
                                   ? 'La tua identità è stata verificata con successo!\nSarai reindirizzato alla home tra poco.'
                                   : _isVeriffWaiting
-                                      ? 'Stiamo monitorando automaticamente lo stato della tua verifica.\nNon chiudere questa finestra.'
-                                      : 'La verifica si aprirà automaticamente in una nuova scheda.\nCompleta tutti i passaggi richiesti.',
+                                  ? 'Stiamo monitorando automaticamente lo stato della tua verifica.\nNon chiudere questa finestra.'
+                                  : 'La verifica si aprirà automaticamente in una nuova scheda.\nCompleta tutti i passaggi richiesti.',
                               style: const TextStyle(
                                 fontSize: 16,
                                 color: Colors.white,
@@ -553,7 +568,9 @@ class _SignupScreenState extends State<SignupScreen> {
                         const SizedBox(height: 40),
 
                         // Loader elegante o pulsante
-                        if (_isVeriffWaiting && !_isVeriffComplete)
+                        if (_isVeriffWaiting &&
+                            !_isVeriffComplete &&
+                            !_veriffWindowClosed)
                           Container(
                             padding: const EdgeInsets.all(24),
                             decoration: BoxDecoration(
@@ -569,7 +586,9 @@ class _SignupScreenState extends State<SignupScreen> {
                                   width: 60,
                                   height: 60,
                                   child: CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white,
+                                    ),
                                     strokeWidth: 4,
                                   ),
                                 ),
@@ -595,7 +614,10 @@ class _SignupScreenState extends State<SignupScreen> {
                           )
                         else if (!_isVeriffComplete)
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 12,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(25),
@@ -629,19 +651,29 @@ class _SignupScreenState extends State<SignupScreen> {
                         const SizedBox(height: 40),
 
                         // Pulsanti aggiuntivi
-                        if (!_isVeriffWaiting && !_isVeriffComplete)
+                        if (!_isVeriffWaiting &&
+                            !_isVeriffComplete &&
+                            !_veriffWindowClosed)
                           Column(
                             children: [
                               TextButton.icon(
                                 onPressed: _openVeriffInNewTab,
-                                icon: const Icon(Icons.refresh, color: Colors.white),
+                                icon: const Icon(
+                                  Icons.refresh,
+                                  color: Colors.white,
+                                ),
                                 label: const Text(
                                   'Riapri Verifica',
                                   style: TextStyle(color: Colors.white),
                                 ),
                                 style: TextButton.styleFrom(
-                                  backgroundColor: Colors.white.withOpacity(0.1),
-                                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                  backgroundColor: Colors.white.withOpacity(
+                                    0.1,
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 24,
+                                    vertical: 12,
+                                  ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(25),
                                   ),
@@ -649,14 +681,51 @@ class _SignupScreenState extends State<SignupScreen> {
                               ),
                               const SizedBox(height: 16),
                               TextButton.icon(
-                                onPressed: () => Navigator.pushReplacementNamed(context, '/home'),
-                                icon: const Icon(Icons.home, color: Colors.white70),
+                                onPressed: () => Navigator.pushReplacementNamed(
+                                  context,
+                                  '/home',
+                                ),
+                                icon: const Icon(
+                                  Icons.home,
+                                  color: Colors.white70,
+                                ),
                                 label: const Text(
                                   'Salta per ora',
                                   style: TextStyle(color: Colors.white70),
                                 ),
                               ),
                             ],
+                          )
+                        // Messaggio di reindirizzamento quando la finestra è chiusa
+                        else if (_veriffWindowClosed)
+                          Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: Colors.orange.withOpacity(0.9),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.3),
+                                width: 1,
+                              ),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.info_outline,
+                                  color: Colors.white,
+                                  size: 24,
+                                ),
+                                SizedBox(width: 12),
+                                Text(
+                                  'Reindirizzamento automatico alla home...',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
 
                         // Messaggio di successo
@@ -716,7 +785,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
               ],
             ),
-            ),
+          ),
         ),
       );
     }

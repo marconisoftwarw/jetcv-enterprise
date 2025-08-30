@@ -373,7 +373,10 @@ class _VeriffVerificationScreenState extends State<VeriffVerificationScreen> {
         );
 
         print('Verification status: $statusResponse');
-
+        setState(() {
+          _isVerificationComplete = true;
+          _isLoading = true;
+        });
         // Se la verifica è completata, ottieni i risultati
         if (statusResponse['status'] == 'completed' ||
             statusResponse['status'] == 'approved') {
@@ -435,7 +438,10 @@ class _VeriffVerificationScreenState extends State<VeriffVerificationScreen> {
       );
 
       print('Manual status check: $statusResponse');
-
+      setState(() {
+        _isVerificationComplete = true;
+        _isLoading = true;
+      });
       if (statusResponse['status'] == 'completed' ||
           statusResponse['status'] == 'approved') {
         final results = await veriffService.getVeriffSessionResults(
@@ -446,7 +452,7 @@ class _VeriffVerificationScreenState extends State<VeriffVerificationScreen> {
 
         setState(() {
           _isVerificationComplete = true;
-          _isLoading = false;
+          _isLoading = true;
         });
       } else {
         setState(() {
