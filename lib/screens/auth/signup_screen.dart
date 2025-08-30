@@ -296,10 +296,34 @@ class _SignupScreenState extends State<SignupScreen> {
     // Cancella eventuali timer precedenti
     _windowCheckTimer?.cancel();
 
-    // Controlla ogni 2 secondi se la finestra è ancora aperta
-    _windowCheckTimer = Timer.periodic(const Duration(seconds: 2), (timer) {
+    // Controlla ogni 1 secondo se la finestra è ancora aperta per un massimo di 3 secondi
+    _windowCheckTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) {
         timer.cancel();
+        return;
+      }
+
+      // Dopo 3 secondi, considera il timeout scaduto e vai al login
+      if (timer.tick >= 3) {
+        timer.cancel();
+        if (mounted && !_veriffWindowClosed && !_isVeriffComplete) {
+          setState(() {
+            _isVeriffWaiting = false;
+          });
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Timeout verifica - reindirizzamento alla pagina di login...'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+
+          Future.delayed(const Duration(seconds: 2), () {
+            if (mounted) {
+              Navigator.pushReplacementNamed(context, '/login');
+            }
+          });
+        }
         return;
       }
 
@@ -356,14 +380,34 @@ class _SignupScreenState extends State<SignupScreen> {
   void _startVeriffStatusMonitoring() {
     if (_veriffSessionId == null) return;
 
-    // Controlla lo stato ogni 3 secondi per i primi 30 secondi
+    // Controlla lo stato ogni 3 secondi per un massimo di 1 controllo (3 secondi totali)
     const checkInterval = Duration(seconds: 3);
-    const maxChecks = 10; // 30 secondi totali
+    const maxChecks = 1; // Solo 1 controllo dopo 3 secondi
     int checkCount = 0;
 
     Timer.periodic(checkInterval, (timer) async {
       if (!mounted || checkCount >= maxChecks || _veriffWindowClosed) {
         timer.cancel();
+
+        // Dopo il timeout di 3 secondi, reindirizza alla pagina di login
+        if (mounted && !_veriffWindowClosed && !_isVeriffComplete) {
+          setState(() {
+            _isVeriffWaiting = false;
+          });
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Timeout verifica - reindirizzamento alla pagina di login...'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+
+          Future.delayed(const Duration(seconds: 2), () {
+            if (mounted) {
+              Navigator.pushReplacementNamed(context, '/login');
+            }
+          });
+        }
         return;
       }
 
@@ -398,6 +442,19 @@ class _SignupScreenState extends State<SignupScreen> {
         }
       } catch (e) {
         print('SignupScreen: Errore nel controllo stato: $e');
+        // In caso di errore, considera completato il timeout e vai al login
+        timer.cancel();
+        if (mounted && !_veriffWindowClosed) {
+          setState(() {
+            _isVeriffWaiting = false;
+          });
+
+          Future.delayed(const Duration(seconds: 1), () {
+            if (mounted) {
+              Navigator.pushReplacementNamed(context, '/login');
+            }
+          });
+        }
       }
     });
   }
@@ -553,8 +610,8 @@ class _SignupScreenState extends State<SignupScreen> {
                                   : _isVeriffComplete
                                   ? 'La tua identità è stata verificata con successo!\nSarai reindirizzato alla home tra poco.'
                                   : _isVeriffWaiting
-                                  ? 'Stiamo monitorando automaticamente lo stato della tua verifica.\nNon chiudere questa finestra.'
-                                  : 'La verifica si aprirà automaticamente in una nuova scheda.\nCompleta tutti i passaggi richiesti.',
+                                                                        ? 'Stiamo monitorando automaticamente lo stato della tua verifica.\nDopo 3 secondi verrai reindirizzato alla pagina di login se non completata.'
+                                      : 'La verifica si aprirà automaticamente in una nuova scheda.\nCompleta tutti i passaggi richiesti entro 3 secondi.',
                               style: const TextStyle(
                                 fontSize: 16,
                                 color: Colors.white,
@@ -603,7 +660,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  'Controllo automatico ogni 3 secondi',
+                                  'Controllo dopo 3 secondi',
                                   style: TextStyle(
                                     color: Colors.white.withOpacity(0.7),
                                     fontSize: 12,
