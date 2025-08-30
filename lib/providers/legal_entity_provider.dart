@@ -45,6 +45,13 @@ class LegalEntityProvider extends ChangeNotifier {
     try {
       print('🔄 LegalEntityProvider: Starting to load legal entities...');
       print('🔄 Status filter: ${status ?? 'none'}');
+      
+      // Check if Supabase service is ready
+      if (!_supabaseService.isUserAuthenticated) {
+        print('❌ LegalEntityProvider: User not authenticated, skipping load');
+        _setError('User not authenticated');
+        return;
+      }
 
       final entities = await _supabaseService.getLegalEntities(status: status);
 

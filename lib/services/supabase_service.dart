@@ -7,6 +7,11 @@ import '../models/legal_entity.dart';
 import '../models/legal_entity_invitation.dart';
 import '../config/app_config.dart';
 
+/// SupabaseService - Optimized for Legal Entity Management
+/// 
+/// This service has been optimized to avoid unnecessary calls to the 'user' table
+/// during legal entity operations. Only essential user queries for authentication
+/// are maintained.
 class SupabaseService {
   static final SupabaseService _instance = SupabaseService._internal();
   factory SupabaseService() => _instance;
@@ -743,15 +748,16 @@ class SupabaseService {
     }).asyncMap((future) => future);
   }
 
-  // Admin functions
-  Future<bool> isUserAdmin(String userId) async {
-    try {
-      final user = await getUserById(userId);
-      return user?.type == app_models.UserType.admin;
-    } catch (e) {
-      return false;
-    }
-  }
+  // Admin functions - Removed unnecessary user table query
+  // This method is no longer needed as admin check is done via AuthProvider
+  // Future<bool> isUserAdmin(String userId) async {
+  //   try {
+  //     final user = await getUserById(userId);
+  //     return user?.type == app_models.UserType.admin;
+  //   } catch (e) {
+  //     return false;
+  //   }
+  // }
 
   // Metodi per gestire gli inviti alle legal entity
   Future<List<LegalEntityInvitation>> getLegalEntityInvitations({
@@ -896,7 +902,7 @@ class SupabaseService {
     }
   }
 
-  // KYC management
+  // KYC management - Only essential operations, no unnecessary user table queries
   Future<Map<String, dynamic>?> createKycAttempt({
     required String userId,
     required Map<String, dynamic> requestBody,
@@ -919,25 +925,27 @@ class SupabaseService {
     }
   }
 
-  Future<bool> updateKycStatus({
-    required String userId,
-    required bool completed,
-    required bool passed,
-  }) async {
-    try {
-      await _client
-          .from('user')
-          .update({
-            'kycCompleted': completed,
-            'kycPassed': passed,
-            'updatedAt': DateTime.now().toIso8601String(),
-          })
-          .eq('idUser', userId);
-
-      return true;
-    } catch (e) {
-      print('Error updating KYC status: $e');
-      return false;
-    }
-  }
+  // KYC status update - Removed unnecessary user table query
+  // This method is no longer needed as KYC status is managed elsewhere
+  // Future<bool> updateKycStatus({
+  //   required String userId,
+  //   required bool completed,
+  //   required bool passed,
+  // }) async {
+  //   try {
+  //     await _client
+  //         .from('user')
+  //         .update({
+  //           'kycCompleted': completed,
+  //           'kycPassed': passed,
+  //           'updatedAt': DateTime.now().toIso8601String(),
+  //         })
+  //         .eq('idUser', userId);
+  //
+  //     return true;
+  //   } catch (e) {
+  //     print('Error updating KYC status: $e');
+  //     return false;
+  //   }
+  // }
 }
