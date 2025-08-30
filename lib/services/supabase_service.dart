@@ -360,14 +360,34 @@ class SupabaseService {
       // Get the current user's access token
       final session = _client.auth.currentSession;
       if (session == null) {
-        print('❌ No active session found');
+        print('❌ No active session found - attempting to restore session...');
+        
+        // Try to restore the session
+        try {
+          await _auth.refreshSession();
+          final restoredSession = _client.auth.currentSession;
+          if (restoredSession == null) {
+            print('❌ Failed to restore session');
+            return [];
+          }
+          print('✅ Session restored successfully');
+        } catch (e) {
+          print('❌ Failed to restore session: $e');
+          return [];
+        }
+      }
+      
+      // Get the session again after potential restoration
+      final currentSession = _client.auth.currentSession;
+      if (currentSession == null) {
+        print('❌ Still no active session after restoration attempt');
         return [];
       }
 
       final response = await http.get(
         Uri.parse(url),
         headers: {
-          'Authorization': 'Bearer ${session.accessToken}',
+          'Authorization': 'Bearer ${currentSession.accessToken}',
           'Content-Type': 'application/json',
         },
       );
@@ -428,7 +448,27 @@ class SupabaseService {
       // Get the current user's access token
       final session = _client.auth.currentSession;
       if (session == null) {
-        print('❌ No active session found');
+        print('❌ No active session found - attempting to restore session...');
+        
+        // Try to restore the session
+        try {
+          await _auth.refreshSession();
+          final restoredSession = _client.auth.currentSession;
+          if (restoredSession == null) {
+            print('❌ Failed to restore session');
+            return null;
+          }
+          print('✅ Session restored successfully');
+        } catch (e) {
+          print('❌ Failed to restore session: $e');
+          return null;
+        }
+      }
+      
+      // Get the session again after potential restoration
+      final currentSession = _client.auth.currentSession;
+      if (currentSession == null) {
+        print('❌ Still no active session after restoration attempt');
         return null;
       }
 
