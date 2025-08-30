@@ -8,6 +8,7 @@ import '../../widgets/custom_button.dart';
 import '../../services/veriff_service.dart';
 import '../../services/supabase_service.dart';
 import 'dart:convert';
+import 'dart:async';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -33,7 +34,10 @@ class _SignupScreenState extends State<SignupScreen> {
   // Variabili per la verifica Veriff
   bool _showVeriffWebView = false;
   String? _veriffUrl;
+  String? _veriffSessionId;
   bool _isVeriffLoading = false;
+  bool _isVeriffWaiting = false;
+  bool _isVeriffComplete = false;
   String? _veriffErrorMessage;
 
   @override
@@ -193,12 +197,20 @@ class _SignupScreenState extends State<SignupScreen> {
           // Salva i dati della sessione Veriff
           await _saveVeriffSession(sessionId, verificationUrl);
 
-          // Mostra la schermata di verifica Veriff
+          // Mostra la schermata di verifica Veriff e apri automaticamente il link
           if (mounted) {
             setState(() {
               _veriffUrl = verificationUrl;
+              _veriffSessionId = sessionId;
               _showVeriffWebView = true;
               _isVeriffLoading = false;
+            });
+
+            // Apri automaticamente il link Veriff dopo un breve delay
+            Future.delayed(const Duration(milliseconds: 500), () {
+              if (mounted) {
+                _openVeriffInNewTab();
+              }
             });
           }
         } else {
@@ -274,6 +286,56 @@ class _SignupScreenState extends State<SignupScreen> {
     }
   }
 
+  /// Avvia il monitoraggio automatico dello stato della verifica Veriff
+  void _startVeriffStatusMonitoring() {
+    if (_veriffSessionId == null) return;
+
+    // Controlla lo stato ogni 3 secondi per i primi 30 secondi
+    const checkInterval = Duration(seconds: 3);
+    const maxChecks = 10; // 30 secondi totali
+    int checkCount = 0;
+
+    Timer.periodic(checkInterval, (timer) async {
+      if (!mounted || checkCount >= maxChecks) {
+        timer.cancel();
+        return;
+      }
+
+      checkCount++;
+      print('SignupScreen: Controllo stato verifica #$checkCount');
+
+      try {
+        final veriffService = VeriffService();
+        final statusResponse = await veriffService.checkVeriffSessionStatus(
+          sessionId: _veriffSessionId!,
+        );
+
+        print('SignupScreen: Stato verifica: ${statusResponse['status']}');
+
+        if (statusResponse['status'] == 'completed' ||
+            statusResponse['status'] == 'approved') {
+          timer.cancel();
+
+          if (mounted) {
+            setState(() {
+              _isVeriffWaiting = false;
+              _isVeriffComplete = true;
+            });
+
+            // Attendi 2 secondi per mostrare il messaggio di successo
+            await Future.delayed(const Duration(seconds: 2));
+
+            if (mounted) {
+              Navigator.pushReplacementNamed(context, '/home');
+            }
+          }
+        }
+      } catch (e) {
+        print('SignupScreen: Errore nel controllo stato: $e');
+      }
+    });
+  }
+
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), backgroundColor: Colors.red),
@@ -282,78 +344,309 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Se la verifica Veriff è attiva, mostra la schermata di verifica
+    // Se la verifica Veriff è attiva, mostra la bellissima schermata di verifica
     if (_showVeriffWebView && _veriffUrl != null) {
       return Scaffold(
-        appBar: AppBar(
-          title: const Text('Verifica Identità'),
-          backgroundColor: Color(AppConfig.primaryColorValue),
-          foregroundColor: Colors.white,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () {
-              setState(() {
-                _showVeriffWebView = false;
-                _veriffUrl = null;
-              });
-            },
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFF667eea),
+                Color(0xFF764ba2),
+                Color(0xFFF093FB),
+                Color(0xFFF5576C),
+              ],
+            ),
           ),
-        ),
-        body: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.verified_user,
-                size: 80,
-                color: Color(AppConfig.primaryColorValue),
-              ),
-              const SizedBox(height: 32),
-              Text(
-                'Verifica la tua identità',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+          child: SafeArea(
+            child: Stack(
+              children: [
+                // Pulsante di chiusura
+                Positioned(
+                  top: 16,
+                  left: 16,
+                  child: IconButton(
+                    icon: const Icon(Icons.close, color: Colors.white),
+                    onPressed: () {
+                      setState(() {
+                        _showVeriffWebView = false;
+                        _veriffUrl = null;
+                        _isVeriffWaiting = false;
+                        _isVeriffComplete = false;
+                      });
+                    },
+                    style: IconButton.styleFrom(
+                      backgroundColor: Colors.white.withOpacity(0.2),
+                      shape: const CircleBorder(),
+                    ),
+                  ),
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Per completare la registrazione, è necessario verificare la tua identità con Veriff. '
-                'Clicca il pulsante qui sotto per aprire la verifica in una nuova scheda del browser.',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 32),
-              CustomButton(
-                onPressed: _openVeriffInNewTab,
-                text: 'Apri Verifica Veriff',
-                icon: Icons.open_in_new,
-                fullWidth: true,
-                variant: ButtonVariant.filled,
-              ),
-              const SizedBox(height: 24),
-              Text(
-                'Dopo aver completato la verifica, torna all\'app e clicca "Continua"',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[500],
-                  fontStyle: FontStyle.italic,
+
+                // Contenuto principale
+                Center(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Icona animata
+                        AnimatedContainer(
+                          duration: const Duration(seconds: 1),
+                          curve: Curves.elasticOut,
+                          width: _isVeriffComplete ? 120 : 100,
+                          height: _isVeriffComplete ? 120 : 100,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withOpacity(0.9),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                blurRadius: 20,
+                                spreadRadius: 5,
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            _isVeriffComplete
+                                ? Icons.check_circle
+                                : _isVeriffWaiting
+                                    ? Icons.verified_user
+                                    : Icons.open_in_new,
+                            size: _isVeriffComplete ? 60 : 50,
+                            color: _isVeriffComplete
+                                ? Colors.green
+                                : Color(AppConfig.primaryColorValue),
+                          ),
+                        ),
+
+                        const SizedBox(height: 40),
+
+                        // Titolo
+                        AnimatedOpacity(
+                          opacity: 1.0,
+                          duration: const Duration(milliseconds: 500),
+                          child: Text(
+                            _isVeriffComplete
+                                ? 'Verifica Completata! 🎉'
+                                : _isVeriffWaiting
+                                    ? 'Verifica in Corso...'
+                                    : 'Pronto per la Verifica',
+                            style: const TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black26,
+                                  blurRadius: 10,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        // Descrizione
+                        AnimatedOpacity(
+                          opacity: 1.0,
+                          duration: const Duration(milliseconds: 500),
+                          child: Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.2),
+                                width: 1,
+                              ),
+                            ),
+                            child: Text(
+                              _isVeriffComplete
+                                  ? 'La tua identità è stata verificata con successo!\nSarai reindirizzato alla home tra poco.'
+                                  : _isVeriffWaiting
+                                      ? 'Stiamo monitorando automaticamente lo stato della tua verifica.\nNon chiudere questa finestra.'
+                                      : 'La verifica si aprirà automaticamente in una nuova scheda.\nCompleta tutti i passaggi richiesti.',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: Colors.white,
+                                height: 1.5,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 40),
+
+                        // Loader elegante o pulsante
+                        if (_isVeriffWaiting && !_isVeriffComplete)
+                          Container(
+                            padding: const EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.2),
+                              ),
+                            ),
+                            child: Column(
+                              children: [
+                                const SizedBox(
+                                  width: 60,
+                                  height: 60,
+                                  child: CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                    strokeWidth: 4,
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                const Text(
+                                  'Monitoraggio verifica...',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Controllo automatico ogni 3 secondi',
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.7),
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        else if (!_isVeriffComplete)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(25),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.open_in_new,
+                                  color: Color(AppConfig.primaryColorValue),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Apertura automatica...',
+                                  style: TextStyle(
+                                    color: Color(AppConfig.primaryColorValue),
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                        const SizedBox(height: 40),
+
+                        // Pulsanti aggiuntivi
+                        if (!_isVeriffWaiting && !_isVeriffComplete)
+                          Column(
+                            children: [
+                              TextButton.icon(
+                                onPressed: _openVeriffInNewTab,
+                                icon: const Icon(Icons.refresh, color: Colors.white),
+                                label: const Text(
+                                  'Riapri Verifica',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                style: TextButton.styleFrom(
+                                  backgroundColor: Colors.white.withOpacity(0.1),
+                                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(25),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              TextButton.icon(
+                                onPressed: () => Navigator.pushReplacementNamed(context, '/home'),
+                                icon: const Icon(Icons.home, color: Colors.white70),
+                                label: const Text(
+                                  'Salta per ora',
+                                  style: TextStyle(color: Colors.white70),
+                                ),
+                              ),
+                            ],
+                          ),
+
+                        // Messaggio di successo
+                        if (_isVeriffComplete)
+                          Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: Colors.green.withOpacity(0.9),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.3),
+                                width: 1,
+                              ),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.check_circle,
+                                  color: Colors.white,
+                                  size: 24,
+                                ),
+                                SizedBox(width: 12),
+                                Text(
+                                  'Verifica completata con successo!',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 32),
-              CustomButton(
-                onPressed: () =>
-                    Navigator.pushReplacementNamed(context, '/home'),
-                text: 'Continua',
-                icon: Icons.check,
-                fullWidth: true,
-                variant: ButtonVariant.outlined,
-              ),
-            ],
+
+                // Overlay di sfondo con particelle animate (opzionale)
+                if (_isVeriffWaiting)
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: RadialGradient(
+                            center: const Alignment(0.5, 0.5),
+                            radius: 1.5,
+                            colors: [
+                              Colors.transparent,
+                              Colors.white.withOpacity(0.02),
+                              Colors.transparent,
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       );
@@ -820,6 +1113,14 @@ class _SignupScreenState extends State<SignupScreen> {
         final uri = Uri.parse(_veriffUrl!);
         if (await canLaunchUrl(uri)) {
           await launchUrl(uri, mode: LaunchMode.externalApplication);
+
+          // Avvia il monitoraggio automatico dello stato
+          if (mounted) {
+            setState(() {
+              _isVeriffWaiting = true;
+            });
+            _startVeriffStatusMonitoring();
+          }
         } else {
           throw Exception('Impossibile aprire l\'URL di verifica');
         }
