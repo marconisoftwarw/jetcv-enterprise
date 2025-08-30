@@ -8,7 +8,7 @@ import '../models/legal_entity_invitation.dart';
 import '../config/app_config.dart';
 
 /// SupabaseService - Optimized for Legal Entity Management
-/// 
+///
 /// This service has been optimized to avoid unnecessary calls to the 'user' table
 /// during legal entity operations. Only essential user queries for authentication
 /// are maintained.
@@ -202,18 +202,33 @@ class SupabaseService {
   // User management
   Future<app_models.AppUser?> getUserById(String userId) async {
     try {
+      print('🔍 SupabaseService: Getting user by ID: $userId');
+
+      // Ensure user is authenticated
+      if (!isUserAuthenticated) {
+        print('❌ SupabaseService: User not authenticated for getUserById');
+        return null;
+      }
+
       final response = await _client
           .from('user')
           .select('*')
           .eq('idUser', userId)
           .single();
 
+      print(
+        '✅ SupabaseService: User retrieved successfully: ${response['firstName']} ${response['lastName']}',
+      );
       return app_models.AppUser.fromJson(response);
     } catch (e) {
+      print('❌ SupabaseService: Error getting user $userId: $e');
+      print('❌ SupabaseService: Error type: ${e.runtimeType}');
+
       // Gestisci il caso in cui l'utente non esiste
       if (e.toString().contains('PGRST116') ||
-          e.toString().contains('0 rows')) {
-        print('User not found in database: $userId');
+          e.toString().contains('0 rows') ||
+          e.toString().contains('406')) {
+        print('User not found in database or access denied: $userId');
         return null;
       }
       print('Error getting user $userId: $e');
@@ -260,30 +275,67 @@ class SupabaseService {
 
   Future<app_models.AppUser?> getUserByEmail(String email) async {
     try {
+      print('🔍 SupabaseService: Getting user by email: $email');
+
+      // Ensure user is authenticated
+      if (!isUserAuthenticated) {
+        print('❌ SupabaseService: User not authenticated for getUserByEmail');
+        return null;
+      }
+
       final response = await _client
           .from('user')
           .select()
           .eq('email', email)
           .single();
 
+      print(
+        '✅ SupabaseService: User retrieved by email successfully: ${response['firstName']} ${response['lastName']}',
+      );
       return app_models.AppUser.fromJson(response);
     } catch (e) {
-      print('Error getting user by email: $e');
+      print('❌ SupabaseService: Error getting user by email $email: $e');
+      print('❌ SupabaseService: Error type: ${e.runtimeType}');
+
+      // Handle specific error cases
+      if (e.toString().contains('PGRST116') ||
+          e.toString().contains('0 rows') ||
+          e.toString().contains('406')) {
+        print('User not found in database or access denied: $email');
+        return null;
+      }
       return null;
     }
   }
 
   Future<app_models.AppUser?> createUser(Map<String, dynamic> userData) async {
     try {
+      print('🔍 SupabaseService: Creating user with data: $userData');
+
+      // Ensure user is authenticated
+      if (!isUserAuthenticated) {
+        print('❌ SupabaseService: User not authenticated for createUser');
+        return null;
+      }
+
       final response = await _client
           .from('user')
           .insert(userData)
           .select()
           .single();
 
+      print(
+        '✅ SupabaseService: User created successfully: ${response['firstName']} ${response['lastName']}',
+      );
       return app_models.AppUser.fromJson(response);
     } catch (e) {
-      print('Error creating user: $e');
+      print('❌ SupabaseService: Error creating user: $e');
+      print('❌ SupabaseService: Error type: ${e.runtimeType}');
+
+      // Handle specific error cases
+      if (e.toString().contains('406')) {
+        print('Access denied or invalid request format');
+      }
       return null;
     }
   }
@@ -293,6 +345,14 @@ class SupabaseService {
     Map<String, dynamic> updates,
   ) async {
     try {
+      print('🔍 SupabaseService: Updating user $userId with data: $updates');
+
+      // Ensure user is authenticated
+      if (!isUserAuthenticated) {
+        print('❌ SupabaseService: User not authenticated for updateUser');
+        return null;
+      }
+
       final response = await _client
           .from('user')
           .update(updates)
@@ -300,9 +360,18 @@ class SupabaseService {
           .select()
           .single();
 
+      print(
+        '✅ SupabaseService: User updated successfully: ${response['firstName']} ${response['lastName']}',
+      );
       return app_models.AppUser.fromJson(response);
     } catch (e) {
-      print('Error updating user: $e');
+      print('❌ SupabaseService: Error updating user $userId: $e');
+      print('❌ SupabaseService: Error type: ${e.runtimeType}');
+
+      // Handle specific error cases
+      if (e.toString().contains('406')) {
+        print('Access denied or invalid request format');
+      }
       return null;
     }
   }
@@ -314,39 +383,59 @@ class SupabaseService {
     Map<String, dynamic> entityData,
   ) async {
     try {
+      print('🔄 SupabaseService: Starting upsertLegalEntity...');
+      print('🔄 SupabaseService: Entity data: $entityData');
+
       final response = await _client.functions.invoke(
         'upsert-legal-entity',
         body: entityData,
       );
 
+      print(
+        '🔄 SupabaseService: Edge Function response status: ${response.status}',
+      );
+      print(
+        '🔄 SupabaseService: Edge Function response data: ${response.data}',
+      );
+
       if (response.status != 200 && response.status != 201) {
-        print('Error upserting legal entity: Status ${response.status}');
+        print(
+          '❌ SupabaseService: Error upserting legal entity: Status ${response.status}',
+        );
         return null;
       }
 
       final data = response.data;
       if (data == null || data['ok'] != true) {
         print(
-          'Error upserting legal entity: ${data?['message'] ?? 'Unknown error'}',
+          '❌ SupabaseService: Error upserting legal entity: ${data?['message'] ?? 'Unknown error'}',
         );
         return null;
       }
 
+      print(
+        '✅ SupabaseService: Edge Function successful, processing response...',
+      );
+
       // Return the entity with the response data
       if (data['operation'] == 'create') {
-        return LegalEntity.fromJson({
+        final entity = LegalEntity.fromJson({
           'id_legal_entity': data['id_legal_entity'],
           'id_legal_entity_hash': data['id_legal_entity_hash'],
           'created_at': data['created_at'],
           'updated_at': data['updated_at'],
           ...entityData,
         });
+        print('✅ SupabaseService: Created entity: ${entity.legalName}');
+        return entity;
       } else {
-        return LegalEntity.fromJson({
+        final entity = LegalEntity.fromJson({
           'id_legal_entity': data['id_legal_entity'],
           'updated_at': data['updated_at'],
           ...entityData,
         });
+        print('✅ SupabaseService: Updated entity: ${entity.legalName}');
+        return entity;
       }
     } catch (e) {
       print('Error upserting legal entity: $e');
@@ -358,7 +447,7 @@ class SupabaseService {
     try {
       print('🔍 Attempting to fetch legal entities via Edge Function...');
       print('🔍 Status filter: ${status ?? 'none'}');
-      
+
       // Ensure user is authenticated
       if (!isUserAuthenticated) {
         print('❌ User not authenticated');
@@ -372,7 +461,7 @@ class SupabaseService {
       final session = _client.auth.currentSession;
       if (session == null) {
         print('❌ No active session found - attempting to restore session...');
-        
+
         // Try to restore the session
         try {
           await _auth.refreshSession();
@@ -387,7 +476,7 @@ class SupabaseService {
           return [];
         }
       }
-      
+
       // Get the session again after potential restoration
       final currentSession = _client.auth.currentSession;
       if (currentSession == null) {
@@ -452,7 +541,7 @@ class SupabaseService {
   Future<LegalEntity?> getLegalEntityById(String id) async {
     try {
       print('🔍 Attempting to fetch legal entity by ID: $id');
-      
+
       // Ensure user is authenticated
       if (!isUserAuthenticated) {
         print('❌ User not authenticated');
@@ -466,7 +555,7 @@ class SupabaseService {
       final session = _client.auth.currentSession;
       if (session == null) {
         print('❌ No active session found - attempting to restore session...');
-        
+
         // Try to restore the session
         try {
           await _auth.refreshSession();
@@ -481,7 +570,7 @@ class SupabaseService {
           return null;
         }
       }
-      
+
       // Get the session again after potential restoration
       final currentSession = _client.auth.currentSession;
       if (currentSession == null) {

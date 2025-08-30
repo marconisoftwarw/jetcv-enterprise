@@ -84,23 +84,23 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
     try {
       print('🚀 Initializing app...');
       final authProvider = context.read<AuthProvider>();
-      
+
       print('🔐 Initializing AuthProvider...');
       await authProvider.initialize();
       print('✅ AuthProvider initialized');
-      
+
       // Check authentication status
       print('🔍 Checking authentication status...');
       final isAuthenticated = await authProvider.checkAuthenticationStatus();
       print('🔍 Authentication status: $isAuthenticated');
-      
+
       // Listen to auth state changes
       authProvider.addListener(() {
         if (mounted) {
           setState(() {});
         }
       });
-      
+
       print('🚀 App initialization completed');
     } catch (e) {
       print('❌ App initialization failed: $e');

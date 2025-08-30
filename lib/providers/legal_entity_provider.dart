@@ -45,7 +45,7 @@ class LegalEntityProvider extends ChangeNotifier {
     try {
       print('🔄 LegalEntityProvider: Starting to load legal entities...');
       print('🔄 Status filter: ${status ?? 'none'}');
-      
+
       // Check if Supabase service is ready
       if (!_supabaseService.isUserAuthenticated) {
         print('❌ LegalEntityProvider: User not authenticated, skipping load');
@@ -93,9 +93,20 @@ class LegalEntityProvider extends ChangeNotifier {
     _clearError();
 
     try {
+      print('🔄 LegalEntityProvider: Starting upsertLegalEntity...');
+      print('🔄 LegalEntityProvider: Entity data: $entityData');
+
       final entity = await _supabaseService.upsertLegalEntity(entityData);
 
+      print(
+        '🔄 LegalEntityProvider: SupabaseService response: ${entity?.legalName ?? 'null'}',
+      );
+
       if (entity != null) {
+        print(
+          '🔄 LegalEntityProvider: Entity received, updating local state...',
+        );
+
         // Check if this is an update or create operation
         final existingIndex = _legalEntities.indexWhere(
           (e) => e.idLegalEntity == entity.idLegalEntity,
@@ -103,23 +114,37 @@ class LegalEntityProvider extends ChangeNotifier {
 
         if (existingIndex != -1) {
           // Update existing entity
+          print(
+            '🔄 LegalEntityProvider: Updating existing entity at index $existingIndex',
+          );
           _legalEntities[existingIndex] = entity;
         } else {
           // Add new entity at the beginning
+          print('🔄 LegalEntityProvider: Adding new entity at beginning');
           _legalEntities.insert(0, entity);
         }
 
+        print(
+          '🔄 LegalEntityProvider: Local state updated, notifying listeners...',
+        );
         notifyListeners();
+        print('✅ LegalEntityProvider: Upsert completed successfully');
         return entity;
       }
 
+      print(
+        '❌ LegalEntityProvider: SupabaseService returned null, setting error',
+      );
       _setError('Failed to upsert legal entity');
       return null;
     } catch (e) {
+      print('❌ LegalEntityProvider: Exception during upsert: $e');
+      print('❌ LegalEntityProvider: Exception type: ${e.runtimeType}');
       _setError('Failed to upsert legal entity: $e');
       return null;
     } finally {
       _setLoading(false);
+      print('🔄 LegalEntityProvider: Loading completed');
     }
   }
 
