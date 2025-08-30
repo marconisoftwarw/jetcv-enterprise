@@ -9,6 +9,7 @@ import '../../services/veriff_service.dart';
 import '../../services/supabase_service.dart';
 import 'dart:convert';
 import 'dart:async';
+import 'dart:js' as js;
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -30,7 +31,7 @@ class _SignupScreenState extends State<SignupScreen> {
   bool _obscureConfirmPassword = true;
   bool _agreeToTerms = false;
   bool _agreeToPrivacy = false;
-
+  
   // Variabili per la verifica Veriff
   bool _showVeriffWebView = false;
   String? _veriffUrl;
@@ -39,6 +40,8 @@ class _SignupScreenState extends State<SignupScreen> {
   bool _isVeriffWaiting = false;
   bool _isVeriffComplete = false;
   String? _veriffErrorMessage;
+  Timer? _windowCheckTimer; // Timer per controllare se la finestra è chiusa
+  bool _veriffWindowClosed = false; // Flag per tracciare se la finestra è stata chiusa
 
   @override
   void dispose() {
@@ -48,6 +51,7 @@ class _SignupScreenState extends State<SignupScreen> {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     _phoneController.dispose();
+    _windowCheckTimer?.cancel(); // Cancella il timer del monitoraggio finestra
     super.dispose();
   }
 
@@ -286,6 +290,65 @@ class _SignupScreenState extends State<SignupScreen> {
     }
   }
 
+  /// Monitora se la finestra del browser Veriff è stata chiusa
+  void _startWindowMonitoring() {
+    // Cancella eventuali timer precedenti
+    _windowCheckTimer?.cancel();
+
+    // Controlla ogni 2 secondi se la finestra è ancora aperta
+    _windowCheckTimer = Timer.periodic(const Duration(seconds: 2), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+
+      // In Flutter Web, possiamo controllare se ci sono altre finestre aperte
+      // usando JavaScript interop
+      try {
+        // Questa è una semplice implementazione che controlla se siamo ancora nella pagina
+        // In un'implementazione più avanzata, potremmo usare window.opener o altre tecniche
+        final isWindowClosed = js.context.callMethod('eval', [
+          '''
+          (function() {
+            // Controlliamo se la finestra è stata chiusa o se siamo stati reindirizzati
+            return window.history.length <= 1 || window.closed;
+          })()
+          '''
+        ]);
+
+        if (isWindowClosed == true && !_veriffWindowClosed) {
+          print('SignupScreen: Finestra Veriff chiusa dall\'utente');
+          _veriffWindowClosed = true;
+
+          if (mounted) {
+            setState(() {
+              _isVeriffWaiting = false;
+              _veriffWindowClosed = true;
+            });
+
+            // Mostra un messaggio e reindirizza alla home dopo un breve delay
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Verifica annullata - reindirizzamento alla home...'),
+                duration: Duration(seconds: 2),
+              ),
+            );
+
+            Future.delayed(const Duration(seconds: 2), () {
+              if (mounted) {
+                Navigator.pushReplacementNamed(context, '/home');
+              }
+            });
+          }
+
+          timer.cancel();
+        }
+      } catch (e) {
+        print('SignupScreen: Errore nel monitoraggio finestra: $e');
+      }
+    });
+  }
+
   /// Avvia il monitoraggio automatico dello stato della verifica Veriff
   void _startVeriffStatusMonitoring() {
     if (_veriffSessionId == null) return;
@@ -296,7 +359,7 @@ class _SignupScreenState extends State<SignupScreen> {
     int checkCount = 0;
 
     Timer.periodic(checkInterval, (timer) async {
-      if (!mounted || checkCount >= maxChecks) {
+      if (!mounted || checkCount >= maxChecks || _veriffWindowClosed) {
         timer.cancel();
         return;
       }
@@ -369,14 +432,14 @@ class _SignupScreenState extends State<SignupScreen> {
                   left: 16,
                   child: IconButton(
                     icon: const Icon(Icons.close, color: Colors.white),
-                    onPressed: () {
-                      setState(() {
-                        _showVeriffWebView = false;
-                        _veriffUrl = null;
+            onPressed: () {
+              setState(() {
+                _showVeriffWebView = false;
+                _veriffUrl = null;
                         _isVeriffWaiting = false;
                         _isVeriffComplete = false;
-                      });
-                    },
+              });
+            },
                     style: IconButton.styleFrom(
                       backgroundColor: Colors.white.withOpacity(0.2),
                       shape: const CircleBorder(),
@@ -395,8 +458,8 @@ class _SignupScreenState extends State<SignupScreen> {
                         AnimatedContainer(
                           duration: const Duration(seconds: 1),
                           curve: Curves.elasticOut,
-                          width: _isVeriffComplete ? 120 : 100,
-                          height: _isVeriffComplete ? 120 : 100,
+                          width: (_isVeriffComplete || _veriffWindowClosed) ? 120 : 100,
+                          height: (_isVeriffComplete || _veriffWindowClosed) ? 120 : 100,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: Colors.white.withOpacity(0.9),
@@ -409,15 +472,19 @@ class _SignupScreenState extends State<SignupScreen> {
                             ],
                           ),
                           child: Icon(
-                            _isVeriffComplete
-                                ? Icons.check_circle
-                                : _isVeriffWaiting
-                                    ? Icons.verified_user
-                                    : Icons.open_in_new,
-                            size: _isVeriffComplete ? 60 : 50,
-                            color: _isVeriffComplete
-                                ? Colors.green
-                                : Color(AppConfig.primaryColorValue),
+                            _veriffWindowClosed
+                                ? Icons.cancel
+                                : _isVeriffComplete
+                                    ? Icons.check_circle
+                                    : _isVeriffWaiting
+                                        ? Icons.verified_user
+                                        : Icons.open_in_new,
+                            size: (_isVeriffComplete || _veriffWindowClosed) ? 60 : 50,
+                            color: _veriffWindowClosed
+                                ? Colors.red
+                                : _isVeriffComplete
+                                    ? Colors.green
+                                    : Color(AppConfig.primaryColorValue),
                           ),
                         ),
 
@@ -428,11 +495,13 @@ class _SignupScreenState extends State<SignupScreen> {
                           opacity: 1.0,
                           duration: const Duration(milliseconds: 500),
                           child: Text(
-                            _isVeriffComplete
-                                ? 'Verifica Completata! 🎉'
-                                : _isVeriffWaiting
-                                    ? 'Verifica in Corso...'
-                                    : 'Pronto per la Verifica',
+                            _veriffWindowClosed
+                                ? 'Verifica Annullata'
+                                : _isVeriffComplete
+                                    ? 'Verifica Completata! 🎉'
+                                    : _isVeriffWaiting
+                                        ? 'Verifica in Corso...'
+                                        : 'Pronto per la Verifica',
                             style: const TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
@@ -647,7 +716,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
               ],
             ),
-          ),
+            ),
         ),
       );
     }
@@ -1114,12 +1183,14 @@ class _SignupScreenState extends State<SignupScreen> {
         if (await canLaunchUrl(uri)) {
           await launchUrl(uri, mode: LaunchMode.externalApplication);
 
-          // Avvia il monitoraggio automatico dello stato
+          // Avvia il monitoraggio automatico dello stato e della finestra
           if (mounted) {
             setState(() {
               _isVeriffWaiting = true;
+              _veriffWindowClosed = false;
             });
             _startVeriffStatusMonitoring();
+            _startWindowMonitoring();
           }
         } else {
           throw Exception('Impossibile aprire l\'URL di verifica');
