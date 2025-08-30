@@ -89,17 +89,7 @@ class _SignupScreenState extends State<SignupScreen> {
       lastName: _lastNameController.text.trim(),
     );
 
-    print('SignupScreen: Risultato registrazione: $success');
-
-    if (success && mounted) {
-      print(
-        'SignupScreen: Registrazione riuscita, avviando verifica Veriff...',
-      );
-      // Avvia il processo di verifica Veriff
-      await _startVeriffVerification();
-    } else {
-      print('SignupScreen: Registrazione fallita o utente non montato');
-    }
+     await _startVeriffVerification();
   }
 
   Future<void> _signInWithGoogle() async {
