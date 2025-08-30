@@ -1239,28 +1239,4 @@ class SupabaseService {
       return null;
     }
   }
-
-  // KYC status update - Removed unnecessary user table query
-  // This method is no longer needed as KYC status is managed elsewhere
-  // Future<bool> updateKycStatus({
-  //   required String userId,
-  //   required bool completed,
-  //   required bool passed,
-  // }) async {
-  //   try {
-  //     await _client
-  //         .from('user')
-  //         .update({
-  //           'kycCompleted': completed,
-  //           'kycPassed': passed,
-  //           'updatedAt': DateTime.now().toIso8601String(),
-  //         })
-  //         .eq('idUser', userId);
-  //
-  //     return true;
-  //   } catch (e) {
-  //     print('Error updating KYC status: $e');
-  //     return false;
-  //   }
-  // }
 }

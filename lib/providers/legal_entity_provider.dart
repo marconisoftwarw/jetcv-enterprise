@@ -46,10 +46,8 @@ class LegalEntityProvider extends ChangeNotifier {
       print('🔄 LegalEntityProvider: Starting to load legal entities...');
       print('🔄 Status filter: ${status ?? 'none'}');
 
-      // Check if Supabase service is ready
-      if (!_supabaseService.isUserAuthenticated) {
-        print('❌ LegalEntityProvider: User not authenticated, skipping load');
-        _setError('User not authenticated');
+      // Ensure user is authenticated before proceeding
+      if (!await ensureAuthentication()) {
         return;
       }
 
@@ -95,6 +93,11 @@ class LegalEntityProvider extends ChangeNotifier {
     try {
       print('🔄 LegalEntityProvider: Starting upsertLegalEntity...');
       print('🔄 LegalEntityProvider: Entity data: $entityData');
+
+      // Ensure user is authenticated before proceeding
+      if (!await ensureAuthentication()) {
+        return null;
+      }
 
       final entity = await _supabaseService.upsertLegalEntity(entityData);
 
@@ -154,32 +157,94 @@ class LegalEntityProvider extends ChangeNotifier {
     return await upsertLegalEntity(entityData);
   }
 
-  Future<bool> updateLegalEntityStatus({
-    required String id,
-    required String status,
-    String? rejectionReason,
-  }) async {
-    // Prepare update data with the ID
-    final updateData = {'id_legal_entity': id, 'status': status};
-
-    if (rejectionReason != null) {
-      updateData['rejection_reason'] = rejectionReason;
-    }
-
-    final updatedEntity = await upsertLegalEntity(updateData);
-    return updatedEntity != null;
-  }
-
   Future<bool> approveLegalEntity(String id) async {
-    return await updateLegalEntityStatus(id: id, status: 'approved');
+    _setLoading(true);
+    _clearError();
+
+    try {
+      // Ensure user is authenticated before proceeding
+      if (!await ensureAuthentication()) {
+        return false;
+      }
+
+      print('🔄 LegalEntityProvider: Approving legal entity: $id');
+
+      // Use upsert-legal-entity Edge Function to change status to approved
+      final updateData = {
+        'id_legal_entity': id,
+        'status': 'approved',
+        'updated_at': DateTime.now().toIso8601String(),
+      };
+
+      final updatedEntity = await _supabaseService.upsertLegalEntity(
+        updateData,
+      );
+      if (updatedEntity != null) {
+        // Update local state
+        final index = _legalEntities.indexWhere((e) => e.idLegalEntity == id);
+        if (index != -1) {
+          _legalEntities[index] = updatedEntity;
+          notifyListeners();
+        }
+        print('✅ LegalEntityProvider: Legal entity approved successfully');
+        return true;
+      }
+
+      _setError('Failed to approve legal entity');
+      return false;
+    } catch (e) {
+      print('❌ LegalEntityProvider: Error approving legal entity: $e');
+      _setError('Error approving legal entity: $e');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
   }
 
   Future<bool> rejectLegalEntity(String id, String rejectionReason) async {
-    return await updateLegalEntityStatus(
-      id: id,
-      status: 'rejected',
-      rejectionReason: rejectionReason,
-    );
+    _setLoading(true);
+    _clearError();
+
+    try {
+      // Ensure user is authenticated before proceeding
+      if (!await ensureAuthentication()) {
+        return false;
+      }
+
+      print('🔄 LegalEntityProvider: Rejecting legal entity: $id');
+      print('🔄 LegalEntityProvider: Rejection reason: $rejectionReason');
+
+      // Use upsert-legal-entity Edge Function to change status to rejected
+      final updateData = {
+        'id_legal_entity': id,
+        'status': 'rejected',
+        'rejection_reason': rejectionReason,
+        'updated_at': DateTime.now().toIso8601String(),
+      };
+
+      final updatedEntity = await _supabaseService.upsertLegalEntity(
+        updateData,
+      );
+      if (updatedEntity != null) {
+        // Update local state
+        final index = _legalEntities.indexWhere((e) => e.idLegalEntity == id);
+        if (index != -1) {
+          _legalEntities[index] = updatedEntity;
+          notifyListeners();
+        }
+        print('✅ LegalEntityProvider: Legal entity rejected successfully');
+        return true;
+      }
+
+      _setError('Failed to reject legal entity');
+      return false;
+    } catch (e) {
+      print('❌ LegalEntityProvider: Error rejecting legal entity: $e');
+      _setError('Error rejecting legal entity: $e');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
   }
 
   Future<LegalEntity?> getLegalEntityById(String id) async {
@@ -187,6 +252,11 @@ class LegalEntityProvider extends ChangeNotifier {
     _clearError();
 
     try {
+      // Ensure user is authenticated before proceeding
+      if (!await ensureAuthentication()) {
+        return null;
+      }
+
       final entity = await _supabaseService.getLegalEntityById(id);
 
       if (entity != null) {
@@ -209,11 +279,30 @@ class LegalEntityProvider extends ChangeNotifier {
     required String id,
     required Map<String, dynamic> entityData,
   }) async {
-    // Prepare update data with the ID
-    final updateData = Map<String, dynamic>.from(entityData);
-    updateData['id_legal_entity'] = id;
+    _setLoading(true);
+    _clearError();
 
-    return await upsertLegalEntity(updateData);
+    try {
+      // Ensure user is authenticated before proceeding
+      if (!await ensureAuthentication()) {
+        return null;
+      }
+
+      print('🔄 LegalEntityProvider: Updating legal entity: $id');
+
+      // Prepare update data with the ID
+      final updateData = Map<String, dynamic>.from(entityData);
+      updateData['id_legal_entity'] = id;
+      updateData['updated_at'] = DateTime.now().toIso8601String();
+
+      return await upsertLegalEntity(updateData);
+    } catch (e) {
+      print('❌ LegalEntityProvider: Error updating legal entity: $e');
+      _setError('Error updating legal entity: $e');
+      return null;
+    } finally {
+      _setLoading(false);
+    }
   }
 
   Future<bool> deleteLegalEntity(String id) async {
@@ -221,17 +310,31 @@ class LegalEntityProvider extends ChangeNotifier {
     _clearError();
 
     try {
+      print('🔄 LegalEntityProvider: Deleting legal entity: $id');
+
+      // No need to check authentication here - the Edge Function handles it
+      // and bypasses RLS without calling the user table
       final success = await _supabaseService.deleteLegalEntity(id);
 
       if (success) {
+        // Remove from local state
+        final initialCount = _legalEntities.length;
         _legalEntities.removeWhere((entity) => entity.idLegalEntity == id);
-        notifyListeners();
+        final finalCount = _legalEntities.length;
+
+        if (initialCount > finalCount) {
+          print('✅ LegalEntityProvider: Entity removed from local state');
+          notifyListeners();
+        } else {
+          print('⚠️ LegalEntityProvider: Entity not found in local state');
+        }
         return true;
       }
 
       _setError('Failed to delete legal entity');
       return false;
     } catch (e) {
+      print('❌ LegalEntityProvider: Error deleting legal entity: $e');
       _setError('Failed to delete legal entity: $e');
       return false;
     } finally {
@@ -248,6 +351,11 @@ class LegalEntityProvider extends ChangeNotifier {
     _clearError();
 
     try {
+      // Ensure user is authenticated before proceeding
+      if (!await ensureAuthentication()) {
+        return false;
+      }
+
       final success = await _supabaseService.sendLegalEntityInvitation(
         email: email,
         legalEntityId: legalEntityId,
@@ -305,6 +413,34 @@ class LegalEntityProvider extends ChangeNotifier {
 
   void clearError() {
     _clearError();
+  }
+
+  // Metodo per assicurarsi che l'utente sia autenticato prima di qualsiasi operazione
+  Future<bool> ensureAuthentication() async {
+    try {
+      if (_supabaseService.isUserAuthenticated) {
+        return true;
+      }
+
+      print(
+        '⚠️ LegalEntityProvider: User not authenticated, attempting to restore session...',
+      );
+
+      // Try to restore session
+      final restored = await _supabaseService.restoreSession();
+      if (restored == null) {
+        print('❌ LegalEntityProvider: Failed to restore session');
+        _setError('User not authenticated');
+        return false;
+      }
+
+      print('✅ LegalEntityProvider: Session restored successfully');
+      return true;
+    } catch (e) {
+      print('❌ LegalEntityProvider: Error ensuring authentication: $e');
+      _setError('Authentication error: $e');
+      return false;
+    }
   }
 
   // Search functionality
