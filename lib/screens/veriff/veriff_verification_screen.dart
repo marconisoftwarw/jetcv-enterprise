@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../config/app_theme.dart';
 import '../../config/app_config.dart';
 import '../../models/user.dart';
@@ -18,7 +18,7 @@ class VeriffVerificationScreen extends StatefulWidget {
 }
 
 class _VeriffVerificationScreenState extends State<VeriffVerificationScreen> {
-  String? _webViewController;
+  // Removed webview controller - using url_launcher instead
   bool _isLoading = true;
   bool _isVerificationComplete = false;
   String? _veriffUrl;
@@ -227,8 +227,56 @@ class _VeriffVerificationScreenState extends State<VeriffVerificationScreen> {
           ),
         ),
 
-        // WebView per Veriff
-        Expanded(child: WebViewWidget(controller: _createWebViewController())),
+        // Contenuto principale per la verifica
+        Expanded(
+          child: Center(
+            child: LinkedInCard(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.verified_user,
+                      size: 64,
+                      color: AppTheme.primaryBlue,
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      'Pronto per la verifica?',
+                      style: AppTheme.title1,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Clicca il pulsante qui sotto per aprire la verifica Veriff in una nuova scheda del browser.',
+                      style: AppTheme.body1.copyWith(
+                        color: AppTheme.textSecondary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 32),
+                    LinkedInButton(
+                      onPressed: _openVeriffInNewTab,
+                      text: 'Apri Verifica',
+                      icon: Icons.open_in_new,
+                      variant: LinkedInButtonVariant.primary,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Dopo aver completato la verifica, torna all\'app e clicca "Controlla Stato"',
+                      style: AppTheme.body2.copyWith(
+                        color: AppTheme.textSecondary,
+                        fontStyle: FontStyle.italic,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
 
         // Footer con pulsanti
         Container(
@@ -298,7 +346,7 @@ class _VeriffVerificationScreenState extends State<VeriffVerificationScreen> {
   Future<void> _handleVerificationCallback(String url) async {
     print('Handling verification callback: $url');
 
-    // Se è un callback dalla WebView (contiene 'home' o 'callback')
+    // Se è un callback dalla verifica esterna (contiene 'home' o 'callback')
     if (url.contains('home') || url.contains('callback')) {
       // Mostra un messaggio di successo
       ScaffoldMessenger.of(context).showSnackBar(
@@ -351,41 +399,26 @@ class _VeriffVerificationScreenState extends State<VeriffVerificationScreen> {
     }
   }
 
-  WebViewController _createWebViewController() {
-    final controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onProgress: (int progress) {
-            print('WebView loading: $progress%');
-          },
-          onPageStarted: (String url) {
-            print('WebView started loading: $url');
-          },
-          onPageFinished: (String url) {
-            print('WebView finished loading: $url');
-            // Controlla se siamo tornati alla home del progetto
-            if (url.contains('callback') || url.contains('home')) {
-              _handleVerificationCallback(url);
-            }
-          },
-          onNavigationRequest: (NavigationRequest request) {
-            print('WebView navigation request: ${request.url}');
-            // Permetti tutte le navigazioni
-            return NavigationDecision.navigate;
-          },
-          onWebResourceError: (WebResourceError error) {
-            print('WebView error: ${error.description}');
-          },
-        ),
-      );
-
-    // Carica l'URL di Veriff
+  Future<void> _openVeriffInNewTab() async {
     if (_veriffUrl != null) {
-      controller.loadRequest(Uri.parse(_veriffUrl!));
+      try {
+        final uri = Uri.parse(_veriffUrl!);
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+        } else {
+          throw Exception('Impossibile aprire l\'URL di verifica');
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Errore nell\'apertura della verifica: $e'),
+              backgroundColor: AppTheme.errorRed,
+            ),
+          );
+        }
+      }
     }
-
-    return controller;
   }
 
   Future<void> _checkVerificationStatus() async {

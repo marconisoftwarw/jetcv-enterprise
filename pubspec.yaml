@@ -64,8 +64,7 @@ dependencies:
   # Geolocation
   geolocator: ^11.0.0
   
-  # WebView
-  webview_flutter: ^4.4.2
+  # WebView - Removed, using url_launcher instead
   
   # Localization
   flutter_localizations:

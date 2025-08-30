@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../config/app_config.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/custom_text_field.dart';
@@ -29,8 +29,8 @@ class _SignupScreenState extends State<SignupScreen> {
   bool _obscureConfirmPassword = true;
   bool _agreeToTerms = false;
   bool _agreeToPrivacy = false;
-  
-  // Variabili per la WebView Veriff
+
+  // Variabili per la verifica Veriff
   bool _showVeriffWebView = false;
   String? _veriffUrl;
   bool _isVeriffLoading = false;
@@ -193,7 +193,7 @@ class _SignupScreenState extends State<SignupScreen> {
           // Salva i dati della sessione Veriff
           await _saveVeriffSession(sessionId, verificationUrl);
 
-          // Apri la WebView Veriff direttamente nella schermata
+          // Mostra la schermata di verifica Veriff
           if (mounted) {
             setState(() {
               _veriffUrl = verificationUrl;
@@ -281,7 +281,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Se la WebView Veriff è attiva, mostra solo quella
+    // Se la verifica Veriff è attiva, mostra la schermata di verifica
     if (_showVeriffWebView && _veriffUrl != null) {
       return Scaffold(
         appBar: AppBar(
@@ -299,27 +299,61 @@ class _SignupScreenState extends State<SignupScreen> {
             },
           ),
         ),
-        body: WebViewWidget(
-          controller: WebViewController()
-            ..setJavaScriptMode(JavaScriptMode.unrestricted)
-            ..loadRequest(Uri.parse(_veriffUrl!))
-            ..setNavigationDelegate(
-              NavigationDelegate(
-                onNavigationRequest: (NavigationRequest request) {
-                  // Gestisci la navigazione se necessario
-                  print('Navigazione WebView: ${request.url}');
-                  return NavigationDecision.navigate;
-                },
-                onPageFinished: (String url) {
-                  print('Pagina WebView caricata: $url');
-                  // Controlla se l'utente è tornato dalla verifica
-                  if (url.contains('callback') || url.contains('home')) {
-                    // Verifica completata, vai alla home
-                    Navigator.pushReplacementNamed(context, '/home');
-                  }
-                },
+        body: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.verified_user,
+                size: 80,
+                color: Color(AppConfig.primaryColorValue),
               ),
-            ),
+              const SizedBox(height: 32),
+              Text(
+                'Verifica la tua identità',
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Per completare la registrazione, è necessario verificare la tua identità con Veriff. '
+                'Clicca il pulsante qui sotto per aprire la verifica in una nuova scheda del browser.',
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 32),
+              CustomButton(
+                onPressed: _openVeriffInNewTab,
+                text: 'Apri Verifica Veriff',
+                icon: Icons.open_in_new,
+                fullWidth: true,
+                variant: ButtonVariant.filled,
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Dopo aver completato la verifica, torna all\'app e clicca "Continua"',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Colors.grey[500],
+                  fontStyle: FontStyle.italic,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 32),
+              CustomButton(
+                onPressed: () =>
+                    Navigator.pushReplacementNamed(context, '/home'),
+                text: 'Continua',
+                icon: Icons.check,
+                fullWidth: true,
+                variant: ButtonVariant.outlined,
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -631,8 +665,12 @@ class _SignupScreenState extends State<SignupScreen> {
                       onPressed: (authProvider.isLoading || _isVeriffLoading)
                           ? null
                           : _signUp,
-                      text: _isVeriffLoading ? 'Verifica in corso...' : 'Create Account',
-                      icon: _isVeriffLoading ? Icons.hourglass_empty : Icons.person_add,
+                      text: _isVeriffLoading
+                          ? 'Verifica in corso...'
+                          : 'Create Account',
+                      icon: _isVeriffLoading
+                          ? Icons.hourglass_empty
+                          : Icons.person_add,
                       isLoading: authProvider.isLoading || _isVeriffLoading,
                       fullWidth: true,
                       variant: ButtonVariant.filled,
@@ -773,5 +811,27 @@ class _SignupScreenState extends State<SignupScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _openVeriffInNewTab() async {
+    if (_veriffUrl != null) {
+      try {
+        final uri = Uri.parse(_veriffUrl!);
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+        } else {
+          throw Exception('Impossibile aprire l\'URL di verifica');
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Errore nell\'apertura della verifica: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
   }
 }
