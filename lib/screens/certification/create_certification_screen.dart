@@ -18,50 +18,215 @@ class CreateCertificationScreen extends StatefulWidget {
 }
 
 // Route guard to ensure authentication
-class CreateCertificationScreenRoute extends StatelessWidget {
+class CreateCertificationScreenRoute extends StatefulWidget {
   final Widget child;
 
   const CreateCertificationScreenRoute({super.key, required this.child});
 
   @override
+  State<CreateCertificationScreenRoute> createState() =>
+      _CreateCertificationScreenRouteState();
+}
+
+class _CreateCertificationScreenRouteState
+    extends State<CreateCertificationScreenRoute> {
+  bool _isChecking = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Force authentication check on init
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAuth();
+    });
+  }
+
+  Future<void> _checkAuth() async {
+    final authProvider = context.read<AuthProvider>();
+
+    setState(() {
+      _isChecking = true;
+    });
+
+    try {
+      // Force a complete authentication check
+      await authProvider.checkAuthenticationStatus();
+
+      // If still not authenticated, try to force synchronization
+      if (!authProvider.isAuthenticated || authProvider.currentUser == null) {
+        await authProvider.forceSynchronize();
+      }
+    } catch (e) {
+      print('Authentication check failed: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isChecking = false;
+        });
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
+        // Debug information
+        print(
+          'CreateCertificationScreenRoute - isInitialized: ${authProvider.isInitialized}',
+        );
+        print(
+          'CreateCertificationScreenRoute - isAuthenticated: ${authProvider.isAuthenticated}',
+        );
+        print(
+          'CreateCertificationScreenRoute - currentUser: ${authProvider.currentUser != null}',
+        );
+        print(
+          'CreateCertificationScreenRoute - supabaseAuth: ${authProvider.isAuthenticated}',
+        );
+
         if (!authProvider.isInitialized) {
           return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
-
-        if (!authProvider.isAuthenticated || authProvider.currentUser == null) {
-          return Scaffold(
-            appBar: AppBar(
-              title: const Text('Authentication Required'),
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-            ),
-            body: const Center(
+            body: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.lock_outline, size: 64, color: Colors.red),
+                  CircularProgressIndicator(),
                   SizedBox(height: 16),
-                  Text(
-                    'Please login to access this feature',
-                    style: TextStyle(fontSize: 18),
-                  ),
-                  SizedBox(height: 24),
-                  Text(
-                    'This screen requires authentication',
-                    style: TextStyle(color: Colors.grey),
-                  ),
+                  Text('Initializing...'),
                 ],
               ),
             ),
           );
         }
 
-        return this.child;
+        // Check authentication status
+        if (!authProvider.isAuthenticated || authProvider.currentUser == null) {
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('Authentication Required'),
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.refresh),
+                  onPressed: _checkAuth,
+                  tooltip: 'Refresh Authentication',
+                ),
+              ],
+            ),
+            body: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.lock_outline, size: 64, color: Colors.red),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Authentication Required',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'You need to be logged in to access this feature.',
+                      style: TextStyle(fontSize: 16),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+                    if (_isChecking) ...[
+                      const CircularProgressIndicator(),
+                      const SizedBox(height: 16),
+                      const Text('Checking authentication...'),
+                    ] else ...[
+                      ElevatedButton.icon(
+                        onPressed: _checkAuth,
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Check Authentication'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton.icon(
+                        onPressed: () =>
+                            Navigator.pushReplacementNamed(context, '/login'),
+                        icon: const Icon(Icons.login),
+                        label: const Text('Go to Login'),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 32),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.grey[300]!),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Debug Info:',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey[700],
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text('Initialized: ${authProvider.isInitialized}'),
+                          Text(
+                            'Authenticated: ${authProvider.isAuthenticated}',
+                          ),
+                          Text(
+                            'User Data: ${authProvider.currentUser != null ? "Loaded" : "Not Loaded"}',
+                          ),
+                          Text(
+                            'Supabase Auth: ${authProvider.isAuthenticated}',
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              authProvider.debugAuthState();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Check console for debug info'),
+                                  duration: Duration(seconds: 2),
+                                ),
+                              );
+                            },
+                            icon: const Icon(Icons.bug_report),
+                            label: const Text('Debug Auth State'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.orange,
+                              foregroundColor: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+
+        return widget.child;
       },
     );
   }

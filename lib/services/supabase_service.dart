@@ -188,7 +188,7 @@ class SupabaseService {
       final response = await _client
           .from('user')
           .select('*')
-          .eq('id_user', userId)
+          .eq('idUser', userId)
           .single();
 
       return app_models.AppUser.fromJson(response);
@@ -236,7 +236,7 @@ class SupabaseService {
       final response = await _client
           .from('user')
           .update(updates)
-          .eq('id_user', userId)
+          .eq('idUser', userId)
           .select()
           .single();
 

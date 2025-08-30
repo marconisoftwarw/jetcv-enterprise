@@ -1,17 +1,15 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 import '../models/user.dart' as app_models;
+import 'supabase_service.dart';
 
 class VeriffService {
-  static const String _baseUrl = 'http://18.102.14.247:4000';
-
-  /// Richiede una sessione di verifica Veriff
+  /// Richiede una sessione di verifica Veriff tramite Supabase Edge Function
   Future<Map<String, dynamic>> requestVeriffSession({
     required app_models.AppUser user,
     String callbackUrl = 'https://example.com/callback',
   }) async {
     try {
-      final url = Uri.parse('$_baseUrl/session-request-veriff');
+      final supabaseService = SupabaseService();
 
       final body = {
         'callback': callbackUrl,
@@ -25,23 +23,21 @@ class VeriffService {
         },
       };
 
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(body),
+      // Chiama la Supabase Edge Function
+      final response = await supabaseService.client.functions.invoke(
+        'kyc-create-new-session',
+        body: body,
       );
 
-      if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
+      if (response.status == 200) {
+        final responseData = response.data as Map<String, dynamic>;
 
         // Salva i dati della sessione nel database
         await _saveKycAttempt(user.idUser, body, responseData);
 
         return responseData;
       } else {
-        throw Exception(
-          'Failed to request Veriff session: ${response.statusCode}',
-        );
+        throw Exception('Failed to request Veriff session: ${response.status}');
       }
     } catch (e) {
       print('Error requesting Veriff session: $e');
@@ -49,24 +45,25 @@ class VeriffService {
     }
   }
 
-  /// Controlla lo stato di una sessione Veriff
+  /// Controlla lo stato di una sessione Veriff tramite Supabase Edge Function
   Future<Map<String, dynamic>> checkVeriffSessionStatus({
     required String sessionId,
   }) async {
     try {
-      final url = Uri.parse('$_baseUrl/session-status');
+      final supabaseService = SupabaseService();
 
-      final response = await http.get(
-        url,
-        headers: {'Content-Type': 'application/json'},
+      final body = {'sessionId': sessionId};
+
+      // Chiama la Supabase Edge Function per controllare lo stato
+      final response = await supabaseService.client.functions.invoke(
+        'kyc-session-status',
+        body: body,
       );
 
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+      if (response.status == 200) {
+        return response.data as Map<String, dynamic>;
       } else {
-        throw Exception(
-          'Failed to check session status: ${response.statusCode}',
-        );
+        throw Exception('Failed to check session status: ${response.status}');
       }
     } catch (e) {
       print('Error checking Veriff session status: $e');
@@ -74,24 +71,25 @@ class VeriffService {
     }
   }
 
-  /// Ottiene i risultati di una sessione Veriff
+  /// Ottiene i risultati di una sessione Veriff tramite Supabase Edge Function
   Future<Map<String, dynamic>> getVeriffSessionResults({
     required String sessionId,
   }) async {
     try {
-      final url = Uri.parse('$_baseUrl/session-results');
+      final supabaseService = SupabaseService();
 
-      final response = await http.get(
-        url,
-        headers: {'Content-Type': 'application/json'},
+      final body = {'sessionId': sessionId};
+
+      // Chiama la Supabase Edge Function per ottenere i risultati
+      final response = await supabaseService.client.functions.invoke(
+        'kyc-session-results',
+        body: body,
       );
 
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+      if (response.status == 200) {
+        return response.data as Map<String, dynamic>;
       } else {
-        throw Exception(
-          'Failed to get session results: ${response.statusCode}',
-        );
+        throw Exception('Failed to get session results: ${response.status}');
       }
     } catch (e) {
       print('Error getting Veriff session results: $e');

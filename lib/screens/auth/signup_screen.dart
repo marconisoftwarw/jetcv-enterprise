@@ -6,8 +6,8 @@ import '../../providers/auth_provider.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../widgets/custom_button.dart';
 import '../../services/veriff_service.dart';
-import 'dart:convert'; // Added for jsonEncode and jsonDecode
-import 'package:http/http.dart' as http; // Added for http client
+import '../../services/supabase_service.dart';
+import 'dart:convert';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -234,29 +234,30 @@ class _SignupScreenState extends State<SignupScreen> {
     Map<String, dynamic> data,
   ) async {
     try {
-      print('SignupScreen: Chiamando endpoint Veriff...');
-
-      final response = await http.post(
-        Uri.parse('http://18.102.14.247:4000/session-request-veriff'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: jsonEncode(data),
+      print(
+        'SignupScreen: Chiamando Supabase Edge Function kyc-create-new-session...',
       );
 
-      print('SignupScreen: Risposta HTTP: ${response.statusCode}');
-      print('SignupScreen: Corpo risposta: ${response.body}');
+      final supabaseService = SupabaseService();
 
-      if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body) as Map<String, dynamic>;
+      // Chiama la Supabase Edge Function
+      final response = await supabaseService.client.functions.invoke(
+        'kyc-create-new-session',
+        body: data,
+      );
+
+      print('SignupScreen: Risposta Edge Function: ${response.status}');
+      print('SignupScreen: Corpo risposta: ${response.data}');
+
+      if (response.status == 200) {
+        final responseData = response.data as Map<String, dynamic>;
         return responseData;
       } else {
-        print('SignupScreen: Errore HTTP: ${response.statusCode}');
+        print('SignupScreen: Errore Edge Function: ${response.status}');
         return null;
       }
     } catch (e) {
-      print('SignupScreen: Errore nella chiamata HTTP: $e');
+      print('SignupScreen: Errore nella chiamata Edge Function: $e');
       return null;
     }
   }

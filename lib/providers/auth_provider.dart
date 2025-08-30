@@ -14,7 +14,8 @@ class AuthProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   bool get isInitialized => _isInitialized;
-  bool get isAuthenticated => _supabaseService.isUserAuthenticated;
+  bool get isAuthenticated =>
+      _supabaseService.isUserAuthenticated && _currentUser != null;
   bool get isUserDataLoaded => _currentUser != null;
 
   // Method to check and refresh authentication status
@@ -46,6 +47,78 @@ class AuthProvider extends ChangeNotifier {
       _setError('Authentication check failed: $e');
       return false;
     }
+  }
+
+  // Method to force synchronization between session and user data
+  Future<bool> forceSynchronize() async {
+    try {
+      print('AuthProvider: Starting force synchronization...');
+
+      // First check if we have a valid Supabase session
+      if (!_supabaseService.hasValidSession) {
+        print('AuthProvider: No valid Supabase session found');
+        _currentUser = null;
+        notifyListeners();
+        return false;
+      }
+
+      final supabaseUser = _supabaseService.currentUser;
+      if (supabaseUser == null) {
+        print('AuthProvider: No Supabase user found despite valid session');
+        _currentUser = null;
+        notifyListeners();
+        return false;
+      }
+
+      print('AuthProvider: Supabase user ID: ${supabaseUser.id}');
+      print('AuthProvider: Current user data: ${_currentUser?.idUser}');
+
+      // If we have a session but no user data, load it
+      if (_currentUser == null) {
+        print(
+          'AuthProvider: Loading user data for Supabase user: ${supabaseUser.id}',
+        );
+        await _loadUserData(supabaseUser.id);
+        final success = _currentUser != null;
+        print('AuthProvider: User data loaded: $success');
+        return success;
+      }
+
+      // If we have both, verify they match
+      if (_currentUser!.idUser == supabaseUser.id) {
+        print('AuthProvider: User IDs match, synchronization successful');
+        return true;
+      } else {
+        print('AuthProvider: User ID mismatch, reloading user data');
+        // IDs don't match, reload user data
+        await _loadUserData(supabaseUser.id);
+        final success = _currentUser != null;
+        print('AuthProvider: User data reloaded: $success');
+        return success;
+      }
+    } catch (e) {
+      print('AuthProvider: Synchronization failed: $e');
+      _setError('Synchronization failed: $e');
+      return false;
+    }
+  }
+
+  // Debug method to understand current state
+  void debugAuthState() {
+    print('=== AuthProvider Debug Info ===');
+    print('isInitialized: $_isInitialized');
+    print('isAuthenticated: $isAuthenticated');
+    print(
+      'currentUser: ${_currentUser != null ? "Loaded (${_currentUser!.idUser})" : "Not Loaded"}',
+    );
+    print(
+      'supabaseService.isUserAuthenticated: ${_supabaseService.isUserAuthenticated}',
+    );
+    print(
+      'supabaseService.hasValidSession: ${_supabaseService.hasValidSession}',
+    );
+    print('supabaseService.currentUser: ${_supabaseService.currentUser?.id}');
+    print('================================');
   }
 
   Future<void> initialize() async {
