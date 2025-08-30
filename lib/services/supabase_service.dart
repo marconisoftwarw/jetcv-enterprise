@@ -100,12 +100,9 @@ class SupabaseService {
     Map<String, dynamic> userData,
   ) async {
     try {
-      // Prima verifica se l'utente esiste già
-      final existingUser = await getUserById(user.id);
-      if (existingUser != null) {
-        print('User record already exists for ID: ${user.id}');
-        return;
-      }
+      // Durante la registrazione, non serve verificare se l'utente esiste già
+      // perché stiamo appena creando l'account
+      print('Creating new user record for ID: ${user.id}');
 
       final recordData = {
         'idUser': user.id,
