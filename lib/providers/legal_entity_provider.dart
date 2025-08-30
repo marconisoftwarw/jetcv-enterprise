@@ -43,18 +43,37 @@ class LegalEntityProvider extends ChangeNotifier {
     _clearError();
 
     try {
+      print('🔄 LegalEntityProvider: Starting to load legal entities...');
+      print('🔄 Status filter: ${status ?? 'none'}');
+
       final entities = await _supabaseService.getLegalEntities(status: status);
+
+      print(
+        '🔄 LegalEntityProvider: Received ${entities.length} entities from service',
+      );
+
       _legalEntities = entities;
       _filterStatus = status;
+
+      print(
+        '🔄 LegalEntityProvider: Updated local state with ${_legalEntities.length} entities',
+      );
+      print(
+        '🔄 LegalEntityProvider: Entity names: ${_legalEntities.map((e) => e.legalName).join(', ')}',
+      );
+
       notifyListeners();
     } catch (e) {
+      print('❌ LegalEntityProvider: Error loading legal entities: $e');
       _setError('Failed to load legal entities: $e');
     } finally {
       _setLoading(false);
+      print('🔄 LegalEntityProvider: Loading completed');
     }
   }
 
   Future<void> refreshLegalEntities() async {
+    print('🔄 LegalEntityProvider: Refreshing legal entities...');
     await loadLegalEntities(status: _filterStatus);
   }
 

@@ -350,34 +350,94 @@ class SupabaseService {
 
   Future<List<LegalEntity>> getLegalEntities({String? status}) async {
     try {
-      var query = _client.from('legal_entity').select();
+      print('🔍 Attempting to fetch legal entities via Edge Function...');
+      print('🔍 Status filter: ${status ?? 'none'}');
 
-      if (status != null) {
-        query = query.eq('status', status);
+      // Call the get-legal-entities Edge Function
+      final response = await _client.functions.invoke('get-legal-entities');
+
+      print('🔍 Edge Function response status: ${response.status}');
+
+      if (response.status != 200) {
+        print('❌ Edge Function error: Status ${response.status}');
+        return [];
       }
 
-      final response = await query.order('created_at', ascending: false);
+      final data = response.data;
+      if (data == null || data['ok'] != true) {
+        print('❌ Edge Function error: ${data?['message'] ?? 'Unknown error'}');
+        return [];
+      }
 
-      return (response as List)
-          .map((entity) => LegalEntity.fromJson(entity))
-          .toList();
+      final entitiesList = data['data'] as List;
+      print('🔍 Edge Function returned ${entitiesList.length} entities');
+
+      // Apply status filter if specified
+      List<dynamic> filteredEntities = entitiesList;
+      if (status != null) {
+        filteredEntities = entitiesList.where((entity) {
+          final entityStatus = entity['status']?.toString() ?? '';
+          return entityStatus == status;
+        }).toList();
+        print(
+          '🔍 After status filter "$status": ${filteredEntities.length} entities',
+        );
+      }
+
+      // Convert to LegalEntity objects
+      final entities = filteredEntities.map((entity) {
+        print(
+          '🔍 Processing entity: ${entity['id_legal_entity']} - ${entity['legal_name']}',
+        );
+        return LegalEntity.fromJson(entity);
+      }).toList();
+
+      print('🔍 Successfully processed ${entities.length} entities');
+      return entities;
     } catch (e) {
-      print('Error getting legal entities: $e');
+      print('❌ Error getting legal entities via Edge Function: $e');
+      print('❌ Error type: ${e.runtimeType}');
       return [];
     }
   }
 
   Future<LegalEntity?> getLegalEntityById(String id) async {
     try {
-      final response = await _client
-          .from('legal_entity')
-          .select()
-          .eq('id_legal_entity', id)
-          .single();
+      print('🔍 Attempting to fetch legal entity by ID: $id');
 
-      return LegalEntity.fromJson(response);
+      // Call the get-legal-entities Edge Function
+      final response = await _client.functions.invoke('get-legal-entities');
+
+      if (response.status != 200) {
+        print('❌ Edge Function error: Status ${response.status}');
+        return null;
+      }
+
+      final data = response.data;
+      if (data == null || data['ok'] != true) {
+        print('❌ Edge Function error: ${data?['message'] ?? 'Unknown error'}');
+        return null;
+      }
+
+      final entitiesList = data['data'] as List;
+      print('🔍 Edge Function returned ${entitiesList.length} entities');
+
+      // Find entity by ID
+      final entityData = entitiesList.firstWhere(
+        (entity) => entity['id_legal_entity'] == id,
+        orElse: () => null,
+      );
+
+      if (entityData == null) {
+        print('❌ Legal entity with ID $id not found');
+        return null;
+      }
+
+      print('🔍 Successfully found legal entity: ${entityData['legal_name']}');
+      return LegalEntity.fromJson(entityData);
     } catch (e) {
-      print('Error getting legal entity: $e');
+      print('❌ Error getting legal entity by ID $id via Edge Function: $e');
+      print('❌ Error type: ${e.runtimeType}');
       return null;
     }
   }
@@ -584,15 +644,18 @@ class SupabaseService {
     }
   }
 
-  // Real-time subscriptions
+  // Real-time subscriptions - using Edge Function instead of direct DB access
   Stream<List<LegalEntity>> subscribeToLegalEntities({String? status}) {
-    final query = _client
-        .from('legal_entity')
-        .stream(primaryKey: ['id_legal_entity']);
-
-    return query.map(
-      (event) => event.map((entity) => LegalEntity.fromJson(entity)).toList(),
-    );
+    // Since we can't use real-time subscriptions with Edge Functions,
+    // we'll create a periodic stream that fetches data every few seconds
+    return Stream.periodic(const Duration(seconds: 5), (_) async {
+      try {
+        return await getLegalEntities(status: status);
+      } catch (e) {
+        print('❌ Error in legal entities stream: $e');
+        return <LegalEntity>[];
+      }
+    }).asyncMap((future) => future);
   }
 
   // Admin functions

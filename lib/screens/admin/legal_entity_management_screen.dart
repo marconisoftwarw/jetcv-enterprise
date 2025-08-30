@@ -34,20 +34,35 @@ class _LegalEntityManagementScreenState
   }
 
   Future<void> _loadLegalEntities() async {
+    print('🔄 LegalEntityManagementScreen: Starting to load legal entities...');
     final provider = context.read<LegalEntityProvider>();
     await provider.loadLegalEntities();
+    print('🔄 LegalEntityManagementScreen: Provider loading completed');
     _filterEntities();
+    print('🔄 LegalEntityManagementScreen: Entities filtered');
   }
 
   void _filterEntities() {
     final provider = context.read<LegalEntityProvider>();
     final query = _searchController.text.trim();
 
+    print('🔍 LegalEntityManagementScreen: Filtering entities...');
+    print('🔍 Search query: "$query"');
+    print('🔍 Selected status: $_selectedStatus');
+    print('🔍 Total entities in provider: ${provider.legalEntities.length}');
+    print(
+      '🔍 Entity names in provider: ${provider.legalEntities.map((e) => e.legalName).join(', ')}',
+    );
+
     setState(() {
       if (query.isEmpty && _selectedStatus == null) {
         _filteredEntities = provider.legalEntities;
+        print(
+          '🔍 No filters applied, showing all ${_filteredEntities.length} entities',
+        );
       } else {
         _filteredEntities = provider.searchLegalEntities(query);
+        print('🔍 After search filter: ${_filteredEntities.length} entities');
 
         if (_selectedStatus != null) {
           _filteredEntities = _filteredEntities
@@ -56,8 +71,14 @@ class _LegalEntityManagementScreenState
                     entity.status.toString().split('.').last == _selectedStatus,
               )
               .toList();
+          print('🔍 After status filter: ${_filteredEntities.length} entities');
         }
       }
+
+      print('🔍 Final filtered entities: ${_filteredEntities.length}');
+      print(
+        '🔍 Final entity names: ${_filteredEntities.map((e) => e.legalName).join(', ')}',
+      );
     });
   }
 
