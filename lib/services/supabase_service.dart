@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/user.dart' as app_models;
 import '../models/legal_entity.dart';
@@ -348,22 +349,38 @@ class SupabaseService {
     }
   }
 
-  Future<List<LegalEntity>> getLegalEntities({String? status}) async {
+    Future<List<LegalEntity>> getLegalEntities({String? status}) async {
     try {
       print('🔍 Attempting to fetch legal entities via Edge Function...');
       print('🔍 Status filter: ${status ?? 'none'}');
+      
+      // Call the get-legal-entities Edge Function using HTTP client
+      final url = '${AppConfig.supabaseUrl}/functions/v1/get-legal-entities';
+      
+      // Get the current user's access token
+      final session = _client.auth.currentSession;
+      if (session == null) {
+        print('❌ No active session found');
+        return [];
+      }
+      
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer ${session.accessToken}',
+          'Content-Type': 'application/json',
+        },
+      );
 
-      // Call the get-legal-entities Edge Function
-      final response = await _client.functions.invoke('get-legal-entities');
-
-      print('🔍 Edge Function response status: ${response.status}');
-
-      if (response.status != 200) {
-        print('❌ Edge Function error: Status ${response.status}');
+      print('🔍 Edge Function response status: ${response.statusCode}');
+      
+      if (response.statusCode != 200) {
+        print('❌ Edge Function error: Status ${response.statusCode}');
+        print('❌ Response body: ${response.body}');
         return [];
       }
 
-      final data = response.data;
+      final data = jsonDecode(response.body);
       if (data == null || data['ok'] != true) {
         print('❌ Edge Function error: ${data?['message'] ?? 'Unknown error'}');
         return [];
@@ -391,7 +408,7 @@ class SupabaseService {
         );
         return LegalEntity.fromJson(entity);
       }).toList();
-
+      
       print('🔍 Successfully processed ${entities.length} entities');
       return entities;
     } catch (e) {
@@ -401,19 +418,35 @@ class SupabaseService {
     }
   }
 
-  Future<LegalEntity?> getLegalEntityById(String id) async {
+    Future<LegalEntity?> getLegalEntityById(String id) async {
     try {
       print('🔍 Attempting to fetch legal entity by ID: $id');
+      
+      // Call the get-legal-entities Edge Function using HTTP client
+      final url = '${AppConfig.supabaseUrl}/functions/v1/get-legal-entities';
+      
+      // Get the current user's access token
+      final session = _client.auth.currentSession;
+      if (session == null) {
+        print('❌ No active session found');
+        return null;
+      }
+      
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer ${session.accessToken}',
+          'Content-Type': 'application/json',
+        },
+      );
 
-      // Call the get-legal-entities Edge Function
-      final response = await _client.functions.invoke('get-legal-entities');
-
-      if (response.status != 200) {
-        print('❌ Edge Function error: Status ${response.status}');
+      if (response.statusCode != 200) {
+        print('❌ Edge Function error: Status ${response.statusCode}');
+        print('❌ Response body: ${response.body}');
         return null;
       }
 
-      final data = response.data;
+      final data = jsonDecode(response.body);
       if (data == null || data['ok'] != true) {
         print('❌ Edge Function error: ${data?['message'] ?? 'Unknown error'}');
         return null;
