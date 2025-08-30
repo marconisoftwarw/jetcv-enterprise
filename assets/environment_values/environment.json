@@ -1,11 +1,11 @@
 {
-  "supabaseApiUrlCommon": "https://ammryjdbnqedwlguhqpv.supabase.co",
-"supabaseAnonKeyCommon": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtbXJ5amRibnFlZHdsZ3VocXB2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQxNDcxMTQsImV4cCI6MjA2OTcyMzExNH0.3nQJe3wHdTwBFH7-iaZc2pBVsj4A4bmUPRSvmIcx4aQ",
+  "supabaseApiUrlCommon": "https://skqsuxmdfqxbkhmselaz.supabase.co",
+"supabaseAnonKeyCommon": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcXN1eG1kZnF4YmtobXNlbGF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwNjQxMDMsImV4cCI6MjA3MTY0MDEwM30.NkwMkK6wZVPv2G_U39Q-rOMT5yUKLvPePnfXHKMR6JU",
 "googleAuthIosClientIdEnterprise": "184485158453-cku3ip8qskbucpocdei08a3msf8rm0d2.apps.googleusercontent.com",
 "googleAuthWebClientIdEnterprise": "184485158453-8jf0jkikkkn4o91c44nvop4vt716oljt.apps.googleusercontent.com",
 "name": "prod",
-"supabaseApiUrlEnterpriseAuth": "https://yzrmwuecqmnfvfmbluhd.supabase.co",
-"supabaseAnonKeyEnterpriseAuth": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl6cm13dWVjcW1uZnZmbWJsdWhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUxNzgxODksImV4cCI6MjA3MDc1NDE4OX0.QNoTNfcR_7MS207B8H1zPgCmCs47Jlye0WsQdXFwjEk",
+"supabaseApiUrlEnterpriseAuth": "https://skqsuxmdfqxbkhmselaz.supabase.co",
+"supabaseAnonKeyEnterpriseAuth": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcXN1eG1kZnF4YmtobXNlbGF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwNjQxMDMsImV4cCI6MjA3MTY0MDEwM30.NkwMkK6wZVPv2G_U39Q-rOMT5yUKLvPePnfXHKMR6JU",
 "testUserId": "dd1ccb63-1caf-484a-b3a5-5cf4e41bbf4d",
-"callbackUrlVeriffWeb": "https://jet-cv-enterprise-test.flutterflow.app/kycSessionResult"
+"callbackUrlVeriffWeb": "https://localhost:52003/kycSessionResult"
 }
