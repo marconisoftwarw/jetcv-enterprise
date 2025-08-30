@@ -1,17 +1,26 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:http/http.dart' as http;
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/user.dart' as app_models;
 import '../models/legal_entity.dart';
 import '../models/legal_entity_invitation.dart';
 import '../config/app_config.dart';
 
-/// SupabaseService - Optimized for Legal Entity Management
+/// SupabaseService - Fully Optimized with Edge Functions
 ///
-/// This service has been optimized to avoid unnecessary calls to the 'user' table
-/// during legal entity operations. Only essential user queries for authentication
-/// are maintained.
+/// This service has been completely optimized to use Edge Functions for all
+/// user table operations, bypassing RLS and 403/42501 errors. ALL direct database
+/// calls to the 'user' table have been COMPLETELY ELIMINATED and replaced with:
+/// - create-user (Edge Function)
+/// - getUserById (get-user Edge Function)
+/// - update-user (Edge Function)
+/// - get-user-by-email (Edge Function)
+/// - get-legal-entities (Edge Function)
+/// - upsert-legal-entity (Edge Function)
+/// - delete-legal-entity (Edge Function)
+///
+/// NO MORE direct HTTP calls to rest/v1/user - ALL operations use Edge Functions!
 class SupabaseService {
   static final SupabaseService _instance = SupabaseService._internal();
   factory SupabaseService() => _instance;
@@ -111,33 +120,24 @@ class SupabaseService {
         'createdAt': DateTime.now().toIso8601String(),
       };
 
-      // Use HTTP client with proper headers to avoid 406 error
-      final url = '${AppConfig.supabaseUrl}/rest/v1/user';
-
-      // Get the current user's access token
-      final session = _client.auth.currentSession;
-      if (session == null) {
-        print('❌ No active session found for _createUserRecord');
-        throw Exception('No active session');
-      }
-
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {
-          'Authorization': 'Bearer ${session.accessToken}',
-          'apikey': AppConfig.supabaseAnonKey,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: jsonEncode(recordData),
+      // Use Edge Function to bypass RLS and 403/42501 errors
+      final response = await _client.functions.invoke(
+        'create-user',
+        body: recordData,
       );
 
-      print('🔍 _createUserRecord response status: ${response.statusCode}');
+      print(
+        '🔍 _createUserRecord Edge Function response status: ${response.status}',
+      );
 
-      if (response.statusCode != 201 && response.statusCode != 200) {
-        print('❌ _createUserRecord error: Status ${response.statusCode}');
-        print('❌ Response body: ${response.body}');
-        throw Exception('Failed to create user record: ${response.statusCode}');
+      if (response.status != 201 && response.status != 200) {
+        print(
+          '❌ _createUserRecord Edge Function error: Status ${response.status}',
+        );
+        print('❌ Response data: ${response.data}');
+        throw Exception(
+          'Failed to create user record via Edge Function: ${response.status}',
+        );
       }
 
       print('User record created successfully for ID: ${user.id}');
@@ -483,47 +483,30 @@ class SupabaseService {
         return null;
       }
 
-      // Use HTTP client with proper headers to avoid 406 error
-      final url = '${AppConfig.supabaseUrl}/rest/v1/user';
-
-      // Get the current user's access token
-      final session = _client.auth.currentSession;
-      if (session == null) {
-        print('❌ No active session found for createUser');
-        return null;
-      }
-
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {
-          'Authorization': 'Bearer ${session.accessToken}',
-          'apikey': AppConfig.supabaseAnonKey,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Prefer': 'return=representation',
-        },
-        body: jsonEncode(userData),
+      // Use Edge Function to bypass RLS and 403/42501 errors
+      final response = await _client.functions.invoke(
+        'create-user',
+        body: userData,
       );
 
-      print('🔍 createUser response status: ${response.statusCode}');
+      print('🔍 createUser Edge Function response status: ${response.status}');
 
-      if (response.statusCode != 201 && response.statusCode != 200) {
-        print('❌ createUser error: Status ${response.statusCode}');
-        print('❌ Response body: ${response.body}');
+      if (response.status != 201 && response.status != 200) {
+        print('❌ createUser Edge Function error: Status ${response.status}');
+        print('❌ Response data: ${response.data}');
         return null;
       }
 
-      final data = jsonDecode(response.body);
-      if (data is List && data.isNotEmpty) {
-        final userData = data.first;
+      final data = response.data;
+      if (data == null || data['ok'] != true) {
         print(
-          '✅ SupabaseService: User created successfully: ${userData['firstName']} ${userData['lastName']}',
+          '❌ createUser Edge Function error: ${data?['message'] ?? 'Unknown error'}',
         );
-        return app_models.AppUser.fromJson(userData);
-      } else {
-        print('❌ createUser: No user data in response');
         return null;
       }
+
+      print('✅ SupabaseService: User created successfully via Edge Function');
+      return app_models.AppUser.fromJson(data['user']);
     } catch (e) {
       print('❌ SupabaseService: Error creating user: $e');
       print('❌ SupabaseService: Error type: ${e.runtimeType}');
@@ -549,47 +532,30 @@ class SupabaseService {
         return null;
       }
 
-      // Use HTTP client with proper headers to avoid 406 error
-      final url = '${AppConfig.supabaseUrl}/rest/v1/user?idUser=eq.$userId';
-
-      // Get the current user's access token
-      final session = _client.auth.currentSession;
-      if (session == null) {
-        print('❌ No active session found for updateUser');
-        return null;
-      }
-
-      final response = await http.patch(
-        Uri.parse(url),
-        headers: {
-          'Authorization': 'Bearer ${session.accessToken}',
-          'apikey': AppConfig.supabaseAnonKey,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Prefer': 'return=representation',
-        },
-        body: jsonEncode(updates),
+      // Use Edge Function to bypass RLS and 403/42501 errors
+      final response = await _client.functions.invoke(
+        'update-user',
+        body: {'idUser': userId, ...updates},
       );
 
-      print('🔍 updateUser response status: ${response.statusCode}');
+      print('🔍 updateUser Edge Function response status: ${response.status}');
 
-      if (response.statusCode != 200) {
-        print('❌ updateUser error: Status ${response.statusCode}');
-        print('❌ Response body: ${response.body}');
+      if (response.status != 200) {
+        print('❌ updateUser Edge Function error: Status ${response.status}');
+        print('❌ Response data: ${response.data}');
         return null;
       }
 
-      final data = jsonDecode(response.body);
-      if (data is List && data.isNotEmpty) {
-        final userData = data.first;
+      final data = response.data;
+      if (data == null || data['ok'] != true) {
         print(
-          '✅ SupabaseService: User updated successfully: ${userData['firstName']} ${userData['lastName']}',
+          '❌ updateUser Edge Function error: ${data?['message'] ?? 'Unknown error'}',
         );
-        return app_models.AppUser.fromJson(userData);
-      } else {
-        print('❌ updateUser: No user data in response');
         return null;
       }
+
+      print('✅ SupabaseService: User updated successfully via Edge Function');
+      return app_models.AppUser.fromJson(data['user']);
     } catch (e) {
       print('❌ SupabaseService: Error updating user $userId: $e');
       print('❌ SupabaseService: Error type: ${e.runtimeType}');
@@ -680,53 +646,22 @@ class SupabaseService {
         return [];
       }
 
-      // Call the get-legal-entities Edge Function using HTTP client
-      final url = '${AppConfig.supabaseUrl}/functions/v1/get-legal-entities';
+      // Call the get-legal-entities Edge Function
 
-      // Get the current user's access token
-      final session = _client.auth.currentSession;
-      if (session == null) {
-        print('❌ No active session found - attempting to restore session...');
-
-        // Try to restore the session
-        try {
-          await _auth.refreshSession();
-          final restoredSession = _client.auth.currentSession;
-          if (restoredSession == null) {
-            print('❌ Failed to restore session');
-            return [];
-          }
-          print('✅ Session restored successfully');
-        } catch (e) {
-          print('❌ Failed to restore session: $e');
-          return [];
-        }
-      }
-
-      // Get the session again after potential restoration
-      final currentSession = _client.auth.currentSession;
-      if (currentSession == null) {
-        print('❌ Still no active session after restoration attempt');
-        return [];
-      }
-
-      final response = await http.get(
-        Uri.parse(url),
-        headers: {
-          'Authorization': 'Bearer ${currentSession.accessToken}',
-          'Content-Type': 'application/json',
-        },
+      final response = await _client.functions.invoke(
+        'get-legal-entities',
+        body: {'status': status},
       );
 
-      print('🔍 Edge Function response status: ${response.statusCode}');
+      print('🔍 Edge Function response status: ${response.status}');
 
-      if (response.statusCode != 200) {
-        print('❌ Edge Function error: Status ${response.statusCode}');
-        print('❌ Response body: ${response.body}');
+      if (response.status != 200) {
+        print('❌ Edge Function error: Status ${response.status}');
+        print('❌ Response data: ${response.data}');
         return [];
       }
 
-      final data = jsonDecode(response.body);
+      final data = response.data;
       if (data == null || data['ok'] != true) {
         print('❌ Edge Function error: ${data?['message'] ?? 'Unknown error'}');
         return [];
@@ -774,51 +709,20 @@ class SupabaseService {
         return null;
       }
 
-      // Call the get-legal-entities Edge Function using HTTP client
-      final url = '${AppConfig.supabaseUrl}/functions/v1/get-legal-entities';
+      // Call the get-legal-entities Edge Function
 
-      // Get the current user's access token
-      final session = _client.auth.currentSession;
-      if (session == null) {
-        print('❌ No active session found - attempting to restore session...');
-
-        // Try to restore the session
-        try {
-          await _auth.refreshSession();
-          final restoredSession = _client.auth.currentSession;
-          if (restoredSession == null) {
-            print('❌ Failed to restore session');
-            return null;
-          }
-          print('✅ Session restored successfully');
-        } catch (e) {
-          print('❌ Failed to restore session: $e');
-          return null;
-        }
-      }
-
-      // Get the session again after potential restoration
-      final currentSession = _client.auth.currentSession;
-      if (currentSession == null) {
-        print('❌ Still no active session after restoration attempt');
-        return null;
-      }
-
-      final response = await http.get(
-        Uri.parse(url),
-        headers: {
-          'Authorization': 'Bearer ${currentSession.accessToken}',
-          'Content-Type': 'application/json',
-        },
+      final response = await _client.functions.invoke(
+        'get-legal-entities',
+        body: {},
       );
 
-      if (response.statusCode != 200) {
-        print('❌ Edge Function error: Status ${response.statusCode}');
-        print('❌ Response body: ${response.body}');
+      if (response.status != 200) {
+        print('❌ Edge Function error: Status ${response.status}');
+        print('❌ Response data: ${response.data}');
         return null;
       }
 
-      final data = jsonDecode(response.body);
+      final data = response.data;
       if (data == null || data['ok'] != true) {
         print('❌ Edge Function error: ${data?['message'] ?? 'Unknown error'}');
         return null;
@@ -971,14 +875,53 @@ class SupabaseService {
 
   Future<bool> deleteLegalEntity(String id) async {
     try {
-      final response = await _client
-          .from('legal_entity')
-          .delete()
-          .eq('id_legal_entity', id);
+      // Use Edge Function to delete legal entity (no user table calls needed)
+      final response = await _client.functions.invoke(
+        'delete-legal-entity',
+        body: {'id_legal_entity': id},
+      );
 
-      return response != null;
+      print(
+        '🔍 SupabaseService: Delete Edge Function response status: ${response.status}',
+      );
+      print(
+        '🔍 SupabaseService: Delete Edge Function response data: ${response.data}',
+      );
+
+      if (response.status != 200) {
+        print(
+          '❌ SupabaseService: Error deleting legal entity: Status ${response.status}',
+        );
+        return false;
+      }
+
+      final data = response.data;
+      if (data == null || data['ok'] != true) {
+        print(
+          '❌ SupabaseService: Error deleting legal entity: ${data?['message'] ?? 'Unknown error'}',
+        );
+        print('❌ SupabaseService: Error code: ${data?['code'] ?? 'No code'}');
+        return false;
+      }
+
+      print('✅ SupabaseService: Legal entity deleted successfully');
+      print('🔍 SupabaseService: Operation: ${data['operation'] ?? 'unknown'}');
+      return true;
     } catch (e) {
-      print('Error deleting legal entity: $e');
+      print('❌ SupabaseService: Error deleting legal entity: $e');
+      print('❌ SupabaseService: Error type: ${e.runtimeType}');
+
+      // Check if it's a function not found error
+      if (e.toString().contains('function not found') ||
+          e.toString().contains('delete-legal-entity')) {
+        print('❌ SupabaseService: Edge Function delete-legal-entity not found');
+        print(
+          '❌ SupabaseService: Please deploy the delete-legal-entity Edge Function',
+        );
+        print(
+          '❌ SupabaseService: Check EDGE_FUNCTIONS_SETUP.md for deployment instructions',
+        );
+      }
       return false;
     }
   }

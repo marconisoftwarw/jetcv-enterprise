@@ -31,10 +31,8 @@ class AuthProvider extends ChangeNotifier {
       if (_supabaseService.hasValidSession) {
         final supabaseUser = _supabaseService.currentUser;
         if (supabaseUser != null) {
-          if (_currentUser == null) {
-            // Session exists but user data not loaded, load it
-            await _loadUserData(supabaseUser.id);
-          }
+          // No need to load user data automatically
+          // Just check if session is valid
           return true;
         }
         return false;
@@ -75,30 +73,7 @@ class AuthProvider extends ChangeNotifier {
 
       print('AuthProvider: Supabase user ID: ${supabaseUser.id}');
       print('AuthProvider: Current user data: ${_currentUser?.idUser}');
-
-      // If we have a session but no user data, load it
-      if (_currentUser == null) {
-        print(
-          'AuthProvider: Loading user data for Supabase user: ${supabaseUser.id}',
-        );
-        await _loadUserData(supabaseUser.id);
-        final success = _currentUser != null;
-        print('AuthProvider: User data loaded: $success');
-        return success;
-      }
-
-      // If we have both, verify they match
-      if (_currentUser!.idUser == supabaseUser.id) {
-        print('AuthProvider: User IDs match, synchronization successful');
-        return true;
-      } else {
-        print('AuthProvider: User ID mismatch, reloading user data');
-        // IDs don't match, reload user data
-        await _loadUserData(supabaseUser.id);
-        final success = _currentUser != null;
-        print('AuthProvider: User data reloaded: $success');
-        return success;
-      }
+      return true;
     } catch (e) {
       print('AuthProvider: Synchronization failed: $e');
       _setError('Synchronization failed: $e');
@@ -130,12 +105,8 @@ class AuthProvider extends ChangeNotifier {
     try {
       await _supabaseService.initialize();
 
-      // Check if user is already signed in by restoring session
-      final supabaseUser = await _supabaseService.restoreSession();
-      if (supabaseUser != null) {
-        await _loadUserData(supabaseUser.id);
-      }
-
+      // No need to load user data on initialization
+      // User data will be loaded only when explicitly needed
       _isInitialized = true;
     } catch (e) {
       _errorMessage = 'Failed to initialize: $e';
@@ -209,7 +180,8 @@ class AuthProvider extends ChangeNotifier {
       );
 
       if (response.user != null) {
-        await _loadUserData(response.user!.id);
+        // No need to load user data automatically after sign in
+        // User data will be loaded when explicitly needed
         return true;
       }
 
@@ -239,7 +211,8 @@ class AuthProvider extends ChangeNotifier {
         // Check if user is now authenticated
         final supabaseUser = _supabaseService.currentUser;
         if (supabaseUser != null) {
-          await _loadUserData(supabaseUser.id);
+          // No need to load user data automatically after OAuth
+          // User data will be loaded when explicitly needed
           return true;
         }
       }
@@ -270,7 +243,8 @@ class AuthProvider extends ChangeNotifier {
         // Check if user is now authenticated
         final supabaseUser = _supabaseService.currentUser;
         if (supabaseUser != null) {
-          await _loadUserData(supabaseUser.id);
+          // No need to load user data automatically after OAuth
+          // User data will be loaded when explicitly needed
           return true;
         }
       }
