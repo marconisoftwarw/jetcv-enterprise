@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:http/http.dart' as http;
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/user.dart' as app_models;
@@ -7,20 +8,20 @@ import '../models/legal_entity.dart';
 import '../models/legal_entity_invitation.dart';
 import '../config/app_config.dart';
 
-/// SupabaseService - Fully Optimized with Edge Functions
+/// SupabaseService - Optimized with Edge Functions + HTTP Fallback
 ///
-/// This service has been completely optimized to use Edge Functions for all
-/// user table operations, bypassing RLS and 403/42501 errors. ALL direct database
-/// calls to the 'user' table have been COMPLETELY ELIMINATED and replaced with:
+/// This service is optimized to use Edge Functions for all operations, bypassing
+/// RLS and 403/42501 errors. Primary operations use Edge Functions, with HTTP
+/// fallback for get-legal-entities to ensure reliability:
 /// - create-user (Edge Function)
 /// - getUserById (get-user Edge Function)
 /// - update-user (Edge Function)
 /// - get-user-by-email (Edge Function)
-/// - get-legal-entities (Edge Function)
+/// - get-legal-entities (Edge Function + HTTP fallback)
 /// - upsert-legal-entity (Edge Function)
 /// - delete-legal-entity (Edge Function)
 ///
-/// NO MORE direct HTTP calls to rest/v1/user - ALL operations use Edge Functions!
+/// HTTP fallback ensures legal entities are always accessible even if Edge Function fails.
 class SupabaseService {
   static final SupabaseService _instance = SupabaseService._internal();
   factory SupabaseService() => _instance;
@@ -647,51 +648,135 @@ class SupabaseService {
       }
 
       // Call the get-legal-entities Edge Function
+      // First try with Edge Function, fallback to HTTP if needed
+      try {
+        final response = await _client.functions.invoke(
+          'get-legal-entities',
+          method: 'GET',
+          body: {'status': status},
+        );
 
-      final response = await _client.functions.invoke(
-        'get-legal-entities',
-        body: {'status': status},
-      );
+        print('🔍 Edge Function response status: ${response.status}');
 
-      print('🔍 Edge Function response status: ${response.status}');
+        if (response.status != 200) {
+          print('❌ Edge Function error: Status ${response.status}');
+          print('❌ Response data: ${response.data}');
+          throw Exception('Edge Function failed with status ${response.status}');
+        }
 
-      if (response.status != 200) {
-        print('❌ Edge Function error: Status ${response.status}');
-        print('❌ Response data: ${response.data}');
-        return [];
-      }
+        final data = response.data;
+        if (data == null || data['ok'] != true) {
+          print('❌ Edge Function error: ${data?['message'] ?? 'Unknown error'}');
+          throw Exception('Edge Function returned error: ${data?['message'] ?? 'Unknown error'}');
+        }
 
-      final data = response.data;
-      if (data == null || data['ok'] != true) {
-        print('❌ Edge Function error: ${data?['message'] ?? 'Unknown error'}');
-        return [];
-      }
+        final entitiesList = data['data'] as List;
+        print('🔍 Edge Function returned ${entitiesList.length} entities');
 
-      final entitiesList = data['data'] as List;
-      print('🔍 Edge Function returned ${entitiesList.length} entities');
+        // Apply status filter if specified
+        List<dynamic> filteredEntities = entitiesList;
+        if (status != null) {
+          filteredEntities = entitiesList.where((entity) {
+            final entityStatus = entity['status']?.toString() ?? '';
+            return entityStatus == status;
+          }).toList();
+          print(
+            '🔍 After status filter "$status": ${filteredEntities.length} entities',
+          );
+        }
 
-      // Apply status filter if specified
-      List<dynamic> filteredEntities = entitiesList;
-      if (status != null) {
-        filteredEntities = entitiesList.where((entity) {
-          final entityStatus = entity['status']?.toString() ?? '';
-          return entityStatus == status;
+        // Convert to LegalEntity objects
+        final entities = filteredEntities.map((entity) {
+          print(
+            '🔍 Processing entity: ${entity['id_legal_entity']} - ${entity['legal_name']}',
+          );
+          return LegalEntity.fromJson(entity);
         }).toList();
-        print(
-          '🔍 After status filter "$status": ${filteredEntities.length} entities',
-        );
-      }
 
-      // Convert to LegalEntity objects
-      final entities = filteredEntities.map((entity) {
-        print(
-          '🔍 Processing entity: ${entity['id_legal_entity']} - ${entity['legal_name']}',
-        );
-        return LegalEntity.fromJson(entity);
-      }).toList();
+        print('🔍 Successfully processed ${entities.length} entities');
+        return entities;
+      } catch (e) {
+        print('⚠️ Edge Function failed, trying HTTP fallback: $e');
+        
+        // Fallback to HTTP method with proper authentication
+        final url = '${AppConfig.supabaseUrl}/functions/v1/get-legal-entities';
+        
+        // Get the current user's access token
+        final session = _client.auth.currentSession;
+        if (session == null) {
+          print('❌ No active session found - attempting to restore session...');
+          
+          try {
+            await _auth.refreshSession();
+            final restoredSession = _client.auth.currentSession;
+            if (restoredSession == null) {
+              print('❌ Failed to restore session');
+              return [];
+            }
+            print('✅ Session restored successfully');
+          } catch (e) {
+            print('❌ Failed to restore session: $e');
+            return [];
+          }
+        }
+        
+        // Get the session again after potential restoration
+        final currentSession = _client.auth.currentSession;
+        if (currentSession == null) {
+          print('❌ Still no active session after restoration attempt');
+          return [];
+        }
 
-      print('🔍 Successfully processed ${entities.length} entities');
-      return entities;
+
+        
+        final response = await http.get(
+          Uri.parse(url),
+          headers: {
+            'Authorization': 'Bearer ${currentSession.accessToken}',
+            'Content-Type': 'application/json',
+          },
+        );
+
+        print('🔍 HTTP fallback response status: ${response.statusCode}');
+
+        if (response.statusCode != 200) {
+          print('❌ HTTP fallback error: Status ${response.statusCode}');
+          print('❌ Response body: ${response.body}');
+          return [];
+        }
+
+        final data = jsonDecode(response.body);
+        if (data == null || data['ok'] != true) {
+          print('❌ HTTP fallback error: ${data?['message'] ?? 'Unknown error'}');
+          return [];
+        }
+
+        final entitiesList = data['data'] as List;
+        print('🔍 HTTP fallback returned ${entitiesList.length} entities');
+
+        // Apply status filter if specified
+        List<dynamic> filteredEntities = entitiesList;
+        if (status != null) {
+          filteredEntities = entitiesList.where((entity) {
+            final entityStatus = entity['status']?.toString() ?? '';
+            return entityStatus == status;
+          }).toList();
+          print(
+            '🔍 After status filter "$status": ${filteredEntities.length} entities',
+          );
+        }
+
+        // Convert to LegalEntity objects
+        final entities = filteredEntities.map((entity) {
+          print(
+            '🔍 Processing entity: ${entity['id_legal_entity']} - ${entity['legal_name']}',
+          );
+          return LegalEntity.fromJson(entity);
+        }).toList();
+
+        print('🔍 Successfully processed ${entities.length} entities via HTTP fallback');
+        return entities;
+
     } catch (e) {
       print('❌ Error getting legal entities via Edge Function: $e');
       print('❌ Error type: ${e.runtimeType}');
@@ -710,40 +795,111 @@ class SupabaseService {
       }
 
       // Call the get-legal-entities Edge Function
+      // First try with Edge Function, fallback to HTTP if needed
+      try {
+        final response = await _client.functions.invoke(
+          'get-legal-entities',
+          method: 'GET',
+          body: {},
+        );
 
-      final response = await _client.functions.invoke(
-        'get-legal-entities',
-        body: {},
-      );
+        if (response.status != 200) {
+          print('❌ Edge Function error: Status ${response.status}');
+          print('❌ Response data: ${response.data}');
+          throw Exception('Edge Function failed with status ${response.status}');
+        }
 
-      if (response.status != 200) {
-        print('❌ Edge Function error: Status ${response.status}');
-        print('❌ Response data: ${response.data}');
-        return null;
+        final data = response.data;
+        if (data == null || data['ok'] != true) {
+          print('❌ Edge Function error: ${data?['message'] ?? 'Unknown error'}');
+          throw Exception('Edge Function returned error: ${data?['message'] ?? 'Unknown error'}');
+        }
+
+        final entitiesList = data['data'] as List;
+        print('🔍 Edge Function returned ${entitiesList.length} entities');
+
+        // Find entity by ID
+        final entityData = entitiesList.firstWhere(
+          (entity) => entity['id_legal_entity'] == id,
+          orElse: () => null,
+        );
+
+        if (entityData == null) {
+          print('❌ Legal entity with ID $id not found');
+          return null;
+        }
+
+        print('🔍 Successfully found legal entity: ${entityData['legal_name']}');
+        return LegalEntity.fromJson(entityData);
+      } catch (e) {
+        print('⚠️ Edge Function failed, trying HTTP fallback: $e');
+        
+        // Fallback to HTTP method with proper authentication
+        final url = '${AppConfig.supabaseUrl}/functions/v1/get-legal-entities';
+        
+        // Get the current user's access token
+        final session = _client.auth.currentSession;
+        if (session == null) {
+          print('❌ No active session found - attempting to restore session...');
+          
+          try {
+            await _auth.refreshSession();
+            final restoredSession = _client.auth.currentSession;
+            if (restoredSession == null) {
+              print('❌ Failed to restore session');
+              return null;
+            }
+            print('✅ Session restored successfully');
+          } catch (e) {
+            print('❌ Failed to restore session: $e');
+            return null;
+          }
+        }
+        
+        // Get the session again after potential restoration
+        final currentSession = _client.auth.currentSession;
+        if (currentSession == null) {
+          print('❌ Still no active session after restoration attempt');
+          return null;
+        }
+
+        final response = await http.get(
+          Uri.parse(url),
+          headers: {
+            'Authorization': 'Bearer ${currentSession.accessToken}',
+            'Content-Type': 'application/json',
+          },
+        );
+
+        if (response.statusCode != 200) {
+          print('❌ HTTP fallback error: Status ${response.statusCode}');
+          print('❌ Response body: ${response.body}');
+          return null;
+        }
+
+        final data = jsonDecode(response.body);
+        if (data == null || data['ok'] != true) {
+          print('❌ HTTP fallback error: ${data?['message'] ?? 'Unknown error'}');
+          return null;
+        }
+
+        final entitiesList = data['data'] as List;
+        print('🔍 HTTP fallback returned ${entitiesList.length} entities');
+
+        // Find entity by ID
+        final entityData = entitiesList.firstWhere(
+          (entity) => entity['id_legal_entity'] == id,
+          orElse: () => null,
+        );
+
+        if (entityData == null) {
+          print('❌ Legal entity with ID $id not found via HTTP fallback');
+          return null;
+        }
+
+        print('🔍 Successfully found legal entity via HTTP fallback: ${entityData['legal_name']}');
+        return LegalEntity.fromJson(entityData);
       }
-
-      final data = response.data;
-      if (data == null || data['ok'] != true) {
-        print('❌ Edge Function error: ${data?['message'] ?? 'Unknown error'}');
-        return null;
-      }
-
-      final entitiesList = data['data'] as List;
-      print('🔍 Edge Function returned ${entitiesList.length} entities');
-
-      // Find entity by ID
-      final entityData = entitiesList.firstWhere(
-        (entity) => entity['id_legal_entity'] == id,
-        orElse: () => null,
-      );
-
-      if (entityData == null) {
-        print('❌ Legal entity with ID $id not found');
-        return null;
-      }
-
-      print('🔍 Successfully found legal entity: ${entityData['legal_name']}');
-      return LegalEntity.fromJson(entityData);
     } catch (e) {
       print('❌ Error getting legal entity by ID $id via Edge Function: $e');
       print('❌ Error type: ${e.runtimeType}');

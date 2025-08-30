@@ -122,4 +122,5 @@ curl -X POST "https://YOUR_PROJECT.supabase.co/functions/v1/getUserById" \
 - **getUserById (get-user)**: This function is now ready and handles user authentication checks without RLS errors.
 - **update-user**: This function is still needed for user profile updates. It's the only remaining Edge Function that needs to be implemented.
 - **ALL DIRECT USER TABLE CALLS HAVE BEEN COMPLETELY ELIMINATED**: The app now uses Edge Functions exclusively, preventing 403/42501 RLS errors.
+- **HTTP fallback for get-legal-entities**: Added reliable fallback to HTTP method when Edge Function fails, ensuring legal entities are always accessible.
 - **NO MORE rest/v1/user calls**: All operations that previously used direct HTTP calls to the user table now use Edge Functions.
