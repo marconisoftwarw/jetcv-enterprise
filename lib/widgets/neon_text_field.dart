@@ -181,7 +181,7 @@ class _NeonTextFieldState extends State<NeonTextField>
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
-                    color: AppTheme.lightGray.withOpacity(0.3),
+                    color: AppTheme.lightGray.withValues(alpha: 0.3),
                     width: 1,
                   ),
                 ),
