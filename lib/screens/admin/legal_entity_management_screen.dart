@@ -726,13 +726,16 @@ class _LegalEntityManagementScreenState
     final authProvider = context.read<AuthProvider>();
     final adminId = authProvider.currentUser?.idUser;
 
+    // Salva il ScaffoldMessenger prima dell'operazione asincrona
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
     final success = await context
         .read<LegalEntityProvider>()
         .approveLegalEntity(entity.idLegalEntity);
 
     if (mounted) {
       if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        scaffoldMessenger.showSnackBar(
           const SnackBar(content: Text('Entità approvata con successo')),
         );
       }
