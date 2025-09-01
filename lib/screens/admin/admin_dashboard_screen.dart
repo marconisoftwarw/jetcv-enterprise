@@ -3,10 +3,8 @@ import 'package:provider/provider.dart';
 import '../../providers/legal_entity_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/legal_entity.dart';
-
-import '../../config/app_theme.dart';
-
-import '../../widgets/linkedin_card.dart';
+import '../../theme/app_theme.dart';
+import '../../widgets/glass_card.dart';
 
 import 'create_legal_entity_screen.dart';
 import 'legal_entity_list_screen.dart';
@@ -33,12 +31,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Admin Dashboard',
-          style: AppTheme.title1.copyWith(color: AppTheme.white),
+          style: TextStyle(
+            color: AppTheme.offWhite,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        backgroundColor: AppTheme.primaryBlue,
-        foregroundColor: AppTheme.white,
+        backgroundColor: AppTheme.darkGray,
+        foregroundColor: AppTheme.offWhite,
         elevation: 0,
         actions: [
           IconButton(
@@ -53,9 +55,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           // Sidebar Navigation
           Container(
             decoration: const BoxDecoration(
-              color: AppTheme.white,
+              color: AppTheme.darkGray,
               border: Border(
-                right: BorderSide(color: AppTheme.borderGrey, width: 1),
+                right: BorderSide(color: AppTheme.lightGray, width: 1),
               ),
             ),
             child: NavigationRail(
@@ -66,19 +68,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 });
               },
               labelType: NavigationRailLabelType.all,
-              backgroundColor: AppTheme.white,
-              selectedIconTheme: const IconThemeData(
-                color: AppTheme.primaryBlue,
-              ),
+              backgroundColor: AppTheme.darkGray,
+              selectedIconTheme: const IconThemeData(color: AppTheme.neonGreen),
               unselectedIconTheme: const IconThemeData(
-                color: AppTheme.textSecondary,
+                color: AppTheme.lightGrayText,
               ),
-              selectedLabelTextStyle: AppTheme.body2.copyWith(
-                color: AppTheme.primaryBlue,
+              selectedLabelTextStyle: const TextStyle(
+                color: AppTheme.neonGreen,
                 fontWeight: FontWeight.w600,
               ),
-              unselectedLabelTextStyle: AppTheme.body2.copyWith(
-                color: AppTheme.textSecondary,
+              unselectedLabelTextStyle: const TextStyle(
+                color: AppTheme.lightGrayText,
               ),
               destinations: const [
                 NavigationRailDestination(
@@ -117,9 +117,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   builder: (context) => const CreateLegalEntityScreen(),
                 ),
               ),
-              backgroundColor: AppTheme.primaryBlue,
-              foregroundColor: AppTheme.white,
-              elevation: 4,
+              backgroundColor: AppTheme.neonGreen,
+              foregroundColor: AppTheme.primaryBlack,
+              elevation: 8,
               child: const Icon(Icons.add),
             )
           : null,
@@ -146,7 +146,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   void _showProfileMenu(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppTheme.white,
+      backgroundColor: AppTheme.darkGray,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -159,30 +159,39 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: AppTheme.borderGrey,
+                color: AppTheme.lightGray,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
             const SizedBox(height: 24),
             ListTile(
-              leading: Icon(Icons.person, color: AppTheme.primaryBlue),
-              title: Text('Profilo', style: AppTheme.body1),
+              leading: const Icon(Icons.person, color: AppTheme.neonGreen),
+              title: const Text(
+                'Profilo',
+                style: TextStyle(color: AppTheme.offWhite),
+              ),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/profile');
               },
             ),
             ListTile(
-              leading: Icon(Icons.settings, color: AppTheme.secondaryBlue),
-              title: Text('Impostazioni', style: AppTheme.body1),
+              leading: const Icon(Icons.settings, color: AppTheme.neonBlue),
+              title: const Text(
+                'Impostazioni',
+                style: TextStyle(color: AppTheme.offWhite),
+              ),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/settings');
               },
             ),
             ListTile(
-              leading: Icon(Icons.logout, color: AppTheme.errorRed),
-              title: Text('Sign Out', style: AppTheme.body1),
+              leading: const Icon(Icons.logout, color: AppTheme.neonOrange),
+              title: const Text(
+                'Sign Out',
+                style: TextStyle(color: AppTheme.offWhite),
+              ),
               onTap: () async {
                 Navigator.pop(context);
                 await context.read<AuthProvider>().signOut();
@@ -212,11 +221,21 @@ class _DashboardContent extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Welcome Section
-              Text('Welcome back, Admin!', style: AppTheme.headline2),
+              Text(
+                'Welcome back, Admin!',
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.offWhite,
+                ),
+              ),
               const SizedBox(height: 8),
               Text(
                 'Here\'s what\'s happening with your platform today.',
-                style: AppTheme.body1.copyWith(color: AppTheme.textSecondary),
+                style: const TextStyle(
+                  color: AppTheme.lightGrayText,
+                  fontSize: 16,
+                ),
               ),
 
               const SizedBox(height: 32),
@@ -225,46 +244,222 @@ class _DashboardContent extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: LinkedInMetricCard(
-                      title: 'Total Legal Entities',
-                      value: legalEntityProvider.totalCount.toString(),
-                      icon: Icons.business,
-                      iconColor: AppTheme.primaryBlue,
-                      change: '+12%',
-                      isPositive: true,
+                    child: GlassCard(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    gradient: AppTheme.neonGradient,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Icon(
+                                    Icons.business,
+                                    color: AppTheme.primaryBlack,
+                                    size: 20,
+                                  ),
+                                ),
+                                const Spacer(),
+                                Text(
+                                  '+12%',
+                                  style: TextStyle(
+                                    color: AppTheme.neonGreen,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              legalEntityProvider.totalCount.toString(),
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.offWhite,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Total Legal Entities',
+                              style: TextStyle(
+                                color: AppTheme.lightGrayText,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: LinkedInMetricCard(
-                      title: 'Pending Approvals',
-                      value: legalEntityProvider.pendingCount.toString(),
-                      icon: Icons.pending,
-                      iconColor: AppTheme.warningOrange,
-                      change: '+5',
-                      isPositive: false,
+                    child: GlassCard(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    gradient: AppTheme.orangeGradient,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Icon(
+                                    Icons.pending,
+                                    color: AppTheme.primaryBlack,
+                                    size: 20,
+                                  ),
+                                ),
+                                const Spacer(),
+                                Text(
+                                  '+5',
+                                  style: TextStyle(
+                                    color: AppTheme.neonOrange,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              legalEntityProvider.pendingCount.toString(),
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.offWhite,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Pending Approvals',
+                              style: TextStyle(
+                                color: AppTheme.lightGrayText,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: LinkedInMetricCard(
-                      title: 'Approved',
-                      value: legalEntityProvider.approvedCount.toString(),
-                      icon: Icons.check_circle,
-                      iconColor: AppTheme.successGreen,
-                      change: '+8%',
-                      isPositive: true,
+                    child: GlassCard(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    gradient: AppTheme.neonGradient,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Icon(
+                                    Icons.check_circle,
+                                    color: AppTheme.primaryBlack,
+                                    size: 20,
+                                  ),
+                                ),
+                                const Spacer(),
+                                Text(
+                                  '+8%',
+                                  style: TextStyle(
+                                    color: AppTheme.neonGreen,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              legalEntityProvider.approvedCount.toString(),
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.offWhite,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Approved',
+                              style: TextStyle(
+                                color: AppTheme.lightGrayText,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: LinkedInMetricCard(
-                      title: 'Rejected',
-                      value: legalEntityProvider.rejectedCount.toString(),
-                      icon: Icons.cancel,
-                      iconColor: AppTheme.errorRed,
-                      change: '-2',
-                      isPositive: false,
+                    child: GlassCard(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    gradient: AppTheme.orangeGradient,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Icon(
+                                    Icons.cancel,
+                                    color: AppTheme.primaryBlack,
+                                    size: 20,
+                                  ),
+                                ),
+                                const Spacer(),
+                                Text(
+                                  '-2',
+                                  style: TextStyle(
+                                    color: AppTheme.neonOrange,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              legalEntityProvider.rejectedCount.toString(),
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.offWhite,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Rejected',
+                              style: TextStyle(
+                                color: AppTheme.lightGrayText,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -273,43 +468,127 @@ class _DashboardContent extends StatelessWidget {
               const SizedBox(height: 32),
 
               // Quick Actions
-              Text('Quick Actions', style: AppTheme.title1),
+              Text(
+                'Quick Actions',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.offWhite,
+                ),
+              ),
               const SizedBox(height: 16),
 
               Row(
                 children: [
                   Expanded(
-                    child: LinkedInActionCard(
-                      title: 'Create Legal Entity',
-                      description: 'Add a new legal entity to the platform',
-                      icon: Icons.add_business,
-                      iconColor: AppTheme.primaryBlue,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                const CreateLegalEntityScreen(),
+                    child: GlassCard(
+                      isHoverable: true,
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const CreateLegalEntityScreen(),
+                            ),
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(16),
+                        child: Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  gradient: AppTheme.neonGradient,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Icon(
+                                  Icons.add_business,
+                                  color: AppTheme.primaryBlack,
+                                  size: 32,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'Create Legal Entity',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.offWhite,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Add a new legal entity to the platform',
+                                style: TextStyle(
+                                  color: AppTheme.lightGrayText,
+                                  fontSize: 14,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
                           ),
-                        );
-                      },
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: LinkedInActionCard(
-                      title: 'View All Entities',
-                      description: 'Browse and manage all legal entities',
-                      icon: Icons.list_alt,
-                      iconColor: AppTheme.successGreen,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const LegalEntityListScreen(),
+                    child: GlassCard(
+                      isHoverable: true,
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const LegalEntityListScreen(),
+                            ),
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(16),
+                        child: Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  gradient: AppTheme.neonGradient,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Icon(
+                                  Icons.list_alt,
+                                  color: AppTheme.primaryBlack,
+                                  size: 32,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'View All Entities',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.offWhite,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Browse and manage all legal entities',
+                                style: TextStyle(
+                                  color: AppTheme.lightGrayText,
+                                  fontSize: 14,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
                           ),
-                        );
-                      },
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -320,26 +599,102 @@ class _DashboardContent extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: LinkedInActionCard(
-                      title: 'Manage Users',
-                      description: 'Add, edit, and manage user accounts',
-                      icon: Icons.people,
-                      iconColor: AppTheme.secondaryBlue,
-                      onTap: () {
-                        // Navigate to user management
-                      },
+                    child: GlassCard(
+                      isHoverable: true,
+                      child: InkWell(
+                        onTap: () {
+                          // Navigate to user management
+                        },
+                        borderRadius: BorderRadius.circular(16),
+                        child: Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  gradient: AppTheme.purpleGradient,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Icon(
+                                  Icons.people,
+                                  color: AppTheme.primaryBlack,
+                                  size: 32,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'Manage Users',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.offWhite,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Add, edit, and manage user accounts',
+                                style: TextStyle(
+                                  color: AppTheme.lightGrayText,
+                                  fontSize: 14,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: LinkedInActionCard(
-                      title: 'Send Invitations',
-                      description: 'Invite new users to join the platform',
-                      icon: Icons.email,
-                      iconColor: AppTheme.accentBlue,
-                      onTap: () {
-                        // Show invitation dialog
-                      },
+                    child: GlassCard(
+                      isHoverable: true,
+                      child: InkWell(
+                        onTap: () {
+                          // Show invitation dialog
+                        },
+                        borderRadius: BorderRadius.circular(16),
+                        child: Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  gradient: AppTheme.orangeGradient,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Icon(
+                                  Icons.email,
+                                  color: AppTheme.primaryBlack,
+                                  size: 32,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'Send Invitations',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.offWhite,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Invite new users to join the platform',
+                                style: TextStyle(
+                                  color: AppTheme.lightGrayText,
+                                  fontSize: 14,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -348,7 +703,14 @@ class _DashboardContent extends StatelessWidget {
               const SizedBox(height: 32),
 
               // Recent Activity
-              Text('Recent Activity', style: AppTheme.title1),
+              Text(
+                'Recent Activity',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.offWhite,
+                ),
+              ),
               const SizedBox(height: 16),
 
               _buildRecentActivityList(legalEntityProvider),
@@ -363,31 +725,35 @@ class _DashboardContent extends StatelessWidget {
     final recentEntities = provider.legalEntities.take(5).toList();
 
     if (recentEntities.isEmpty) {
-      return LinkedInCard(
-        padding: const EdgeInsets.all(40),
-        child: Center(
-          child: Column(
-            children: [
-              Icon(Icons.inbox, size: 48, color: AppTheme.textTertiary),
-              const SizedBox(height: 16),
-              Text(
-                'No recent activity',
-                style: AppTheme.body1.copyWith(color: AppTheme.textSecondary),
-              ),
-            ],
+      return GlassCard(
+        child: Padding(
+          padding: const EdgeInsets.all(40),
+          child: Center(
+            child: Column(
+              children: [
+                Icon(Icons.inbox, size: 48, color: AppTheme.lightGrayText),
+                const SizedBox(height: 16),
+                Text(
+                  'No recent activity',
+                  style: const TextStyle(
+                    color: AppTheme.lightGrayText,
+                    fontSize: 16,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );
     }
 
-    return LinkedInCard(
-      padding: EdgeInsets.zero,
+    return GlassCard(
       child: ListView.separated(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: recentEntities.length,
         separatorBuilder: (context, index) =>
-            Divider(color: AppTheme.borderGrey),
+            Divider(color: AppTheme.lightGray),
         itemBuilder: (context, index) {
           final entity = recentEntities[index];
           return ListTile(
@@ -406,11 +772,18 @@ class _DashboardContent extends StatelessWidget {
             ),
             title: Text(
               entity.legalName ?? 'Nome non specificato',
-              style: AppTheme.body1.copyWith(fontWeight: FontWeight.w600),
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                color: AppTheme.offWhite,
+                fontSize: 16,
+              ),
             ),
             subtitle: Text(
               entity.email ?? 'Email non specificata',
-              style: AppTheme.body2,
+              style: const TextStyle(
+                color: AppTheme.lightGrayText,
+                fontSize: 14,
+              ),
             ),
             trailing: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -424,9 +797,10 @@ class _DashboardContent extends StatelessWidget {
               ),
               child: Text(
                 entity.statusDisplayName,
-                style: AppTheme.caption.copyWith(
+                style: TextStyle(
                   color: _getStatusColor(entity.status),
                   fontWeight: FontWeight.w600,
+                  fontSize: 12,
                 ),
               ),
             ),
@@ -443,11 +817,11 @@ class _DashboardContent extends StatelessWidget {
   Color _getStatusColor(LegalEntityStatus status) {
     switch (status) {
       case LegalEntityStatus.pending:
-        return Colors.orange;
+        return AppTheme.neonOrange;
       case LegalEntityStatus.approved:
-        return Colors.green;
+        return AppTheme.neonGreen;
       case LegalEntityStatus.rejected:
-        return Colors.red;
+        return AppTheme.neonOrange;
     }
   }
 }
@@ -462,34 +836,47 @@ class _UsersContent extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('User Management', style: AppTheme.headline2),
+          Text(
+            'User Management',
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.offWhite,
+            ),
+          ),
           const SizedBox(height: 8),
           Text(
             'Manage user accounts and permissions across the platform.',
-            style: AppTheme.body1.copyWith(color: AppTheme.textSecondary),
+            style: const TextStyle(color: AppTheme.lightGrayText, fontSize: 16),
           ),
           const SizedBox(height: 32),
-          LinkedInCard(
-            child: Center(
-              child: Column(
-                children: [
-                  Icon(Icons.people, size: 64, color: AppTheme.textTertiary),
-                  const SizedBox(height: 16),
-                  Text(
-                    'User Management Coming Soon',
-                    style: AppTheme.title1.copyWith(
-                      color: AppTheme.textSecondary,
+          GlassCard(
+            child: Padding(
+              padding: const EdgeInsets.all(40),
+              child: Center(
+                child: Column(
+                  children: [
+                    Icon(Icons.people, size: 64, color: AppTheme.lightGrayText),
+                    const SizedBox(height: 16),
+                    Text(
+                      'User Management Coming Soon',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.lightGrayText,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Advanced user management features will be available in the next update.',
-                    style: AppTheme.body2.copyWith(
-                      color: AppTheme.textTertiary,
+                    const SizedBox(height: 8),
+                    Text(
+                      'Advanced user management features will be available in the next update.',
+                      style: const TextStyle(
+                        color: AppTheme.mediumGrayText,
+                        fontSize: 14,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -509,34 +896,51 @@ class _AnalyticsContent extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Analytics & Insights', style: AppTheme.headline2),
+          Text(
+            'Analytics & Insights',
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.offWhite,
+            ),
+          ),
           const SizedBox(height: 8),
           Text(
             'Track platform performance and user engagement metrics.',
-            style: AppTheme.body1.copyWith(color: AppTheme.textSecondary),
+            style: const TextStyle(color: AppTheme.lightGrayText, fontSize: 16),
           ),
           const SizedBox(height: 32),
-          LinkedInCard(
-            child: Center(
-              child: Column(
-                children: [
-                  Icon(Icons.analytics, size: 64, color: AppTheme.textTertiary),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Analytics Coming Soon',
-                    style: AppTheme.title1.copyWith(
-                      color: AppTheme.textSecondary,
+          GlassCard(
+            child: Padding(
+              padding: const EdgeInsets.all(40),
+              child: Center(
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.analytics,
+                      size: 64,
+                      color: AppTheme.lightGrayText,
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Comprehensive analytics and reporting features will be available in the next update.',
-                    style: AppTheme.body2.copyWith(
-                      color: AppTheme.textTertiary,
+                    const SizedBox(height: 16),
+                    Text(
+                      'Analytics Coming Soon',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.lightGrayText,
+                      ),
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    Text(
+                      'Comprehensive analytics and reporting features will be available in the next update.',
+                      style: const TextStyle(
+                        color: AppTheme.mediumGrayText,
+                        fontSize: 14,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -556,34 +960,51 @@ class _SettingsContent extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Platform Settings', style: AppTheme.headline2),
+          Text(
+            'Platform Settings',
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.offWhite,
+            ),
+          ),
           const SizedBox(height: 8),
           Text(
             'Configure platform settings and preferences.',
-            style: AppTheme.body1.copyWith(color: AppTheme.textSecondary),
+            style: const TextStyle(color: AppTheme.lightGrayText, fontSize: 16),
           ),
           const SizedBox(height: 32),
-          LinkedInCard(
-            child: Center(
-              child: Column(
-                children: [
-                  Icon(Icons.settings, size: 64, color: AppTheme.textTertiary),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Settings Coming Soon',
-                    style: AppTheme.title1.copyWith(
-                      color: AppTheme.textSecondary,
+          GlassCard(
+            child: Padding(
+              padding: const EdgeInsets.all(40),
+              child: Center(
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.settings,
+                      size: 64,
+                      color: AppTheme.lightGrayText,
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Advanced platform configuration options will be available in the next update.',
-                    style: AppTheme.body2.copyWith(
-                      color: AppTheme.textTertiary,
+                    const SizedBox(height: 16),
+                    Text(
+                      'Settings Coming Soon',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.lightGrayText,
+                      ),
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    Text(
+                      'Advanced platform configuration options will be available in the next update.',
+                      style: const TextStyle(
+                        color: AppTheme.mediumGrayText,
+                        fontSize: 14,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

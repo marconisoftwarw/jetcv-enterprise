@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../config/app_config.dart';
+import '../../theme/app_theme.dart';
+import '../../widgets/neon_button.dart';
+import '../../widgets/glass_card.dart';
 
 class PublicHomeScreen extends StatelessWidget {
   const PublicHomeScreen({super.key});
@@ -18,26 +21,19 @@ class PublicHomeScreen extends StatelessWidget {
               title: Text(
                 AppConfig.appName,
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.offWhite,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Color(AppConfig.primaryColorValue),
-                      Color(AppConfig.primaryColorValue).withOpacity(0.8),
-                    ],
-                  ),
+                decoration: const BoxDecoration(
+                  gradient: AppTheme.neonGradient,
                 ),
                 child: const Center(
                   child: Icon(
                     Icons.verified_user,
                     size: 80,
-                    color: Colors.white,
+                    color: AppTheme.primaryBlack,
                   ),
                 ),
               ),
@@ -74,15 +70,20 @@ class PublicHomeScreen extends StatelessWidget {
               padding: const EdgeInsets.all(24),
               child: Column(
                 children: [
-                  const Text(
+                  Text(
                     'Professional Certification Platform',
-                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                      color: AppTheme.offWhite,
+                      fontWeight: FontWeight.bold,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'Streamline your business verification process with our comprehensive legal entity management system.',
-                    style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: AppTheme.lightGrayText,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 32),
@@ -91,30 +92,25 @@ class PublicHomeScreen extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: ElevatedButton(
+                        child: NeonButton(
+                          text: 'View Pricing',
                           onPressed: () => Navigator.pushNamed(
                             context,
                             '/legal-entity/pricing',
                           ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(AppConfig.primaryColorValue),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                          ),
-                          child: const Text('View Pricing'),
+                          neonColor: AppTheme.neonGreen,
                         ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
-                        child: OutlinedButton(
+                        child: NeonButton(
+                          text: 'Register Company',
                           onPressed: () => Navigator.pushNamed(
                             context,
                             '/legal-entity/register',
                           ),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                          ),
-                          child: const Text('Register Company'),
+                          isOutlined: true,
+                          neonColor: AppTheme.neonBlue,
                         ),
                       ),
                     ],
@@ -123,31 +119,29 @@ class PublicHomeScreen extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: OutlinedButton.icon(
+                        child: NeonButton(
+                          text: 'Esplora CV',
                           onPressed: () {
                             Navigator.pushNamed(context, '/cv-list');
                           },
-                          icon: const Icon(Icons.description),
-                          label: const Text('Esplora CV'),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                          ),
+                          icon: Icons.description,
+                          isOutlined: true,
+                          neonColor: AppTheme.neonPurple,
                         ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
-                        child: OutlinedButton.icon(
+                        child: NeonButton(
+                          text: 'Pricing',
                           onPressed: () {
                             Navigator.pushNamed(
                               context,
                               '/legal-entity/pricing',
                             );
                           },
-                          icon: const Icon(Icons.price_check),
-                          label: const Text('Pricing'),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                          ),
+                          icon: Icons.price_check,
+                          isOutlined: true,
+                          neonColor: AppTheme.neonOrange,
                         ),
                       ),
                     ],
@@ -158,38 +152,38 @@ class PublicHomeScreen extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: OutlinedButton.icon(
+                        child: NeonButton(
+                          text: 'Create Certification',
                           onPressed: () {
                             // For public users, redirect to login/registration
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
+                              SnackBar(
                                 content: Text(
                                   'Please login to create certifications',
+                                  style: TextStyle(color: AppTheme.offWhite),
                                 ),
+                                backgroundColor: AppTheme.glassDark,
                               ),
                             );
                           },
-                          icon: const Icon(Icons.verified_user),
-                          label: const Text('Create Certification'),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                          ),
+                          icon: Icons.verified_user,
+                          isOutlined: true,
+                          neonColor: AppTheme.neonPink,
                         ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
-                        child: OutlinedButton.icon(
+                        child: NeonButton(
+                          text: 'Registra Azienda',
                           onPressed: () {
                             Navigator.pushNamed(
                               context,
                               '/legal-entity/register',
                             );
                           },
-                          icon: const Icon(Icons.business),
-                          label: const Text('Registra Azienda'),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                          ),
+                          icon: Icons.business,
+                          isOutlined: true,
+                          neonColor: AppTheme.neonBlue,
                         ),
                       ),
                     ],
@@ -206,9 +200,12 @@ class PublicHomeScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Key Features',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      color: AppTheme.offWhite,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 24),
 
@@ -267,17 +264,23 @@ class PublicHomeScreen extends StatelessWidget {
           SliverToBoxAdapter(
             child: Container(
               padding: const EdgeInsets.all(24),
-              color: Colors.grey[100],
+              color: AppTheme.darkGray,
               child: Column(
                 children: [
                   Text(
                     '© 2024 ${AppConfig.appName}. All rights reserved.',
-                    style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                    style: TextStyle(
+                      color: AppTheme.lightGrayText,
+                      fontSize: 14,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Professional certification and verification platform',
-                    style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                    style: TextStyle(
+                      color: AppTheme.mediumGrayText,
+                      fontSize: 12,
+                    ),
                   ),
                 ],
               ),
@@ -295,59 +298,57 @@ class PublicHomeScreen extends StatelessWidget {
     String? actionText,
     VoidCallback? onAction,
   }) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Row(
-          children: [
-            Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: Color(AppConfig.primaryColorValue).withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
+    return Builder(
+      builder: (context) {
+        return GlassCard(
+          isHoverable: true,
+          child: Row(
+            children: [
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  gradient: AppTheme.neonGradient,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: AppTheme.primaryBlack, size: 30),
               ),
-              child: Icon(
-                icon,
-                color: Color(AppConfig.primaryColorValue),
-                size: 30,
-              ),
-            ),
-            const SizedBox(width: 20),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    description,
-                    style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                  ),
-                  if (actionText != null && onAction != null) ...[
-                    const SizedBox(height: 12),
-                    TextButton(
-                      onPressed: onAction,
-                      child: Text(
-                        actionText,
-                        style: TextStyle(
-                          color: Color(AppConfig.primaryColorValue),
-                        ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: AppTheme.offWhite,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
+                    const SizedBox(height: 8),
+                    Text(
+                      description,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppTheme.lightGrayText,
+                      ),
+                    ),
+                    if (actionText != null && onAction != null) ...[
+                      const SizedBox(height: 12),
+                      NeonButton(
+                        text: actionText,
+                        onPressed: onAction,
+                        isOutlined: true,
+                        neonColor: AppTheme.neonBlue,
+                        height: 36,
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
-          ],
-        ),
-      ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

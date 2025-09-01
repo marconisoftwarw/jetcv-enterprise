@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/certification.dart';
-import '../../models/certification_support.dart';
 import '../../services/certification_service.dart';
 import '../../providers/auth_provider.dart';
 import '../../l10n/app_localizations.dart';
-import '../../widgets/custom_button.dart';
+import '../../widgets/neon_button.dart';
+import '../../widgets/glass_card.dart';
+import '../../theme/app_theme.dart';
 import '../../config/app_config.dart';
 import 'create_certification_screen.dart';
 
@@ -159,13 +160,13 @@ class _CertificationListScreenState extends State<CertificationListScreen> {
                       ),
                     ),
                     const SizedBox(width: 16),
-                    CustomButton(
+                    NeonButton(
                       onPressed: () {
                         Navigator.pushNamed(context, '/create-certification');
                       },
                       text: 'Nuova',
                       icon: Icons.add,
-                      variant: ButtonVariant.filled,
+                      neonColor: AppTheme.neonGreen,
                     ),
                   ],
                 ),
@@ -185,13 +186,13 @@ class _CertificationListScreenState extends State<CertificationListScreen> {
                         Icon(
                           Icons.verified_user,
                           size: 64,
-                          color: Colors.grey[400],
+                          color: AppTheme.lightGrayText,
                         ),
                         const SizedBox(height: 16),
                         Text(
                           'Nessuna certificazione trovata',
                           style: TextStyle(
-                            color: Colors.grey[600],
+                            color: AppTheme.lightGrayText,
                             fontSize: 16,
                           ),
                         ),
@@ -199,12 +200,12 @@ class _CertificationListScreenState extends State<CertificationListScreen> {
                         Text(
                           'Inizia creando la tua prima certificazione',
                           style: TextStyle(
-                            color: Colors.grey[500],
+                            color: AppTheme.mediumGrayText,
                             fontSize: 14,
                           ),
                         ),
                         const SizedBox(height: 24),
-                        CustomButton(
+                        NeonButton(
                           onPressed: () {
                             Navigator.pushNamed(
                               context,
@@ -213,7 +214,7 @@ class _CertificationListScreenState extends State<CertificationListScreen> {
                           },
                           text: 'Crea Certificazione',
                           icon: Icons.add,
-                          variant: ButtonVariant.filled,
+                          neonColor: AppTheme.neonGreen,
                         ),
                       ],
                     ),
@@ -236,7 +237,7 @@ class _CertificationListScreenState extends State<CertificationListScreen> {
   }
 
   Widget _buildCertificationCard(Certification certification) {
-    return Card(
+    return GlassCard(
       margin: const EdgeInsets.only(bottom: 16),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -331,31 +332,32 @@ class _CertificationListScreenState extends State<CertificationListScreen> {
             Row(
               children: [
                 Expanded(
-                  child: CustomButton(
+                  child: NeonButton(
                     onPressed: () => _viewCertificationDetails(certification),
                     text: 'Dettagli',
                     icon: Icons.visibility,
-                    variant: ButtonVariant.outlined,
+                    isOutlined: true,
+                    neonColor: AppTheme.neonBlue,
                   ),
                 ),
                 const SizedBox(width: 12),
                 if (certification.isDraft) ...[
                   Expanded(
-                    child: CustomButton(
+                    child: NeonButton(
                       onPressed: () => _editCertification(certification),
                       text: 'Modifica',
                       icon: Icons.edit,
-                      variant: ButtonVariant.filled,
+                      neonColor: AppTheme.neonGreen,
                     ),
                   ),
                 ],
                 if (!certification.isSynchronized) ...[
                   Expanded(
-                    child: CustomButton(
+                    child: NeonButton(
                       onPressed: () => _syncCertification(certification),
                       text: 'Sincronizza',
                       icon: Icons.sync,
-                      variant: ButtonVariant.filled,
+                      neonColor: AppTheme.neonPurple,
                     ),
                   ),
                 ],
@@ -373,31 +375,31 @@ class _CertificationListScreenState extends State<CertificationListScreen> {
 
     switch (status) {
       case CertificationStatus.draft:
-        color = Colors.grey;
+        color = AppTheme.lightGrayText;
         text = 'Bozza';
         break;
       case CertificationStatus.submitted:
-        color = Colors.blue;
+        color = AppTheme.neonBlue;
         text = 'Inviata';
         break;
       case CertificationStatus.approved:
-        color = Colors.green;
+        color = AppTheme.neonGreen;
         text = 'Approvata';
         break;
       case CertificationStatus.rejected:
-        color = Colors.red;
+        color = AppTheme.neonOrange;
         text = 'Rifiutata';
         break;
       case CertificationStatus.expired:
-        color = Colors.red;
+        color = AppTheme.neonOrange;
         text = 'Scaduta';
         break;
       case CertificationStatus.revoked:
-        color = Colors.red;
+        color = AppTheme.neonOrange;
         text = 'Revocata';
         break;
       case CertificationStatus.closed:
-        color = Colors.grey;
+        color = AppTheme.lightGrayText;
         text = 'Chiusa';
         break;
     }
@@ -405,7 +407,7 @@ class _CertificationListScreenState extends State<CertificationListScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: color),
       ),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'config/app_config.dart';
-import 'config/app_theme.dart';
+import 'theme/app_theme.dart';
 import 'providers/auth_provider.dart';
 import 'providers/legal_entity_provider.dart';
 import 'providers/locale_provider.dart';
@@ -123,7 +123,7 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
           locale: localeProvider.locale,
           supportedLocales: AppLocalizations.supportedLocales,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
-          theme: AppTheme.lightTheme,
+          theme: AppTheme.darkTheme,
           home: FutureBuilder(
             future: _initializationFuture,
             builder: (context, snapshot) {

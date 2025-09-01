@@ -4,8 +4,9 @@ import '../../models/certification.dart';
 import '../../models/user.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/certification_service.dart';
-import '../../widgets/custom_button.dart';
-import '../../widgets/custom_text_field.dart';
+import '../../widgets/neon_button.dart';
+import '../../widgets/neon_text_field.dart';
+import '../../theme/app_theme.dart';
 import '../../l10n/app_localizations.dart';
 import '../../config/app_config.dart';
 
@@ -347,7 +348,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               ),
               const SizedBox(height: 16),
 
-              CustomTextField(
+              NeonTextField(
                 controller: _titleController,
                 labelText: l10n.getString('certification_title'),
                 hintText: 'Inserisci il titolo della certificazione',
@@ -361,7 +362,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
 
               const SizedBox(height: 16),
 
-              CustomTextField(
+              NeonTextField(
                 controller: _codeController,
                 labelText: l10n.getString('certification_code'),
                 hintText: 'Inserisci il codice della certificazione',
@@ -375,7 +376,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
 
               const SizedBox(height: 16),
 
-              CustomTextField(
+              NeonTextField(
                 controller: _detailController,
                 labelText: l10n.getString('certification_detail'),
                 hintText: 'Inserisci i dettagli della certificazione',
@@ -399,20 +400,20 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: CustomButton(
+                    child: NeonButton(
                       onPressed: () => _captureMedia('camera'),
                       text: l10n.getString('camera'),
                       icon: Icons.camera_alt,
-                      variant: ButtonVariant.filled,
+                      neonColor: AppTheme.neonGreen,
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: CustomButton(
+                    child: NeonButton(
                       onPressed: () => _captureMedia('gallery'),
                       text: l10n.getString('gallery'),
                       icon: Icons.photo_library,
-                      variant: ButtonVariant.filled,
+                      neonColor: AppTheme.neonBlue,
                     ),
                   ),
                 ],
@@ -423,20 +424,20 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: CustomButton(
+                    child: NeonButton(
                       onPressed: () => _captureMedia('liveVideo'),
                       text: l10n.getString('live_video'),
                       icon: Icons.videocam,
-                      variant: ButtonVariant.filled,
+                      neonColor: AppTheme.neonPurple,
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: CustomButton(
+                    child: NeonButton(
                       onPressed: () => _captureMedia('fileAttachment'),
                       text: l10n.getString('file_attachment'),
                       icon: Icons.attach_file,
-                      variant: ButtonVariant.filled,
+                      neonColor: AppTheme.neonOrange,
                     ),
                   ),
                 ],
@@ -458,16 +459,22 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               const SizedBox(height: 16),
 
               if (_location != null) ...[
-                Text('Posizione: ${_location!}'),
+                Text(
+                  'Posizione: ${_location!}',
+                  style: const TextStyle(color: AppTheme.lightGrayText),
+                ),
               ] else ...[
-                Text('Posizione non disponibile'),
+                Text(
+                  'Posizione non disponibile',
+                  style: const TextStyle(color: AppTheme.mediumGrayText),
+                ),
               ],
 
-              CustomButton(
+              NeonButton(
                 onPressed: _getCurrentLocation,
                 text: 'Aggiorna Posizione',
                 icon: Icons.my_location,
-                variant: ButtonVariant.filled,
+                neonColor: AppTheme.neonGreen,
               ),
 
               const SizedBox(height: 32),
@@ -479,7 +486,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               ),
               const SizedBox(height: 16),
 
-              CustomTextField(
+              NeonTextField(
                 controller: _descriptionController,
                 labelText: l10n.getString('certification_description'),
                 hintText: 'Inserisci la descrizione della certificazione',
@@ -501,16 +508,19 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               ),
               const SizedBox(height: 16),
 
-              CustomButton(
+              NeonButton(
                 onPressed: _addAttachment,
                 text: 'Aggiungi Allegato',
                 icon: Icons.add,
-                variant: ButtonVariant.filled,
+                neonColor: AppTheme.neonBlue,
               ),
 
               if (_attachments.isNotEmpty) ...[
                 const SizedBox(height: 16),
-                Text('Allegati: ${_attachments.length}'),
+                Text(
+                  'Allegati: ${_attachments.length}',
+                  style: const TextStyle(color: AppTheme.lightGrayText),
+                ),
                 // Qui puoi mostrare la lista degli allegati
               ],
 
@@ -523,16 +533,19 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               ),
               const SizedBox(height: 16),
 
-              CustomButton(
+              NeonButton(
                 onPressed: _addUser,
                 text: l10n.getString('add_user'),
                 icon: Icons.person_add,
-                variant: ButtonVariant.filled,
+                neonColor: AppTheme.neonPurple,
               ),
 
               if (_users.isNotEmpty) ...[
                 const SizedBox(height: 16),
-                Text('Utenti: ${_users.length}'),
+                Text(
+                  'Utenti: ${_users.length}',
+                  style: const TextStyle(color: AppTheme.lightGrayText),
+                ),
                 // Qui puoi mostrare la lista degli utenti
               ],
 
@@ -545,7 +558,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               ),
               const SizedBox(height: 16),
 
-              CustomTextField(
+              NeonTextField(
                 controller: _resultController,
                 labelText: l10n.getString('certification_result'),
                 hintText: 'Inserisci l\'esito della certificazione',
@@ -564,9 +577,13 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               const SizedBox(height: 16),
 
               SwitchListTile(
-                title: Text('Salva offline'),
+                title: const Text(
+                  'Salva offline',
+                  style: TextStyle(color: AppTheme.offWhite),
+                ),
                 subtitle: Text(
                   'I dati verranno sincronizzati quando torni online',
+                  style: const TextStyle(color: AppTheme.lightGrayText),
                 ),
                 value: _isOffline,
                 onChanged: (value) {
@@ -582,23 +599,24 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: CustomButton(
+                    child: NeonButton(
                       onPressed: _isLoading
                           ? null
                           : () => Navigator.pop(context),
                       text: l10n.getString('cancel'),
-                      variant: ButtonVariant.outlined,
+                      isOutlined: true,
+                      neonColor: AppTheme.neonOrange,
                     ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: CustomButton(
+                    child: NeonButton(
                       onPressed: _isLoading ? null : _createCertification,
                       text: _isLoading
                           ? 'Creazione...'
                           : l10n.getString('save'),
                       isLoading: _isLoading,
-                      variant: ButtonVariant.filled,
+                      neonColor: AppTheme.neonGreen,
                     ),
                   ),
                 ],
@@ -613,11 +631,15 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   Widget _buildSectionHeader(String title, IconData icon) {
     return Row(
       children: [
-        Icon(icon, color: Color(AppConfig.primaryColorValue)),
+        Icon(icon, color: AppTheme.neonGreen),
         const SizedBox(width: 8),
         Text(
           title,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppTheme.offWhite,
+          ),
         ),
       ],
     );

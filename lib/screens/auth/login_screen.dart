@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/app_config.dart';
 import '../../providers/auth_provider.dart';
-import '../../widgets/custom_text_field.dart';
-import '../../widgets/custom_button.dart';
+import '../../theme/app_theme.dart';
+import '../../widgets/neon_text_field.dart';
+import '../../widgets/neon_button.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -109,26 +110,29 @@ class _LoginScreenState extends State<LoginScreen> {
                         width: 80,
                         height: 80,
                         decoration: BoxDecoration(
-                          color: Color(AppConfig.primaryColorValue),
+                          gradient: AppTheme.neonGradient,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: const Icon(
                           Icons.verified_user,
                           size: 40,
-                          color: Colors.white,
+                          color: AppTheme.primaryBlack,
                         ),
                       ),
                       const SizedBox(height: 24),
                       Text(
                         'Welcome Back',
                         style: Theme.of(context).textTheme.headlineMedium
-                            ?.copyWith(fontWeight: FontWeight.bold),
+                            ?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.offWhite,
+                            ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         'Sign in to your account',
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Colors.grey[600],
+                          color: AppTheme.lightGrayText,
                         ),
                       ),
                     ],
@@ -138,12 +142,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 48),
 
                 // Email Field
-                CustomTextField(
+                NeonTextField(
                   controller: _emailController,
                   labelText: 'Email',
                   hintText: 'Enter your email',
                   keyboardType: TextInputType.emailAddress,
-                  prefixIconData: Icons.email_outlined,
+                  prefixIcon: const Icon(Icons.email_outlined),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Email is required';
@@ -160,12 +164,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 20),
 
                 // Password Field
-                CustomTextField(
+                NeonTextField(
                   controller: _passwordController,
                   labelText: 'Password',
                   hintText: 'Enter password',
                   obscureText: _obscurePassword,
-                  prefixIconData: Icons.lock_outlined,
+                  prefixIcon: const Icon(Icons.lock_outlined),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscurePassword
@@ -205,12 +209,18 @@ class _LoginScreenState extends State<LoginScreen> {
                             });
                           },
                         ),
-                        const Text('Remember me'),
+                        Text(
+                          'Remember me',
+                          style: TextStyle(color: AppTheme.lightGrayText),
+                        ),
                       ],
                     ),
                     TextButton(
                       onPressed: _forgotPassword,
-                      child: const Text('Forgot Password?'),
+                      child: Text(
+                        'Forgot Password?',
+                        style: TextStyle(color: AppTheme.neonBlue),
+                      ),
                     ),
                   ],
                 ),
@@ -220,7 +230,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 // Sign In Button
                 Consumer<AuthProvider>(
                   builder: (context, authProvider, child) {
-                    return CustomButton(
+                    return NeonButton(
                       onPressed: authProvider.isLoading
                           ? null
                           : _signInWithEmail,
@@ -228,8 +238,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ? 'Signing In...'
                           : 'Sign In',
                       isLoading: authProvider.isLoading,
-                      fullWidth: true,
-                      variant: ButtonVariant.filled,
+                      neonColor: AppTheme.neonGreen,
                     );
                   },
                 ),
@@ -239,18 +248,18 @@ class _LoginScreenState extends State<LoginScreen> {
                 // Divider
                 Row(
                   children: [
-                    Expanded(child: Divider(color: Colors.grey[300])),
+                    Expanded(child: Divider(color: AppTheme.lightGray)),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
                         'OR',
                         style: TextStyle(
-                          color: Colors.grey[600],
+                          color: AppTheme.mediumGrayText,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
-                    Expanded(child: Divider(color: Colors.grey[300])),
+                    Expanded(child: Divider(color: AppTheme.lightGray)),
                   ],
                 ),
 
@@ -259,15 +268,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 // Google Sign In Button
                 Consumer<AuthProvider>(
                   builder: (context, authProvider, child) {
-                    return CustomButton(
+                    return NeonButton(
                       onPressed: authProvider.isLoading
                           ? null
                           : _signInWithGoogle,
                       text: 'Sign In with Google',
                       icon: Icons.g_mobiledata,
                       isLoading: authProvider.isLoading,
-                      fullWidth: true,
-                      variant: ButtonVariant.outlined,
+                      isOutlined: true,
+                      neonColor: AppTheme.neonBlue,
                     );
                   },
                 ),
@@ -280,11 +289,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     Text(
                       "Don't have an account? ",
-                      style: TextStyle(color: Colors.grey[600]),
+                      style: TextStyle(color: AppTheme.lightGrayText),
                     ),
                     TextButton(
                       onPressed: () => Navigator.pushNamed(context, '/signup'),
-                      child: const Text('Sign Up'),
+                      child: Text(
+                        'Sign Up',
+                        style: TextStyle(color: AppTheme.neonGreen),
+                      ),
                     ),
                   ],
                 ),
@@ -298,22 +310,28 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.red[50],
+                            color: AppTheme.neonOrange.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.red[200]!),
+                            border: Border.all(color: AppTheme.neonOrange),
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.error_outline, color: Colors.red[600]),
+                              Icon(
+                                Icons.error_outline,
+                                color: AppTheme.neonOrange,
+                              ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   authProvider.errorMessage!,
-                                  style: TextStyle(color: Colors.red[600]),
+                                  style: TextStyle(color: AppTheme.neonOrange),
                                 ),
                               ),
                               IconButton(
-                                icon: Icon(Icons.close, color: Colors.red[600]),
+                                icon: Icon(
+                                  Icons.close,
+                                  color: AppTheme.neonOrange,
+                                ),
                                 onPressed: authProvider.clearError,
                                 iconSize: 20,
                               ),

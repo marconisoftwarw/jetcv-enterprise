@@ -332,8 +332,6 @@ Questo è un messaggio automatico, non rispondere a questa email.
     }
   }
 
-
-
   // Metodo per testare la configurazione email
   Future<bool> testEmailConfiguration() async {
     try {

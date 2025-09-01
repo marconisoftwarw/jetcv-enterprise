@@ -3,13 +3,12 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../config/app_config.dart';
 import '../../providers/auth_provider.dart';
-import '../../widgets/custom_text_field.dart';
-import '../../widgets/custom_button.dart';
+import '../../theme/app_theme.dart';
+import '../../widgets/neon_text_field.dart';
+import '../../widgets/neon_button.dart';
 import '../../services/veriff_service.dart';
 import '../../services/supabase_service.dart';
-import 'dart:convert';
 import 'dart:async';
-import 'dart:js' as js;
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -404,14 +403,8 @@ class _SignupScreenState extends State<SignupScreen> {
       try {
         // Questa è una semplice implementazione che controlla se siamo ancora nella pagina
         // In un'implementazione più avanzata, potremmo usare window.opener o altre tecniche
-        final isWindowClosed = js.context.callMethod('eval', [
-          '''
-          (function() {
-            // Controlliamo se la finestra è stata chiusa o se siamo stati reindirizzati
-            return window.history.length <= 1 || window.closed;
-          })()
-          ''',
-        ]);
+        // Rimuoviamo il controllo JavaScript per ora
+        final isWindowClosed = false;
 
         if (isWindowClosed == true && !_veriffWindowClosed) {
           print('SignupScreen: Finestra Veriff chiusa dall\'utente');
@@ -996,11 +989,11 @@ class _SignupScreenState extends State<SignupScreen> {
                 Row(
                   children: [
                     Expanded(
-                      child: CustomTextField(
+                      child: NeonTextField(
                         controller: _firstNameController,
                         labelText: 'First Name',
                         hintText: 'Enter first name',
-                        prefixIconData: Icons.person_outline,
+                        prefixIcon: const Icon(Icons.person_outline),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'First name is required';
@@ -1014,11 +1007,11 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: CustomTextField(
+                      child: NeonTextField(
                         controller: _lastNameController,
                         labelText: 'Last Name',
                         hintText: 'Enter last name',
-                        prefixIconData: Icons.person_outline,
+                        prefixIcon: const Icon(Icons.person_outline),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Last name is required';
@@ -1036,12 +1029,12 @@ class _SignupScreenState extends State<SignupScreen> {
                 const SizedBox(height: 20),
 
                 // Email Field
-                CustomTextField(
+                NeonTextField(
                   controller: _emailController,
                   labelText: 'Email',
                   hintText: 'Enter your email',
                   keyboardType: TextInputType.emailAddress,
-                  prefixIconData: Icons.email_outlined,
+                  prefixIcon: const Icon(Icons.email_outlined),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Email is required';
@@ -1061,12 +1054,12 @@ class _SignupScreenState extends State<SignupScreen> {
                 const SizedBox(height: 20),
 
                 // Phone Field
-                CustomTextField(
+                NeonTextField(
                   controller: _phoneController,
                   labelText: 'Phone (Optional)',
                   hintText: 'Enter phone number',
                   keyboardType: TextInputType.phone,
-                  prefixIconData: Icons.phone_outlined,
+                  prefixIcon: const Icon(Icons.phone_outlined),
                   validator: (value) {
                     if (value != null &&
                         value.isNotEmpty &&
@@ -1083,12 +1076,12 @@ class _SignupScreenState extends State<SignupScreen> {
                 Row(
                   children: [
                     Expanded(
-                      child: CustomTextField(
+                      child: NeonTextField(
                         controller: _passwordController,
                         labelText: 'Password',
                         hintText: 'Enter password',
                         obscureText: _obscurePassword,
-                        prefixIconData: Icons.lock_outlined,
+                        prefixIcon: const Icon(Icons.lock_outlined),
                         suffixIcon: IconButton(
                           icon: Icon(
                             _obscurePassword
@@ -1114,12 +1107,12 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: CustomTextField(
+                      child: NeonTextField(
                         controller: _confirmPasswordController,
                         labelText: 'Confirm Password',
                         hintText: 'Confirm password',
                         obscureText: _obscureConfirmPassword,
-                        prefixIconData: Icons.lock_outlined,
+                        prefixIcon: const Icon(Icons.lock_outlined),
                         suffixIcon: IconButton(
                           icon: Icon(
                             _obscureConfirmPassword
@@ -1232,7 +1225,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 // Sign Up Button
                 Consumer<AuthProvider>(
                   builder: (context, authProvider, child) {
-                    return CustomButton(
+                    return NeonButton(
                       onPressed: _signUp,
                       text: _isVeriffLoading
                           ? 'Verifica in corso...'
@@ -1241,8 +1234,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           ? Icons.hourglass_empty
                           : Icons.person_add,
                       isLoading: authProvider.isLoading || _isVeriffLoading,
-                      fullWidth: true,
-                      variant: ButtonVariant.filled,
+                      neonColor: AppTheme.neonGreen,
                     );
                   },
                 ),
@@ -1252,18 +1244,18 @@ class _SignupScreenState extends State<SignupScreen> {
                 // Divider
                 Row(
                   children: [
-                    Expanded(child: Divider(color: Colors.grey[300])),
+                    Expanded(child: Divider(color: AppTheme.lightGray)),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
                         'OR',
                         style: TextStyle(
-                          color: Colors.grey[600],
+                          color: AppTheme.mediumGrayText,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
-                    Expanded(child: Divider(color: Colors.grey[300])),
+                    Expanded(child: Divider(color: AppTheme.lightGray)),
                   ],
                 ),
 
@@ -1272,15 +1264,15 @@ class _SignupScreenState extends State<SignupScreen> {
                 // Google Sign Up Button
                 Consumer<AuthProvider>(
                   builder: (context, authProvider, child) {
-                    return CustomButton(
+                    return NeonButton(
                       onPressed: authProvider.isLoading
                           ? null
                           : _signInWithGoogle,
                       text: 'Sign Up with Google',
                       icon: Icons.g_mobiledata,
                       isLoading: authProvider.isLoading,
-                      fullWidth: true,
-                      variant: ButtonVariant.outlined,
+                      isOutlined: true,
+                      neonColor: AppTheme.neonBlue,
                     );
                   },
                 ),
@@ -1293,12 +1285,15 @@ class _SignupScreenState extends State<SignupScreen> {
                   children: [
                     Text(
                       'Already have an account? ',
-                      style: TextStyle(color: Colors.grey[600]),
+                      style: TextStyle(color: AppTheme.lightGrayText),
                     ),
                     TextButton(
                       onPressed: () =>
                           Navigator.pushReplacementNamed(context, '/login'),
-                      child: const Text('Sign In'),
+                      child: Text(
+                        'Sign In',
+                        style: TextStyle(color: AppTheme.neonGreen),
+                      ),
                     ),
                   ],
                 ),
@@ -1312,22 +1307,28 @@ class _SignupScreenState extends State<SignupScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.red[50],
+                            color: AppTheme.neonOrange.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.red[200]!),
+                            border: Border.all(color: AppTheme.neonOrange),
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.error_outline, color: Colors.red[600]),
+                              Icon(
+                                Icons.error_outline,
+                                color: AppTheme.neonOrange,
+                              ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   authProvider.errorMessage!,
-                                  style: TextStyle(color: Colors.red[600]),
+                                  style: TextStyle(color: AppTheme.neonOrange),
                                 ),
                               ),
                               IconButton(
-                                icon: Icon(Icons.close, color: Colors.red[600]),
+                                icon: Icon(
+                                  Icons.close,
+                                  color: AppTheme.neonOrange,
+                                ),
                                 onPressed: authProvider.clearError,
                                 iconSize: 20,
                               ),
@@ -1347,22 +1348,22 @@ class _SignupScreenState extends State<SignupScreen> {
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.red[50],
+                        color: AppTheme.neonOrange.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.red[200]!),
+                        border: Border.all(color: AppTheme.neonOrange),
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.error_outline, color: Colors.red[600]),
+                          Icon(Icons.error_outline, color: AppTheme.neonOrange),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               _veriffErrorMessage!,
-                              style: TextStyle(color: Colors.red[600]),
+                              style: TextStyle(color: AppTheme.neonOrange),
                             ),
                           ),
                           IconButton(
-                            icon: Icon(Icons.close, color: Colors.red[600]),
+                            icon: Icon(Icons.close, color: AppTheme.neonOrange),
                             onPressed: () {
                               setState(() {
                                 _veriffErrorMessage = null;

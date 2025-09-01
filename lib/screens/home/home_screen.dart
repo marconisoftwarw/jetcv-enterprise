@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
-import '../../config/app_config.dart';
+import '../../theme/app_theme.dart';
+import '../../widgets/glass_card.dart';
 
 import '../certification/create_certification_screen.dart';
 import '../certification/certification_list_screen.dart';
@@ -38,6 +39,19 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
                 labelType: NavigationRailLabelType.all,
                 destinations: _buildNavigationDestinations(isAdmin),
+                backgroundColor: AppTheme.darkGray,
+                selectedIconTheme: const IconThemeData(
+                  color: AppTheme.neonGreen,
+                ),
+                unselectedIconTheme: const IconThemeData(
+                  color: AppTheme.lightGrayText,
+                ),
+                selectedLabelTextStyle: const TextStyle(
+                  color: AppTheme.neonGreen,
+                ),
+                unselectedLabelTextStyle: const TextStyle(
+                  color: AppTheme.lightGrayText,
+                ),
               ),
 
               // Main Content
@@ -124,6 +138,7 @@ class _DashboardContent extends StatelessWidget {
                 'Benvenuto, ${user.firstName}!',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
+                  color: AppTheme.offWhite,
                 ),
               ),
               const SizedBox(height: 32),
@@ -136,9 +151,10 @@ class _DashboardContent extends StatelessWidget {
               // Recent activity
               Text(
                 'Attività Recente',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.offWhite,
+                ),
               ),
               const SizedBox(height: 16),
               _buildRecentActivityList(),
@@ -201,28 +217,37 @@ class _DashboardContent extends StatelessWidget {
     IconData icon,
     VoidCallback onTap,
   ) {
-    return Card(
+    return GlassCard(
+      isHoverable: true,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(16),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-              Icon(icon, size: 32, color: Color(AppConfig.primaryColorValue)),
-              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  gradient: AppTheme.neonGradient,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, size: 32, color: AppTheme.primaryBlack),
+              ),
+              const SizedBox(height: 12),
               Text(
                 title,
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
+                  color: AppTheme.offWhite,
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 8),
               Text(
                 subtitle,
-                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                style: TextStyle(fontSize: 12, color: AppTheme.lightGrayText),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -233,25 +258,25 @@ class _DashboardContent extends StatelessWidget {
   }
 
   Widget _buildRecentActivityList() {
-    return Card(
+    return GlassCard(
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
             Row(
               children: [
-                Icon(Icons.history, color: Colors.grey[600]),
+                Icon(Icons.history, color: AppTheme.lightGrayText),
                 const SizedBox(width: 12),
                 Text(
                   'Nessuna attività recente',
-                  style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                  style: TextStyle(color: AppTheme.lightGrayText, fontSize: 16),
                 ),
               ],
             ),
             const SizedBox(height: 16),
             Text(
               'La tua attività apparirà qui una volta che inizierai a usare la piattaforma.',
-              style: TextStyle(color: Colors.grey[500], fontSize: 14),
+              style: TextStyle(color: AppTheme.mediumGrayText, fontSize: 14),
             ),
           ],
         ),
