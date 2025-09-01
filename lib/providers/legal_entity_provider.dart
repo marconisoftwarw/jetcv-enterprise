@@ -472,8 +472,13 @@ class LegalEntityProvider extends ChangeNotifier {
         email: email,
       );
 
+      // Ottieni i dati della legal entity per il link
+      final legalEntity = await _supabaseService.getLegalEntityById(legalEntityId);
+      final legalEntityData = legalEntity?.toJson();
+
       final emailSuccess = await emailService.sendLegalEntityInvitation(
         invitation,
+        legalEntityData: legalEntityData,
       );
 
       if (emailSuccess) {

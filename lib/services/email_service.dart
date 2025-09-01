@@ -13,8 +13,9 @@ class EmailService {
 
   // Metodo per inviare invito via email
   Future<bool> sendLegalEntityInvitation(
-    LegalEntityInvitation invitation,
-  ) async {
+    LegalEntityInvitation invitation, {
+    Map<String, dynamic>? legalEntityData,
+  }) async {
     try {
       // Per ora usiamo un servizio esterno come MailHog o simili
       // In produzione si può integrare con SendGrid, AWS SES, etc.
@@ -22,8 +23,8 @@ class EmailService {
       final emailData = {
         'to': invitation.email,
         'subject': 'Invito a unirsi a JetCV Enterprise',
-        'html': _generateInvitationEmailHTML(invitation),
-        'text': _generateInvitationEmailText(invitation),
+        'html': _generateInvitationEmailHTML(invitation, legalEntityData),
+        'text': _generateInvitationEmailText(invitation, legalEntityData),
       };
 
       // Opzione 1: MailHog per sviluppo locale
@@ -115,7 +116,13 @@ class EmailService {
 
 
   // Genera HTML per l'email di invito
-  String _generateInvitationEmailHTML(LegalEntityInvitation invitation) {
+  String _generateInvitationEmailHTML(
+    LegalEntityInvitation invitation,
+    Map<String, dynamic>? legalEntityData,
+  ) {
+    // Genera il link con i parametri della legal entity
+    final invitationLink = _generateInvitationLink(invitation, legalEntityData);
+    
     return '''
 <!DOCTYPE html>
 <html>
@@ -131,6 +138,7 @@ class EmailService {
         .button { display: inline-block; padding: 12px 24px; background: #4caf50; color: white; text-decoration: none; border-radius: 4px; margin: 20px 0; }
         .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
         .expiry { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 4px; margin: 20px 0; }
+        .entity-info { background: #e3f2fd; border: 1px solid #bbdefb; padding: 15px; border-radius: 4px; margin: 20px 0; }
     </style>
 </head>
 <body>
@@ -145,11 +153,21 @@ class EmailService {
             
             <p>Hai ricevuto un invito per unirti alla piattaforma JetCV Enterprise.</p>
             
+            ${legalEntityData != null ? '''
+            <div class="entity-info">
+                <h3>📋 Informazioni Entità Legale</h3>
+                <p><strong>Nome:</strong> ${legalEntityData['legal_name'] ?? 'N/A'}</p>
+                <p><strong>Codice Identificativo:</strong> ${legalEntityData['identifier_code'] ?? 'N/A'}</p>
+                <p><strong>Email:</strong> ${legalEntityData['email'] ?? 'N/A'}</p>
+                <p><strong>Rappresentante Legale:</strong> ${legalEntityData['legal_rapresentative'] ?? 'N/A'}</p>
+            </div>
+            ''' : ''}
+            
             <p><strong>Email:</strong> ${invitation.email}</p>
             <p><strong>Scadenza invito:</strong> ${invitation.expiresAt?.toString() ?? '7 giorni'}</p>
             
             <div style="text-align: center;">
-                <a href="${invitation.invitationLink}" class="button">
+                <a href="$invitationLink" class="button">
                     🎯 Accetta Invito
                 </a>
             </div>
@@ -174,7 +192,22 @@ class EmailService {
   }
 
   // Genera testo semplice per l'email di invito
-  String _generateInvitationEmailText(LegalEntityInvitation invitation) {
+  String _generateInvitationEmailText(
+    LegalEntityInvitation invitation,
+    Map<String, dynamic>? legalEntityData,
+  ) {
+    // Genera il link con i parametri della legal entity
+    final invitationLink = _generateInvitationLink(invitation, legalEntityData);
+    
+    final entityInfo = legalEntityData != null ? '''
+INFORMAZIONI ENTITÀ LEGALE:
+Nome: ${legalEntityData['legal_name'] ?? 'N/A'}
+Codice Identificativo: ${legalEntityData['identifier_code'] ?? 'N/A'}
+Email: ${legalEntityData['email'] ?? 'N/A'}
+Rappresentante Legale: ${legalEntityData['legal_rapresentative'] ?? 'N/A'}
+
+''' : '';
+    
     return '''
 JetCV Enterprise - Invito
 
@@ -182,11 +215,12 @@ Benvenuto in JetCV Enterprise!
 
 Hai ricevuto un invito per unirti alla piattaforma.
 
+$entityInfo
 Email: ${invitation.email}
 Scadenza invito: ${invitation.expiresAt?.toString() ?? '7 giorni'}
 
 Per accettare l'invito, visita questo link:
-${invitation.invitationLink}
+$invitationLink
 
 ⚠️ Attenzione: Questo invito scade il ${invitation.expiresAt?.toString() ?? 'tra 7 giorni'}.
 
@@ -197,6 +231,84 @@ Per assistenza, contatta il supporto tecnico.
 © 2024 JetCV Enterprise. Tutti i diritti riservati.
 Questo è un messaggio automatico, non rispondere a questa email.
     ''';
+  }
+
+  // Genera il link di invito con i parametri della legal entity
+  String _generateInvitationLink(
+    LegalEntityInvitation invitation,
+    Map<String, dynamic>? legalEntityData,
+  ) {
+    final baseUrl = AppConfig.appUrl;
+    final token = invitation.invitationToken;
+    
+    // Costruisci l'URL base
+    final url = Uri.parse('$baseUrl/legal-entity/register');
+    
+    // Aggiungi i parametri di query
+    final queryParams = <String, String>{
+      'token': token,
+      'email': invitation.email,
+    };
+    
+    // Aggiungi i parametri della legal entity se disponibili
+    if (legalEntityData != null) {
+      if (legalEntityData['legal_name'] != null) {
+        queryParams['legal_name'] = legalEntityData['legal_name'];
+      }
+      if (legalEntityData['identifier_code'] != null) {
+        queryParams['identifier_code'] = legalEntityData['identifier_code'];
+      }
+      if (legalEntityData['email'] != null) {
+        queryParams['entity_email'] = legalEntityData['email'];
+      }
+      if (legalEntityData['legal_rapresentative'] != null) {
+        queryParams['legal_rapresentative'] = legalEntityData['legal_rapresentative'];
+      }
+      if (legalEntityData['operational_address'] != null) {
+        queryParams['operational_address'] = legalEntityData['operational_address'];
+      }
+      if (legalEntityData['operational_city'] != null) {
+        queryParams['operational_city'] = legalEntityData['operational_city'];
+      }
+      if (legalEntityData['operational_postal_code'] != null) {
+        queryParams['operational_postal_code'] = legalEntityData['operational_postal_code'];
+      }
+      if (legalEntityData['operational_state'] != null) {
+        queryParams['operational_state'] = legalEntityData['operational_state'];
+      }
+      if (legalEntityData['operational_country'] != null) {
+        queryParams['operational_country'] = legalEntityData['operational_country'];
+      }
+      if (legalEntityData['headquarter_address'] != null) {
+        queryParams['headquarter_address'] = legalEntityData['headquarter_address'];
+      }
+      if (legalEntityData['headquarter_city'] != null) {
+        queryParams['headquarter_city'] = legalEntityData['headquarter_city'];
+      }
+      if (legalEntityData['headquarter_postal_code'] != null) {
+        queryParams['headquarter_postal_code'] = legalEntityData['headquarter_postal_code'];
+      }
+      if (legalEntityData['headquarter_state'] != null) {
+        queryParams['headquarter_state'] = legalEntityData['headquarter_state'];
+      }
+      if (legalEntityData['headquarter_country'] != null) {
+        queryParams['headquarter_country'] = legalEntityData['headquarter_country'];
+      }
+      if (legalEntityData['phone'] != null) {
+        queryParams['phone'] = legalEntityData['phone'];
+      }
+      if (legalEntityData['pec'] != null) {
+        queryParams['pec'] = legalEntityData['pec'];
+      }
+      if (legalEntityData['website'] != null) {
+        queryParams['website'] = legalEntityData['website'];
+      }
+    }
+    
+    // Costruisci l'URL finale con i parametri
+    final finalUrl = url.replace(queryParameters: queryParams);
+    
+    return finalUrl.toString();
   }
 
   // Metodo per verificare lo stato dell'email
