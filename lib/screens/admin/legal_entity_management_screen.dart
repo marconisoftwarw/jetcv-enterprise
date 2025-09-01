@@ -313,27 +313,86 @@ class _LegalEntityManagementScreenState
                   ),
                 ),
 
-                // Stato
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: _getStatusColor(entity.status).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: _getStatusColor(entity.status).withOpacity(0.3),
+                // Stato con possibilità di modifica
+                PopupMenuButton<LegalEntityStatus>(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _getStatusColor(entity.status).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: _getStatusColor(entity.status).withOpacity(0.3),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          entity.statusDisplayName,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: _getStatusColor(entity.status),
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Icon(
+                          Icons.arrow_drop_down,
+                          size: 16,
+                          color: _getStatusColor(entity.status),
+                        ),
+                      ],
                     ),
                   ),
-                  child: Text(
-                    entity.statusDisplayName,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: _getStatusColor(entity.status),
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: LegalEntityStatus.pending,
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.schedule,
+                            color: _getStatusColor(LegalEntityStatus.pending),
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          const Text('In Attesa'),
+                        ],
+                      ),
                     ),
-                  ),
+                    PopupMenuItem(
+                      value: LegalEntityStatus.approved,
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.check_circle,
+                            color: _getStatusColor(LegalEntityStatus.approved),
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          const Text('Approvata'),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: LegalEntityStatus.rejected,
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.cancel,
+                            color: _getStatusColor(LegalEntityStatus.rejected),
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          const Text('Rifiutata'),
+                        ],
+                      ),
+                    ),
+                  ],
+                  onSelected: (newStatus) =>
+                      _changeEntityStatus(entity, newStatus),
                 ),
               ],
             ),
@@ -385,35 +444,90 @@ class _LegalEntityManagementScreenState
                   label: const Text('Dettagli'),
                 ),
 
-                if (entity.isPending) ...[
-                  const SizedBox(width: 8),
-                  TextButton.icon(
-                    onPressed: () => _showEditEntityDialog(entity),
-                    icon: const Icon(Icons.edit),
-                    label: const Text('Modifica'),
+                const SizedBox(width: 8),
+                TextButton.icon(
+                  onPressed: () => _showEditEntityDialog(entity),
+                  icon: const Icon(Icons.edit),
+                  label: const Text('Modifica'),
+                ),
+
+                const SizedBox(width: 8),
+                PopupMenuButton<LegalEntityStatus>(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey[300]!),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.swap_horiz,
+                          size: 16,
+                          color: _getStatusColor(entity.status),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Cambia Stato',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: _getStatusColor(entity.status),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(width: 8),
-                  TextButton.icon(
-                    onPressed: () => _approveEntity(entity),
-                    icon: const Icon(Icons.check),
-                    label: const Text('Approva'),
-                    style: TextButton.styleFrom(foregroundColor: Colors.green),
-                  ),
-                  const SizedBox(width: 8),
-                  TextButton.icon(
-                    onPressed: () => _showRejectDialog(entity),
-                    icon: const Icon(Icons.close),
-                    label: const Text('Rifiuta'),
-                    style: TextButton.styleFrom(foregroundColor: Colors.red),
-                  ),
-                ] else ...[
-                  const SizedBox(width: 8),
-                  TextButton.icon(
-                    onPressed: () => _showEditEntityDialog(entity),
-                    icon: const Icon(Icons.edit),
-                    label: const Text('Modifica'),
-                  ),
-                ],
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: LegalEntityStatus.pending,
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.schedule,
+                            color: _getStatusColor(LegalEntityStatus.pending),
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          const Text('In Attesa'),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: LegalEntityStatus.approved,
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.check_circle,
+                            color: _getStatusColor(LegalEntityStatus.approved),
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          const Text('Approvata'),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: LegalEntityStatus.rejected,
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.cancel,
+                            color: _getStatusColor(LegalEntityStatus.rejected),
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          const Text('Rifiutata'),
+                        ],
+                      ),
+                    ),
+                  ],
+                  onSelected: (newStatus) =>
+                      _changeEntityStatus(entity, newStatus),
+                ),
 
                 const SizedBox(width: 8),
                 TextButton.icon(
@@ -445,7 +559,29 @@ class _LegalEntityManagementScreenState
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(entity.legalName ?? 'Dettagli Entità'),
+        title: Row(
+          children: [
+            Expanded(child: Text(entity.legalName ?? 'Dettagli Entità')),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: _getStatusColor(entity.status).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: _getStatusColor(entity.status).withOpacity(0.3),
+                ),
+              ),
+              child: Text(
+                entity.statusDisplayName,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: _getStatusColor(entity.status),
+                ),
+              ),
+            ),
+          ],
+        ),
         content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -486,6 +622,13 @@ class _LegalEntityManagementScreenState
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: const Text('Chiudi'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _showEditEntityDialog(entity);
+            },
+            child: const Text('Modifica'),
           ),
         ],
       ),
@@ -647,6 +790,163 @@ class _LegalEntityManagementScreenState
         ],
       ),
     );
+  }
+
+  Future<void> _changeEntityStatus(
+    LegalEntity entity,
+    LegalEntityStatus newStatus,
+  ) async {
+    // Se lo stato è lo stesso, non fare nulla
+    if (entity.status == newStatus) {
+      return;
+    }
+
+    // Mostra un dialog di conferma per il cambio di stato
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Modifica Stato Entità'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Sei sicuro di voler modificare lo stato dell\'entità "${entity.legalName ?? 'senza nome'}"?',
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Stato attuale: ${entity.statusDisplayName}',
+              style: TextStyle(
+                color: _getStatusColor(entity.status),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Nuovo stato: ${_getStatusDisplayName(newStatus)}',
+              style: TextStyle(
+                color: _getStatusColor(newStatus),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            if (newStatus == LegalEntityStatus.rejected) ...[
+              const SizedBox(height: 16),
+              const Text(
+                'Motivo del rifiuto (opzionale):',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: TextEditingController(),
+                maxLines: 2,
+                decoration: const InputDecoration(
+                  hintText: 'Inserisci il motivo del rifiuto...',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Annulla'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(
+              foregroundColor: _getStatusColor(newStatus),
+            ),
+            child: const Text('Conferma'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) {
+      return;
+    }
+
+    final provider = context.read<LegalEntityProvider>();
+    bool success = false;
+    String? rejectionReason;
+
+    // Se il nuovo stato è rejected, chiedi il motivo
+    if (newStatus == LegalEntityStatus.rejected) {
+      final reasonController = TextEditingController();
+      final reasonConfirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Motivo del Rifiuto'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Inserisci il motivo del rifiuto:'),
+              const SizedBox(height: 16),
+              TextField(
+                controller: reasonController,
+                maxLines: 3,
+                decoration: const InputDecoration(
+                  hintText: 'Motivo del rifiuto...',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Annulla'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text('Rifiuta'),
+            ),
+          ],
+        ),
+      );
+
+      if (reasonConfirmed == true) {
+        rejectionReason = reasonController.text.isNotEmpty
+            ? reasonController.text
+            : 'Nessun motivo specificato';
+      } else {
+        return; // User cancelled
+      }
+    }
+
+    // Usa il nuovo metodo unificato per l'aggiornamento dello stato
+    success = await provider.updateLegalEntityStatus(
+      entity.idLegalEntity,
+      newStatus,
+      rejectionReason: rejectionReason,
+    );
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Stato dell\'entità modificato con successo in "${_getStatusDisplayName(newStatus)}"',
+          ),
+          backgroundColor: _getStatusColor(newStatus),
+        ),
+      );
+      _loadLegalEntities();
+    } else {
+      _loadLegalEntities();
+    }
+  }
+
+  String _getStatusDisplayName(LegalEntityStatus status) {
+    switch (status) {
+      case LegalEntityStatus.pending:
+        return 'In Attesa';
+      case LegalEntityStatus.approved:
+        return 'Approvata';
+      case LegalEntityStatus.rejected:
+        return 'Rifiutata';
+    }
   }
 }
 
@@ -846,6 +1146,85 @@ class _LegalEntityFormDialogState extends State<LegalEntityFormDialog> {
                           ),
                         ],
                       ),
+
+                      const SizedBox(height: 16),
+
+                      // Campo Stato (solo per la modifica)
+                      if (isEditing)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey[300]!),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: DropdownButtonFormField<String>(
+                            value: _controllers['status']!.text.isNotEmpty
+                                ? _controllers['status']!.text
+                                : 'pending',
+                            decoration: const InputDecoration(
+                              labelText: 'Stato *',
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.symmetric(
+                                vertical: 16,
+                              ),
+                            ),
+                            items: [
+                              DropdownMenuItem(
+                                value: 'pending',
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.schedule,
+                                      color: _getStatusColor(
+                                        LegalEntityStatus.pending,
+                                      ),
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    const Text('In Attesa'),
+                                  ],
+                                ),
+                              ),
+                              DropdownMenuItem(
+                                value: 'approved',
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.check_circle,
+                                      color: _getStatusColor(
+                                        LegalEntityStatus.approved,
+                                      ),
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    const Text('Approvata'),
+                                  ],
+                                ),
+                              ),
+                              DropdownMenuItem(
+                                value: 'rejected',
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.cancel,
+                                      color: _getStatusColor(
+                                        LegalEntityStatus.rejected,
+                                      ),
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    const Text('Rifiutata'),
+                                  ],
+                                ),
+                              ),
+                            ],
+                            onChanged: (value) {
+                              if (value != null) {
+                                _controllers['status']!.text = value;
+                              }
+                            },
+                          ),
+                        ),
 
                       const SizedBox(height: 16),
 
@@ -1116,6 +1495,17 @@ class _LegalEntityFormDialogState extends State<LegalEntityFormDialog> {
       );
     } else {
       Navigator.of(context).pop();
+    }
+  }
+
+  Color _getStatusColor(LegalEntityStatus status) {
+    switch (status) {
+      case LegalEntityStatus.pending:
+        return Colors.orange;
+      case LegalEntityStatus.approved:
+        return Colors.green;
+      case LegalEntityStatus.rejected:
+        return Colors.red;
     }
   }
 }

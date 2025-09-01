@@ -305,6 +305,62 @@ class LegalEntityProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> updateLegalEntityStatus(
+    String id,
+    LegalEntityStatus newStatus, {
+    String? rejectionReason,
+  }) async {
+    _setLoading(true);
+    _clearError();
+
+    try {
+      // Ensure user is authenticated before proceeding
+      if (!await ensureAuthentication()) {
+        return false;
+      }
+
+      print(
+        '🔄 LegalEntityProvider: Updating legal entity status: $id to ${newStatus.toString().split('.').last}',
+      );
+
+      final updateData = <String, dynamic>{
+        'id_legal_entity': id,
+        'status': newStatus.toString().split('.').last,
+        'updated_at': DateTime.now().toIso8601String(),
+      };
+
+      // Add rejection reason if provided
+      if (newStatus == LegalEntityStatus.rejected && rejectionReason != null) {
+        updateData['rejection_reason'] = rejectionReason;
+      }
+
+      final updatedEntity = await _supabaseService.upsertLegalEntity(
+        updateData,
+      );
+      if (updatedEntity != null) {
+        // Update local state
+        final index = _legalEntities.indexWhere((e) => e.idLegalEntity == id);
+        if (index != -1) {
+          _legalEntities[index] = updatedEntity;
+          notifyListeners();
+        }
+        print(
+          '✅ LegalEntityProvider: Legal entity status updated successfully',
+        );
+        return true;
+      }
+
+      _setError('Failed to update legal entity status');
+      return false;
+    } catch (e) {
+      print('❌ LegalEntityProvider: Error updating legal entity status: $e');
+      _setError('Error updating legal entity status: $e');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   Future<bool> deleteLegalEntity(String id) async {
     _setLoading(true);
     _clearError();

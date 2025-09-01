@@ -89,7 +89,7 @@ class _SignupScreenState extends State<SignupScreen> {
       lastName: _lastNameController.text.trim(),
     );
 
-     await _startVeriffVerification();
+    await _startVeriffVerification();
   }
 
   Future<void> _signInWithGoogle() async {
