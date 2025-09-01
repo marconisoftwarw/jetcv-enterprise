@@ -86,10 +86,6 @@ class EmailService {
         headers: {
           'accept': 'application/json',
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
-          'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept, Authorization, X-API-KEY',
-          'Access-Control-Allow-Credentials': 'true',
         },
         body: jsonEncode({
           'to': emailData['to'],
@@ -220,7 +216,7 @@ Questo è un messaggio automatico, non rispondere a questa email.
     try {
       print('🧪 Testing Local API configuration...');
       
-      final apiUrl = 'http://localhost:4000/api/email/send';
+      final apiUrl = 'http://18.102.14.247:4000/api/email/send';
       final fromEmail = _fromEmail;
       
       print('API URL: $apiUrl');
