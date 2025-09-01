@@ -46,8 +46,9 @@ dependencies:
   # HTTP & API
   http: ^1.2.0
   
-  # SMTP for Gmail
+  # Email services
   mailer: ^6.0.1
+  emailjs: ^1.0.0
   
   # Image handling
   image_picker: ^1.0.7

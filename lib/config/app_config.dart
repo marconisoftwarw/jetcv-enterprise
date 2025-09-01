@@ -63,6 +63,22 @@ class AppConfig {
     defaultValue: 'JetCV Enterprise',
   );
 
+  // EmailJS configuration for web
+  static const String emailjsServiceId = String.fromEnvironment(
+    'EMAILJS_SERVICE_ID',
+    defaultValue: 'service_jetcv_gmail',
+  );
+
+  static const String emailjsTemplateId = String.fromEnvironment(
+    'EMAILJS_TEMPLATE_ID',
+    defaultValue: 'template_x6ldhfg',
+  );
+
+  static const String emailjsPublicKey = String.fromEnvironment(
+    'EMAILJS_PUBLIC_KEY',
+    defaultValue: 'uFYLKdj5-MkIWARul',
+  );
+
   // Feature flags
   static const bool enableGoogleSignIn = true;
   static const bool enableEmailSignIn = true;

@@ -775,6 +775,9 @@ class _LegalEntityManagementScreenState
               final authProvider = context.read<AuthProvider>();
               final adminId = authProvider.currentUser?.idUser;
 
+              // Salva il ScaffoldMessenger prima dell'operazione asincrona
+              final scaffoldMessenger = ScaffoldMessenger.of(context);
+
               final success = await context
                   .read<LegalEntityProvider>()
                   .rejectLegalEntity(
@@ -786,7 +789,7 @@ class _LegalEntityManagementScreenState
 
               if (mounted) {
                 if (success) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  scaffoldMessenger.showSnackBar(
                     const SnackBar(
                       content: Text('Entità rifiutata con successo'),
                     ),
@@ -819,6 +822,10 @@ class _LegalEntityManagementScreenState
           TextButton(
             onPressed: () async {
               final provider = context.read<LegalEntityProvider>();
+              
+              // Salva il ScaffoldMessenger prima dell'operazione asincrona
+              final scaffoldMessenger = ScaffoldMessenger.of(context);
+              
               final success = await provider.deleteLegalEntity(
                 entity.idLegalEntity,
               );
@@ -827,7 +834,7 @@ class _LegalEntityManagementScreenState
 
               if (mounted) {
                 if (success) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  scaffoldMessenger.showSnackBar(
                     const SnackBar(
                       content: Text('Entità eliminata con successo'),
                     ),
@@ -835,7 +842,7 @@ class _LegalEntityManagementScreenState
                   // Ricarica la lista
                   await provider.refreshLegalEntities();
                 } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  scaffoldMessenger.showSnackBar(
                     const SnackBar(
                       content: Text('Errore nell\'eliminazione dell\'entità'),
                     ),
@@ -975,6 +982,9 @@ class _LegalEntityManagementScreenState
       }
     }
 
+    // Salva il ScaffoldMessenger prima dell'operazione asincrona
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
     // Usa il nuovo metodo unificato per l'aggiornamento dello stato
     success = await provider.updateLegalEntityStatus(
       entity.idLegalEntity,
@@ -984,7 +994,7 @@ class _LegalEntityManagementScreenState
 
     if (mounted) {
       if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        scaffoldMessenger.showSnackBar(
           SnackBar(
             content: Text(
               'Stato dell\'entità modificato con successo in "${_getStatusDisplayName(newStatus)}"',
@@ -1940,6 +1950,9 @@ class _LegalEntityFormDialogState extends State<LegalEntityFormDialog> {
     final provider = context.read<LegalEntityProvider>();
     final entityData = <String, dynamic>{};
 
+    // Salva il ScaffoldMessenger prima dell'operazione asincrona
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
     // Raccogli i dati dal form
     _controllers.forEach((key, controller) {
       if (controller.text.isNotEmpty) {
@@ -1970,7 +1983,7 @@ class _LegalEntityFormDialogState extends State<LegalEntityFormDialog> {
     if (mounted) {
       if (success) {
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
+        scaffoldMessenger.showSnackBar(
           SnackBar(
             content: Text(
               widget.entity != null

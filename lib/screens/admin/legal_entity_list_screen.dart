@@ -559,10 +559,13 @@ class _LegalEntityListScreenState extends State<LegalEntityListScreen> {
     );
 
     if (confirmed == true) {
+      // Salva il ScaffoldMessenger prima dell'operazione asincrona
+      final scaffoldMessenger = ScaffoldMessenger.of(context);
+      
       final success = await provider.approveLegalEntity(entity.idLegalEntity);
 
       if (success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        scaffoldMessenger.showSnackBar(
           SnackBar(
             content: Text('${entity.legalName} has been approved'),
             backgroundColor: Colors.green,

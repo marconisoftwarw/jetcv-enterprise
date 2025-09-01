@@ -1,7 +1,5 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:mailer/mailer.dart';
-import 'package:mailer/smtp_server.dart';
 import '../models/legal_entity_invitation.dart';
 import '../config/app_config.dart';
 
@@ -10,9 +8,8 @@ class EmailService {
   factory EmailService() => _instance;
   EmailService._internal();
 
-  // Configurazione email Gmail
+  // Configurazione email
   static const String _fromEmail = AppConfig.gmailFromEmail;
-  static const String _fromName = AppConfig.gmailFromName;
 
   // Metodo per inviare invito via email
   Future<bool> sendLegalEntityInvitation(
@@ -64,39 +61,13 @@ class EmailService {
     }
   }
 
-  // Metodo per inviare via Gmail SMTP
+  // Metodo per inviare via API locale
   Future<bool> _sendViaExternalService(Map<String, dynamic> emailData) async {
     try {
-      // Configurazione SMTP Gmail
-      final smtpServer = SmtpServer(
-        AppConfig.gmailHost,
-        port: AppConfig.gmailPort,
-        username: AppConfig.gmailUsername,
-        password: AppConfig.gmailPassword,
-        ssl: false,
-        allowInsecure: false,
-      );
-
-      // Creazione del messaggio
-      final message = Message()
-        ..from = Address(_fromEmail, _fromName)
-        ..recipients.add(emailData['to'])
-        ..subject = emailData['subject']
-        ..html = emailData['html']
-        ..text = emailData['text'];
-
-      // Invio email
-      final sendReport = await send(message, smtpServer);
-
-      print(
-        '✅ Email sent successfully via Gmail SMTP to ${emailData['to']}: ${emailData['subject']}',
-      );
-      print('Send report: $sendReport');
-
-      return true;
+      return await _sendViaLocalAPI(emailData);
     } catch (e) {
-      print('❌ Error sending via Gmail SMTP: $e');
-
+      print('❌ Error sending email: $e');
+      
       // Fallback: simulazione per test
       print('🔄 Falling back to simulation for testing...');
       await Future.delayed(const Duration(seconds: 1));
@@ -106,6 +77,46 @@ class EmailService {
       return true;
     }
   }
+
+  // Metodo per inviare via API locale
+  Future<bool> _sendViaLocalAPI(Map<String, dynamic> emailData) async {
+    try {
+      final response = await http.post(
+        Uri.parse('http://18.102.14.247:4000/api/email/send'),
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+          'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept, Authorization, X-API-KEY',
+          'Access-Control-Allow-Credentials': 'true',
+        },
+        body: jsonEncode({
+          'to': emailData['to'],
+          'subject': emailData['subject'],
+          'text': emailData['text'],
+          'html': emailData['html'],
+          'from': _fromEmail,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print(
+          '✅ Email sent successfully via Local API to ${emailData['to']}: ${emailData['subject']}',
+        );
+        print('API response: ${response.body}');
+        return true;
+      } else {
+        print('❌ Error sending via Local API. Status: ${response.statusCode}, Body: ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      print('❌ Error sending via Local API: $e');
+      rethrow;
+    }
+  }
+
+
 
   // Genera HTML per l'email di invito
   String _generateInvitationEmailHTML(LegalEntityInvitation invitation) {
@@ -204,42 +215,36 @@ Questo è un messaggio automatico, non rispondere a questa email.
     }
   }
 
-  // Metodo per testare la configurazione Gmail SMTP
+    // Metodo per testare la configurazione email
   Future<bool> testEmailConfiguration() async {
     try {
-      print('🧪 Testing Gmail SMTP configuration...');
-
-      final host = AppConfig.gmailHost;
-      final port = AppConfig.gmailPort;
-      final username = AppConfig.gmailUsername;
-      final password = AppConfig.gmailPassword;
-
-      print('Host: $host');
-      print('Port: $port');
-      print('Username: $username');
-      print('Password: ${password.substring(0, 4)}...');
-
+      print('🧪 Testing Local API configuration...');
+      
+      final apiUrl = 'http://localhost:4000/api/email/send';
+      final fromEmail = _fromEmail;
+      
+      print('API URL: $apiUrl');
+      print('From Email: $fromEmail');
+      
       // Test con email di prova
       final testEmailData = {
         'to': 'test@example.com',
-        'subject': 'Test Gmail SMTP Configuration',
-        'html':
-            '<h1>Test Email</h1><p>This is a test email to verify Gmail SMTP configuration.</p>',
-        'text':
-            'Test Email\n\nThis is a test email to verify Gmail SMTP configuration.',
+        'subject': 'Test Email Configuration',
+        'html': '<h1>Test Email</h1><p>This is a test email to verify email configuration.</p>',
+        'text': 'Test Email\n\nThis is a test email to verify email configuration.',
       };
-
+      
       final result = await _sendViaExternalService(testEmailData);
-
+      
       if (result) {
-        print('✅ Gmail SMTP configuration test successful!');
+        print('✅ Email configuration test successful!');
       } else {
-        print('❌ Gmail SMTP configuration test failed!');
+        print('❌ Email configuration test failed!');
       }
-
+      
       return result;
     } catch (e) {
-      print('❌ Error testing Gmail SMTP configuration: $e');
+      print('❌ Error testing email configuration: $e');
       return false;
     }
   }

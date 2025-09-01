@@ -265,6 +265,9 @@ class _InviteCertifierScreenState extends State<InviteCertifierScreen> {
       _isLoading = true;
     });
 
+    // Salva il ScaffoldMessenger prima dell'operazione asincrona
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
     try {
       final certifierProvider = context.read<CertifierProvider>();
 
@@ -287,7 +290,7 @@ class _InviteCertifierScreenState extends State<InviteCertifierScreen> {
       if (success) {
         if (mounted) {
           Navigator.of(context).pop();
-          ScaffoldMessenger.of(context).showSnackBar(
+          scaffoldMessenger.showSnackBar(
             SnackBar(
               content: Text(
                 'Invito inviato con successo a ${_emailController.text.trim()}',
@@ -298,7 +301,7 @@ class _InviteCertifierScreenState extends State<InviteCertifierScreen> {
         }
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          scaffoldMessenger.showSnackBar(
             SnackBar(
               content: Text(
                 'Errore nell\'invio dell\'invito: ${certifierProvider.errorMessage}',
@@ -310,7 +313,7 @@ class _InviteCertifierScreenState extends State<InviteCertifierScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        scaffoldMessenger.showSnackBar(
           SnackBar(
             content: Text('Errore nell\'invio dell\'invito: $e'),
             backgroundColor: AppTheme.errorRed,
