@@ -822,10 +822,10 @@ class _LegalEntityManagementScreenState
           TextButton(
             onPressed: () async {
               final provider = context.read<LegalEntityProvider>();
-              
+
               // Salva il ScaffoldMessenger prima dell'operazione asincrona
               final scaffoldMessenger = ScaffoldMessenger.of(context);
-              
+
               final success = await provider.deleteLegalEntity(
                 entity.idLegalEntity,
               );

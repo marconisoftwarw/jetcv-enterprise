@@ -51,6 +51,14 @@ class PublicHomeScreen extends StatelessWidget {
                 ),
               ),
               TextButton(
+                onPressed: () =>
+                    Navigator.pushNamed(context, '/legal-entity/pricing'),
+                child: const Text(
+                  'Pricing',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+              TextButton(
                 onPressed: () => Navigator.pushNamed(context, '/login'),
                 child: const Text(
                   'Login',
@@ -84,21 +92,25 @@ class PublicHomeScreen extends StatelessWidget {
                     children: [
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: () =>
-                              Navigator.pushNamed(context, '/signup'),
+                          onPressed: () => Navigator.pushNamed(
+                            context,
+                            '/legal-entity/pricing',
+                          ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color(AppConfig.primaryColorValue),
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                           ),
-                          child: const Text('Get Started'),
+                          child: const Text('View Pricing'),
                         ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: () =>
-                              Navigator.pushNamed(context, '/signup'),
+                          onPressed: () => Navigator.pushNamed(
+                            context,
+                            '/legal-entity/register',
+                          ),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 16),
                           ),
@@ -129,6 +141,26 @@ class PublicHomeScreen extends StatelessWidget {
                       Expanded(
                         child: OutlinedButton.icon(
                           onPressed: () {
+                            Navigator.pushNamed(
+                              context,
+                              '/legal-entity/pricing',
+                            );
+                          },
+                          icon: const Icon(Icons.price_check),
+                          label: const Text('Pricing'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () {
                             // For public users, redirect to login/registration
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -140,6 +172,22 @@ class PublicHomeScreen extends StatelessWidget {
                           },
                           icon: const Icon(Icons.verified_user),
                           label: const Text('Create Certification'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () {
+                            Navigator.pushNamed(
+                              context,
+                              '/legal-entity/register',
+                            );
+                          },
+                          icon: const Icon(Icons.business),
+                          label: const Text('Registra Azienda'),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 16),
                           ),
@@ -182,9 +230,9 @@ class PublicHomeScreen extends StatelessWidget {
                     title: 'Legal Entity Management',
                     description:
                         'Comprehensive management of legal entities and compliance.',
-                    actionText: 'Get Started',
+                    actionText: 'View Pricing',
                     onAction: () {
-                      // Navigate to legal entity management
+                      Navigator.pushNamed(context, '/legal-entity/pricing');
                     },
                   ),
                   const SizedBox(height: 16),

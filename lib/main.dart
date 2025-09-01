@@ -7,6 +7,7 @@ import 'providers/auth_provider.dart';
 import 'providers/legal_entity_provider.dart';
 import 'providers/locale_provider.dart';
 import 'providers/certifier_provider.dart';
+import 'providers/pricing_provider.dart';
 import 'models/user.dart';
 import 'l10n/app_localizations.dart';
 import 'screens/splash_screen.dart';
@@ -20,6 +21,8 @@ import 'screens/profile/user_profile_screen.dart';
 import 'screens/settings/user_settings_screen.dart';
 import 'screens/veriff/veriff_verification_screen.dart';
 import 'screens/public/cv_list_screen.dart';
+import 'screens/public/legal_entity_pricing_screen.dart';
+import 'screens/public/legal_entity_public_registration_screen.dart';
 import 'screens/legal_entity/legal_entity_registration_screen.dart';
 
 void main() async {
@@ -39,6 +42,7 @@ class JetCVEnterpriseApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => LegalEntityProvider()),
         ChangeNotifierProvider(create: (_) => LocaleProvider()),
         ChangeNotifierProvider(create: (_) => CertifierProvider()),
+        ChangeNotifierProvider(create: (_) => PricingProvider()),
       ],
       child: const AppContent(),
     );
@@ -158,6 +162,10 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
             '/settings': (context) => const UserSettingsScreen(),
             '/veriff': (context) => const VeriffVerificationScreen(),
             '/cv-list': (context) => const CVListScreen(),
+            '/legal-entity/pricing': (context) =>
+                const LegalEntityPricingScreen(),
+            '/legal-entity/register': (context) =>
+                const LegalEntityPublicRegistrationScreen(),
             '/legal-entity-registration': (context) =>
                 const LegalEntityRegistrationScreen(),
           },
@@ -198,6 +206,14 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
                 );
               case '/cv-list':
                 return MaterialPageRoute(builder: (_) => const CVListScreen());
+              case '/legal-entity/pricing':
+                return MaterialPageRoute(
+                  builder: (_) => const LegalEntityPricingScreen(),
+                );
+              case '/legal-entity/register':
+                return MaterialPageRoute(
+                  builder: (_) => const LegalEntityPublicRegistrationScreen(),
+                );
               case '/legal-entity-registration':
                 return MaterialPageRoute(
                   builder: (_) => const LegalEntityRegistrationScreen(),

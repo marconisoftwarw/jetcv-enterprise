@@ -2,193 +2,96 @@ import '../models/pricing.dart';
 import '../config/app_config.dart';
 
 class PricingService {
-  // Carica tutti i pricing disponibili
-  Future<List<Pricing>> getAvailablePricing() async {
-    try {
-      // TODO: Implementare chiamata al database
-      // Per ora restituisco dati mock
-      return _getMockPricing();
-    } catch (e) {
-      print('Error getting available pricing: $e');
-      return [];
-    }
-  }
+  // Per ora restituisce pricing fittizi
+  // In futuro si può integrare con un database reale
+  Future<List<Pricing>> getPricings() async {
+    // Simula un delay di rete
+    await Future.delayed(const Duration(milliseconds: 500));
 
-  // Carica pricing per tipo
-  Future<List<Pricing>> getPricingByType(PricingType type) async {
-    try {
-      final allPricing = await getAvailablePricing();
-      return allPricing.where((p) => p.type == type).toList();
-    } catch (e) {
-      print('Error getting pricing by type: $e');
-      return [];
-    }
-  }
-
-  // Carica pricing attivo
-  Future<List<Pricing>> getActivePricing() async {
-    try {
-      final allPricing = await getAvailablePricing();
-      return allPricing.where((p) => p.isAvailable).toList();
-    } catch (e) {
-      print('Error getting active pricing: $e');
-      return [];
-    }
-  }
-
-  // Carica pricing per legal entity
-  Future<List<Pricing>> getPricingForLegalEntity(String legalEntityId) async {
-    try {
-      // TODO: Implementare logica per pricing specifici per legal entity
-      final allPricing = await getAvailablePricing();
-      return allPricing.where((p) => p.isAvailable).toList();
-    } catch (e) {
-      print('Error getting pricing for legal entity: $e');
-      return [];
-    }
-  }
-
-  // Crea un nuovo pricing
-  Future<bool> createPricing(Pricing pricing) async {
-    try {
-      // TODO: Implementare chiamata al database
-      print('Creating pricing: ${pricing.name}');
-      return true;
-    } catch (e) {
-      print('Error creating pricing: $e');
-      return false;
-    }
-  }
-
-  // Aggiorna un pricing esistente
-  Future<bool> updatePricing(Pricing pricing) async {
-    try {
-      // TODO: Implementare chiamata al database
-      print('Updating pricing: ${pricing.name}');
-      return true;
-    } catch (e) {
-      print('Error updating pricing: $e');
-      return false;
-    }
-  }
-
-  // Elimina un pricing
-  Future<bool> deletePricing(String idPricing) async {
-    try {
-      // TODO: Implementare chiamata al database
-      print('Deleting pricing: $idPricing');
-      return true;
-    } catch (e) {
-      print('Error deleting pricing: $e');
-      return false;
-    }
-  }
-
-  // Verifica se un pricing è disponibile per una legal entity
-  Future<bool> isPricingAvailableForLegalEntity(
-    String idPricing,
-    String legalEntityId,
-  ) async {
-    try {
-      final pricing = await getPricingById(idPricing);
-      if (pricing == null) return false;
-
-      return pricing.isAvailable;
-    } catch (e) {
-      print('Error checking pricing availability: $e');
-      return false;
-    }
-  }
-
-  // Carica pricing per ID
-  Future<Pricing?> getPricingById(String idPricing) async {
-    try {
-      final allPricing = await getAvailablePricing();
-      return allPricing.firstWhere((p) => p.idPricing == idPricing);
-    } catch (e) {
-      print('Error getting pricing by ID: $e');
-      return null;
-    }
-  }
-
-  // Dati mock per sviluppo
-  List<Pricing> _getMockPricing() {
     return [
       Pricing(
-        name: 'Basic License',
-        description: 'Licenza base per piccole aziende',
-        price: 99.99,
+        name: 'Starter',
+        description: 'Piano base per piccole aziende',
+        price: 99.00,
         type: PricingType.basic,
         validityDays: 365,
         features: [
-          'Fino a 5 utenti',
-          'Certificazioni base',
+          'Registrazione entità legale',
+          'Gestione profilo aziendale',
           'Supporto email',
           'Dashboard base',
+          'Fino a 10 certificazioni',
         ],
       ),
       Pricing(
-        name: 'Professional License',
-        description: 'Licenza professionale per aziende medie',
-        price: 299.99,
+        name: 'Professional',
+        description: 'Piano professionale per aziende medie',
+        price: 199.00,
         type: PricingType.professional,
         validityDays: 365,
         features: [
-          'Fino a 20 utenti',
-          'Tutte le certificazioni',
+          'Tutto del piano Starter',
+          'Gestione certificazioni avanzata',
           'Supporto telefonico',
           'Dashboard avanzata',
           'Report personalizzati',
+          'Fino a 50 certificazioni',
+          'Integrazione API',
         ],
       ),
       Pricing(
-        name: 'Enterprise License',
-        description: 'Licenza enterprise per grandi aziende',
-        price: 799.99,
+        name: 'Enterprise',
+        description: 'Piano enterprise per grandi aziende',
+        price: 399.00,
         type: PricingType.enterprise,
         validityDays: 365,
         features: [
-          'Utenti illimitati',
-          'Tutte le certificazioni',
+          'Tutto del piano Professional',
+          'API personalizzate',
           'Supporto dedicato',
-          'Dashboard personalizzata',
-          'Report avanzati',
-          'API access',
           'Integrazione personalizzata',
-        ],
-      ),
-      Pricing(
-        name: 'Custom License',
-        description: 'Licenza personalizzata su misura',
-        price: 1499.99,
-        type: PricingType.custom,
-        validityDays: 365,
-        features: [
-          'Tutto incluso',
-          'Personalizzazione completa',
-          'Supporto 24/7',
-          'Sviluppo su misura',
-          'Integrazione enterprise',
+          'Training team',
+          'SLA garantito',
+          'Certificazioni illimitate',
+          'White-label disponibile',
         ],
       ),
     ];
   }
 
-  // Metodo per generare link di acquisto
-  String generatePurchaseLink(Pricing pricing) {
-    // TODO: Implementare logica per generare link di acquisto
-    return '${AppConfig.appUrl}/purchase/${pricing.idPricing}';
+  // Ottiene un pricing specifico per ID
+  Future<Pricing?> getPricingById(String id) async {
+    final pricings = await getPricings();
+    try {
+      return pricings.firstWhere((pricing) => pricing.idPricing == id);
+    } catch (e) {
+      return null;
+    }
   }
 
-  // Metodo per verificare stato acquisto
-  Future<bool> checkPurchaseStatus(String purchaseId) async {
-    try {
-      // TODO: Implementare verifica stato acquisto
-      await Future.delayed(const Duration(seconds: 1));
-      return true;
-    } catch (e) {
-      print('Error checking purchase status: $e');
-      return false;
-    }
+  // Ottiene i pricing attivi
+  Future<List<Pricing>> getActivePricings() async {
+    final pricings = await getPricings();
+    return pricings.where((pricing) => pricing.isAvailable).toList();
+  }
+
+  // Ottiene i pricing per tipo
+  Future<List<Pricing>> getPricingsByType(PricingType type) async {
+    final pricings = await getPricings();
+    return pricings.where((pricing) => pricing.type == type).toList();
+  }
+
+  // Valida un pricing
+  bool validatePricing(Pricing pricing) {
+    return pricing.isAvailable && !pricing.isExpired;
+  }
+
+  // Calcola il prezzo con sconti (per future implementazioni)
+  double calculateDiscountedPrice(
+    Pricing pricing, {
+    double discountPercentage = 0,
+  }) {
+    if (discountPercentage <= 0) return pricing.price;
+    return pricing.price * (1 - discountPercentage / 100);
   }
 }

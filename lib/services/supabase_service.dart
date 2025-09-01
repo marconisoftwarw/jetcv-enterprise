@@ -225,6 +225,23 @@ class SupabaseService {
     }
   }
 
+  // Get access token for API calls
+  Future<String?> getAccessToken() async {
+    try {
+      final session = _auth.currentSession;
+      if (session == null) {
+        // Try to restore session
+        await restoreSession();
+        final restoredSession = _auth.currentSession;
+        return restoredSession?.accessToken;
+      }
+      return session.accessToken;
+    } catch (e) {
+      print('❌ Error getting access token: $e');
+      return null;
+    }
+  }
+
   // User management
   Future<app_models.AppUser?> getUserById(String userId) async {
     try {

@@ -68,7 +68,7 @@ class EmailService {
       return await _sendViaLocalAPI(emailData);
     } catch (e) {
       print('❌ Error sending email: $e');
-      
+
       // Fallback: simulazione per test
       print('🔄 Falling back to simulation for testing...');
       await Future.delayed(const Duration(seconds: 1));
@@ -104,7 +104,9 @@ class EmailService {
         print('API response: ${response.body}');
         return true;
       } else {
-        print('❌ Error sending via Local API. Status: ${response.statusCode}, Body: ${response.body}');
+        print(
+          '❌ Error sending via Local API. Status: ${response.statusCode}, Body: ${response.body}',
+        );
         return false;
       }
     } catch (e) {
@@ -113,8 +115,6 @@ class EmailService {
     }
   }
 
-
-
   // Genera HTML per l'email di invito
   String _generateInvitationEmailHTML(
     LegalEntityInvitation invitation,
@@ -122,7 +122,7 @@ class EmailService {
   ) {
     // Genera il link con i parametri della legal entity
     final invitationLink = _generateInvitationLink(invitation, legalEntityData);
-    
+
     return '''
 <!DOCTYPE html>
 <html>
@@ -198,16 +198,18 @@ class EmailService {
   ) {
     // Genera il link con i parametri della legal entity
     final invitationLink = _generateInvitationLink(invitation, legalEntityData);
-    
-    final entityInfo = legalEntityData != null ? '''
+
+    final entityInfo = legalEntityData != null
+        ? '''
 INFORMAZIONI ENTITÀ LEGALE:
 Nome: ${legalEntityData['legal_name'] ?? 'N/A'}
 Codice Identificativo: ${legalEntityData['identifier_code'] ?? 'N/A'}
 Email: ${legalEntityData['email'] ?? 'N/A'}
 Rappresentante Legale: ${legalEntityData['legal_rapresentative'] ?? 'N/A'}
 
-''' : '';
-    
+'''
+        : '';
+
     return '''
 JetCV Enterprise - Invito
 
@@ -240,16 +242,16 @@ Questo è un messaggio automatico, non rispondere a questa email.
   ) {
     final baseUrl = AppConfig.appUrl;
     final token = invitation.invitationToken;
-    
+
     // Costruisci l'URL base
     final url = Uri.parse('$baseUrl/legal-entity/register');
-    
+
     // Aggiungi i parametri di query
     final queryParams = <String, String>{
       'token': token,
       'email': invitation.email,
     };
-    
+
     // Aggiungi i parametri della legal entity se disponibili
     if (legalEntityData != null) {
       if (legalEntityData['legal_name'] != null) {
@@ -262,37 +264,44 @@ Questo è un messaggio automatico, non rispondere a questa email.
         queryParams['entity_email'] = legalEntityData['email'];
       }
       if (legalEntityData['legal_rapresentative'] != null) {
-        queryParams['legal_rapresentative'] = legalEntityData['legal_rapresentative'];
+        queryParams['legal_rapresentative'] =
+            legalEntityData['legal_rapresentative'];
       }
       if (legalEntityData['operational_address'] != null) {
-        queryParams['operational_address'] = legalEntityData['operational_address'];
+        queryParams['operational_address'] =
+            legalEntityData['operational_address'];
       }
       if (legalEntityData['operational_city'] != null) {
         queryParams['operational_city'] = legalEntityData['operational_city'];
       }
       if (legalEntityData['operational_postal_code'] != null) {
-        queryParams['operational_postal_code'] = legalEntityData['operational_postal_code'];
+        queryParams['operational_postal_code'] =
+            legalEntityData['operational_postal_code'];
       }
       if (legalEntityData['operational_state'] != null) {
         queryParams['operational_state'] = legalEntityData['operational_state'];
       }
       if (legalEntityData['operational_country'] != null) {
-        queryParams['operational_country'] = legalEntityData['operational_country'];
+        queryParams['operational_country'] =
+            legalEntityData['operational_country'];
       }
       if (legalEntityData['headquarter_address'] != null) {
-        queryParams['headquarter_address'] = legalEntityData['headquarter_address'];
+        queryParams['headquarter_address'] =
+            legalEntityData['headquarter_address'];
       }
       if (legalEntityData['headquarter_city'] != null) {
         queryParams['headquarter_city'] = legalEntityData['headquarter_city'];
       }
       if (legalEntityData['headquarter_postal_code'] != null) {
-        queryParams['headquarter_postal_code'] = legalEntityData['headquarter_postal_code'];
+        queryParams['headquarter_postal_code'] =
+            legalEntityData['headquarter_postal_code'];
       }
       if (legalEntityData['headquarter_state'] != null) {
         queryParams['headquarter_state'] = legalEntityData['headquarter_state'];
       }
       if (legalEntityData['headquarter_country'] != null) {
-        queryParams['headquarter_country'] = legalEntityData['headquarter_country'];
+        queryParams['headquarter_country'] =
+            legalEntityData['headquarter_country'];
       }
       if (legalEntityData['phone'] != null) {
         queryParams['phone'] = legalEntityData['phone'];
@@ -304,10 +313,10 @@ Questo è un messaggio automatico, non rispondere a questa email.
         queryParams['website'] = legalEntityData['website'];
       }
     }
-    
+
     // Costruisci l'URL finale con i parametri
     final finalUrl = url.replace(queryParameters: queryParams);
-    
+
     return finalUrl.toString();
   }
 
@@ -323,33 +332,35 @@ Questo è un messaggio automatico, non rispondere a questa email.
     }
   }
 
-    // Metodo per testare la configurazione email
+  // Metodo per testare la configurazione email
   Future<bool> testEmailConfiguration() async {
     try {
       print('🧪 Testing Local API configuration...');
-      
+
       final apiUrl = 'http://18.102.14.247:4000/api/email/send';
       final fromEmail = _fromEmail;
-      
+
       print('API URL: $apiUrl');
       print('From Email: $fromEmail');
-      
+
       // Test con email di prova
       final testEmailData = {
         'to': 'test@example.com',
         'subject': 'Test Email Configuration',
-        'html': '<h1>Test Email</h1><p>This is a test email to verify email configuration.</p>',
-        'text': 'Test Email\n\nThis is a test email to verify email configuration.',
+        'html':
+            '<h1>Test Email</h1><p>This is a test email to verify email configuration.</p>',
+        'text':
+            'Test Email\n\nThis is a test email to verify email configuration.',
       };
-      
+
       final result = await _sendViaExternalService(testEmailData);
-      
+
       if (result) {
         print('✅ Email configuration test successful!');
       } else {
         print('❌ Email configuration test failed!');
       }
-      
+
       return result;
     } catch (e) {
       print('❌ Error testing email configuration: $e');
