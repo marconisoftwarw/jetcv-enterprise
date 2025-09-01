@@ -32,30 +32,35 @@ class AppConfig {
     defaultValue: 'https://skqsuxmdfqxbkhmselaz.supabase.co',
   );
 
-  // SMTP configuration for AWS SES
-  static const String smtpHost = String.fromEnvironment(
-    'SMTP_HOST',
-    defaultValue: 'email-smtp.us-east-1.amazonaws.com',
+  // Gmail SMTP configuration
+  static const String gmailHost = String.fromEnvironment(
+    'GMAIL_HOST',
+    defaultValue: 'smtp.gmail.com',
   );
 
-  static const int smtpPort = int.fromEnvironment(
-    'SMTP_PORT',
+  static const int gmailPort = int.fromEnvironment(
+    'GMAIL_PORT',
     defaultValue: 587, // TLS port
   );
 
-  static const String smtpUsername = String.fromEnvironment(
-    'SMTP_USERNAME',
-    defaultValue: 'AKIAW7RD7Q2X765RMDPT',
+  static const String gmailUsername = String.fromEnvironment(
+    'GMAIL_USERNAME',
+    defaultValue: 'jjectcvuser@gmail.com',
   );
 
-  static const String smtpPassword = String.fromEnvironment(
-    'SMTP_PASSWORD',
-    defaultValue: 'BLKakh10pvzFJmkSWNxzY3U57oxCtrpHAt/KNo+JknXr',
+  static const String gmailPassword = String.fromEnvironment(
+    'GMAIL_PASSWORD',
+    defaultValue: '2323902390AA@',
   );
 
-  static const String smtpFromEmail = String.fromEnvironment(
-    'SMTP_FROM_EMAIL',
-    defaultValue: 'noreply@jetcv.com',
+  static const String gmailFromEmail = String.fromEnvironment(
+    'GMAIL_FROM_EMAIL',
+    defaultValue: 'jjectcvuser@gmail.com',
+  );
+
+  static const String gmailFromName = String.fromEnvironment(
+    'GMAIL_FROM_NAME',
+    defaultValue: 'JetCV Enterprise',
   );
 
   // Feature flags

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/legal_entity.dart';
+import '../models/legal_entity_invitation.dart';
 import '../services/supabase_service.dart';
+import '../services/email_service.dart';
 
 class LegalEntityProvider extends ChangeNotifier {
   final SupabaseService _supabaseService = SupabaseService();
@@ -432,6 +434,64 @@ class LegalEntityProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> sendEmailInvitation({
+    required String email,
+    required String legalEntityId,
+    required String inviterId,
+  }) async {
+    _setLoading(true);
+    _clearError();
+
+    try {
+      // Ensure user is authenticated before proceeding
+      if (!await ensureAuthentication()) {
+        return false;
+      }
+
+      print(
+        '🔄 LegalEntityProvider: Sending email invitation to $email for entity $legalEntityId',
+      );
+
+      // Prima crea l'invito nel database
+      final invitationSuccess = await _supabaseService
+          .sendLegalEntityInvitation(
+            email: email,
+            legalEntityId: legalEntityId,
+            inviterId: inviterId,
+          );
+
+      if (!invitationSuccess) {
+        _setError('Failed to create invitation in database');
+        return false;
+      }
+
+      // Poi invia l'email
+      final emailService = EmailService();
+      final invitation = LegalEntityInvitation.create(
+        idLegalEntity: legalEntityId,
+        email: email,
+      );
+
+      final emailSuccess = await emailService.sendLegalEntityInvitation(
+        invitation,
+      );
+
+      if (emailSuccess) {
+        print('✅ LegalEntityProvider: Email invitation sent successfully');
+        return true;
+      } else {
+        _setError('Failed to send invitation email');
+        return false;
+      }
+    } catch (e) {
+      print('❌ LegalEntityProvider: Error sending email invitation: $e');
+      _setError('Failed to send invitation: $e');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   void selectLegalEntity(LegalEntity entity) {
     _selectedLegalEntity = entity;
     notifyListeners();
@@ -521,6 +581,34 @@ class LegalEntityProvider extends ChangeNotifier {
   int get pendingCount => pendingLegalEntities.length;
   int get approvedCount => approvedLegalEntities.length;
   int get rejectedCount => rejectedLegalEntities.length;
+
+  // Invitation tracking
+  final Map<String, List<LegalEntityInvitation>> _entityInvitations = {};
+
+  Future<List<LegalEntityInvitation>> getEntityInvitations(
+    String entityId,
+  ) async {
+    if (_entityInvitations.containsKey(entityId)) {
+      return _entityInvitations[entityId]!;
+    }
+
+    try {
+      // TODO: Implementare chiamata al servizio per ottenere gli inviti
+      // Per ora restituiamo una lista vuota
+      _entityInvitations[entityId] = [];
+      return [];
+    } catch (e) {
+      print('❌ LegalEntityProvider: Error getting entity invitations: $e');
+      return [];
+    }
+  }
+
+  bool hasActiveInvitation(String entityId) {
+    final invitations = _entityInvitations[entityId];
+    if (invitations == null) return false;
+
+    return invitations.any((invitation) => invitation.isActive);
+  }
 
   double get approvalRate {
     if (totalCount == 0) return 0.0;

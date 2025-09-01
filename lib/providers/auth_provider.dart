@@ -319,6 +319,26 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  Future<String?> getCurrentUserId() async {
+    // Se abbiamo già l'utente caricato, restituisci l'ID
+    if (_currentUser != null) {
+      return _currentUser!.idUser;
+    }
+
+    // Altrimenti, prova a ottenere l'ID direttamente da Supabase
+    try {
+      final supabaseUser = _supabaseService.currentUser;
+      if (supabaseUser != null) {
+        // Restituisci direttamente l'ID di Supabase senza caricare i dati completi
+        return supabaseUser.id;
+      }
+    } catch (e) {
+      print('AuthProvider: Error getting current user ID: $e');
+    }
+
+    return null;
+  }
+
   Future<void> _loadUserData(String userId) async {
     try {
       // Prima prova a recuperare l'utente esistente

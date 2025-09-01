@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/legal_entity.dart';
+import '../../models/legal_entity_invitation.dart';
 import '../../providers/legal_entity_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/custom_button.dart';
@@ -419,6 +420,38 @@ class _LegalEntityManagementScreenState
 
             const SizedBox(height: 8),
 
+            // Indicatore inviti attivi
+            Consumer<LegalEntityProvider>(
+              builder: (context, provider, child) {
+                final hasActiveInvitation = provider.hasActiveInvitation(
+                  entity.idLegalEntity,
+                );
+                if (hasActiveInvitation) {
+                  return Row(
+                    children: [
+                      Icon(
+                        Icons.mark_email_unread,
+                        size: 16,
+                        color: Colors.orange[600],
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Invito attivo',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.orange[600],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+
+            const SizedBox(height: 8),
+
             // Rappresentante legale
             if (entity.legalRapresentative != null)
               Row(
@@ -435,8 +468,10 @@ class _LegalEntityManagementScreenState
             const SizedBox(height: 12),
 
             // Azioni
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+            Wrap(
+              alignment: WrapAlignment.end,
+              spacing: 8,
+              runSpacing: 4,
               children: [
                 TextButton.icon(
                   onPressed: () => _showEntityDetails(entity),
@@ -444,14 +479,26 @@ class _LegalEntityManagementScreenState
                   label: const Text('Dettagli'),
                 ),
 
-                const SizedBox(width: 8),
                 TextButton.icon(
                   onPressed: () => _showEditEntityDialog(entity),
                   icon: const Icon(Icons.edit),
                   label: const Text('Modifica'),
                 ),
 
-                const SizedBox(width: 8),
+                TextButton.icon(
+                  onPressed: () => _showSendInvitationDialog(entity),
+                  icon: const Icon(Icons.email),
+                  label: const Text('Invia Invito'),
+                  style: TextButton.styleFrom(foregroundColor: Colors.blue),
+                ),
+
+                TextButton.icon(
+                  onPressed: () => _showInvitationHistoryDialog(entity),
+                  icon: const Icon(Icons.history),
+                  label: const Text('Cronologia'),
+                  style: TextButton.styleFrom(foregroundColor: Colors.purple),
+                ),
+
                 PopupMenuButton<LegalEntityStatus>(
                   child: Container(
                     padding: const EdgeInsets.symmetric(
@@ -626,6 +673,13 @@ class _LegalEntityManagementScreenState
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
+              _showSendInvitationDialog(entity);
+            },
+            child: const Text('Invia Invito'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
               _showEditEntityDialog(entity);
             },
             child: const Text('Modifica'),
@@ -676,12 +730,12 @@ class _LegalEntityManagementScreenState
         .read<LegalEntityProvider>()
         .approveLegalEntity(entity.idLegalEntity);
 
-    if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Entità approvata con successo')),
-      );
-      _loadLegalEntities();
-    } else {
+    if (mounted) {
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Entità approvata con successo')),
+        );
+      }
       _loadLegalEntities();
     }
   }
@@ -727,14 +781,14 @@ class _LegalEntityManagementScreenState
 
               Navigator.of(context).pop();
 
-              if (success) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Entità rifiutata con successo'),
-                  ),
-                );
-                _loadLegalEntities();
-              } else {
+              if (mounted) {
+                if (success) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Entità rifiutata con successo'),
+                    ),
+                  );
+                }
                 _loadLegalEntities();
               }
             },
@@ -768,20 +822,22 @@ class _LegalEntityManagementScreenState
 
               Navigator.of(context).pop();
 
-              if (success) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Entità eliminata con successo'),
-                  ),
-                );
-                // Ricarica la lista
-                await provider.refreshLegalEntities();
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Errore nell\'eliminazione dell\'entità'),
-                  ),
-                );
+              if (mounted) {
+                if (success) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Entità eliminata con successo'),
+                    ),
+                  );
+                  // Ricarica la lista
+                  await provider.refreshLegalEntities();
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Errore nell\'eliminazione dell\'entità'),
+                    ),
+                  );
+                }
               }
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
@@ -923,17 +979,17 @@ class _LegalEntityManagementScreenState
       rejectionReason: rejectionReason,
     );
 
-    if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Stato dell\'entità modificato con successo in "${_getStatusDisplayName(newStatus)}"',
+    if (mounted) {
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Stato dell\'entità modificato con successo in "${_getStatusDisplayName(newStatus)}"',
+            ),
+            backgroundColor: _getStatusColor(newStatus),
           ),
-          backgroundColor: _getStatusColor(newStatus),
-        ),
-      );
-      _loadLegalEntities();
-    } else {
+        );
+      }
       _loadLegalEntities();
     }
   }
@@ -947,6 +1003,427 @@ class _LegalEntityManagementScreenState
       case LegalEntityStatus.rejected:
         return 'Rifiutata';
     }
+  }
+
+  void _showInvitationHistoryDialog(LegalEntity entity) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.history, color: Colors.purple),
+            const SizedBox(width: 8),
+            const Text('Cronologia Inviti'),
+          ],
+        ),
+        content: SizedBox(
+          width: double.maxFinite,
+          height: 400,
+          child: FutureBuilder<List<LegalEntityInvitation>>(
+            future: context.read<LegalEntityProvider>().getEntityInvitations(
+              entity.idLegalEntity,
+            ),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (snapshot.hasError) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.error, size: 48, color: Colors.red[300]),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Errore nel caricamento degli inviti',
+                        style: TextStyle(color: Colors.red[600]),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              final invitations = snapshot.data ?? [];
+
+              if (invitations.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.email_outlined,
+                        size: 48,
+                        color: Colors.grey[300],
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Nessun invito trovato',
+                        style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Invia il primo invito per iniziare',
+                        style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Inviti per: ${entity.legalName ?? 'Entità senza nome'}',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: invitations.length,
+                      itemBuilder: (context, index) {
+                        final invitation = invitations[index];
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: _getInvitationStatusColor(
+                                invitation.status,
+                              ),
+                              child: Icon(
+                                _getInvitationStatusIcon(invitation.status),
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ),
+                            title: Text(invitation.email),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(invitation.statusDisplayName),
+                                Text(
+                                  'Inviato: ${_formatDate(invitation.sentAt)}',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                                if (invitation.expiresAt != null)
+                                  Text(
+                                    'Scade: ${_formatDate(invitation.expiresAt!)}',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            trailing: PopupMenuButton<String>(
+                              itemBuilder: (context) => [
+                                if (invitation.isActive)
+                                  const PopupMenuItem(
+                                    value: 'resend',
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.refresh, size: 16),
+                                        SizedBox(width: 8),
+                                        Text('Rinvia'),
+                                      ],
+                                    ),
+                                  ),
+                                const PopupMenuItem(
+                                  value: 'copy_link',
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.copy, size: 16),
+                                      SizedBox(width: 8),
+                                      Text('Copia Link'),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                              onSelected: (value) {
+                                switch (value) {
+                                  case 'resend':
+                                    // TODO: Implementare rinvia invito
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Funzionalità in sviluppo',
+                                        ),
+                                      ),
+                                    );
+                                    break;
+                                  case 'copy_link':
+                                    // TODO: Implementare copia link
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Link copiato negli appunti',
+                                        ),
+                                      ),
+                                    );
+                                    break;
+                                }
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Chiudi'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _showSendInvitationDialog(entity);
+            },
+            child: const Text('Nuovo Invito'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _getInvitationStatusColor(InvitationStatus status) {
+    switch (status) {
+      case InvitationStatus.pending:
+        return Colors.orange;
+      case InvitationStatus.accepted:
+        return Colors.green;
+      case InvitationStatus.rejected:
+        return Colors.red;
+      case InvitationStatus.expired:
+        return Colors.grey;
+    }
+  }
+
+  IconData _getInvitationStatusIcon(InvitationStatus status) {
+    switch (status) {
+      case InvitationStatus.pending:
+        return Icons.schedule;
+      case InvitationStatus.accepted:
+        return Icons.check;
+      case InvitationStatus.rejected:
+        return Icons.close;
+      case InvitationStatus.expired:
+        return Icons.timer_off;
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
+  }
+
+  void _showSendInvitationDialog(LegalEntity entity) {
+    final TextEditingController emailController = TextEditingController();
+    final TextEditingController messageController = TextEditingController();
+
+    // Pre-compila l'email se disponibile
+    if (entity.email != null && entity.email!.isNotEmpty) {
+      emailController.text = entity.email!;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.email, color: Colors.blue),
+            const SizedBox(width: 8),
+            const Text('Invia Invito Email'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Invia un invito via email per l\'entità:',
+              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey[300]!),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    entity.legalName ?? 'Nome non specificato',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  if (entity.email != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      entity.email!,
+                      style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            CustomTextField(
+              controller: emailController,
+              labelText: 'Email destinatario *',
+              hintText: 'Inserisci l\'email del destinatario',
+              keyboardType: TextInputType.emailAddress,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'L\'email è obbligatoria';
+                }
+                if (!RegExp(
+                  r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                ).hasMatch(value)) {
+                  return 'Inserisci un\'email valida';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+            CustomTextField(
+              controller: messageController,
+              labelText: 'Messaggio personalizzato (opzionale)',
+              hintText: 'Aggiungi un messaggio personalizzato all\'invito...',
+              maxLines: 3,
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blue[50],
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.blue[200]!),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline, color: Colors.blue[700], size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'L\'invito conterrà un link sicuro per accedere alla piattaforma e scadrà automaticamente dopo 7 giorni.',
+                      style: TextStyle(color: Colors.blue[700], fontSize: 12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Annulla'),
+          ),
+          CustomButton(
+            text: 'Invia Invito',
+            onPressed: () async {
+              // Validazione
+              if (emailController.text.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Inserisci un\'email valida'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+                return;
+              }
+
+              if (!RegExp(
+                r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+              ).hasMatch(emailController.text)) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Inserisci un\'email valida'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+                return;
+              }
+
+              Navigator.of(context).pop();
+
+              // Invia l'invito
+              final authProvider = context.read<AuthProvider>();
+
+              // Ottieni l'ID dell'utente corrente
+              String? adminId;
+
+              // Prima prova a ottenere l'ID dall'utente già caricato
+              if (authProvider.currentUser != null) {
+                adminId = authProvider.currentUser!.idUser;
+              } else {
+                // Se non è caricato, prova a ottenere l'ID direttamente da Supabase
+                adminId = await authProvider.getCurrentUserId();
+              }
+
+              if (adminId == null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Errore: utente non autenticato. Riprova dopo aver effettuato il login.',
+                    ),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+                return;
+              }
+
+              final success = await context
+                  .read<LegalEntityProvider>()
+                  .sendEmailInvitation(
+                    email: emailController.text.trim(),
+                    legalEntityId: entity.idLegalEntity,
+                    inviterId: adminId!,
+                  );
+
+              if (mounted) {
+                if (success) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Invito inviato con successo a ${emailController.text.trim()}',
+                      ),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Errore nell\'invio dell\'invito'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
+            },
+            isLoading: context.watch<LegalEntityProvider>().isLoading,
+            icon: Icons.send,
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -1482,19 +1959,21 @@ class _LegalEntityFormDialogState extends State<LegalEntityFormDialog> {
       success = await provider.createLegalEntity(entityData) != null;
     }
 
-    if (success) {
-      Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            widget.entity != null
-                ? 'Entità modificata con successo'
-                : 'Entità creata con successo',
+    if (mounted) {
+      if (success) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              widget.entity != null
+                  ? 'Entità modificata con successo'
+                  : 'Entità creata con successo',
+            ),
           ),
-        ),
-      );
-    } else {
-      Navigator.of(context).pop();
+        );
+      } else {
+        Navigator.of(context).pop();
+      }
     }
   }
 
