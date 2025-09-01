@@ -335,7 +335,7 @@ Questo è un messaggio automatico, non rispondere a questa email.
   // Metodo per testare la generazione del link di invito
   void testInvitationLink() {
     print('🧪 Testing invitation link generation...');
-    
+
     // Simula dati di una legal entity
     final legalEntityData = {
       'legal_name': 'Test Company SRL',
@@ -369,10 +369,12 @@ Questo è un messaggio automatico, non rispondere a questa email.
 
     // Genera il link
     final link = _generateInvitationLink(invitation, legalEntityData);
-    
+
     print('Generated link: $link');
-    print('Expected format: http://localhost:8080/signup?token=...&email=...&legal_name=...');
-    
+    print(
+      'Expected format: http://localhost:8080/signup?token=...&email=...&legal_name=...',
+    );
+
     // Verifica che l'URL contenga i parametri corretti
     final uri = Uri.parse(link);
     print('Base URL: ${uri.origin}${uri.path}');

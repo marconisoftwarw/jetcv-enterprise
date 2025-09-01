@@ -88,6 +88,11 @@ dev_dependencies:
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
+# Flutter Web Configuration
+flutter_web:
+  port: 8080
+  hostname: localhost
+
 # The following section is specific to Flutter packages.
 flutter:
 
