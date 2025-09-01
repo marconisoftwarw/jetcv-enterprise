@@ -9,7 +9,7 @@ class EmailService {
   EmailService._internal();
 
   // Configurazione email
-  static const String _fromEmail = AppConfig.gmailFromEmail;
+  static const String _fromEmail = "jjectcvuser@gmail.com";
 
   // Metodo per inviare invito via email
   Future<bool> sendLegalEntityInvitation(
