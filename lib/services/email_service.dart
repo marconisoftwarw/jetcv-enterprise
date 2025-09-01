@@ -332,54 +332,7 @@ Questo è un messaggio automatico, non rispondere a questa email.
     }
   }
 
-  // Metodo per testare la generazione del link di invito
-  void testInvitationLink() {
-    print('🧪 Testing invitation link generation...');
 
-    // Simula dati di una legal entity
-    final legalEntityData = {
-      'legal_name': 'Test Company SRL',
-      'identifier_code': '12345678901',
-      'email': 'test@company.com',
-      'legal_rapresentative': 'Mario Rossi',
-      'operational_address': 'Via Roma 123',
-      'operational_city': 'Milano',
-      'operational_postal_code': '20100',
-      'operational_state': 'MI',
-      'operational_country': 'Italy',
-      'headquarter_address': 'Via Milano 456',
-      'headquarter_city': 'Roma',
-      'headquarter_postal_code': '00100',
-      'headquarter_state': 'RM',
-      'headquarter_country': 'Italy',
-      'phone': '+39 02 1234567',
-      'pec': 'test@pec.it',
-      'website': 'https://testcompany.com',
-    };
-
-    // Simula un invito
-    final invitation = LegalEntityInvitation(
-      idInvitation: 123,
-      idLegalEntity: 'test-legal-entity-123',
-      invitationToken: 'abc123def456',
-      email: 'user@example.com',
-      status: InvitationStatus.pending,
-      expiresAt: DateTime.now().add(const Duration(days: 7)),
-    );
-
-    // Genera il link
-    final link = _generateInvitationLink(invitation, legalEntityData);
-
-    print('Generated link: $link');
-    print(
-      'Expected format: http://localhost:8080/signup?token=...&email=...&legal_name=...',
-    );
-
-    // Verifica che l'URL contenga i parametri corretti
-    final uri = Uri.parse(link);
-    print('Base URL: ${uri.origin}${uri.path}');
-    print('Query parameters: ${uri.queryParameters}');
-  }
 
   // Metodo per testare la configurazione email
   Future<bool> testEmailConfiguration() async {
