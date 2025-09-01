@@ -1364,6 +1364,9 @@ class _LegalEntityManagementScreenState
 
               Navigator.of(context).pop();
 
+              // Salva il ScaffoldMessenger prima dell'operazione asincrona
+              final scaffoldMessenger = ScaffoldMessenger.of(context);
+
               // Invia l'invito
               final authProvider = context.read<AuthProvider>();
 
@@ -1379,14 +1382,16 @@ class _LegalEntityManagementScreenState
               }
 
               if (adminId == null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Errore: utente non autenticato. Riprova dopo aver effettuato il login.',
+                if (mounted) {
+                  scaffoldMessenger.showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Errore: utente non autenticato. Riprova dopo aver effettuato il login.',
+                      ),
+                      backgroundColor: Colors.red,
                     ),
-                    backgroundColor: Colors.red,
-                  ),
-                );
+                  );
+                }
                 return;
               }
 
@@ -1400,7 +1405,7 @@ class _LegalEntityManagementScreenState
 
               if (mounted) {
                 if (success) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  scaffoldMessenger.showSnackBar(
                     SnackBar(
                       content: Text(
                         'Invito inviato con successo a ${emailController.text.trim()}',
@@ -1409,7 +1414,7 @@ class _LegalEntityManagementScreenState
                     ),
                   );
                 } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  scaffoldMessenger.showSnackBar(
                     const SnackBar(
                       content: Text('Errore nell\'invio dell\'invito'),
                       backgroundColor: Colors.red,
