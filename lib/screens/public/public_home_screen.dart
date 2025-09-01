@@ -20,20 +20,20 @@ class PublicHomeScreen extends StatelessWidget {
             flexibleSpace: FlexibleSpaceBar(
               title: Text(
                 AppConfig.appName,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppTheme.offWhite,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               background: Container(
-                decoration: const BoxDecoration(
-                  gradient: AppTheme.neonGradient,
+                decoration: BoxDecoration(
+                  gradient: AppTheme.primaryGradient,
                 ),
-                child: const Center(
+                child: Center(
                   child: Icon(
                     Icons.verified_user,
                     size: 80,
-                    color: AppTheme.primaryBlack,
+                    color: AppTheme.pureWhite,
                   ),
                 ),
               ),
@@ -82,7 +82,7 @@ class PublicHomeScreen extends StatelessWidget {
                   Text(
                     'Streamline your business verification process with our comprehensive legal entity management system.',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: AppTheme.lightGrayText,
+                      color: AppTheme.lightGray,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -98,7 +98,7 @@ class PublicHomeScreen extends StatelessWidget {
                             context,
                             '/legal-entity/pricing',
                           ),
-                          neonColor: AppTheme.neonGreen,
+                          neonColor: AppTheme.accentGreen,
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -110,7 +110,7 @@ class PublicHomeScreen extends StatelessWidget {
                             '/legal-entity/register',
                           ),
                           isOutlined: true,
-                          neonColor: AppTheme.neonBlue,
+                          neonColor: AppTheme.accentBlue,
                         ),
                       ),
                     ],
@@ -126,7 +126,7 @@ class PublicHomeScreen extends StatelessWidget {
                           },
                           icon: Icons.description,
                           isOutlined: true,
-                          neonColor: AppTheme.neonPurple,
+                          neonColor: AppTheme.accentPurple,
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -141,7 +141,7 @@ class PublicHomeScreen extends StatelessWidget {
                           },
                           icon: Icons.price_check,
                           isOutlined: true,
-                          neonColor: AppTheme.neonOrange,
+                          neonColor: AppTheme.accentOrange,
                         ),
                       ),
                     ],
@@ -168,7 +168,7 @@ class PublicHomeScreen extends StatelessWidget {
                           },
                           icon: Icons.verified_user,
                           isOutlined: true,
-                          neonColor: AppTheme.neonPink,
+                          neonColor: AppTheme.accentPurple,
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -183,7 +183,7 @@ class PublicHomeScreen extends StatelessWidget {
                           },
                           icon: Icons.business,
                           isOutlined: true,
-                          neonColor: AppTheme.neonBlue,
+                          neonColor: AppTheme.accentBlue,
                         ),
                       ),
                     ],
@@ -264,13 +264,13 @@ class PublicHomeScreen extends StatelessWidget {
           SliverToBoxAdapter(
             child: Container(
               padding: const EdgeInsets.all(24),
-              color: AppTheme.darkGray,
+              color: AppTheme.darkCharcoal,
               child: Column(
                 children: [
                   Text(
                     '© 2024 ${AppConfig.appName}. All rights reserved.',
                     style: TextStyle(
-                      color: AppTheme.lightGrayText,
+                      color: AppTheme.lightGray,
                       fontSize: 14,
                     ),
                   ),
@@ -278,7 +278,7 @@ class PublicHomeScreen extends StatelessWidget {
                   Text(
                     'Professional certification and verification platform',
                     style: TextStyle(
-                      color: AppTheme.mediumGrayText,
+                      color: AppTheme.mediumGray,
                       fontSize: 12,
                     ),
                   ),
@@ -308,10 +308,10 @@ class PublicHomeScreen extends StatelessWidget {
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  gradient: AppTheme.neonGradient,
+                  gradient: AppTheme.primaryGradient,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(icon, color: AppTheme.primaryBlack, size: 30),
+                child: Icon(icon, color: AppTheme.pureWhite, size: 30),
               ),
               const SizedBox(width: 20),
               Expanded(
@@ -329,7 +329,7 @@ class PublicHomeScreen extends StatelessWidget {
                     Text(
                       description,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppTheme.lightGrayText,
+                        color: AppTheme.lightGray,
                       ),
                     ),
                     if (actionText != null && onAction != null) ...[
@@ -338,7 +338,7 @@ class PublicHomeScreen extends StatelessWidget {
                         text: actionText,
                         onPressed: onAction,
                         isOutlined: true,
-                        neonColor: AppTheme.neonBlue,
+                        neonColor: AppTheme.accentBlue,
                         height: 36,
                       ),
                     ],

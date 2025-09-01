@@ -9,7 +9,7 @@ class SplashScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(gradient: AppTheme.neonGradient),
+        decoration: BoxDecoration(gradient: AppTheme.primaryGradient),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -25,11 +25,11 @@ class SplashScreen extends StatelessWidget {
                     width: 2,
                   ),
                 ),
-                child: Icon(
-                  Icons.verified_user,
-                  size: 120,
-                  color: AppTheme.primaryBlack,
-                ),
+                                  child: Icon(
+                    Icons.verified_user,
+                    size: 120,
+                    color: AppTheme.pureWhite,
+                  ),
               ),
 
               const SizedBox(height: 32),
@@ -40,7 +40,7 @@ class SplashScreen extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 36,
                   fontWeight: FontWeight.bold,
-                  color: AppTheme.primaryBlack,
+                  color: AppTheme.pureWhite,
                   letterSpacing: 1.2,
                 ),
                 textAlign: TextAlign.center,
@@ -53,7 +53,7 @@ class SplashScreen extends StatelessWidget {
                 'Professional Certification Platform',
                 style: TextStyle(
                   fontSize: 18,
-                  color: AppTheme.primaryBlack.withValues(alpha: 0.8),
+                  color: AppTheme.offWhite.withValues(alpha: 0.8),
                   fontWeight: FontWeight.w500,
                 ),
                 textAlign: TextAlign.center,
@@ -68,9 +68,9 @@ class SplashScreen extends StatelessWidget {
                   color: AppTheme.primaryBlack.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: const CircularProgressIndicator(
+                child: CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    AppTheme.primaryBlack,
+                    AppTheme.pureWhite,
                   ),
                   strokeWidth: 3,
                 ),

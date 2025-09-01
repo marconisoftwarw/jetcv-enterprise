@@ -3,30 +3,24 @@ import '../theme/app_theme.dart';
 
 class GlassCard extends StatefulWidget {
   final Widget child;
+  final bool isHoverable;
+  final List<BoxShadow>? boxShadow;
   final EdgeInsetsGeometry? padding;
   final EdgeInsetsGeometry? margin;
-  final double? width;
-  final double? height;
   final BorderRadius? borderRadius;
   final Color? borderColor;
   final double? borderWidth;
-  final List<BoxShadow>? boxShadow;
-  final VoidCallback? onTap;
-  final bool isHoverable;
 
   const GlassCard({
     super.key,
     required this.child,
+    this.isHoverable = false,
+    this.boxShadow,
     this.padding,
     this.margin,
-    this.width,
-    this.height,
     this.borderRadius,
     this.borderColor,
     this.borderWidth,
-    this.boxShadow,
-    this.onTap,
-    this.isHoverable = false,
   });
 
   @override
@@ -74,9 +68,8 @@ class _GlassCardState extends State<GlassCard>
 
   @override
   Widget build(BuildContext context) {
-    final borderColor = widget.borderColor ?? AppTheme.neonGreen;
+    final borderColor = widget.borderColor ?? AppTheme.accentBlue;
     final borderWidth = widget.borderWidth ?? 1.0;
-    final borderRadius = widget.borderRadius ?? BorderRadius.circular(16);
 
     return MouseRegion(
       onEnter: (_) => _onHover(true),
@@ -87,14 +80,13 @@ class _GlassCardState extends State<GlassCard>
           return Transform.scale(
             scale: _scaleAnimation.value,
             child: Container(
-              width: widget.width,
-              height: widget.height,
               margin: widget.margin,
+              padding: widget.padding,
               decoration: BoxDecoration(
-                borderRadius: borderRadius,
+                borderRadius: widget.borderRadius ?? BorderRadius.circular(12),
                 color: AppTheme.glassMedium,
                 border: Border.all(
-                  color: borderColor.withValues(alpha: _isHovered ? 0.6 : 0.2),
+                  color: borderColor.withValues(alpha: _isHovered ? 0.4 : 0.1),
                   width: borderWidth,
                 ),
                 boxShadow: [
@@ -102,24 +94,14 @@ class _GlassCardState extends State<GlassCard>
                   if (_isHovered)
                     BoxShadow(
                       color: borderColor.withValues(
-                        alpha: 0.3 * _glowAnimation.value,
+                        alpha: 0.2 * _glowAnimation.value,
                       ),
-                      blurRadius: 20,
-                      spreadRadius: 2,
+                      blurRadius: 12,
+                      spreadRadius: 1,
                     ),
                 ],
               ),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: widget.onTap,
-                  borderRadius: borderRadius,
-                  child: Padding(
-                    padding: widget.padding ?? const EdgeInsets.all(16),
-                    child: widget.child,
-                  ),
-                ),
-              ),
+              child: widget.child,
             ),
           );
         },

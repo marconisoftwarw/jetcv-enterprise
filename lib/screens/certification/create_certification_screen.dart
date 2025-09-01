@@ -404,7 +404,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                       onPressed: () => _captureMedia('camera'),
                       text: l10n.getString('camera'),
                       icon: Icons.camera_alt,
-                      neonColor: AppTheme.neonGreen,
+                      neonColor: AppTheme.accentGreen,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -413,7 +413,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                       onPressed: () => _captureMedia('gallery'),
                       text: l10n.getString('gallery'),
                       icon: Icons.photo_library,
-                      neonColor: AppTheme.neonBlue,
+                      neonColor: AppTheme.accentBlue,
                     ),
                   ),
                 ],
@@ -428,7 +428,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                       onPressed: () => _captureMedia('liveVideo'),
                       text: l10n.getString('live_video'),
                       icon: Icons.videocam,
-                      neonColor: AppTheme.neonPurple,
+                      neonColor: AppTheme.accentPurple,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -437,7 +437,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                       onPressed: () => _captureMedia('fileAttachment'),
                       text: l10n.getString('file_attachment'),
                       icon: Icons.attach_file,
-                      neonColor: AppTheme.neonOrange,
+                      neonColor: AppTheme.accentOrange,
                     ),
                   ),
                 ],
@@ -461,12 +461,12 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               if (_location != null) ...[
                 Text(
                   'Posizione: ${_location!}',
-                  style: const TextStyle(color: AppTheme.lightGrayText),
+                  style: TextStyle(color: AppTheme.lightGray),
                 ),
               ] else ...[
                 Text(
                   'Posizione non disponibile',
-                  style: const TextStyle(color: AppTheme.mediumGrayText),
+                  style: TextStyle(color: AppTheme.lightGray),
                 ),
               ],
 
@@ -474,7 +474,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 onPressed: _getCurrentLocation,
                 text: 'Aggiorna Posizione',
                 icon: Icons.my_location,
-                neonColor: AppTheme.neonGreen,
+                                      neonColor: AppTheme.accentGreen,
               ),
 
               const SizedBox(height: 32),
@@ -512,14 +512,14 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 onPressed: _addAttachment,
                 text: 'Aggiungi Allegato',
                 icon: Icons.add,
-                neonColor: AppTheme.neonBlue,
+                                      neonColor: AppTheme.accentBlue,
               ),
 
               if (_attachments.isNotEmpty) ...[
                 const SizedBox(height: 16),
                 Text(
                   'Allegati: ${_attachments.length}',
-                  style: const TextStyle(color: AppTheme.lightGrayText),
+                  style: TextStyle(color: AppTheme.lightGray),
                 ),
                 // Qui puoi mostrare la lista degli allegati
               ],
@@ -537,14 +537,14 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 onPressed: _addUser,
                 text: l10n.getString('add_user'),
                 icon: Icons.person_add,
-                neonColor: AppTheme.neonPurple,
+                neonColor: AppTheme.accentPurple,
               ),
 
               if (_users.isNotEmpty) ...[
                 const SizedBox(height: 16),
                 Text(
                   'Utenti: ${_users.length}',
-                  style: const TextStyle(color: AppTheme.lightGrayText),
+                  style: TextStyle(color: AppTheme.lightGray),
                 ),
                 // Qui puoi mostrare la lista degli utenti
               ],
@@ -577,13 +577,13 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               const SizedBox(height: 16),
 
               SwitchListTile(
-                title: const Text(
+                title: Text(
                   'Salva offline',
                   style: TextStyle(color: AppTheme.offWhite),
                 ),
                 subtitle: Text(
                   'I dati verranno sincronizzati quando torni online',
-                  style: const TextStyle(color: AppTheme.lightGrayText),
+                  style: TextStyle(color: AppTheme.lightGray),
                 ),
                 value: _isOffline,
                 onChanged: (value) {
@@ -605,7 +605,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                           : () => Navigator.pop(context),
                       text: l10n.getString('cancel'),
                       isOutlined: true,
-                      neonColor: AppTheme.neonOrange,
+                      neonColor: AppTheme.accentOrange,
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -616,7 +616,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                           ? 'Creazione...'
                           : l10n.getString('save'),
                       isLoading: _isLoading,
-                      neonColor: AppTheme.neonGreen,
+                      neonColor: AppTheme.accentGreen,
                     ),
                   ),
                 ],
@@ -631,11 +631,11 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   Widget _buildSectionHeader(String title, IconData icon) {
     return Row(
       children: [
-        Icon(icon, color: AppTheme.neonGreen),
+        Icon(icon, color: AppTheme.accentGreen),
         const SizedBox(width: 8),
         Text(
           title,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: AppTheme.offWhite,

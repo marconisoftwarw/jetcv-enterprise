@@ -110,13 +110,13 @@ class _LoginScreenState extends State<LoginScreen> {
                         width: 80,
                         height: 80,
                         decoration: BoxDecoration(
-                          gradient: AppTheme.neonGradient,
+                          gradient: AppTheme.primaryGradient,
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.verified_user,
                           size: 40,
-                          color: AppTheme.primaryBlack,
+                          color: AppTheme.pureWhite,
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -132,7 +132,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Text(
                         'Sign in to your account',
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: AppTheme.lightGrayText,
+                          color: AppTheme.lightGray,
                         ),
                       ),
                     ],
@@ -211,7 +211,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         Text(
                           'Remember me',
-                          style: TextStyle(color: AppTheme.lightGrayText),
+                          style: TextStyle(color: AppTheme.lightGray),
                         ),
                       ],
                     ),
@@ -219,7 +219,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       onPressed: _forgotPassword,
                       child: Text(
                         'Forgot Password?',
-                        style: TextStyle(color: AppTheme.neonBlue),
+                        style: TextStyle(color: AppTheme.accentBlue),
                       ),
                     ),
                   ],
@@ -238,7 +238,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ? 'Signing In...'
                           : 'Sign In',
                       isLoading: authProvider.isLoading,
-                      neonColor: AppTheme.neonGreen,
+                      neonColor: AppTheme.accentGreen,
                     );
                   },
                 ),
@@ -254,7 +254,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Text(
                         'OR',
                         style: TextStyle(
-                          color: AppTheme.mediumGrayText,
+                          color: AppTheme.mediumGray,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -276,7 +276,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       icon: Icons.g_mobiledata,
                       isLoading: authProvider.isLoading,
                       isOutlined: true,
-                      neonColor: AppTheme.neonBlue,
+                      neonColor: AppTheme.accentBlue,
                     );
                   },
                 ),
@@ -289,13 +289,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     Text(
                       "Don't have an account? ",
-                      style: TextStyle(color: AppTheme.lightGrayText),
+                                              style: TextStyle(color: AppTheme.lightGray),
                     ),
                     TextButton(
                       onPressed: () => Navigator.pushNamed(context, '/signup'),
                       child: Text(
                         'Sign Up',
-                        style: TextStyle(color: AppTheme.neonGreen),
+                        style: TextStyle(color: AppTheme.accentGreen),
                       ),
                     ),
                   ],
@@ -310,27 +310,27 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: AppTheme.neonOrange.withValues(alpha: 0.1),
+                            color: AppTheme.accentOrange.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: AppTheme.neonOrange),
+                                                          border: Border.all(color: AppTheme.accentOrange),
                           ),
                           child: Row(
                             children: [
                               Icon(
                                 Icons.error_outline,
-                                color: AppTheme.neonOrange,
+                                color: AppTheme.accentOrange,
                               ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   authProvider.errorMessage!,
-                                  style: TextStyle(color: AppTheme.neonOrange),
+                                  style: TextStyle(color: AppTheme.accentOrange),
                                 ),
                               ),
                               IconButton(
                                 icon: Icon(
                                   Icons.close,
-                                  color: AppTheme.neonOrange,
+                                  color: AppTheme.accentOrange,
                                 ),
                                 onPressed: authProvider.clearError,
                                 iconSize: 20,

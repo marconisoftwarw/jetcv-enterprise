@@ -31,7 +31,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Admin Dashboard',
           style: TextStyle(
             color: AppTheme.offWhite,
@@ -39,7 +39,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        backgroundColor: AppTheme.darkGray,
+        backgroundColor: AppTheme.darkCharcoal,
         foregroundColor: AppTheme.offWhite,
         elevation: 0,
         actions: [
@@ -54,8 +54,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         children: [
           // Sidebar Navigation
           Container(
-            decoration: const BoxDecoration(
-              color: AppTheme.darkGray,
+            decoration: BoxDecoration(
+              color: AppTheme.darkCharcoal,
               border: Border(
                 right: BorderSide(color: AppTheme.lightGray, width: 1),
               ),
@@ -68,17 +68,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 });
               },
               labelType: NavigationRailLabelType.all,
-              backgroundColor: AppTheme.darkGray,
-              selectedIconTheme: const IconThemeData(color: AppTheme.neonGreen),
-              unselectedIconTheme: const IconThemeData(
-                color: AppTheme.lightGrayText,
+              backgroundColor: AppTheme.darkCharcoal,
+              selectedIconTheme: IconThemeData(color: AppTheme.accentGreen),
+              unselectedIconTheme: IconThemeData(
+                color: AppTheme.mediumGray,
               ),
-              selectedLabelTextStyle: const TextStyle(
-                color: AppTheme.neonGreen,
+              selectedLabelTextStyle: TextStyle(
+                color: AppTheme.accentGreen,
                 fontWeight: FontWeight.w600,
               ),
-              unselectedLabelTextStyle: const TextStyle(
-                color: AppTheme.lightGrayText,
+              unselectedLabelTextStyle: TextStyle(
+                color: AppTheme.mediumGray,
               ),
               destinations: const [
                 NavigationRailDestination(
@@ -117,8 +117,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   builder: (context) => const CreateLegalEntityScreen(),
                 ),
               ),
-              backgroundColor: AppTheme.neonGreen,
-              foregroundColor: AppTheme.primaryBlack,
+              backgroundColor: AppTheme.accentGreen,
+              foregroundColor: AppTheme.pureWhite,
               elevation: 8,
               child: const Icon(Icons.add),
             )
@@ -165,8 +165,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             ),
             const SizedBox(height: 24),
             ListTile(
-              leading: const Icon(Icons.person, color: AppTheme.neonGreen),
-              title: const Text(
+              leading: Icon(Icons.person, color: AppTheme.accentGreen),
+              title: Text(
                 'Profilo',
                 style: TextStyle(color: AppTheme.offWhite),
               ),
@@ -176,8 +176,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.settings, color: AppTheme.neonBlue),
-              title: const Text(
+              leading: Icon(Icons.settings, color: AppTheme.accentBlue),
+              title: Text(
                 'Impostazioni',
                 style: TextStyle(color: AppTheme.offWhite),
               ),
@@ -187,8 +187,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.logout, color: AppTheme.neonOrange),
-              title: const Text(
+              leading: Icon(Icons.logout, color: AppTheme.accentOrange),
+              title: Text(
                 'Sign Out',
                 style: TextStyle(color: AppTheme.offWhite),
               ),
@@ -223,7 +223,7 @@ class _DashboardContent extends StatelessWidget {
               // Welcome Section
               Text(
                 'Welcome back, Admin!',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: AppTheme.offWhite,
@@ -232,8 +232,8 @@ class _DashboardContent extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 'Here\'s what\'s happening with your platform today.',
-                style: const TextStyle(
-                  color: AppTheme.lightGrayText,
+                style: TextStyle(
+                  color: AppTheme.lightGray,
                   fontSize: 16,
                 ),
               ),
@@ -255,12 +255,12 @@ class _DashboardContent extends StatelessWidget {
                                 Container(
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                    gradient: AppTheme.neonGradient,
+                                    gradient: AppTheme.primaryGradient,
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Icon(
                                     Icons.business,
-                                    color: AppTheme.primaryBlack,
+                                    color: AppTheme.pureWhite,
                                     size: 20,
                                   ),
                                 ),
@@ -268,7 +268,7 @@ class _DashboardContent extends StatelessWidget {
                                 Text(
                                   '+12%',
                                   style: TextStyle(
-                                    color: AppTheme.neonGreen,
+                                    color: AppTheme.accentGreen,
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -278,7 +278,7 @@ class _DashboardContent extends StatelessWidget {
                             const SizedBox(height: 12),
                             Text(
                               legalEntityProvider.totalCount.toString(),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
                                 color: AppTheme.offWhite,
@@ -288,7 +288,7 @@ class _DashboardContent extends StatelessWidget {
                             Text(
                               'Total Legal Entities',
                               style: TextStyle(
-                                color: AppTheme.lightGrayText,
+                                color: AppTheme.lightGray,
                                 fontSize: 14,
                               ),
                             ),
@@ -310,7 +310,7 @@ class _DashboardContent extends StatelessWidget {
                                 Container(
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                    gradient: AppTheme.orangeGradient,
+                                    gradient: AppTheme.accentGradient,
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Icon(
@@ -323,7 +323,7 @@ class _DashboardContent extends StatelessWidget {
                                 Text(
                                   '+5',
                                   style: TextStyle(
-                                    color: AppTheme.neonOrange,
+                                    color: AppTheme.accentOrange,
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -333,7 +333,7 @@ class _DashboardContent extends StatelessWidget {
                             const SizedBox(height: 12),
                             Text(
                               legalEntityProvider.pendingCount.toString(),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
                                 color: AppTheme.offWhite,
@@ -343,7 +343,7 @@ class _DashboardContent extends StatelessWidget {
                             Text(
                               'Pending Approvals',
                               style: TextStyle(
-                                color: AppTheme.lightGrayText,
+                                color: AppTheme.lightGray,
                                 fontSize: 14,
                               ),
                             ),
@@ -365,12 +365,12 @@ class _DashboardContent extends StatelessWidget {
                                 Container(
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                    gradient: AppTheme.neonGradient,
+                                    gradient: AppTheme.primaryGradient,
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Icon(
                                     Icons.check_circle,
-                                    color: AppTheme.primaryBlack,
+                                    color: AppTheme.pureWhite,
                                     size: 20,
                                   ),
                                 ),
@@ -378,7 +378,7 @@ class _DashboardContent extends StatelessWidget {
                                 Text(
                                   '+8%',
                                   style: TextStyle(
-                                    color: AppTheme.neonGreen,
+                                    color: AppTheme.accentGreen,
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -388,20 +388,20 @@ class _DashboardContent extends StatelessWidget {
                             const SizedBox(height: 12),
                             Text(
                               legalEntityProvider.approvedCount.toString(),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
                                 color: AppTheme.offWhite,
                               ),
                             ),
                             const SizedBox(height: 4),
-                            Text(
-                              'Approved',
-                              style: TextStyle(
-                                color: AppTheme.lightGrayText,
-                                fontSize: 14,
+                                                          Text(
+                                'Approved',
+                                style: TextStyle(
+                                  color: AppTheme.lightGray,
+                                  fontSize: 14,
+                                ),
                               ),
-                            ),
                           ],
                         ),
                       ),
@@ -420,12 +420,12 @@ class _DashboardContent extends StatelessWidget {
                                 Container(
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                    gradient: AppTheme.orangeGradient,
+                                    gradient: AppTheme.accentGradient,
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Icon(
                                     Icons.cancel,
-                                    color: AppTheme.primaryBlack,
+                                    color: AppTheme.pureWhite,
                                     size: 20,
                                   ),
                                 ),
@@ -433,7 +433,7 @@ class _DashboardContent extends StatelessWidget {
                                 Text(
                                   '-2',
                                   style: TextStyle(
-                                    color: AppTheme.neonOrange,
+                                    color: AppTheme.accentOrange,
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -443,20 +443,20 @@ class _DashboardContent extends StatelessWidget {
                             const SizedBox(height: 12),
                             Text(
                               legalEntityProvider.rejectedCount.toString(),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
                                 color: AppTheme.offWhite,
                               ),
                             ),
                             const SizedBox(height: 4),
-                            Text(
-                              'Rejected',
-                              style: TextStyle(
-                                color: AppTheme.lightGrayText,
-                                fontSize: 14,
+                                                          Text(
+                                'Rejected',
+                                style: TextStyle(
+                                  color: AppTheme.lightGray,
+                                  fontSize: 14,
+                                ),
                               ),
-                            ),
                           ],
                         ),
                       ),
@@ -470,7 +470,7 @@ class _DashboardContent extends StatelessWidget {
               // Quick Actions
               Text(
                 'Quick Actions',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: AppTheme.offWhite,
@@ -501,19 +501,19 @@ class _DashboardContent extends StatelessWidget {
                               Container(
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  gradient: AppTheme.neonGradient,
+                                  gradient: AppTheme.primaryGradient,
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Icon(
                                   Icons.add_business,
-                                  color: AppTheme.primaryBlack,
+                                  color: AppTheme.pureWhite,
                                   size: 32,
                                 ),
                               ),
                               const SizedBox(height: 12),
                               Text(
                                 'Create Legal Entity',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                   color: AppTheme.offWhite,
@@ -524,7 +524,7 @@ class _DashboardContent extends StatelessWidget {
                               Text(
                                 'Add a new legal entity to the platform',
                                 style: TextStyle(
-                                  color: AppTheme.lightGrayText,
+                                  color: AppTheme.lightGray,
                                   fontSize: 14,
                                 ),
                                 textAlign: TextAlign.center,
@@ -557,19 +557,19 @@ class _DashboardContent extends StatelessWidget {
                               Container(
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  gradient: AppTheme.neonGradient,
+                                  gradient: AppTheme.primaryGradient,
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Icon(
                                   Icons.list_alt,
-                                  color: AppTheme.primaryBlack,
+                                  color: AppTheme.pureWhite,
                                   size: 32,
                                 ),
                               ),
                               const SizedBox(height: 12),
                               Text(
                                 'View All Entities',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                   color: AppTheme.offWhite,
@@ -580,7 +580,7 @@ class _DashboardContent extends StatelessWidget {
                               Text(
                                 'Browse and manage all legal entities',
                                 style: TextStyle(
-                                  color: AppTheme.lightGrayText,
+                                  color: AppTheme.lightGray,
                                   fontSize: 14,
                                 ),
                                 textAlign: TextAlign.center,
@@ -613,19 +613,19 @@ class _DashboardContent extends StatelessWidget {
                               Container(
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  gradient: AppTheme.purpleGradient,
+                                  gradient: AppTheme.accentGradient,
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Icon(
                                   Icons.people,
-                                  color: AppTheme.primaryBlack,
+                                  color: AppTheme.pureWhite,
                                   size: 32,
                                 ),
                               ),
                               const SizedBox(height: 12),
                               Text(
                                 'Manage Users',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                   color: AppTheme.offWhite,
@@ -636,7 +636,7 @@ class _DashboardContent extends StatelessWidget {
                               Text(
                                 'Add, edit, and manage user accounts',
                                 style: TextStyle(
-                                  color: AppTheme.lightGrayText,
+                                  color: AppTheme.lightGray,
                                   fontSize: 14,
                                 ),
                                 textAlign: TextAlign.center,
@@ -663,19 +663,19 @@ class _DashboardContent extends StatelessWidget {
                               Container(
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  gradient: AppTheme.orangeGradient,
+                                  gradient: AppTheme.accentGradient,
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Icon(
                                   Icons.email,
-                                  color: AppTheme.primaryBlack,
+                                  color: AppTheme.pureWhite,
                                   size: 32,
                                 ),
                               ),
                               const SizedBox(height: 12),
                               Text(
                                 'Send Invitations',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                   color: AppTheme.offWhite,
@@ -686,7 +686,7 @@ class _DashboardContent extends StatelessWidget {
                               Text(
                                 'Invite new users to join the platform',
                                 style: TextStyle(
-                                  color: AppTheme.lightGrayText,
+                                  color: AppTheme.lightGray,
                                   fontSize: 14,
                                 ),
                                 textAlign: TextAlign.center,
@@ -705,7 +705,7 @@ class _DashboardContent extends StatelessWidget {
               // Recent Activity
               Text(
                 'Recent Activity',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: AppTheme.offWhite,
@@ -731,12 +731,12 @@ class _DashboardContent extends StatelessWidget {
           child: Center(
             child: Column(
               children: [
-                Icon(Icons.inbox, size: 48, color: AppTheme.lightGrayText),
+                Icon(Icons.inbox, size: 48, color: AppTheme.lightGray),
                 const SizedBox(height: 16),
                 Text(
                   'No recent activity',
-                  style: const TextStyle(
-                    color: AppTheme.lightGrayText,
+                  style: TextStyle(
+                    color: AppTheme.lightGray,
                     fontSize: 16,
                   ),
                 ),
@@ -753,7 +753,7 @@ class _DashboardContent extends StatelessWidget {
         physics: const NeverScrollableScrollPhysics(),
         itemCount: recentEntities.length,
         separatorBuilder: (context, index) =>
-            Divider(color: AppTheme.lightGray),
+            Divider(color: AppTheme.mediumCharcoal),
         itemBuilder: (context, index) {
           final entity = recentEntities[index];
           return ListTile(
@@ -772,7 +772,7 @@ class _DashboardContent extends StatelessWidget {
             ),
             title: Text(
               entity.legalName ?? 'Nome non specificato',
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w600,
                 color: AppTheme.offWhite,
                 fontSize: 16,
@@ -780,8 +780,8 @@ class _DashboardContent extends StatelessWidget {
             ),
             subtitle: Text(
               entity.email ?? 'Email non specificata',
-              style: const TextStyle(
-                color: AppTheme.lightGrayText,
+              style: TextStyle(
+                color: AppTheme.lightGray,
                 fontSize: 14,
               ),
             ),
@@ -817,11 +817,11 @@ class _DashboardContent extends StatelessWidget {
   Color _getStatusColor(LegalEntityStatus status) {
     switch (status) {
       case LegalEntityStatus.pending:
-        return AppTheme.neonOrange;
+        return AppTheme.accentOrange;
       case LegalEntityStatus.approved:
-        return AppTheme.neonGreen;
+        return AppTheme.accentGreen;
       case LegalEntityStatus.rejected:
-        return AppTheme.neonOrange;
+        return AppTheme.accentOrange;
     }
   }
 }
@@ -838,7 +838,7 @@ class _UsersContent extends StatelessWidget {
         children: [
           Text(
             'User Management',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color: AppTheme.offWhite,
@@ -847,7 +847,7 @@ class _UsersContent extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             'Manage user accounts and permissions across the platform.',
-            style: const TextStyle(color: AppTheme.lightGrayText, fontSize: 16),
+            style: TextStyle(color: AppTheme.lightGray, fontSize: 16),
           ),
           const SizedBox(height: 32),
           GlassCard(
@@ -856,21 +856,21 @@ class _UsersContent extends StatelessWidget {
               child: Center(
                 child: Column(
                   children: [
-                    Icon(Icons.people, size: 64, color: AppTheme.lightGrayText),
+                    Icon(Icons.people, size: 64, color: AppTheme.lightGray),
                     const SizedBox(height: 16),
                     Text(
                       'User Management Coming Soon',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: AppTheme.lightGrayText,
+                        color: AppTheme.lightGray,
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'Advanced user management features will be available in the next update.',
-                      style: const TextStyle(
-                        color: AppTheme.mediumGrayText,
+                      style: TextStyle(
+                        color: AppTheme.mediumGray,
                         fontSize: 14,
                       ),
                       textAlign: TextAlign.center,
@@ -898,7 +898,7 @@ class _AnalyticsContent extends StatelessWidget {
         children: [
           Text(
             'Analytics & Insights',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color: AppTheme.offWhite,
@@ -907,7 +907,7 @@ class _AnalyticsContent extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             'Track platform performance and user engagement metrics.',
-            style: const TextStyle(color: AppTheme.lightGrayText, fontSize: 16),
+            style: TextStyle(color: AppTheme.lightGray, fontSize: 16),
           ),
           const SizedBox(height: 32),
           GlassCard(
@@ -919,25 +919,25 @@ class _AnalyticsContent extends StatelessWidget {
                     Icon(
                       Icons.analytics,
                       size: 64,
-                      color: AppTheme.lightGrayText,
+                      color: AppTheme.lightGray,
                     ),
                     const SizedBox(height: 16),
                     Text(
                       'Analytics Coming Soon',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: AppTheme.lightGrayText,
+                        color: AppTheme.lightGray,
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Comprehensive analytics and reporting features will be available in the next update.',
-                      style: const TextStyle(
-                        color: AppTheme.mediumGrayText,
-                        fontSize: 14,
-                      ),
-                      textAlign: TextAlign.center,
+                                              'Comprehensive analytics and reporting features will be available in the next update.',
+                        style: TextStyle(
+                          color: AppTheme.mediumGray,
+                          fontSize: 14,
+                        ),
+                        textAlign: TextAlign.center,
                     ),
                   ],
                 ),
@@ -962,7 +962,7 @@ class _SettingsContent extends StatelessWidget {
         children: [
           Text(
             'Platform Settings',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color: AppTheme.offWhite,
@@ -971,7 +971,7 @@ class _SettingsContent extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             'Configure platform settings and preferences.',
-            style: const TextStyle(color: AppTheme.lightGrayText, fontSize: 16),
+            style: TextStyle(color: AppTheme.lightGray, fontSize: 16),
           ),
           const SizedBox(height: 32),
           GlassCard(
@@ -983,22 +983,22 @@ class _SettingsContent extends StatelessWidget {
                     Icon(
                       Icons.settings,
                       size: 64,
-                      color: AppTheme.lightGrayText,
+                                              color: AppTheme.lightGray,
                     ),
                     const SizedBox(height: 16),
                     Text(
                       'Settings Coming Soon',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: AppTheme.lightGrayText,
+                        color: AppTheme.lightGray,
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'Advanced platform configuration options will be available in the next update.',
-                      style: const TextStyle(
-                        color: AppTheme.mediumGrayText,
+                      style: TextStyle(
+                        color: AppTheme.mediumGray,
                         fontSize: 14,
                       ),
                       textAlign: TextAlign.center,

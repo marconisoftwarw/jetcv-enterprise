@@ -166,7 +166,7 @@ class _CertificationListScreenState extends State<CertificationListScreen> {
                       },
                       text: 'Nuova',
                       icon: Icons.add,
-                      neonColor: AppTheme.neonGreen,
+                      neonColor: AppTheme.accentGreen,
                     ),
                   ],
                 ),
@@ -186,13 +186,13 @@ class _CertificationListScreenState extends State<CertificationListScreen> {
                         Icon(
                           Icons.verified_user,
                           size: 64,
-                          color: AppTheme.lightGrayText,
+                          color: AppTheme.lightGray,
                         ),
                         const SizedBox(height: 16),
                         Text(
                           'Nessuna certificazione trovata',
                           style: TextStyle(
-                            color: AppTheme.lightGrayText,
+                            color: AppTheme.lightGray,
                             fontSize: 16,
                           ),
                         ),
@@ -200,7 +200,7 @@ class _CertificationListScreenState extends State<CertificationListScreen> {
                         Text(
                           'Inizia creando la tua prima certificazione',
                           style: TextStyle(
-                            color: AppTheme.mediumGrayText,
+                            color: AppTheme.mediumGray,
                             fontSize: 14,
                           ),
                         ),
@@ -214,7 +214,7 @@ class _CertificationListScreenState extends State<CertificationListScreen> {
                           },
                           text: 'Crea Certificazione',
                           icon: Icons.add,
-                          neonColor: AppTheme.neonGreen,
+                          neonColor: AppTheme.accentGreen,
                         ),
                       ],
                     ),
@@ -337,7 +337,7 @@ class _CertificationListScreenState extends State<CertificationListScreen> {
                     text: 'Dettagli',
                     icon: Icons.visibility,
                     isOutlined: true,
-                    neonColor: AppTheme.neonBlue,
+                                          neonColor: AppTheme.accentBlue,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -347,7 +347,7 @@ class _CertificationListScreenState extends State<CertificationListScreen> {
                       onPressed: () => _editCertification(certification),
                       text: 'Modifica',
                       icon: Icons.edit,
-                      neonColor: AppTheme.neonGreen,
+                      neonColor: AppTheme.accentGreen,
                     ),
                   ),
                 ],
@@ -357,7 +357,7 @@ class _CertificationListScreenState extends State<CertificationListScreen> {
                       onPressed: () => _syncCertification(certification),
                       text: 'Sincronizza',
                       icon: Icons.sync,
-                      neonColor: AppTheme.neonPurple,
+                      neonColor: AppTheme.accentPurple,
                     ),
                   ),
                 ],
@@ -375,31 +375,31 @@ class _CertificationListScreenState extends State<CertificationListScreen> {
 
     switch (status) {
       case CertificationStatus.draft:
-        color = AppTheme.lightGrayText;
+        color = AppTheme.lightGray;
         text = 'Bozza';
         break;
       case CertificationStatus.submitted:
-        color = AppTheme.neonBlue;
+        color = AppTheme.accentBlue;
         text = 'Inviata';
         break;
       case CertificationStatus.approved:
-        color = AppTheme.neonGreen;
+        color = AppTheme.accentGreen;
         text = 'Approvata';
         break;
       case CertificationStatus.rejected:
-        color = AppTheme.neonOrange;
+        color = AppTheme.accentOrange;
         text = 'Rifiutata';
         break;
       case CertificationStatus.expired:
-        color = AppTheme.neonOrange;
+        color = AppTheme.accentOrange;
         text = 'Scaduta';
         break;
       case CertificationStatus.revoked:
-        color = AppTheme.neonOrange;
+        color = AppTheme.accentOrange;
         text = 'Revocata';
         break;
       case CertificationStatus.closed:
-        color = AppTheme.lightGrayText;
+        color = AppTheme.lightGray;
         text = 'Chiusa';
         break;
     }

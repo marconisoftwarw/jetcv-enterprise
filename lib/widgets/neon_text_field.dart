@@ -87,8 +87,8 @@ class _NeonTextFieldState extends State<NeonTextField>
 
   @override
   Widget build(BuildContext context) {
-    final neonColor = widget.neonColor ?? AppTheme.neonGreen;
-    final errorColor = AppTheme.neonOrange;
+    final neonColor = widget.neonColor ?? AppTheme.accentBlue;
+    final errorColor = AppTheme.accentOrange;
 
     return SizedBox(
       width: widget.width,
@@ -140,7 +140,7 @@ class _NeonTextFieldState extends State<NeonTextField>
                 widget.onChanged?.call(value);
               },
               onFieldSubmitted: widget.onSubmitted,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppTheme.offWhite,
                 fontSize: 16,
                 fontWeight: FontWeight.w400,
@@ -155,7 +155,7 @@ class _NeonTextFieldState extends State<NeonTextField>
                               ? neonColor
                               : _hasError
                               ? errorColor
-                              : AppTheme.lightGrayText,
+                              : AppTheme.lightGray,
                         ),
                         child: widget.prefixIcon!,
                       )
@@ -167,7 +167,7 @@ class _NeonTextFieldState extends State<NeonTextField>
                               ? neonColor
                               : _hasError
                               ? errorColor
-                              : AppTheme.lightGrayText,
+                              : AppTheme.lightGray,
                         ),
                         child: widget.suffixIcon!,
                       )
@@ -202,17 +202,17 @@ class _NeonTextFieldState extends State<NeonTextField>
                       ? neonColor
                       : _hasError
                       ? errorColor
-                      : AppTheme.lightGrayText,
+                      : AppTheme.lightGray,
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
                 ),
-                hintStyle: const TextStyle(
-                  color: AppTheme.mediumGrayText,
+                hintStyle: TextStyle(
+                  color: AppTheme.mediumGray,
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
                 ),
-                errorStyle: const TextStyle(
-                  color: AppTheme.neonOrange,
+                errorStyle: TextStyle(
+                  color: AppTheme.accentOrange,
                   fontSize: 12,
                   fontWeight: FontWeight.w400,
                 ),

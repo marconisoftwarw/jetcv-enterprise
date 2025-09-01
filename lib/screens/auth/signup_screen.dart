@@ -1234,7 +1234,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           ? Icons.hourglass_empty
                           : Icons.person_add,
                       isLoading: authProvider.isLoading || _isVeriffLoading,
-                      neonColor: AppTheme.neonGreen,
+                      neonColor: AppTheme.accentGreen,
                     );
                   },
                 ),
@@ -1250,7 +1250,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       child: Text(
                         'OR',
                         style: TextStyle(
-                          color: AppTheme.mediumGrayText,
+                          color: AppTheme.mediumGray,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -1272,7 +1272,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       icon: Icons.g_mobiledata,
                       isLoading: authProvider.isLoading,
                       isOutlined: true,
-                      neonColor: AppTheme.neonBlue,
+                      neonColor: AppTheme.accentBlue,
                     );
                   },
                 ),
@@ -1285,14 +1285,14 @@ class _SignupScreenState extends State<SignupScreen> {
                   children: [
                     Text(
                       'Already have an account? ',
-                      style: TextStyle(color: AppTheme.lightGrayText),
+                      style: TextStyle(color: AppTheme.lightGray),
                     ),
                     TextButton(
                       onPressed: () =>
                           Navigator.pushReplacementNamed(context, '/login'),
                       child: Text(
                         'Sign In',
-                        style: TextStyle(color: AppTheme.neonGreen),
+                        style: TextStyle(color: AppTheme.accentGreen),
                       ),
                     ),
                   ],
@@ -1307,27 +1307,27 @@ class _SignupScreenState extends State<SignupScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: AppTheme.neonOrange.withValues(alpha: 0.1),
+                            color: AppTheme.accentOrange.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: AppTheme.neonOrange),
+                            border: Border.all(color: AppTheme.accentOrange),
                           ),
                           child: Row(
                             children: [
                               Icon(
                                 Icons.error_outline,
-                                color: AppTheme.neonOrange,
+                                color: AppTheme.accentOrange,
                               ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   authProvider.errorMessage!,
-                                  style: TextStyle(color: AppTheme.neonOrange),
+                                  style: TextStyle(color: AppTheme.accentOrange),
                                 ),
                               ),
                               IconButton(
                                 icon: Icon(
                                   Icons.close,
-                                  color: AppTheme.neonOrange,
+                                  color: AppTheme.accentOrange,
                                 ),
                                 onPressed: authProvider.clearError,
                                 iconSize: 20,
@@ -1348,22 +1348,22 @@ class _SignupScreenState extends State<SignupScreen> {
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: AppTheme.neonOrange.withValues(alpha: 0.1),
+                        color: AppTheme.accentOrange.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: AppTheme.neonOrange),
+                        border: Border.all(color: AppTheme.accentOrange),
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.error_outline, color: AppTheme.neonOrange),
+                          Icon(Icons.error_outline, color: AppTheme.accentOrange),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               _veriffErrorMessage!,
-                              style: TextStyle(color: AppTheme.neonOrange),
+                              style: TextStyle(color: AppTheme.mediumGray),
                             ),
                           ),
                           IconButton(
-                            icon: Icon(Icons.close, color: AppTheme.neonOrange),
+                            icon: Icon(Icons.close, color: AppTheme.accentOrange),
                             onPressed: () {
                               setState(() {
                                 _veriffErrorMessage = null;

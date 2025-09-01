@@ -40,17 +40,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 labelType: NavigationRailLabelType.all,
                 destinations: _buildNavigationDestinations(isAdmin),
                 backgroundColor: AppTheme.darkGray,
-                selectedIconTheme: const IconThemeData(
-                  color: AppTheme.neonGreen,
+                selectedIconTheme: IconThemeData(
+                  color: AppTheme.accentGreen,
                 ),
-                unselectedIconTheme: const IconThemeData(
-                  color: AppTheme.lightGrayText,
+                unselectedIconTheme: IconThemeData(
+                  color: AppTheme.mediumGray,
                 ),
-                selectedLabelTextStyle: const TextStyle(
-                  color: AppTheme.neonGreen,
+                selectedLabelTextStyle: TextStyle(
+                  color: AppTheme.accentGreen,
                 ),
-                unselectedLabelTextStyle: const TextStyle(
-                  color: AppTheme.lightGrayText,
+                unselectedLabelTextStyle: TextStyle(
+                  color: AppTheme.mediumGray,
                 ),
               ),
 
@@ -229,15 +229,15 @@ class _DashboardContent extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  gradient: AppTheme.neonGradient,
+                  gradient: AppTheme.primaryGradient,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(icon, size: 32, color: AppTheme.primaryBlack),
+                child: Icon(icon, size: 32, color: AppTheme.pureWhite),
               ),
               const SizedBox(height: 12),
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: AppTheme.offWhite,
@@ -247,7 +247,7 @@ class _DashboardContent extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 subtitle,
-                style: TextStyle(fontSize: 12, color: AppTheme.lightGrayText),
+                style: TextStyle(fontSize: 12, color: AppTheme.lightGray),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -265,18 +265,18 @@ class _DashboardContent extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.history, color: AppTheme.lightGrayText),
+                Icon(Icons.history, color: AppTheme.lightGray),
                 const SizedBox(width: 12),
                 Text(
                   'Nessuna attività recente',
-                  style: TextStyle(color: AppTheme.lightGrayText, fontSize: 16),
+                  style: TextStyle(color: AppTheme.lightGray, fontSize: 16),
                 ),
               ],
             ),
             const SizedBox(height: 16),
             Text(
               'La tua attività apparirà qui una volta che inizierai a usare la piattaforma.',
-              style: TextStyle(color: AppTheme.mediumGrayText, fontSize: 14),
+              style: TextStyle(color: AppTheme.mediumGray, fontSize: 14),
             ),
           ],
         ),
