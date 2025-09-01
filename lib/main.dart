@@ -23,6 +23,7 @@ import 'screens/veriff/veriff_verification_screen.dart';
 import 'screens/public/cv_list_screen.dart';
 import 'screens/public/legal_entity_pricing_screen.dart';
 import 'screens/public/legal_entity_public_registration_screen.dart';
+import 'screens/public/legal_entity_invitation_details_screen.dart';
 import 'screens/legal_entity/legal_entity_registration_screen.dart';
 
 void main() async {
@@ -213,6 +214,13 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
               case '/legal-entity/register':
                 return MaterialPageRoute(
                   builder: (_) => const LegalEntityPublicRegistrationScreen(),
+                );
+              case '/legal-entity/invitation-details':
+                final args = settings.arguments as Map<String, String>?;
+                return MaterialPageRoute(
+                  builder: (_) => LegalEntityInvitationDetailsScreen(
+                    queryParameters: args ?? {},
+                  ),
                 );
               case '/legal-entity-registration':
                 return MaterialPageRoute(

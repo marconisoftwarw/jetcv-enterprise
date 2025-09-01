@@ -44,6 +44,16 @@ class _SignupScreenState extends State<SignupScreen> {
   bool _veriffWindowClosed =
       false; // Flag per tracciare se la finestra è stata chiusa
 
+  // Invitation tracking
+  bool _isFromInvitation = false;
+  Map<String, String> _invitationParams = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUrlParameters();
+  }
+
   @override
   void dispose() {
     _firstNameController.dispose();
@@ -54,6 +64,35 @@ class _SignupScreenState extends State<SignupScreen> {
     _phoneController.dispose();
     _windowCheckTimer?.cancel(); // Cancella il timer del monitoraggio finestra
     super.dispose();
+  }
+
+  void _loadUrlParameters() {
+    // Controlla se ci sono parametri di invito nell'URL
+    final uri = Uri.base;
+    final queryParams = uri.queryParameters;
+
+    // Se ci sono parametri di invito (token e email), pre-compila il form
+    if (queryParams.containsKey('token') && queryParams.containsKey('email')) {
+      _isFromInvitation = true;
+      _invitationParams = Map<String, String>.from(queryParams);
+
+      // Pre-compila l'email se presente
+      if (queryParams['email'] != null) {
+        _emailController.text = queryParams['email']!;
+      }
+
+      // Pre-compila il nome se presente nei parametri
+      if (queryParams['legal_rapresentative'] != null) {
+        final representativeName = queryParams['legal_rapresentative']!;
+        final nameParts = representativeName.split(' ');
+        if (nameParts.isNotEmpty) {
+          _firstNameController.text = nameParts.first;
+          if (nameParts.length > 1) {
+            _lastNameController.text = nameParts.skip(1).join(' ');
+          }
+        }
+      }
+    }
   }
 
   Future<void> _signUp() async {
@@ -89,7 +128,20 @@ class _SignupScreenState extends State<SignupScreen> {
       lastName: _lastNameController.text.trim(),
     );
 
-    await _startVeriffVerification();
+    // Se l'utente arriva da un invito, salta la verifica Veriff
+    if (_isFromInvitation) {
+      print('SignupScreen: Utente da invito, saltando verifica Veriff...');
+      if (mounted) {
+        Navigator.pushReplacementNamed(
+          context,
+          '/legal-entity/invitation-details',
+          arguments: _invitationParams,
+        );
+      }
+    } else {
+      // Altrimenti, procedi con la verifica Veriff normale
+      await _startVeriffVerification();
+    }
   }
 
   Future<void> _signInWithGoogle() async {
@@ -97,8 +149,20 @@ class _SignupScreenState extends State<SignupScreen> {
     final success = await authProvider.signInWithGoogle();
 
     if (success && mounted) {
-      // Per gli utenti Google, avvia anche la verifica Veriff
-      await _startVeriffVerification();
+      // Se l'utente arriva da un invito, salta la verifica Veriff
+      if (_isFromInvitation) {
+        print(
+          'SignupScreen: Utente Google da invito, saltando verifica Veriff...',
+        );
+        Navigator.pushReplacementNamed(
+          context,
+          '/legal-entity/invitation-details',
+          arguments: _invitationParams,
+        );
+      } else {
+        // Per gli utenti Google normali, avvia la verifica Veriff
+        await _startVeriffVerification();
+      }
     }
   }
 
@@ -144,14 +208,30 @@ class _SignupScreenState extends State<SignupScreen> {
         print(
           'SignupScreen: Utente ha scelto di non verificare ora, navigando alla home...',
         );
-        // Se l'utente sceglie di non verificare ora, vai alla home
-        Navigator.pushReplacementNamed(context, '/home');
+        // Se l'utente sceglie di non verificare ora, naviga in base all'invito
+        if (_isFromInvitation) {
+          Navigator.pushReplacementNamed(
+            context,
+            '/legal-entity/invitation-details',
+            arguments: _invitationParams,
+          );
+        } else {
+          Navigator.pushReplacementNamed(context, '/home');
+        }
       }
     } catch (e) {
       print('SignupScreen: Errore nell\'avvio verifica Veriff: $e');
       if (mounted) {
-        // In caso di errore, vai alla home
-        Navigator.pushReplacementNamed(context, '/home');
+        // In caso di errore, naviga in base all'invito
+        if (_isFromInvitation) {
+          Navigator.pushReplacementNamed(
+            context,
+            '/legal-entity/invitation-details',
+            arguments: _invitationParams,
+          );
+        } else {
+          Navigator.pushReplacementNamed(context, '/home');
+        }
       }
     }
   }
@@ -430,7 +510,15 @@ class _SignupScreenState extends State<SignupScreen> {
             await Future.delayed(const Duration(seconds: 2));
 
             if (mounted) {
-              Navigator.pushReplacementNamed(context, '/home');
+              if (_isFromInvitation) {
+                Navigator.pushReplacementNamed(
+                  context,
+                  '/legal-entity/invitation-details',
+                  arguments: _invitationParams,
+                );
+              } else {
+                Navigator.pushReplacementNamed(context, '/home');
+              }
             }
           }
         }

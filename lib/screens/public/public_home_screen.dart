@@ -119,10 +119,7 @@ class PublicHomeScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-
-                  const SizedBox(height: 24),
-
-                  // Additional Actions
+                  const SizedBox(height: 16),
                   Row(
                     children: [
                       Expanded(
@@ -155,7 +152,9 @@ class PublicHomeScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+
+                  const SizedBox(height: 24),
+
                   Row(
                     children: [
                       Expanded(

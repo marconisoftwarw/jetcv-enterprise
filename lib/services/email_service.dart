@@ -244,7 +244,7 @@ Questo è un messaggio automatico, non rispondere a questa email.
     final token = invitation.invitationToken;
 
     // Costruisci l'URL base
-    final url = Uri.parse('$baseUrl/legal-entity/register');
+    final url = Uri.parse(baseUrl);
 
     // Aggiungi i parametri di query
     final queryParams = <String, String>{
@@ -317,7 +317,8 @@ Questo è un messaggio automatico, non rispondere a questa email.
     // Costruisci l'URL finale con i parametri
     final finalUrl = url.replace(queryParameters: queryParams);
 
-    return finalUrl.toString();
+    // Aggiungi il fragment per la navigazione
+    return '$finalUrl#/signup';
   }
 
   // Metodo per verificare lo stato dell'email
