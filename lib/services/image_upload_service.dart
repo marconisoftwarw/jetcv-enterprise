@@ -1,7 +1,4 @@
-import 'dart:convert';
 import 'dart:io';
-import 'package:http/http.dart' as http;
-import '../config/app_config.dart';
 import '../services/supabase_service.dart';
 
 class ImageUploadService {
@@ -53,7 +50,42 @@ class ImageUploadService {
     }
   }
 
-  // Generic upload method
+  // Unified upload function for both profile and company photos
+  Future<String?> uploadEntityPicture(
+    File imageFile, {
+    required String pictureType, // 'profile' or 'company'
+    String? legalEntityId,
+  }) async {
+    try {
+      String folder;
+      String type;
+      
+      switch (pictureType) {
+        case 'profile':
+          folder = 'entity-profile-pictures';
+          type = 'entity-profile';
+          break;
+        case 'company':
+          folder = 'entity-company-pictures';
+          type = 'entity-company';
+          break;
+        default:
+          throw Exception('Invalid picture type: $pictureType');
+      }
+
+      return await _uploadImage(
+        imageFile,
+        folder,
+        type,
+        legalEntityId: legalEntityId,
+      );
+    } catch (e) {
+      print('❌ Error uploading entity $pictureType picture: $e');
+      return null;
+    }
+  }
+
+  // Generic upload method - Direct database access
   Future<String?> _uploadImage(
     File imageFile,
     String folder,
@@ -61,59 +93,45 @@ class ImageUploadService {
     String? legalEntityId,
   }) async {
     try {
-      // Read file as bytes
-      final bytes = await imageFile.readAsBytes();
-
-      // Convert to base64
-      final base64File = base64Encode(bytes);
-
       // Get file name and type
       final fileName = imageFile.path.split('/').last;
       final fileType = _getMimeType(fileName);
 
-      // Prepare request body
-      final requestBody = {
-        'file': base64File,
-        'fileName': fileName,
-        'fileType': fileType,
-        'folder': folder,
-        if (legalEntityId != null) 'legalEntityId': legalEntityId,
-      };
+      // Generate unique file name
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final uniqueFileName = '${timestamp}_$fileName';
 
-      // Get access token
-      final accessToken = await _supabaseService.getAccessToken();
-      if (accessToken == null) {
-        throw Exception('No access token available');
-      }
-
-      // Determine which edge function to use
-      String endpoint;
+      // Determine storage bucket and path
+      String bucketName;
+      String filePath;
+      
       if (type == 'profile') {
-        endpoint = 'uploadProfilePicture';
+        bucketName = 'profile-pictures';
+        filePath = uniqueFileName;
+      } else if (type == 'entity-profile') {
+        bucketName = 'entity-profile-pictures';
+        filePath = legalEntityId != null ? '$legalEntityId/$uniqueFileName' : uniqueFileName;
+      } else if (type == 'entity-company') {
+        bucketName = 'entity-company-pictures';
+        filePath = legalEntityId != null ? '$legalEntityId/$uniqueFileName' : uniqueFileName;
       } else {
-        endpoint = 'uploadCompanyPicture';
+        bucketName = 'company-pictures';
+        filePath = legalEntityId != null ? '$legalEntityId/$uniqueFileName' : uniqueFileName;
       }
 
-      // Make request to edge function
-      final response = await http.post(
-        Uri.parse('${AppConfig.supabaseUrl}/functions/v1/$endpoint'),
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(requestBody),
+      // Upload directly to Supabase Storage
+      final response = await _supabaseService.uploadFileToStorage(
+        bucketName: bucketName,
+        filePath: filePath,
+        file: imageFile,
+        contentType: fileType,
       );
 
-      if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
-        if (responseData['success'] == true) {
-          print('✅ Image uploaded successfully: ${responseData['url']}');
-          return responseData['url'];
-        } else {
-          throw Exception(responseData['error'] ?? 'Upload failed');
-        }
+      if (response != null) {
+        print('✅ Image uploaded successfully: $response');
+        return response;
       } else {
-        throw Exception('HTTP ${response.statusCode}: ${response.body}');
+        throw Exception('Upload failed - no URL returned');
       }
     } catch (e) {
       print('❌ Error in _uploadImage: $e');
@@ -140,21 +158,13 @@ class ImageUploadService {
   }
 
   // Delete image from storage
-  Future<bool> deleteImage(String imagePath) async {
+  Future<bool> deleteImage(String imagePath, String bucketName) async {
     try {
-      final accessToken = await _supabaseService.getAccessToken();
-      if (accessToken == null) {
-        throw Exception('No access token available');
-      }
+      final response = await _supabaseService.client.storage
+          .from(bucketName)
+          .remove([imagePath]);
 
-      final response = await http.delete(
-        Uri.parse(
-          '${AppConfig.supabaseUrl}/storage/v1/object/images/$imagePath',
-        ),
-        headers: {'Authorization': 'Bearer $accessToken'},
-      );
-
-      return response.statusCode == 200;
+      return response.isNotEmpty;
     } catch (e) {
       print('❌ Error deleting image: $e');
       return false;
@@ -162,8 +172,10 @@ class ImageUploadService {
   }
 
   // Get image URL from path
-  String getImageUrl(String imagePath) {
-    return '${AppConfig.supabaseUrl}/storage/v1/object/public/images/$imagePath';
+  String getImageUrl(String imagePath, String bucketName) {
+    return _supabaseService.client.storage
+        .from(bucketName)
+        .getPublicUrl(imagePath);
   }
 
   // Validate image file

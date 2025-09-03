@@ -2,37 +2,38 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
-import 'package:provider/provider.dart';
-import '../../models/pricing.dart';
+
 import '../../models/user.dart' show AppUser;
 import '../../models/legal_entity.dart';
 import '../../services/supabase_service.dart';
 import '../../services/image_upload_service.dart';
-
-import '../../providers/pricing_provider.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text_field.dart';
 
-class LegalEntityPublicRegistrationScreen extends StatefulWidget {
-  const LegalEntityPublicRegistrationScreen({super.key});
+class LegalEntityLinkRegistrationScreen extends StatefulWidget {
+  final String? invitationToken;
+  final Map<String, dynamic>? prefillData;
+
+  const LegalEntityLinkRegistrationScreen({
+    super.key,
+    this.invitationToken,
+    this.prefillData,
+  });
 
   @override
-  State<LegalEntityPublicRegistrationScreen> createState() =>
-      _LegalEntityPublicRegistrationScreenState();
+  State<LegalEntityLinkRegistrationScreen> createState() =>
+      _LegalEntityLinkRegistrationScreenState();
 }
 
-class _LegalEntityPublicRegistrationScreenState
-    extends State<LegalEntityPublicRegistrationScreen> {
+class _LegalEntityLinkRegistrationScreenState
+    extends State<LegalEntityLinkRegistrationScreen> {
   final _formKey = GlobalKey<FormState>();
   final _personalFormKey = GlobalKey<FormState>();
   final _entityFormKey = GlobalKey<FormState>();
 
   // Step management
   int _currentStep = 0;
-  final int _totalSteps = 3;
-
-  // Pricing
-  Pricing? _selectedPricing;
+  final int _totalSteps = 2; // No pricing step for link registration
 
   // Personal information
   final _personalNameController = TextEditingController();
@@ -72,13 +73,7 @@ class _LegalEntityPublicRegistrationScreenState
   @override
   void initState() {
     super.initState();
-    _loadUrlParameters();
-    _loadPricingData();
-  }
-
-  Future<void> _loadPricingData() async {
-    final pricingProvider = context.read<PricingProvider>();
-    await pricingProvider.loadPricings();
+    _loadPrefillData();
   }
 
   @override
@@ -106,18 +101,39 @@ class _LegalEntityPublicRegistrationScreenState
     super.dispose();
   }
 
-  void _loadUrlParameters() {
-    // Check if this is a link-based registration
-    // In a real app, you would get the current URL from the route
-    // For now, we'll check if there are any URL parameters passed to the screen
-    // This would typically be done through route parameters or deep linking
+  void _loadPrefillData() {
+    if (widget.prefillData != null) {
+      // Pre-fill personal information
+      _personalNameController.text = widget.prefillData!['personalName'] ?? '';
+      _personalEmailController.text = widget.prefillData!['personalEmail'] ?? '';
+      _personalPhoneController.text = widget.prefillData!['personalPhone'] ?? '';
+
+      // Pre-fill legal entity information
+      _legalNameController.text = widget.prefillData!['legalName'] ?? '';
+      _identifierCodeController.text = widget.prefillData!['identifierCode'] ?? '';
+      _entityEmailController.text = widget.prefillData!['entityEmail'] ?? '';
+      _legalRepresentativeController.text = widget.prefillData!['legalRepresentative'] ?? '';
+      _operationalAddressController.text = widget.prefillData!['operationalAddress'] ?? '';
+      _operationalCityController.text = widget.prefillData!['operationalCity'] ?? '';
+      _operationalPostalCodeController.text = widget.prefillData!['operationalPostalCode'] ?? '';
+      _operationalStateController.text = widget.prefillData!['operationalState'] ?? '';
+      _operationalCountryController.text = widget.prefillData!['operationalCountry'] ?? '';
+      _headquarterAddressController.text = widget.prefillData!['headquarterAddress'] ?? '';
+      _headquarterCityController.text = widget.prefillData!['headquarterCity'] ?? '';
+      _headquarterPostalCodeController.text = widget.prefillData!['headquarterPostalCode'] ?? '';
+      _headquarterStateController.text = widget.prefillData!['headquarterState'] ?? '';
+      _headquarterCountryController.text = widget.prefillData!['headquarterCountry'] ?? '';
+      _phoneController.text = widget.prefillData!['phone'] ?? '';
+      _pecController.text = widget.prefillData!['pec'] ?? '';
+      _websiteController.text = widget.prefillData!['website'] ?? '';
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Registrazione Entità Legale'),
+        title: const Text('Registrazione tramite Invito'),
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
       ),
@@ -133,9 +149,8 @@ class _LegalEntityPublicRegistrationScreenState
               child: IndexedStack(
                 index: _currentStep,
                 children: [
-                  if (_currentStep == 0) _buildPricingStep(),
-                  if (_currentStep == 1) _buildPersonalInfoStep(),
-                  if (_currentStep == 2) _buildLegalEntityStep(),
+                  if (_currentStep == 0) _buildPersonalInfoStep(),
+                  if (_currentStep == 1) _buildLegalEntityStep(),
                 ],
               ),
             ),
@@ -180,11 +195,7 @@ class _LegalEntityPublicRegistrationScreenState
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    index == 0
-                        ? 'Pricing'
-                        : index == 1
-                        ? 'Personale'
-                        : 'Azienda',
+                    index == 0 ? 'Personale' : 'Azienda',
                     style: TextStyle(
                       fontSize: 12,
                       color: isActive ? Colors.blue : Colors.grey,
@@ -198,174 +209,6 @@ class _LegalEntityPublicRegistrationScreenState
             ),
           );
         }),
-      ),
-    );
-  }
-
-  Widget _buildPricingStep() {
-    return Consumer<PricingProvider>(
-      builder: (context, pricingProvider, child) {
-        if (pricingProvider.isLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (pricingProvider.hasError) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error, size: 64, color: Colors.red),
-                const SizedBox(height: 16),
-                Text(
-                  'Errore nel caricamento dei piani: ${pricingProvider.errorMessage}',
-                  style: const TextStyle(color: Colors.red),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => pricingProvider.loadPricings(),
-                  child: const Text('Riprova'),
-                ),
-              ],
-            ),
-          );
-        }
-
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Seleziona il Piano',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Scegli il piano più adatto alle tue esigenze.',
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-              ),
-              const SizedBox(height: 24),
-
-              // Pricing cards
-              ...pricingProvider.pricings.map((pricing) => _buildPricingCard(pricing)),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildPricingCard(Pricing pricing) {
-    final isSelected = _selectedPricing?.idPricing == pricing.idPricing;
-    
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: Card(
-        elevation: isSelected ? 8 : 2,
-        color: isSelected ? Colors.blue.shade50 : null,
-        child: InkWell(
-          onTap: () {
-            setState(() {
-              _selectedPricing = pricing;
-            });
-          },
-          borderRadius: BorderRadius.circular(8),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            pricing.name,
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: isSelected ? Colors.blue : Colors.black,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            pricing.description,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          pricing.formattedPrice,
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: isSelected ? Colors.blue : Colors.green,
-                          ),
-                        ),
-                        const Text(
-                          '/anno',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                // Features
-                ...pricing.features.map((feature) => Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.check_circle,
-                        size: 16,
-                        color: isSelected ? Colors.blue : Colors.green,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          feature,
-                          style: const TextStyle(fontSize: 14),
-                        ),
-                      ),
-                    ],
-                  ),
-                )),
-                const SizedBox(height: 16),
-                if (isSelected)
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.blue,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: const Text(
-                      'PIANO SELEZIONATO',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }
@@ -796,17 +639,11 @@ class _LegalEntityPublicRegistrationScreenState
   bool _validateCurrentStep() {
     switch (_currentStep) {
       case 0:
-        if (_selectedPricing == null) {
-          _showError('Seleziona un piano per continuare');
-          return false;
-        }
-        break;
-      case 1:
         if (!_personalFormKey.currentState!.validate()) {
           return false;
         }
         break;
-      case 2:
+      case 1:
         if (!_entityFormKey.currentState!.validate()) {
           return false;
         }
@@ -896,15 +733,10 @@ class _LegalEntityPublicRegistrationScreenState
         throw Exception('Errore nella creazione dell\'entità legale');
       }
 
-      // 4. Create pricing record (temporary/mock for now)
-      if (_selectedPricing != null) {
-        // TODO: Implement actual pricing purchase and database storage
-        print('Selected pricing: ${_selectedPricing!.name} - ${_selectedPricing!.formattedPrice}');
-        // In a real implementation, this would:
-        // - Process payment
-        // - Create pricing record in database
-        // - Link pricing to legal entity
-        // - Set expiration date
+      // 4. Process invitation token if provided
+      if (widget.invitationToken != null) {
+        // TODO: Process invitation token and link to existing legal entity
+        print('Processing invitation token: ${widget.invitationToken}');
       }
 
       // 5. Show success message

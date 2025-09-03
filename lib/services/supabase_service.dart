@@ -1170,6 +1170,37 @@ class SupabaseService {
     }
   }
 
+  // Generic file upload method for direct database access
+  Future<String?> uploadFileToStorage({
+    required String bucketName,
+    required String filePath,
+    required File file,
+    required String contentType,
+  }) async {
+    try {
+      final response = await _client.storage
+          .from(bucketName)
+          .upload(
+            filePath,
+            file,
+            fileOptions: FileOptions(
+              cacheControl: '3600',
+              upsert: false,
+              contentType: contentType,
+            ),
+          );
+
+      final url = _client.storage
+          .from(bucketName)
+          .getPublicUrl(response);
+
+      return url;
+    } catch (e) {
+      print('Error uploading file to storage: $e');
+      return null;
+    }
+  }
+
   // Country management
   Future<List<Map<String, dynamic>>> getCountries() async {
     try {

@@ -12,6 +12,7 @@ class PricingProvider extends ChangeNotifier {
   List<Pricing> get pricings => _pricings;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+  bool get hasError => _errorMessage != null;
 
   // Carica i pricing disponibili
   Future<void> loadPricings() async {
