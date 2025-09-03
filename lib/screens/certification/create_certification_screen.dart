@@ -474,7 +474,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 onPressed: _getCurrentLocation,
                 text: 'Aggiorna Posizione',
                 icon: Icons.my_location,
-                                      neonColor: AppTheme.accentGreen,
+                neonColor: AppTheme.accentGreen,
               ),
 
               const SizedBox(height: 32),
@@ -512,7 +512,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 onPressed: _addAttachment,
                 text: 'Aggiungi Allegato',
                 icon: Icons.add,
-                                      neonColor: AppTheme.accentBlue,
+                neonColor: AppTheme.accentBlue,
               ),
 
               if (_attachments.isNotEmpty) ...[

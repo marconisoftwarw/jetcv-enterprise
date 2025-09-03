@@ -118,9 +118,9 @@ class CustomTextField extends StatelessWidget {
           vertical: 16,
         ),
         labelStyle: TextStyle(
-          color: enabled ? Colors.grey[700] : Colors.grey[500],
+          color: enabled ? Colors.black : Colors.grey[600],
         ),
-        hintStyle: TextStyle(color: Colors.grey[500]),
+        hintStyle: TextStyle(color: Colors.grey[600]),
         errorStyle: TextStyle(color: Colors.red[600], fontSize: 12),
       ),
     );

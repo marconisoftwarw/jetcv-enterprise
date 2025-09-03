@@ -25,11 +25,11 @@ class SplashScreen extends StatelessWidget {
                     width: 2,
                   ),
                 ),
-                                  child: Icon(
-                    Icons.verified_user,
-                    size: 120,
-                    color: AppTheme.pureWhite,
-                  ),
+                child: Icon(
+                  Icons.verified_user,
+                  size: 120,
+                  color: AppTheme.pureWhite,
+                ),
               ),
 
               const SizedBox(height: 32),
@@ -69,9 +69,7 @@ class SplashScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    AppTheme.pureWhite,
-                  ),
+                  valueColor: AlwaysStoppedAnimation<Color>(AppTheme.pureWhite),
                   strokeWidth: 3,
                 ),
               ),

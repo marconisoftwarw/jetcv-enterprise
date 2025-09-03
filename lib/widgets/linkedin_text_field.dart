@@ -83,13 +83,13 @@ class LinkedInTextField extends StatelessWidget {
           ),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: AppTheme.body1.copyWith(color: AppTheme.textTertiary),
+            hintStyle: AppTheme.body1.copyWith(color: AppTheme.textPrimary),
             prefixIcon: prefixIcon != null
                 ? Padding(
                     padding: const EdgeInsets.only(left: 16, right: 8),
                     child: IconTheme(
                       data: const IconThemeData(
-                        color: AppTheme.textSecondary,
+                        color: AppTheme.textPrimary,
                         size: 20,
                       ),
                       child: prefixIcon!,
@@ -101,7 +101,7 @@ class LinkedInTextField extends StatelessWidget {
                     padding: const EdgeInsets.only(left: 8, right: 16),
                     child: IconTheme(
                       data: const IconThemeData(
-                        color: AppTheme.textSecondary,
+                        color: AppTheme.textPrimary,
                         size: 20,
                       ),
                       child: suffixIcon!,

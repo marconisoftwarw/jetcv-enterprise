@@ -123,7 +123,7 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
           locale: localeProvider.locale,
           supportedLocales: AppLocalizations.supportedLocales,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
-          theme: AppTheme.darkTheme,
+          theme: AppTheme.lightTheme,
           home: FutureBuilder(
             future: _initializationFuture,
             builder: (context, snapshot) {

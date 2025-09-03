@@ -337,7 +337,7 @@ class _CertificationListScreenState extends State<CertificationListScreen> {
                     text: 'Dettagli',
                     icon: Icons.visibility,
                     isOutlined: true,
-                                          neonColor: AppTheme.accentBlue,
+                    neonColor: AppTheme.accentBlue,
                   ),
                 ),
                 const SizedBox(width: 12),

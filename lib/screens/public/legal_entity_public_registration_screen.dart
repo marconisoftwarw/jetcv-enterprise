@@ -248,7 +248,9 @@ class _LegalEntityPublicRegistrationScreenState
               const SizedBox(height: 24),
 
               // Pricing cards
-              ...pricingProvider.pricings.map((pricing) => _buildPricingCard(pricing)),
+              ...pricingProvider.pricings.map(
+                (pricing) => _buildPricingCard(pricing),
+              ),
             ],
           ),
         );
@@ -258,7 +260,7 @@ class _LegalEntityPublicRegistrationScreenState
 
   Widget _buildPricingCard(Pricing pricing) {
     final isSelected = _selectedPricing?.idPricing == pricing.idPricing;
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       child: Card(
@@ -314,10 +316,7 @@ class _LegalEntityPublicRegistrationScreenState
                         ),
                         const Text(
                           '/anno',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey,
-                          ),
+                          style: TextStyle(fontSize: 12, color: Colors.grey),
                         ),
                       ],
                     ),
@@ -325,25 +324,27 @@ class _LegalEntityPublicRegistrationScreenState
                 ),
                 const SizedBox(height: 16),
                 // Features
-                ...pricing.features.map((feature) => Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.check_circle,
-                        size: 16,
-                        color: isSelected ? Colors.blue : Colors.green,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          feature,
-                          style: const TextStyle(fontSize: 14),
+                ...pricing.features.map(
+                  (feature) => Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.check_circle,
+                          size: 16,
+                          color: isSelected ? Colors.blue : Colors.green,
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            feature,
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                )),
+                ),
                 const SizedBox(height: 16),
                 if (isSelected)
                   Container(
@@ -899,7 +900,9 @@ class _LegalEntityPublicRegistrationScreenState
       // 4. Create pricing record (temporary/mock for now)
       if (_selectedPricing != null) {
         // TODO: Implement actual pricing purchase and database storage
-        print('Selected pricing: ${_selectedPricing!.name} - ${_selectedPricing!.formattedPrice}');
+        print(
+          'Selected pricing: ${_selectedPricing!.name} - ${_selectedPricing!.formattedPrice}',
+        );
         // In a real implementation, this would:
         // - Process payment
         // - Create pricing record in database

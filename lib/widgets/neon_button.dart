@@ -106,7 +106,8 @@ class _NeonButtonState extends State<NeonButton>
                     : null,
               ),
               child: Padding(
-                padding: widget.padding ??
+                padding:
+                    widget.padding ??
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 child: Center(
                   child: widget.isLoading

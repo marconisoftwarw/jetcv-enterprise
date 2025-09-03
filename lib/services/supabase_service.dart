@@ -1190,9 +1190,7 @@ class SupabaseService {
             ),
           );
 
-      final url = _client.storage
-          .from(bucketName)
-          .getPublicUrl(response);
+      final url = _client.storage.from(bucketName).getPublicUrl(response);
 
       return url;
     } catch (e) {

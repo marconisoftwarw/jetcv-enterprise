@@ -85,7 +85,7 @@ class AppTheme {
     fontFamily: fontFamily,
     fontSize: 14,
     fontWeight: FontWeight.w400,
-    color: textSecondary,
+    color: textPrimary,
     letterSpacing: 0,
   );
 
@@ -93,7 +93,7 @@ class AppTheme {
     fontFamily: fontFamily,
     fontSize: 12,
     fontWeight: FontWeight.w400,
-    color: textTertiary,
+    color: textPrimary,
     letterSpacing: 0.01,
   );
 
@@ -205,8 +205,8 @@ class AppTheme {
           horizontal: 16,
           vertical: 16,
         ),
-        labelStyle: body2.copyWith(color: textSecondary),
-        hintStyle: body2.copyWith(color: textTertiary),
+        labelStyle: body2.copyWith(color: textPrimary),
+        hintStyle: body2.copyWith(color: textPrimary),
       ),
 
       // Chip Theme
@@ -226,7 +226,7 @@ class AppTheme {
       ),
 
       // Icon Theme
-      iconTheme: const IconThemeData(color: textSecondary, size: 24),
+      iconTheme: const IconThemeData(color: textPrimary, size: 24),
 
       // Text Theme
       textTheme: const TextTheme(
@@ -247,7 +247,7 @@ class AppTheme {
       navigationRailTheme: NavigationRailThemeData(
         backgroundColor: white,
         selectedIconTheme: const IconThemeData(color: primaryBlue),
-        unselectedIconTheme: const IconThemeData(color: textSecondary),
+        unselectedIconTheme: const IconThemeData(color: textPrimary),
         selectedLabelTextStyle: body2.copyWith(
           color: primaryBlue,
           fontWeight: FontWeight.w600,

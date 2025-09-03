@@ -125,14 +125,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: Theme.of(context).textTheme.headlineMedium
                             ?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: AppTheme.offWhite,
+                              color: AppTheme.primaryBlack,
                             ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         'Sign in to your account',
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: AppTheme.lightGray,
+                          color: AppTheme.primaryBlack,
                         ),
                       ),
                     ],
@@ -211,7 +211,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         Text(
                           'Remember me',
-                          style: TextStyle(color: AppTheme.lightGray),
+                          style: TextStyle(color: AppTheme.primaryBlack),
                         ),
                       ],
                     ),
@@ -248,7 +248,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 // Divider
                 Row(
                   children: [
-                    Expanded(child: Divider(color: AppTheme.lightGray)),
+                    Expanded(child: Divider(color: AppTheme.primaryBlack)),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
@@ -259,7 +259,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
-                    Expanded(child: Divider(color: AppTheme.lightGray)),
+                    Expanded(child: Divider(color: AppTheme.primaryBlack)),
                   ],
                 ),
 
@@ -289,7 +289,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     Text(
                       "Don't have an account? ",
-                                              style: TextStyle(color: AppTheme.lightGray),
+                      style: TextStyle(color: AppTheme.primaryBlack),
                     ),
                     TextButton(
                       onPressed: () => Navigator.pushNamed(context, '/signup'),
@@ -312,7 +312,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           decoration: BoxDecoration(
                             color: AppTheme.accentOrange.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
-                                                          border: Border.all(color: AppTheme.accentOrange),
+                            border: Border.all(color: AppTheme.accentOrange),
                           ),
                           child: Row(
                             children: [
@@ -324,7 +324,9 @@ class _LoginScreenState extends State<LoginScreen> {
                               Expanded(
                                 child: Text(
                                   authProvider.errorMessage!,
-                                  style: TextStyle(color: AppTheme.accentOrange),
+                                  style: TextStyle(
+                                    color: AppTheme.accentOrange,
+                                  ),
                                 ),
                               ),
                               IconButton(

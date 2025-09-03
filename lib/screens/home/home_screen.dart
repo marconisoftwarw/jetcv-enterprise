@@ -40,18 +40,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 labelType: NavigationRailLabelType.all,
                 destinations: _buildNavigationDestinations(isAdmin),
                 backgroundColor: AppTheme.darkGray,
-                selectedIconTheme: IconThemeData(
-                  color: AppTheme.accentGreen,
-                ),
-                unselectedIconTheme: IconThemeData(
-                  color: AppTheme.mediumGray,
-                ),
-                selectedLabelTextStyle: TextStyle(
-                  color: AppTheme.accentGreen,
-                ),
-                unselectedLabelTextStyle: TextStyle(
-                  color: AppTheme.mediumGray,
-                ),
+                selectedIconTheme: IconThemeData(color: AppTheme.accentGreen),
+                unselectedIconTheme: IconThemeData(color: AppTheme.mediumGray),
+                selectedLabelTextStyle: TextStyle(color: AppTheme.accentGreen),
+                unselectedLabelTextStyle: TextStyle(color: AppTheme.mediumGray),
               ),
 
               // Main Content
@@ -138,7 +130,7 @@ class _DashboardContent extends StatelessWidget {
                 'Benvenuto, ${user.firstName}!',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: AppTheme.offWhite,
+                  color: AppTheme.primaryBlack,
                 ),
               ),
               const SizedBox(height: 32),
@@ -153,7 +145,7 @@ class _DashboardContent extends StatelessWidget {
                 'Attività Recente',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: AppTheme.offWhite,
+                  color: AppTheme.primaryBlack,
                 ),
               ),
               const SizedBox(height: 16),
@@ -240,14 +232,14 @@ class _DashboardContent extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: AppTheme.offWhite,
+                  color: AppTheme.primaryBlack,
                 ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
               Text(
                 subtitle,
-                style: TextStyle(fontSize: 12, color: AppTheme.lightGray),
+                style: TextStyle(fontSize: 12, color: AppTheme.primaryBlack),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -265,11 +257,11 @@ class _DashboardContent extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.history, color: AppTheme.lightGray),
+                Icon(Icons.history, color: AppTheme.primaryBlack),
                 const SizedBox(width: 12),
                 Text(
                   'Nessuna attività recente',
-                  style: TextStyle(color: AppTheme.lightGray, fontSize: 16),
+                  style: TextStyle(color: AppTheme.primaryBlack, fontSize: 16),
                 ),
               ],
             ),

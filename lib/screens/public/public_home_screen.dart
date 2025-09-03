@@ -21,14 +21,12 @@ class PublicHomeScreen extends StatelessWidget {
               title: Text(
                 AppConfig.appName,
                 style: TextStyle(
-                  color: AppTheme.offWhite,
+                  color: AppTheme.primaryBlack,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               background: Container(
-                decoration: BoxDecoration(
-                  gradient: AppTheme.primaryGradient,
-                ),
+                decoration: BoxDecoration(gradient: AppTheme.primaryGradient),
                 child: Center(
                   child: Icon(
                     Icons.verified_user,
@@ -73,7 +71,7 @@ class PublicHomeScreen extends StatelessWidget {
                   Text(
                     'Professional Certification Platform',
                     style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                      color: AppTheme.offWhite,
+                      color: AppTheme.primaryBlack,
                       fontWeight: FontWeight.bold,
                     ),
                     textAlign: TextAlign.center,
@@ -81,9 +79,9 @@ class PublicHomeScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   Text(
                     'Streamline your business verification process with our comprehensive legal entity management system.',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: AppTheme.lightGray,
-                    ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyLarge?.copyWith(color: AppTheme.primaryBlack),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 32),
@@ -160,7 +158,7 @@ class PublicHomeScreen extends StatelessWidget {
                               SnackBar(
                                 content: Text(
                                   'Please login to create certifications',
-                                  style: TextStyle(color: AppTheme.offWhite),
+                                  style: TextStyle(color: AppTheme.primaryBlack),
                                 ),
                                 backgroundColor: AppTheme.glassDark,
                               ),
@@ -203,7 +201,7 @@ class PublicHomeScreen extends StatelessWidget {
                   Text(
                     'Key Features',
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      color: AppTheme.offWhite,
+                      color: AppTheme.primaryBlack,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -269,18 +267,12 @@ class PublicHomeScreen extends StatelessWidget {
                 children: [
                   Text(
                     '© 2024 ${AppConfig.appName}. All rights reserved.',
-                    style: TextStyle(
-                      color: AppTheme.lightGray,
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(color: AppTheme.primaryBlack, fontSize: 14),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Professional certification and verification platform',
-                    style: TextStyle(
-                      color: AppTheme.mediumGray,
-                      fontSize: 12,
-                    ),
+                    style: TextStyle(color: AppTheme.mediumGray, fontSize: 12),
                   ),
                 ],
               ),
@@ -321,7 +313,7 @@ class PublicHomeScreen extends StatelessWidget {
                     Text(
                       title,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: AppTheme.offWhite,
+                        color: AppTheme.primaryBlack,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -329,7 +321,7 @@ class PublicHomeScreen extends StatelessWidget {
                     Text(
                       description,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppTheme.lightGray,
+                        color: AppTheme.primaryBlack,
                       ),
                     ),
                     if (actionText != null && onAction != null) ...[

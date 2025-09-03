@@ -105,24 +105,38 @@ class _LegalEntityLinkRegistrationScreenState
     if (widget.prefillData != null) {
       // Pre-fill personal information
       _personalNameController.text = widget.prefillData!['personalName'] ?? '';
-      _personalEmailController.text = widget.prefillData!['personalEmail'] ?? '';
-      _personalPhoneController.text = widget.prefillData!['personalPhone'] ?? '';
+      _personalEmailController.text =
+          widget.prefillData!['personalEmail'] ?? '';
+      _personalPhoneController.text =
+          widget.prefillData!['personalPhone'] ?? '';
 
       // Pre-fill legal entity information
       _legalNameController.text = widget.prefillData!['legalName'] ?? '';
-      _identifierCodeController.text = widget.prefillData!['identifierCode'] ?? '';
+      _identifierCodeController.text =
+          widget.prefillData!['identifierCode'] ?? '';
       _entityEmailController.text = widget.prefillData!['entityEmail'] ?? '';
-      _legalRepresentativeController.text = widget.prefillData!['legalRepresentative'] ?? '';
-      _operationalAddressController.text = widget.prefillData!['operationalAddress'] ?? '';
-      _operationalCityController.text = widget.prefillData!['operationalCity'] ?? '';
-      _operationalPostalCodeController.text = widget.prefillData!['operationalPostalCode'] ?? '';
-      _operationalStateController.text = widget.prefillData!['operationalState'] ?? '';
-      _operationalCountryController.text = widget.prefillData!['operationalCountry'] ?? '';
-      _headquarterAddressController.text = widget.prefillData!['headquarterAddress'] ?? '';
-      _headquarterCityController.text = widget.prefillData!['headquarterCity'] ?? '';
-      _headquarterPostalCodeController.text = widget.prefillData!['headquarterPostalCode'] ?? '';
-      _headquarterStateController.text = widget.prefillData!['headquarterState'] ?? '';
-      _headquarterCountryController.text = widget.prefillData!['headquarterCountry'] ?? '';
+      _legalRepresentativeController.text =
+          widget.prefillData!['legalRepresentative'] ?? '';
+      _operationalAddressController.text =
+          widget.prefillData!['operationalAddress'] ?? '';
+      _operationalCityController.text =
+          widget.prefillData!['operationalCity'] ?? '';
+      _operationalPostalCodeController.text =
+          widget.prefillData!['operationalPostalCode'] ?? '';
+      _operationalStateController.text =
+          widget.prefillData!['operationalState'] ?? '';
+      _operationalCountryController.text =
+          widget.prefillData!['operationalCountry'] ?? '';
+      _headquarterAddressController.text =
+          widget.prefillData!['headquarterAddress'] ?? '';
+      _headquarterCityController.text =
+          widget.prefillData!['headquarterCity'] ?? '';
+      _headquarterPostalCodeController.text =
+          widget.prefillData!['headquarterPostalCode'] ?? '';
+      _headquarterStateController.text =
+          widget.prefillData!['headquarterState'] ?? '';
+      _headquarterCountryController.text =
+          widget.prefillData!['headquarterCountry'] ?? '';
       _phoneController.text = widget.prefillData!['phone'] ?? '';
       _pecController.text = widget.prefillData!['pec'] ?? '';
       _websiteController.text = widget.prefillData!['website'] ?? '';

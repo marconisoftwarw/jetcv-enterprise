@@ -1244,7 +1244,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 // Divider
                 Row(
                   children: [
-                    Expanded(child: Divider(color: AppTheme.lightGray)),
+                    Expanded(child: Divider(color: AppTheme.primaryBlack)),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
@@ -1255,7 +1255,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                       ),
                     ),
-                    Expanded(child: Divider(color: AppTheme.lightGray)),
+                    Expanded(child: Divider(color: AppTheme.primaryBlack)),
                   ],
                 ),
 
@@ -1285,7 +1285,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   children: [
                     Text(
                       'Already have an account? ',
-                      style: TextStyle(color: AppTheme.lightGray),
+                      style: TextStyle(color: AppTheme.primaryBlack),
                     ),
                     TextButton(
                       onPressed: () =>
@@ -1321,7 +1321,9 @@ class _SignupScreenState extends State<SignupScreen> {
                               Expanded(
                                 child: Text(
                                   authProvider.errorMessage!,
-                                  style: TextStyle(color: AppTheme.accentOrange),
+                                  style: TextStyle(
+                                    color: AppTheme.accentOrange,
+                                  ),
                                 ),
                               ),
                               IconButton(
@@ -1354,7 +1356,10 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.error_outline, color: AppTheme.accentOrange),
+                          Icon(
+                            Icons.error_outline,
+                            color: AppTheme.accentOrange,
+                          ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
@@ -1363,7 +1368,10 @@ class _SignupScreenState extends State<SignupScreen> {
                             ),
                           ),
                           IconButton(
-                            icon: Icon(Icons.close, color: AppTheme.accentOrange),
+                            icon: Icon(
+                              Icons.close,
+                              color: AppTheme.accentOrange,
+                            ),
                             onPressed: () {
                               setState(() {
                                 _veriffErrorMessage = null;

@@ -59,7 +59,7 @@ class ImageUploadService {
     try {
       String folder;
       String type;
-      
+
       switch (pictureType) {
         case 'profile':
           folder = 'entity-profile-pictures';
@@ -104,19 +104,25 @@ class ImageUploadService {
       // Determine storage bucket and path
       String bucketName;
       String filePath;
-      
+
       if (type == 'profile') {
         bucketName = 'profile-pictures';
         filePath = uniqueFileName;
       } else if (type == 'entity-profile') {
         bucketName = 'entity-profile-pictures';
-        filePath = legalEntityId != null ? '$legalEntityId/$uniqueFileName' : uniqueFileName;
+        filePath = legalEntityId != null
+            ? '$legalEntityId/$uniqueFileName'
+            : uniqueFileName;
       } else if (type == 'entity-company') {
         bucketName = 'entity-company-pictures';
-        filePath = legalEntityId != null ? '$legalEntityId/$uniqueFileName' : uniqueFileName;
+        filePath = legalEntityId != null
+            ? '$legalEntityId/$uniqueFileName'
+            : uniqueFileName;
       } else {
         bucketName = 'company-pictures';
-        filePath = legalEntityId != null ? '$legalEntityId/$uniqueFileName' : uniqueFileName;
+        filePath = legalEntityId != null
+            ? '$legalEntityId/$uniqueFileName'
+            : uniqueFileName;
       }
 
       // Upload directly to Supabase Storage

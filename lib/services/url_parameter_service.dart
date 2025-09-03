@@ -75,12 +75,12 @@ class UrlParameterService {
     try {
       final uri = Uri.parse(url);
       final dataParam = uri.queryParameters['data'];
-      
+
       if (dataParam != null) {
         final decodedData = utf8.decode(base64Decode(dataParam));
         return jsonDecode(decodedData) as Map<String, dynamic>;
       }
-      
+
       return null;
     } catch (e) {
       print('Error extracting prefill data: $e');
