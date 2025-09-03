@@ -903,7 +903,11 @@ class _AnalyticsContent extends StatelessWidget {
               child: Center(
                 child: Column(
                   children: [
-                    Icon(Icons.analytics, size: 64, color: AppTheme.primaryBlack),
+                    Icon(
+                      Icons.analytics,
+                      size: 64,
+                      color: AppTheme.primaryBlack,
+                    ),
                     const SizedBox(height: 16),
                     Text(
                       'Analytics Coming Soon',
@@ -963,7 +967,11 @@ class _SettingsContent extends StatelessWidget {
               child: Center(
                 child: Column(
                   children: [
-                    Icon(Icons.settings, size: 64, color: AppTheme.primaryBlack),
+                    Icon(
+                      Icons.settings,
+                      size: 64,
+                      color: AppTheme.primaryBlack,
+                    ),
                     const SizedBox(height: 16),
                     Text(
                       'Settings Coming Soon',

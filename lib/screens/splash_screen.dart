@@ -21,7 +21,7 @@ class SplashScreen extends StatelessWidget {
                   color: AppTheme.primaryBlack.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: AppTheme.offWhite.withValues(alpha: 0.3),
+                    color: AppTheme.primaryBlack.withValues(alpha: 0.3),
                     width: 2,
                   ),
                 ),
@@ -53,7 +53,7 @@ class SplashScreen extends StatelessWidget {
                 'Professional Certification Platform',
                 style: TextStyle(
                   fontSize: 18,
-                  color: AppTheme.offWhite.withValues(alpha: 0.8),
+                  color: AppTheme.primaryBlack.withValues(alpha: 0.8),
                   fontWeight: FontWeight.w500,
                 ),
                 textAlign: TextAlign.center,

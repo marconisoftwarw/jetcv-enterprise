@@ -141,7 +141,7 @@ class _NeonTextFieldState extends State<NeonTextField>
               },
               onFieldSubmitted: widget.onSubmitted,
               style: TextStyle(
-                color: AppTheme.offWhite,
+                color: AppTheme.primaryBlack,
                 fontSize: 16,
                 fontWeight: FontWeight.w400,
               ),
@@ -181,7 +181,7 @@ class _NeonTextFieldState extends State<NeonTextField>
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
-                    color: AppTheme.lightGray.withValues(alpha: 0.3),
+                    color: AppTheme.primaryBlack.withValues(alpha: 0.3),
                     width: 1,
                   ),
                 ),

@@ -186,13 +186,13 @@ class _CertificationListScreenState extends State<CertificationListScreen> {
                         Icon(
                           Icons.verified_user,
                           size: 64,
-                          color: AppTheme.lightGray,
+                          color: AppTheme.primaryBlack,
                         ),
                         const SizedBox(height: 16),
                         Text(
                           'Nessuna certificazione trovata',
                           style: TextStyle(
-                            color: AppTheme.lightGray,
+                            color: AppTheme.primaryBlack,
                             fontSize: 16,
                           ),
                         ),

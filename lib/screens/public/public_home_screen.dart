@@ -79,9 +79,9 @@ class PublicHomeScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   Text(
                     'Streamline your business verification process with our comprehensive legal entity management system.',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodyLarge?.copyWith(color: AppTheme.primaryBlack),
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: AppTheme.primaryBlack,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 32),
@@ -158,7 +158,9 @@ class PublicHomeScreen extends StatelessWidget {
                               SnackBar(
                                 content: Text(
                                   'Please login to create certifications',
-                                  style: TextStyle(color: AppTheme.primaryBlack),
+                                  style: TextStyle(
+                                    color: AppTheme.primaryBlack,
+                                  ),
                                 ),
                                 backgroundColor: AppTheme.glassDark,
                               ),
@@ -267,7 +269,10 @@ class PublicHomeScreen extends StatelessWidget {
                 children: [
                   Text(
                     '© 2024 ${AppConfig.appName}. All rights reserved.',
-                    style: TextStyle(color: AppTheme.primaryBlack, fontSize: 14),
+                    style: TextStyle(
+                      color: AppTheme.primaryBlack,
+                      fontSize: 14,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(

@@ -461,12 +461,12 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               if (_location != null) ...[
                 Text(
                   'Posizione: ${_location!}',
-                  style: TextStyle(color: AppTheme.lightGray),
+                  style: TextStyle(color: AppTheme.primaryBlack),
                 ),
               ] else ...[
                 Text(
                   'Posizione non disponibile',
-                  style: TextStyle(color: AppTheme.lightGray),
+                  style: TextStyle(color: AppTheme.primaryBlack),
                 ),
               ],
 
@@ -519,7 +519,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 const SizedBox(height: 16),
                 Text(
                   'Allegati: ${_attachments.length}',
-                  style: TextStyle(color: AppTheme.lightGray),
+                  style: TextStyle(color: AppTheme.primaryBlack),
                 ),
                 // Qui puoi mostrare la lista degli allegati
               ],
@@ -544,7 +544,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 const SizedBox(height: 16),
                 Text(
                   'Utenti: ${_users.length}',
-                  style: TextStyle(color: AppTheme.lightGray),
+                  style: TextStyle(color: AppTheme.primaryBlack),
                 ),
                 // Qui puoi mostrare la lista degli utenti
               ],
@@ -579,11 +579,11 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               SwitchListTile(
                 title: Text(
                   'Salva offline',
-                  style: TextStyle(color: AppTheme.offWhite),
+                  style: TextStyle(color: AppTheme.primaryBlack),
                 ),
                 subtitle: Text(
                   'I dati verranno sincronizzati quando torni online',
-                  style: TextStyle(color: AppTheme.lightGray),
+                  style: TextStyle(color: AppTheme.primaryBlack),
                 ),
                 value: _isOffline,
                 onChanged: (value) {
@@ -638,7 +638,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: AppTheme.offWhite,
+            color: AppTheme.primaryBlack,
           ),
         ),
       ],
