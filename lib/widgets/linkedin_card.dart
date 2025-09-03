@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../config/app_theme.dart';
+import '../theme/app_theme.dart';
 
 class LinkedInCard extends StatelessWidget {
   final Widget child;
@@ -33,15 +33,16 @@ class LinkedInCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: backgroundColor ?? AppTheme.white,
         borderRadius: borderRadius ?? BorderRadius.circular(12),
-        border:
-            border ??
-            const Border(
-              top: BorderSide(color: AppTheme.borderGrey, width: 1),
-              left: BorderSide(color: AppTheme.borderGrey, width: 1),
-              right: BorderSide(color: AppTheme.borderGrey, width: 1),
-              bottom: BorderSide(color: AppTheme.borderGrey, width: 1),
-            ),
-        boxShadow: showShadow ? AppTheme.cardShadow : null,
+        border: border ?? Border.all(color: AppTheme.borderGrey, width: 1),
+        boxShadow: showShadow
+            ? [
+                BoxShadow(
+                  color: AppTheme.cardShadow,
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ]
+            : null,
       ),
       child: child,
     );
@@ -121,12 +122,13 @@ class LinkedInMetricCard extends StatelessWidget {
                   ),
                   child: Text(
                     change!,
-                    style: AppTheme.caption.copyWith(
-                      color: isPositive
-                          ? AppTheme.successGreen
-                          : AppTheme.errorRed,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 12, color: AppTheme.primaryBlack)
+                        .copyWith(
+                          color: isPositive
+                              ? AppTheme.successGreen
+                              : AppTheme.errorRed,
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
                 ),
             ],
@@ -135,7 +137,7 @@ class LinkedInMetricCard extends StatelessWidget {
           Text(
             value,
             style: AppTheme.headline3.copyWith(
-              color: valueColor ?? AppTheme.textPrimary,
+              color: valueColor ?? AppTheme.primaryBlack,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -143,7 +145,7 @@ class LinkedInMetricCard extends StatelessWidget {
           Text(
             title,
             style: AppTheme.body2.copyWith(
-              color: AppTheme.textSecondary,
+              color: AppTheme.primaryBlack,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -151,7 +153,7 @@ class LinkedInMetricCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               subtitle!,
-              style: AppTheme.caption.copyWith(color: AppTheme.textTertiary),
+              style: TextStyle(fontSize: 12, color: AppTheme.primaryBlack),
             ),
           ],
         ],
@@ -205,14 +207,14 @@ class LinkedInActionCard extends StatelessWidget {
                 Text(
                   title,
                   style: AppTheme.title2.copyWith(
-                    color: AppTheme.textPrimary,
+                    color: AppTheme.primaryBlack,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   description,
-                  style: AppTheme.body2.copyWith(color: AppTheme.textSecondary),
+                  style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
                 ),
               ],
             ),
@@ -222,7 +224,7 @@ class LinkedInActionCard extends StatelessWidget {
             trailing!,
           ] else if (onTap != null) ...[
             const SizedBox(width: 16),
-            Icon(Icons.chevron_right, color: AppTheme.textTertiary, size: 20),
+            Icon(Icons.chevron_right, color: AppTheme.primaryBlack, size: 20),
           ],
         ],
       ),

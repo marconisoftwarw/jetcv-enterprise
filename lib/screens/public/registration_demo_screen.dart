@@ -145,10 +145,7 @@ class RegistrationDemoScreen extends StatelessWidget {
                   const SizedBox(height: 8),
                   SelectableText(
                     _generateExampleLink(),
-                    style: const TextStyle(
-                      fontFamily: 'monospace',
-                      fontSize: 12,
-                    ),
+                    style: TextStyle(fontFamily: 'monospace', fontSize: 12),
                   ),
                 ],
               ),

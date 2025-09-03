@@ -647,7 +647,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                 : _isVeriffWaiting
                                 ? 'Verifica in Corso...'
                                 : 'Pronto per la Verifica',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
@@ -687,7 +687,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                   : _isVeriffWaiting
                                   ? 'Stiamo monitorando automaticamente lo stato della tua verifica.\nDopo 3 secondi verrai reindirizzato alla pagina di login se non completata.'
                                   : 'La verifica si aprirà automaticamente in una nuova scheda.\nCompleta tutti i passaggi richiesti entro 3 secondi.',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 16,
                                 color: Colors.white,
                                 height: 1.5,
@@ -1250,7 +1250,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       child: Text(
                         'OR',
                         style: TextStyle(
-                          color: AppTheme.mediumGray,
+                          color: AppTheme.primaryBlack,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -1364,7 +1364,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           Expanded(
                             child: Text(
                               _veriffErrorMessage!,
-                              style: TextStyle(color: AppTheme.mediumGray),
+                              style: TextStyle(color: AppTheme.primaryBlack),
                             ),
                           ),
                           IconButton(

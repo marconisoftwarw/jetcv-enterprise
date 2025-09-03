@@ -300,7 +300,7 @@ class _LegalEntityManagementScreenState
                     children: [
                       Text(
                         entity.legalName ?? 'Nome non specificato',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
@@ -407,13 +407,13 @@ class _LegalEntityManagementScreenState
                   if (entity.email != null) ...[
                     const Icon(Icons.email, size: 16, color: Colors.grey),
                     const SizedBox(width: 4),
-                    Text(entity.email!, style: const TextStyle(fontSize: 14)),
+                    Text(entity.email!, style: TextStyle(fontSize: 14)),
                     const SizedBox(width: 16),
                   ],
                   if (entity.phone != null) ...[
                     const Icon(Icons.phone, size: 16, color: Colors.grey),
                     const SizedBox(width: 4),
-                    Text(entity.phone!, style: const TextStyle(fontSize: 14)),
+                    Text(entity.phone!, style: TextStyle(fontSize: 14)),
                   ],
                 ],
               ),
@@ -460,7 +460,7 @@ class _LegalEntityManagementScreenState
                   const SizedBox(width: 4),
                   Text(
                     'Rappresentante: ${entity.legalRapresentative}',
-                    style: const TextStyle(fontSize: 14),
+                    style: TextStyle(fontSize: 14),
                   ),
                 ],
               ),
@@ -699,7 +699,7 @@ class _LegalEntityManagementScreenState
             width: 150,
             child: Text(
               '$label:',
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
           Expanded(child: Text(value ?? 'Non specificato')),
@@ -1089,10 +1089,7 @@ class _LegalEntityManagementScreenState
                 children: [
                   Text(
                     'Inviti per: ${entity.legalName ?? 'Entità senza nome'}',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   const SizedBox(height: 16),
                   Expanded(
@@ -1281,10 +1278,7 @@ class _LegalEntityManagementScreenState
                 children: [
                   Text(
                     entity.legalName ?? 'Nome non specificato',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   if (entity.email != null) ...[
                     const SizedBox(height: 4),
@@ -1577,10 +1571,7 @@ class _LegalEntityFormDialogState extends State<LegalEntityFormDialog> {
               children: [
                 Text(
                   isEditing ? 'Modifica Entità Legale' : 'Nuova Entità Legale',
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
                 IconButton(

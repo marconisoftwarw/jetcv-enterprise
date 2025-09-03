@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../config/app_theme.dart';
+import '../theme/app_theme.dart';
 
 class LinkedInTextField extends StatelessWidget {
   final String? label;
@@ -55,10 +55,7 @@ class LinkedInTextField extends StatelessWidget {
         if (label != null) ...[
           Text(
             label!,
-            style: AppTheme.body2.copyWith(
-              color: AppTheme.textPrimary,
-              fontWeight: FontWeight.w500,
-            ),
+            style: AppTheme.body2.copyWith(fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 8),
         ],
@@ -78,18 +75,16 @@ class LinkedInTextField extends StatelessWidget {
           focusNode: focusNode,
           textInputAction: textInputAction,
           expands: expands,
-          style: AppTheme.body1.copyWith(
-            color: enabled ? AppTheme.textPrimary : AppTheme.textTertiary,
-          ),
+          style: AppTheme.body1,
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: AppTheme.body1.copyWith(color: AppTheme.textPrimary),
+            hintStyle: AppTheme.body1,
             prefixIcon: prefixIcon != null
                 ? Padding(
                     padding: const EdgeInsets.only(left: 16, right: 8),
                     child: IconTheme(
-                      data: const IconThemeData(
-                        color: AppTheme.textPrimary,
+                      data: IconThemeData(
+                        color: AppTheme.primaryBlack,
                         size: 20,
                       ),
                       child: prefixIcon!,
@@ -100,8 +95,8 @@ class LinkedInTextField extends StatelessWidget {
                 ? Padding(
                     padding: const EdgeInsets.only(left: 8, right: 16),
                     child: IconTheme(
-                      data: const IconThemeData(
-                        color: AppTheme.textPrimary,
+                      data: IconThemeData(
+                        color: AppTheme.primaryBlack,
                         size: 20,
                       ),
                       child: suffixIcon!,
@@ -112,39 +107,27 @@ class LinkedInTextField extends StatelessWidget {
             fillColor: enabled ? AppTheme.white : AppTheme.lightGrey,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(
-                color: AppTheme.borderGrey,
-                width: 1,
-              ),
+              borderSide: BorderSide(color: AppTheme.borderGrey, width: 1),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(
-                color: AppTheme.borderGrey,
-                width: 1,
-              ),
+              borderSide: BorderSide(color: AppTheme.borderGrey, width: 1),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(
-                color: AppTheme.primaryBlue,
-                width: 2,
-              ),
+              borderSide: BorderSide(color: AppTheme.primaryBlue, width: 2),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: AppTheme.errorRed, width: 1),
+              borderSide: BorderSide(color: AppTheme.errorRed, width: 1),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: AppTheme.errorRed, width: 2),
+              borderSide: BorderSide(color: AppTheme.errorRed, width: 2),
             ),
             disabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(
-                color: AppTheme.borderGrey,
-                width: 1,
-              ),
+              borderSide: BorderSide(color: AppTheme.borderGrey, width: 1),
             ),
             contentPadding: EdgeInsets.only(
               left: prefixIcon != null ? 0 : 16,

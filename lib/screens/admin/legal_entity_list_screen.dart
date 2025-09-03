@@ -247,7 +247,7 @@ class _LegalEntityListScreenState extends State<LegalEntityListScreen> {
                     children: [
                       Text(
                         entity.legalName ?? 'Nome non specificato',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
@@ -409,7 +409,7 @@ class _LegalEntityListScreenState extends State<LegalEntityListScreen> {
                 ),
                 Text(
                   value,
-                  style: const TextStyle(fontSize: 14),
+                  style: TextStyle(fontSize: 14),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -523,7 +523,7 @@ class _LegalEntityListScreenState extends State<LegalEntityListScreen> {
             width: 120,
             child: Text(
               '$label:',
-              style: const TextStyle(fontWeight: FontWeight.w600),
+              style: TextStyle(fontWeight: FontWeight.w600),
             ),
           ),
           Expanded(child: Text(value)),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../config/app_theme.dart';
+import '../../theme/app_theme.dart';
 import '../../config/app_config.dart';
 import '../../models/user.dart';
 import '../../providers/auth_provider.dart';
@@ -166,7 +166,7 @@ class _VeriffVerificationScreenState extends State<VeriffVerificationScreen> {
             const SizedBox(height: 8),
             Text(
               _errorMessage!,
-              style: AppTheme.body1.copyWith(color: AppTheme.textSecondary),
+              style: TextStyle(fontSize: 16, color: AppTheme.primaryBlack),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -216,8 +216,9 @@ class _VeriffVerificationScreenState extends State<VeriffVerificationScreen> {
                     ),
                     Text(
                       'Completa il processo di verifica per accedere alle funzionalità complete',
-                      style: AppTheme.body2.copyWith(
-                        color: AppTheme.textSecondary,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: AppTheme.primaryBlack,
                       ),
                     ),
                   ],
@@ -250,8 +251,9 @@ class _VeriffVerificationScreenState extends State<VeriffVerificationScreen> {
                     const SizedBox(height: 16),
                     Text(
                       'Clicca il pulsante qui sotto per aprire la verifica Veriff in una nuova scheda del browser.',
-                      style: AppTheme.body1.copyWith(
-                        color: AppTheme.textSecondary,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: AppTheme.primaryBlack,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -265,10 +267,14 @@ class _VeriffVerificationScreenState extends State<VeriffVerificationScreen> {
                     const SizedBox(height: 16),
                     Text(
                       'Dopo aver completato la verifica, torna all\'app e clicca "Controlla Stato"',
-                      style: AppTheme.body2.copyWith(
-                        color: AppTheme.textSecondary,
-                        fontStyle: FontStyle.italic,
-                      ),
+                      style:
+                          TextStyle(
+                            fontSize: 14,
+                            color: AppTheme.primaryBlack,
+                          ).copyWith(
+                            color: AppTheme.primaryBlack,
+                            fontStyle: FontStyle.italic,
+                          ),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -327,7 +333,7 @@ class _VeriffVerificationScreenState extends State<VeriffVerificationScreen> {
             const SizedBox(height: 8),
             Text(
               'La tua identità è stata verificata con successo. Ora puoi accedere a tutte le funzionalità dell\'app.',
-              style: AppTheme.body1.copyWith(color: AppTheme.textSecondary),
+              style: TextStyle(fontSize: 16, color: AppTheme.primaryBlack),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),

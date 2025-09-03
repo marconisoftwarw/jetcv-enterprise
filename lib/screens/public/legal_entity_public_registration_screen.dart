@@ -218,7 +218,7 @@ class _LegalEntityPublicRegistrationScreenState
                 const SizedBox(height: 16),
                 Text(
                   'Errore nel caricamento dei piani: ${pricingProvider.errorMessage}',
-                  style: const TextStyle(color: Colors.red),
+                  style: TextStyle(color: Colors.red),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),
@@ -295,10 +295,7 @@ class _LegalEntityPublicRegistrationScreenState
                           const SizedBox(height: 4),
                           Text(
                             pricing.description,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey,
-                            ),
+                            style: TextStyle(fontSize: 14, color: Colors.grey),
                           ),
                         ],
                       ),
@@ -336,10 +333,7 @@ class _LegalEntityPublicRegistrationScreenState
                         ),
                         const SizedBox(width: 8),
                         Expanded(
-                          child: Text(
-                            feature,
-                            style: const TextStyle(fontSize: 14),
-                          ),
+                          child: Text(feature, style: TextStyle(fontSize: 14)),
                         ),
                       ],
                     ),

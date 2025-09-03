@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/cv.dart';
 import '../../services/cv_service.dart';
-import '../../config/app_theme.dart';
+import '../../theme/app_theme.dart';
 import '../../widgets/linkedin_card.dart';
 import '../../widgets/linkedin_button.dart';
 import '../../widgets/linkedin_text_field.dart';
@@ -271,7 +271,7 @@ class _CVListScreenState extends State<CVListScreen> {
               const SizedBox(width: 12),
               Text(
                 '${_filteredCVs.length} CV trovati',
-                style: AppTheme.body2.copyWith(color: AppTheme.textSecondary),
+                style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
               ),
             ],
           ),
@@ -335,7 +335,7 @@ class _CVListScreenState extends State<CVListScreen> {
             Text(value, style: AppTheme.title1.copyWith(color: color)),
             Text(
               title,
-              style: AppTheme.caption.copyWith(color: AppTheme.textSecondary),
+              style: TextStyle(fontSize: 12, color: AppTheme.primaryBlack),
               textAlign: TextAlign.center,
             ),
           ],
@@ -352,7 +352,7 @@ class _CVListScreenState extends State<CVListScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.search_off, size: 64, color: AppTheme.textSecondary),
+              Icon(Icons.search_off, size: 64, color: AppTheme.primaryBlack),
               const SizedBox(height: 16),
               Text(
                 'Nessun CV trovato',
@@ -362,7 +362,7 @@ class _CVListScreenState extends State<CVListScreen> {
               const SizedBox(height: 8),
               Text(
                 'Prova a modificare i filtri di ricerca',
-                style: AppTheme.body1.copyWith(color: AppTheme.textSecondary),
+                style: TextStyle(fontSize: 16, color: AppTheme.primaryBlack),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -452,8 +452,9 @@ class _CVListScreenState extends State<CVListScreen> {
 
                   Text(
                     cv.displayLocation,
-                    style: AppTheme.body1.copyWith(
-                      color: AppTheme.textSecondary,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: AppTheme.primaryBlack,
                     ),
                   ),
 
@@ -461,17 +462,14 @@ class _CVListScreenState extends State<CVListScreen> {
 
                   Row(
                     children: [
-                      Icon(
-                        Icons.email,
-                        size: 16,
-                        color: AppTheme.textSecondary,
-                      ),
+                      Icon(Icons.email, size: 16, color: AppTheme.primaryBlack),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
                           cv.displayContact,
-                          style: AppTheme.body2.copyWith(
-                            color: AppTheme.textSecondary,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: AppTheme.primaryBlack,
                           ),
                         ),
                       ),
@@ -485,13 +483,14 @@ class _CVListScreenState extends State<CVListScreen> {
                       Icon(
                         Icons.schedule,
                         size: 16,
-                        color: AppTheme.textSecondary,
+                        color: AppTheme.primaryBlack,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         'Aggiornato ${_formatDate(cv.updatedAt ?? cv.createdAt)}',
-                        style: AppTheme.caption.copyWith(
-                          color: AppTheme.textSecondary,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppTheme.primaryBlack,
                         ),
                       ),
                     ],

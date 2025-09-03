@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../../providers/certifier_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/certifier.dart';
-import '../../config/app_theme.dart';
+import '../../theme/app_theme.dart';
 import '../../widgets/linkedin_metric_card.dart';
 import 'invite_certifier_screen.dart';
 
@@ -106,10 +106,7 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Panoramica',
-          style: AppTheme.title2.copyWith(color: AppTheme.textPrimary),
-        ),
+        Text('Panoramica', style: AppTheme.title2),
         const SizedBox(height: 16),
         Row(
           children: [
@@ -155,10 +152,7 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Filtri',
-            style: AppTheme.title3.copyWith(color: AppTheme.textPrimary),
-          ),
+          Text('Filtri', style: AppTheme.title3),
           const SizedBox(height: 16),
           Row(
             children: [
@@ -222,16 +216,20 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.people_outline, size: 64, color: AppTheme.textSecondary),
+            Icon(Icons.people_outline, size: 64, color: AppTheme.primaryBlack),
             const SizedBox(height: 16),
             Text(
               'Nessun certificatore trovato',
-              style: AppTheme.title2.copyWith(color: AppTheme.textSecondary),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.primaryBlack,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               'Inizia invitando il primo certificatore',
-              style: AppTheme.body2.copyWith(color: AppTheme.textSecondary),
+              style: AppTheme.body2,
             ),
             const SizedBox(height: 16),
             ElevatedButton(
@@ -251,7 +249,11 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen> {
           children: [
             Text(
               'Certificatori (${certifiers.length})',
-              style: AppTheme.title2.copyWith(color: AppTheme.textPrimary),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.primaryBlack,
+              ),
             ),
             ElevatedButton.icon(
               onPressed: () => _showInviteCertifierDialog(context),
@@ -291,7 +293,7 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen> {
           certifier.roleDisplayName,
           style: AppTheme.body1.copyWith(
             fontWeight: FontWeight.w600,
-            color: AppTheme.textPrimary,
+            color: AppTheme.primaryBlack,
           ),
         ),
         subtitle: Column(
@@ -299,12 +301,12 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen> {
           children: [
             Text(
               'Legal Entity: ${certifier.idLegalEntity}',
-              style: AppTheme.body2.copyWith(color: AppTheme.textSecondary),
+              style: AppTheme.body2,
             ),
             if (certifier.hasUser)
               Text(
                 'Utente: ${certifier.idUser}',
-                style: AppTheme.body2.copyWith(color: AppTheme.textSecondary),
+                style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
               ),
             Row(
               children: [

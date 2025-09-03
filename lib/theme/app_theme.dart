@@ -58,6 +58,57 @@ class AppTheme {
   static Color get mediumCharcoal => _mediumCharcoal;
   static Color get lightCharcoal => _lightCharcoal;
 
+  // Colori aggiuntivi per compatibilità
+  static Color get white => _pureWhite;
+  static Color get primaryBlue => _accentBlue;
+  static Color get successGreen => _accentGreen;
+  static Color get errorRed => const Color(0xFFDC2626);
+  static Color get warningOrange => _accentOrange;
+  static Color get lightBlue => const Color(0xFF3B82F6);
+  static Color get lightGrey => _lightGray;
+  static Color get borderGrey => _lightGray;
+  static Color get neutralGrey => _mediumGray;
+  static Color get textTertiary => _mediumGray;
+  static Color get textSecondary => _darkGray;
+  static Color get secondaryBlue => const Color(0xFF1E40AF);
+  static Color get infoBlue => const Color(0xFF0EA5E9);
+  static Color get cardShadow => _primaryBlack.withValues(alpha: 0.1);
+
+  // Stili di testo per compatibilità
+  static TextStyle get title1 => TextStyle(
+    fontSize: 24,
+    fontWeight: FontWeight.w600,
+    color: _primaryBlack,
+  );
+  static TextStyle get title2 => TextStyle(
+    fontSize: 20,
+    fontWeight: FontWeight.w600,
+    color: _primaryBlack,
+  );
+  static TextStyle get title3 => TextStyle(
+    fontSize: 18,
+    fontWeight: FontWeight.w500,
+    color: _primaryBlack,
+  );
+  static TextStyle get headline2 => TextStyle(
+    fontSize: 22,
+    fontWeight: FontWeight.w600,
+    color: _primaryBlack,
+  );
+  static TextStyle get headline3 => TextStyle(
+    fontSize: 18,
+    fontWeight: FontWeight.w600,
+    color: _primaryBlack,
+  );
+  static TextStyle get body1 => TextStyle(fontSize: 16, color: _primaryBlack);
+  static TextStyle get body2 => TextStyle(fontSize: 14, color: _primaryBlack);
+  static TextStyle get caption => TextStyle(fontSize: 12, color: _primaryBlack);
+  static TextStyle get button => TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.w500,
+    color: _primaryBlack,
+  );
+
   static Color get accentBlue => _accentBlue;
   static Color get accentGreen => _accentGreen;
   static Color get accentPurple => _accentPurple;
@@ -139,7 +190,7 @@ class AppTheme {
           shadowColor: _accentBlue.withValues(alpha: 0.2),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          textStyle: const TextStyle(
+          textStyle: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.3,
@@ -154,7 +205,7 @@ class AppTheme {
           side: const BorderSide(color: _accentBlue, width: 1.5),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          textStyle: const TextStyle(
+          textStyle: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.3,
@@ -168,7 +219,7 @@ class AppTheme {
           foregroundColor: _accentBlue,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          textStyle: const TextStyle(
+          textStyle: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w500,
             letterSpacing: 0.2,
@@ -196,12 +247,12 @@ class AppTheme {
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: _accentOrange, width: 1.5),
         ),
-        labelStyle: const TextStyle(
+        labelStyle: TextStyle(
           color: _darkGray,
           fontSize: 14,
           fontWeight: FontWeight.w400,
         ),
-        hintStyle: const TextStyle(
+        hintStyle: TextStyle(
           color: _mediumGray,
           fontSize: 14,
           fontWeight: FontWeight.w400,
@@ -297,7 +348,7 @@ class AppTheme {
       ),
 
       // Icon Theme
-      iconTheme: const IconThemeData(color: _primaryBlack, size: 24),
+      iconTheme: IconThemeData(color: _primaryBlack, size: 24),
 
       // Divider
       dividerTheme: const DividerThemeData(
@@ -330,7 +381,7 @@ class AppTheme {
         backgroundColor: _lightGray,
         selectedColor: _accentBlue.withValues(alpha: 0.1),
         disabledColor: _lightGray,
-        labelStyle: const TextStyle(
+        labelStyle: TextStyle(
           color: _primaryBlack,
           fontSize: 12,
           fontWeight: FontWeight.w500,
@@ -371,7 +422,7 @@ class AppTheme {
         thumbColor: _accentBlue,
         overlayColor: _accentBlue.withValues(alpha: 0.1),
         valueIndicatorColor: _accentBlue,
-        valueIndicatorTextStyle: const TextStyle(
+        valueIndicatorTextStyle: TextStyle(
           color: _pureWhite,
           fontSize: 12,
           fontWeight: FontWeight.w500,
@@ -390,18 +441,18 @@ class AppTheme {
         backgroundColor: _pureWhite,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        titleTextStyle: const TextStyle(
+        titleTextStyle: TextStyle(
           color: _primaryBlack,
           fontSize: 18,
           fontWeight: FontWeight.w600,
         ),
-        contentTextStyle: const TextStyle(color: _primaryBlack, fontSize: 14),
+        contentTextStyle: TextStyle(color: _primaryBlack, fontSize: 14),
       ),
 
       // SnackBar
       snackBarTheme: SnackBarThemeData(
         backgroundColor: _pureWhite,
-        contentTextStyle: const TextStyle(
+        contentTextStyle: TextStyle(
           color: _primaryBlack,
           fontSize: 14,
           fontWeight: FontWeight.w400,

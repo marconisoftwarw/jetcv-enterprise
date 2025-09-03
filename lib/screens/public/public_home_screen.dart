@@ -277,7 +277,10 @@ class PublicHomeScreen extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     'Professional certification and verification platform',
-                    style: TextStyle(color: AppTheme.mediumGray, fontSize: 12),
+                    style: TextStyle(
+                      color: AppTheme.primaryBlack,
+                      fontSize: 12,
+                    ),
                   ),
                 ],
               ),

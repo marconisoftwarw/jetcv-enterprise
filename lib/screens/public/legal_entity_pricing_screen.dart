@@ -47,7 +47,7 @@ class _LegalEntityPricingScreenState extends State<LegalEntityPricingScreen> {
                 children: [
                   Text(
                     'Errore: ${pricingProvider.errorMessage}',
-                    style: const TextStyle(color: Colors.red),
+                    style: TextStyle(color: Colors.red),
                   ),
                   const SizedBox(height: 16),
                   CustomButton(
@@ -137,7 +137,7 @@ class _LegalEntityPricingScreenState extends State<LegalEntityPricingScreen> {
                       children: [
                         Text(
                           pricing.name,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                           ),
@@ -145,10 +145,7 @@ class _LegalEntityPricingScreenState extends State<LegalEntityPricingScreen> {
                         const SizedBox(height: 4),
                         Text(
                           pricing.description,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey,
-                          ),
+                          style: TextStyle(fontSize: 14, color: Colors.grey),
                         ),
                       ],
                     ),
@@ -158,7 +155,7 @@ class _LegalEntityPricingScreenState extends State<LegalEntityPricingScreen> {
                     children: [
                       Text(
                         pricing.formattedPrice,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                           color: Colors.green,
@@ -166,10 +163,7 @@ class _LegalEntityPricingScreenState extends State<LegalEntityPricingScreen> {
                       ),
                       Text(
                         'per ${pricing.validityDays} giorni',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
-                        ),
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
                       ),
                     ],
                   ),
@@ -178,10 +172,7 @@ class _LegalEntityPricingScreenState extends State<LegalEntityPricingScreen> {
               const SizedBox(height: 16),
               Text(
                 'Caratteristiche:',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               ...pricing.features.map(
@@ -196,10 +187,7 @@ class _LegalEntityPricingScreenState extends State<LegalEntityPricingScreen> {
                       ),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: Text(
-                          feature,
-                          style: const TextStyle(fontSize: 14),
-                        ),
+                        child: Text(feature, style: TextStyle(fontSize: 14)),
                       ),
                     ],
                   ),
@@ -248,7 +236,7 @@ class _LegalEntityPricingScreenState extends State<LegalEntityPricingScreen> {
           const SizedBox(height: 8),
           Text(
             '${selectedPricing!.name} - ${selectedPricing!.formattedPrice}',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: Colors.green,
@@ -257,7 +245,7 @@ class _LegalEntityPricingScreenState extends State<LegalEntityPricingScreen> {
           const SizedBox(height: 4),
           Text(
             'Validità: ${selectedPricing!.validityDays} giorni',
-            style: const TextStyle(fontSize: 14),
+            style: TextStyle(fontSize: 14),
           ),
         ],
       ),

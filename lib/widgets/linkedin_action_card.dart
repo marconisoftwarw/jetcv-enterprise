@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../config/app_theme.dart';
+import '../theme/app_theme.dart';
 
 class LinkedInActionCard extends StatelessWidget {
   final String title;
@@ -46,18 +46,13 @@ class LinkedInActionCard extends StatelessWidget {
                         Text(
                           title,
                           style: AppTheme.title3.copyWith(
-                            color: AppTheme.textPrimary,
+                            color: AppTheme.primaryBlack,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                         if (subtitle != null) ...[
                           const SizedBox(height: 4),
-                          Text(
-                            subtitle!,
-                            style: AppTheme.body2.copyWith(
-                              color: AppTheme.textSecondary,
-                            ),
-                          ),
+                          Text(subtitle!, style: AppTheme.body2),
                         ],
                       ],
                     ),

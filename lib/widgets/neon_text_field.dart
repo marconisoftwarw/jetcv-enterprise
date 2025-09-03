@@ -207,7 +207,7 @@ class _NeonTextFieldState extends State<NeonTextField>
                   fontWeight: FontWeight.w400,
                 ),
                 hintStyle: TextStyle(
-                  color: AppTheme.mediumGray,
+                  color: AppTheme.primaryBlack,
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
                 ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../config/app_theme.dart';
+import '../../theme/app_theme.dart';
 
 import '../../providers/locale_provider.dart';
 import '../../widgets/linkedin_card.dart';
@@ -101,7 +101,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
             ),
             subtitle: Text(
               'Ricevi notifiche via email per attività importanti',
-              style: AppTheme.body2.copyWith(color: AppTheme.textSecondary),
+              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
             ),
             value: _emailNotifications,
             onChanged: (value) {
@@ -122,7 +122,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
             ),
             subtitle: Text(
               'Ricevi notifiche push sull\'app',
-              style: AppTheme.body2.copyWith(color: AppTheme.textSecondary),
+              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
             ),
             value: _pushNotifications,
             onChanged: (value) {
@@ -143,7 +143,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
             ),
             subtitle: Text(
               'Ricevi notifiche via SMS per eventi critici',
-              style: AppTheme.body2.copyWith(color: AppTheme.textSecondary),
+              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
             ),
             value: _smsNotifications,
             onChanged: (value) {
@@ -164,7 +164,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
             ),
             subtitle: Text(
               'Ricevi aggiornamenti su nuovi prodotti e servizi',
-              style: AppTheme.body2.copyWith(color: AppTheme.textSecondary),
+              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
             ),
             value: _marketingEmails,
             onChanged: (value) {
@@ -201,7 +201,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
             ),
             subtitle: Text(
               'Attiva il tema scuro per l\'interfaccia',
-              style: AppTheme.body2.copyWith(color: AppTheme.textSecondary),
+              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
             ),
             value: _darkMode,
             onChanged: (value) {
@@ -222,7 +222,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
             ),
             subtitle: Text(
               'Sincronizza automaticamente i dati in background',
-              style: AppTheme.body2.copyWith(color: AppTheme.textSecondary),
+              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
             ),
             value: _autoSync,
             onChanged: (value) {
@@ -243,7 +243,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
             ),
             subtitle: Text(
               'Consenti l\'accesso alla posizione per le certificazioni',
-              style: AppTheme.body2.copyWith(color: AppTheme.textSecondary),
+              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
             ),
             value: _locationServices,
             onChanged: (value) {
@@ -264,7 +264,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
             ),
             subtitle: Text(
               'Condividi dati anonimi per migliorare l\'app',
-              style: AppTheme.body2.copyWith(color: AppTheme.textSecondary),
+              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
             ),
             value: _analytics,
             onChanged: (value) {
@@ -302,7 +302,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
             ),
             subtitle: Text(
               'Aggiorna la password del tuo account',
-              style: AppTheme.body2.copyWith(color: AppTheme.textSecondary),
+              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: _changePassword,
@@ -319,7 +319,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
             ),
             subtitle: Text(
               'Aggiungi un livello extra di sicurezza',
-              style: AppTheme.body2.copyWith(color: AppTheme.textSecondary),
+              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: _setupTwoFactorAuth,
@@ -336,7 +336,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
             ),
             subtitle: Text(
               'Gestisci i dispositivi connessi',
-              style: AppTheme.body2.copyWith(color: AppTheme.textSecondary),
+              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: _manageActiveSessions,
@@ -353,7 +353,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
             ),
             subtitle: Text(
               'Leggi la nostra politica sulla privacy',
-              style: AppTheme.body2.copyWith(color: AppTheme.textSecondary),
+              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: _viewPrivacyPolicy,
@@ -388,7 +388,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
                 ),
                 subtitle: Text(
                   _getLanguageDisplayName(localeProvider.locale),
-                  style: AppTheme.body2.copyWith(color: AppTheme.textSecondary),
+                  style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
                 ),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: _showLanguageSelector,
@@ -405,7 +405,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
                 ),
                 subtitle: Text(
                   'Europa/Roma (UTC+1)',
-                  style: AppTheme.body2.copyWith(color: AppTheme.textSecondary),
+                  style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
                 ),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: _changeTimeZone,
@@ -425,7 +425,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
                 ),
                 subtitle: Text(
                   'DD/MM/YYYY',
-                  style: AppTheme.body2.copyWith(color: AppTheme.textSecondary),
+                  style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
                 ),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: _changeDateFormat,
@@ -460,7 +460,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
             ),
             subtitle: Text(
               'Gestisci lo spazio di archiviazione',
-              style: AppTheme.body2.copyWith(color: AppTheme.textSecondary),
+              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: _manageCacheStorage,
@@ -477,7 +477,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
             ),
             subtitle: Text(
               'Salva e ripristina i tuoi dati',
-              style: AppTheme.body2.copyWith(color: AppTheme.textSecondary),
+              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: _manageBackupRestore,
@@ -494,7 +494,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
             ),
             subtitle: Text(
               'Informazioni tecniche per il supporto',
-              style: AppTheme.body2.copyWith(color: AppTheme.textSecondary),
+              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: _viewDebugLogs,
@@ -527,7 +527,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
             ),
             subtitle: Text(
               'Trova risposte alle domande frequenti',
-              style: AppTheme.body2.copyWith(color: AppTheme.textSecondary),
+              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: _openHelpCenter,
@@ -544,7 +544,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
             ),
             subtitle: Text(
               'Richiedi assistenza dal nostro team',
-              style: AppTheme.body2.copyWith(color: AppTheme.textSecondary),
+              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: _contactSupport,
@@ -561,7 +561,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
             ),
             subtitle: Text(
               'Aiutaci a migliorare l\'app',
-              style: AppTheme.body2.copyWith(color: AppTheme.textSecondary),
+              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: _reportBug,
@@ -578,7 +578,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
             ),
             subtitle: Text(
               'Dai la tua opinione sull\'app store',
-              style: AppTheme.body2.copyWith(color: AppTheme.textSecondary),
+              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: _rateApp,

@@ -200,7 +200,7 @@ class _CertificationListScreenState extends State<CertificationListScreen> {
                         Text(
                           'Inizia creando la tua prima certificazione',
                           style: TextStyle(
-                            color: AppTheme.mediumGray,
+                            color: AppTheme.primaryBlack,
                             fontSize: 14,
                           ),
                         ),
@@ -253,7 +253,7 @@ class _CertificationListScreenState extends State<CertificationListScreen> {
                     children: [
                       Text(
                         certification.title,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
@@ -320,7 +320,7 @@ class _CertificationListScreenState extends State<CertificationListScreen> {
                     certification.isOffline
                         ? 'Modalità Offline'
                         : 'In Attesa di Sincronizzazione',
-                    style: const TextStyle(color: Colors.orange, fontSize: 12),
+                    style: TextStyle(color: Colors.orange, fontSize: 12),
                   ),
                 ],
               ),
@@ -375,7 +375,7 @@ class _CertificationListScreenState extends State<CertificationListScreen> {
 
     switch (status) {
       case CertificationStatus.draft:
-        color = AppTheme.lightGray;
+        color = AppTheme.primaryBlack;
         text = 'Bozza';
         break;
       case CertificationStatus.submitted:
@@ -399,7 +399,7 @@ class _CertificationListScreenState extends State<CertificationListScreen> {
         text = 'Revocata';
         break;
       case CertificationStatus.closed:
-        color = AppTheme.lightGray;
+        color = AppTheme.primaryBlack;
         text = 'Chiusa';
         break;
     }

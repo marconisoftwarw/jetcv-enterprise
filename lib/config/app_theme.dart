@@ -226,7 +226,7 @@ class AppTheme {
       ),
 
       // Icon Theme
-      iconTheme: const IconThemeData(color: textPrimary, size: 24),
+      iconTheme: IconThemeData(color: textPrimary, size: 24),
 
       // Text Theme
       textTheme: const TextTheme(
@@ -246,8 +246,8 @@ class AppTheme {
       // Navigation Rail Theme
       navigationRailTheme: NavigationRailThemeData(
         backgroundColor: white,
-        selectedIconTheme: const IconThemeData(color: primaryBlue),
-        unselectedIconTheme: const IconThemeData(color: textPrimary),
+        selectedIconTheme: IconThemeData(color: primaryBlue),
+        unselectedIconTheme: IconThemeData(color: textPrimary),
         selectedLabelTextStyle: body2.copyWith(
           color: primaryBlue,
           fontWeight: FontWeight.w600,

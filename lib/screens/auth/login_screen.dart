@@ -254,7 +254,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Text(
                         'OR',
                         style: TextStyle(
-                          color: AppTheme.mediumGray,
+                          color: AppTheme.primaryBlack,
                           fontWeight: FontWeight.w500,
                         ),
                       ),

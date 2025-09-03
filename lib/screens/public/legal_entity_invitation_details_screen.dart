@@ -46,7 +46,7 @@ class LegalEntityInvitationDetailsScreen extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     'Benvenuto in ${queryParameters['legal_name'] ?? 'JetCV Enterprise'}',
-                    style: const TextStyle(fontSize: 16, color: Colors.grey),
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -214,10 +214,7 @@ class LegalEntityInvitationDetailsScreen extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 title,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -238,16 +235,13 @@ class LegalEntityInvitationDetailsScreen extends StatelessWidget {
             width: 120,
             child: Text(
               '$label:',
-              style: const TextStyle(
-                fontWeight: FontWeight.w500,
-                color: Colors.grey,
-              ),
+              style: TextStyle(fontWeight: FontWeight.w500, color: Colors.grey),
             ),
           ),
           Expanded(
             child: Text(
               value ?? 'Non specificato',
-              style: const TextStyle(fontWeight: FontWeight.w500),
+              style: TextStyle(fontWeight: FontWeight.w500),
             ),
           ),
         ],

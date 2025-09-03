@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../config/app_theme.dart';
+import '../theme/app_theme.dart';
 
 class LinkedInMetricCard extends StatelessWidget {
   final String title;
@@ -34,8 +34,9 @@ class LinkedInMetricCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       title,
-                      style: AppTheme.body2.copyWith(
-                        color: AppTheme.textSecondary,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: AppTheme.primaryBlack,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -46,7 +47,7 @@ class LinkedInMetricCard extends StatelessWidget {
               Text(
                 value,
                 style: AppTheme.title1.copyWith(
-                  color: AppTheme.textPrimary,
+                  color: AppTheme.primaryBlack,
                   fontWeight: FontWeight.bold,
                 ),
               ),

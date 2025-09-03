@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/certifier_provider.dart';
-import '../../config/app_theme.dart';
+import '../../theme/app_theme.dart';
 import '../../widgets/linkedin_card.dart';
 import '../../widgets/linkedin_text_field.dart';
 import '../../widgets/linkedin_button.dart';
@@ -108,8 +108,9 @@ class _InviteCertifierScreenState extends State<InviteCertifierScreen> {
                                 'Invita un nuovo certificatore a unirsi al team. '
                                 'Riceverà un\'email con un link per accettare l\'invito '
                                 'e completare la registrazione.',
-                                style: AppTheme.body2.copyWith(
-                                  color: AppTheme.textSecondary,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: AppTheme.primaryBlack,
                                 ),
                               ),
                             ],

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../config/app_theme.dart';
+import '../../theme/app_theme.dart';
 import '../../models/user.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/linkedin_card.dart';
@@ -170,23 +170,27 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     const SizedBox(height: 8),
                     Text(
                       'Non specificato',
-                      style: AppTheme.title2.copyWith(
-                        color: AppTheme.textSecondary,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.primaryBlack,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'Non specificato',
-                      style: AppTheme.body1.copyWith(
-                        color: AppTheme.textSecondary,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: AppTheme.primaryBlack,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       user.email ?? 'Non specificato',
-                      style: AppTheme.body1.copyWith(
-                        color: AppTheme.primaryBlue,
-                      ),
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: AppTheme.primaryBlack,
+                      ).copyWith(color: AppTheme.primaryBlue),
                     ),
                     const SizedBox(height: 16),
 
@@ -412,11 +416,17 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                         'Entità Legale Associata',
                         style: AppTheme.body2.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: AppTheme.textSecondary,
+                          color: AppTheme.primaryBlack,
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Text('ID: Non specificato', style: AppTheme.body1),
+                      Text(
+                        'ID: Non specificato',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: AppTheme.primaryBlack,
+                        ),
+                      ),
                     ],
                   ),
                 ),

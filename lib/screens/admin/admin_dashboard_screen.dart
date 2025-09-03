@@ -70,12 +70,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               labelType: NavigationRailLabelType.all,
               backgroundColor: AppTheme.darkCharcoal,
               selectedIconTheme: IconThemeData(color: AppTheme.accentGreen),
-              unselectedIconTheme: IconThemeData(color: AppTheme.mediumGray),
+              unselectedIconTheme: IconThemeData(color: AppTheme.primaryBlack),
               selectedLabelTextStyle: TextStyle(
                 color: AppTheme.accentGreen,
                 fontWeight: FontWeight.w600,
               ),
-              unselectedLabelTextStyle: TextStyle(color: AppTheme.mediumGray),
+              unselectedLabelTextStyle: TextStyle(color: AppTheme.primaryBlack),
               destinations: const [
                 NavigationRailDestination(
                   icon: Icon(Icons.dashboard),
@@ -857,7 +857,7 @@ class _UsersContent extends StatelessWidget {
                     Text(
                       'Advanced user management features will be available in the next update.',
                       style: TextStyle(
-                        color: AppTheme.mediumGray,
+                        color: AppTheme.primaryBlack,
                         fontSize: 14,
                       ),
                       textAlign: TextAlign.center,
@@ -921,7 +921,7 @@ class _AnalyticsContent extends StatelessWidget {
                     Text(
                       'Comprehensive analytics and reporting features will be available in the next update.',
                       style: TextStyle(
-                        color: AppTheme.mediumGray,
+                        color: AppTheme.primaryBlack,
                         fontSize: 14,
                       ),
                       textAlign: TextAlign.center,
@@ -985,7 +985,7 @@ class _SettingsContent extends StatelessWidget {
                     Text(
                       'Advanced platform configuration options will be available in the next update.',
                       style: TextStyle(
-                        color: AppTheme.mediumGray,
+                        color: AppTheme.primaryBlack,
                         fontSize: 14,
                       ),
                       textAlign: TextAlign.center,

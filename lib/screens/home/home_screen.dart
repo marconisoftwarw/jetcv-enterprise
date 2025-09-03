@@ -41,9 +41,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 destinations: _buildNavigationDestinations(isAdmin),
                 backgroundColor: AppTheme.darkGray,
                 selectedIconTheme: IconThemeData(color: AppTheme.accentGreen),
-                unselectedIconTheme: IconThemeData(color: AppTheme.mediumGray),
+                unselectedIconTheme: IconThemeData(
+                  color: AppTheme.primaryBlack,
+                ),
                 selectedLabelTextStyle: TextStyle(color: AppTheme.accentGreen),
-                unselectedLabelTextStyle: TextStyle(color: AppTheme.mediumGray),
+                unselectedLabelTextStyle: TextStyle(
+                  color: AppTheme.primaryBlack,
+                ),
               ),
 
               // Main Content
@@ -268,7 +272,7 @@ class _DashboardContent extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               'La tua attività apparirà qui una volta che inizierai a usare la piattaforma.',
-              style: TextStyle(color: AppTheme.mediumGray, fontSize: 14),
+              style: TextStyle(color: AppTheme.primaryBlack, fontSize: 14),
             ),
           ],
         ),
