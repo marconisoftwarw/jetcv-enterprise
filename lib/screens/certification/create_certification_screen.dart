@@ -5,6 +5,7 @@ import '../../theme/app_theme.dart';
 import '../../widgets/linkedin_button.dart';
 import '../../widgets/linkedin_card.dart';
 import '../../widgets/linkedin_text_field.dart';
+import '../../l10n/app_localizations.dart';
 
 class CreateCertificationScreen extends StatefulWidget {
   const CreateCertificationScreen({super.key});
@@ -44,6 +45,11 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 768;
+    final isDesktop = screenWidth > 1024;
+
     return Scaffold(
       backgroundColor: AppTheme.backgroundGrey,
       appBar: AppBar(
@@ -51,10 +57,10 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
         foregroundColor: AppTheme.primaryBlack,
         elevation: 0,
         title: Text(
-          'Nuova Certificazione',
+          l10n.getString('new_certification'),
           style: TextStyle(
             color: AppTheme.primaryBlack,
-            fontSize: 20,
+            fontSize: isTablet ? 24 : 20,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -70,7 +76,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             child: PageView(
               controller: _pageController,
               onPageChanged: (index) {
-                setState(() {
+        setState(() {
                   _currentStep = index;
                 });
               },
@@ -83,100 +89,147 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
+          ),
+        );
+      }
 
   Widget _buildProgressIndicator() {
+    final l10n = AppLocalizations.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 768;
+
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(isTablet ? 24 : 16),
       color: AppTheme.pureWhite,
       child: Row(
         children: [
-          _buildStepIndicator(0, 'Info Generali', _currentStep >= 0),
+          _buildStepIndicator(
+            0,
+            l10n.getString('general_info'),
+            _currentStep >= 0,
+            isTablet,
+          ),
           _buildStepConnector(),
-          _buildStepIndicator(1, 'Utenti', _currentStep >= 1),
+          _buildStepIndicator(
+            1,
+            l10n.getString('users'),
+            _currentStep >= 1,
+            isTablet,
+          ),
           _buildStepConnector(),
-          _buildStepIndicator(2, 'Risultati', _currentStep >= 2),
+          _buildStepIndicator(
+            2,
+            l10n.getString('results'),
+            _currentStep >= 2,
+            isTablet,
+          ),
           _buildStepConnector(),
-          _buildStepIndicator(3, 'Revisione', _currentStep >= 3),
+          _buildStepIndicator(
+            3,
+            l10n.getString('review'),
+            _currentStep >= 3,
+            isTablet,
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildStepIndicator(int stepNumber, String label, bool isActive) {
+  Widget _buildStepIndicator(
+    int stepNumber,
+    String label,
+    bool isActive,
+    bool isTablet,
+  ) {
     return Column(
       children: [
         Container(
-          width: 32,
-          height: 32,
+          width: isTablet ? 40 : 32,
+          height: isTablet ? 40 : 32,
           decoration: BoxDecoration(
             color: isActive ? AppTheme.primaryBlack : AppTheme.lightGrey,
             shape: BoxShape.circle,
           ),
           child: Center(
             child: isActive
-                ? Icon(Icons.check, color: AppTheme.pureWhite, size: 20)
+                ? Icon(
+                    Icons.check,
+                    color: AppTheme.pureWhite,
+                    size: isTablet ? 24 : 20,
+                  )
                 : Text(
                     '${stepNumber + 1}',
                     style: TextStyle(
                       color: AppTheme.primaryBlack,
                       fontWeight: FontWeight.bold,
+                      fontSize: isTablet ? 16 : 14,
                     ),
                   ),
           ),
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: isTablet ? 6 : 4),
         Text(
           label,
           style: TextStyle(
-            fontSize: 12,
+            fontSize: isTablet ? 14 : 12,
             color: isActive ? AppTheme.primaryBlack : AppTheme.textSecondary,
             fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
           ),
+          textAlign: TextAlign.center,
         ),
       ],
     );
   }
 
   Widget _buildStepConnector() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 768;
+
     return Expanded(
       child: Container(
-        height: 2,
-        margin: const EdgeInsets.symmetric(horizontal: 8),
+        height: isTablet ? 3 : 2,
+        margin: EdgeInsets.symmetric(horizontal: isTablet ? 12 : 8),
         color: AppTheme.lightGrey,
       ),
     );
   }
 
   Widget _buildGeneralInfoStep() {
+    final l10n = AppLocalizations.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 768;
+    final isDesktop = screenWidth > 1024;
+
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Form(
+      padding: EdgeInsets.all(isTablet ? 24 : 16),
+        child: Form(
         key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
             Text(
-              'Informazioni Generali',
+              l10n.getString('general_information'),
               style: TextStyle(
-                fontSize: 24,
+                fontSize: isTablet ? 28 : 24,
                 fontWeight: FontWeight.bold,
                 color: AppTheme.primaryBlack,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: isTablet ? 12 : 8),
             Text(
-              'Inserisci i dettagli principali della certificazione',
-              style: TextStyle(fontSize: 16, color: AppTheme.textSecondary),
+              l10n.getString('enter_main_details'),
+              style: TextStyle(
+                fontSize: isTablet ? 18 : 16,
+                color: AppTheme.textSecondary,
+              ),
             ),
             const SizedBox(height: 24),
 
             LinkedInTextField(
               controller: _titleController,
-              label: 'Titolo Certificazione',
-              hintText: 'Titolo Certificazione',
+              label: l10n.getString('certification_title'),
+              hintText: l10n.getString('certification_title'),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Inserisci il titolo della certificazione';
@@ -184,42 +237,42 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 return null;
               },
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: isTablet ? 20 : 16),
 
             LinkedInTextField(
-              label: 'Organizzazione Emittente',
-              initialValue: 'La mia Legal Entity',
+              label: l10n.getString('issuing_organization'),
+              initialValue: l10n.getString('my_legal_entity'),
               enabled: false,
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: isTablet ? 20 : 16),
 
-            DropdownButtonFormField<String>(
+              DropdownButtonFormField<String>(
               value: _selectedActivityType,
-              decoration: InputDecoration(
-                labelText: 'Tipo Attività',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
+                decoration: InputDecoration(
+                labelText: l10n.getString('activity_type'),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                contentPadding: EdgeInsets.symmetric(
                   horizontal: 16,
-                  vertical: 12,
+                  vertical: isTablet ? 16 : 12,
                 ),
               ),
               items: _activityTypes.map((String type) {
                 return DropdownMenuItem<String>(value: type, child: Text(type));
-              }).toList(),
+                }).toList(),
               onChanged: (String? newValue) {
-                setState(() {
+                    setState(() {
                   _selectedActivityType = newValue!;
                 });
               },
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: isTablet ? 20 : 16),
 
             LinkedInTextField(
               controller: _descriptionController,
-              label: 'Descrizione',
-              hintText: 'Descrizione',
+              label: l10n.getString('description'),
+              hintText: l10n.getString('description'),
               maxLines: 4,
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -231,11 +284,11 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             const SizedBox(height: 24),
 
             _buildMediaSection(),
-            const SizedBox(height: 32),
+            SizedBox(height: isTablet ? 40 : 32),
 
             LinkedInButton(
               onPressed: _nextStep,
-              text: 'Continua',
+              text: l10n.getString('continue'),
               icon: Icons.arrow_forward,
               variant: LinkedInButtonVariant.primary,
               fullWidth: true,
@@ -247,58 +300,63 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   }
 
   Widget _buildMediaSection() {
+    final l10n = AppLocalizations.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 768;
+
     return LinkedInCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Media (Foto e Video)',
+                l10n.getString('media_photos_videos'),
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: isTablet ? 20 : 18,
                   fontWeight: FontWeight.bold,
                   color: AppTheme.primaryBlack,
                 ),
               ),
               LinkedInButton(
                 onPressed: _addMedia,
-                text: '+ Aggiungi',
+                text: '+ ${l10n.getString('add')}',
                 variant: LinkedInButtonVariant.outline,
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          Container(
-            height: 120,
+          SizedBox(height: isTablet ? 20 : 16),
+              Container(
+            height: isTablet ? 140 : 120,
             width: double.infinity,
-            decoration: BoxDecoration(
+                decoration: BoxDecoration(
               color: AppTheme.lightGrey,
-              borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(8),
               border: Border.all(
                 color: AppTheme.borderGrey,
                 style: BorderStyle.solid,
-              ),
+                ),
             ),
             child: _mediaFiles.isEmpty
                 ? Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
+                  children: [
                       Icon(
                         Icons.cloud_upload,
-                        size: 48,
+                        size: isTablet ? 56 : 48,
                         color: AppTheme.textSecondary,
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: isTablet ? 12 : 8),
                       Text(
-                        'Aggiungi foto e video',
+                        l10n.getString('add_photos_videos'),
                         style: TextStyle(
                           color: AppTheme.textSecondary,
-                          fontSize: 16,
-                        ),
+                          fontSize: isTablet ? 18 : 16,
                       ),
-                    ],
+                    ),
+                  ],
                   )
                 : GridView.builder(
                     padding: const EdgeInsets.all(8),
@@ -337,10 +395,10 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                                   color: AppTheme.pureWhite,
                                   size: 16,
                                 ),
-                              ),
-                            ),
-                          ),
-                        ],
+                        ),
+                      ),
+                    ),
+                  ],
                       );
                     },
                   ),
@@ -351,23 +409,31 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   }
 
   Widget _buildUsersStep() {
+    final l10n = AppLocalizations.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 768;
+    
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(isTablet ? 24 : 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Aggiungi Utenti',
+            l10n.getString('add_users'),
             style: TextStyle(
-              fontSize: 24,
+              fontSize: isTablet ? 28 : 24,
               fontWeight: FontWeight.bold,
               color: AppTheme.primaryBlack,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: isTablet ? 12 : 8),
           Text(
-            'Inserisci i partecipanti alla certificazione',
-            style: TextStyle(fontSize: 16, color: AppTheme.textSecondary),
+            l10n.getString('enter_participants'),
+            style: TextStyle(
+              fontSize: isTablet ? 18 : 16, 
+              color: AppTheme.textSecondary
+            ),
           ),
           const SizedBox(height: 24),
 
@@ -375,11 +441,11 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           const SizedBox(height: 24),
 
           _buildUsersList(),
-          const SizedBox(height: 32),
+              const SizedBox(height: 32),
 
-          Row(
-            children: [
-              Expanded(
+              Row(
+                children: [
+                  Expanded(
                 child: LinkedInButton(
                   onPressed: _previousStep,
                   text: 'Indietro',
@@ -387,16 +453,16 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 ),
               ),
               const SizedBox(width: 16),
-              Expanded(
+                  Expanded(
                 child: LinkedInButton(
                   onPressed: _nextStep,
                   text: 'Continua alla Revisione',
                   icon: Icons.arrow_forward,
                   variant: LinkedInButtonVariant.primary,
-                ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
         ],
       ),
     );
@@ -406,9 +472,9 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     return LinkedInCard(
       child: Column(
         children: [
-          Row(
-            children: [
-              Expanded(
+              Row(
+                children: [
+                  Expanded(
                 child: LinkedInTextField(
                   label: 'Inserisci codice OTP utente',
                   hintText: 'Inserisci codice OT...',
@@ -423,7 +489,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+              const SizedBox(height: 16),
           Row(
             children: [
               Container(height: 1, color: AppTheme.borderGrey, width: 100),
@@ -437,7 +503,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               Expanded(child: Container(height: 1, color: AppTheme.borderGrey)),
             ],
           ),
-          const SizedBox(height: 16),
+                const SizedBox(height: 16),
           Row(
             children: [
               Icon(Icons.qr_code, size: 48, color: AppTheme.primaryBlue),
@@ -497,6 +563,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     return LinkedInCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -516,8 +583,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 style: TextButton.styleFrom(foregroundColor: AppTheme.errorRed),
               ),
             ],
-          ),
-          const SizedBox(height: 16),
+              ),
+              const SizedBox(height: 16),
           ...users.map((user) => _buildUserItem(user)).toList(),
         ],
       ),
@@ -587,48 +654,59 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   }
 
   Widget _buildResultsStep() {
+    final l10n = AppLocalizations.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 768;
+    
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(isTablet ? 24 : 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Risultati Utenti',
+            l10n.getString('user_results'),
             style: TextStyle(
-              fontSize: 24,
+              fontSize: isTablet ? 28 : 24,
               fontWeight: FontWeight.bold,
               color: AppTheme.primaryBlack,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: isTablet ? 12 : 8),
           Text(
-            'Inserisci i risultati per ogni utente',
-            style: TextStyle(fontSize: 16, color: AppTheme.textSecondary),
+            l10n.getString('enter_results_for_each'),
+            style: TextStyle(
+              fontSize: isTablet ? 18 : 16, 
+              color: AppTheme.textSecondary
+            ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: isTablet ? 12 : 8),
           Text(
-            'Compila i campi per ogni partecipante alla certificazione',
-            style: TextStyle(fontSize: 14, color: AppTheme.textSecondary),
+            l10n.getString('fill_fields_for_participants'),
+            style: TextStyle(
+              fontSize: isTablet ? 16 : 14, 
+              color: AppTheme.textSecondary
+            ),
           ),
           const SizedBox(height: 24),
 
           _buildUserResultsCard(),
-          const SizedBox(height: 32),
+              const SizedBox(height: 32),
 
           Row(
             children: [
               Expanded(
                 child: LinkedInButton(
                   onPressed: _previousStep,
-                  text: 'Indietro',
+                  text: l10n.getString('back'),
                   variant: LinkedInButtonVariant.outline,
                 ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: isTablet ? 20 : 16),
               Expanded(
                 child: LinkedInButton(
                   onPressed: _nextStep,
-                  text: 'Continua alla Revisione',
+                  text: l10n.getString('continue_to_review'),
                   icon: Icons.arrow_forward,
                   variant: LinkedInButtonVariant.primary,
                 ),
@@ -644,19 +722,20 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     return LinkedInCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            children: [
+              Row(
+                children: [
               CircleAvatar(
                 radius: 24,
                 backgroundImage: NetworkImage('https://via.placeholder.com/48'),
               ),
               const SizedBox(width: 16),
-              Expanded(
+                  Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                Text(
                       'Giulia Rossi',
                       style: TextStyle(
                         fontSize: 18,
@@ -669,25 +748,25 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                       style: TextStyle(
                         fontSize: 14,
                         color: AppTheme.textSecondary,
-                      ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
+              ),
               ),
             ],
           ),
           const SizedBox(height: 24),
 
-          Row(
-            children: [
-              Expanded(
+              Row(
+                children: [
+                  Expanded(
                 child: LinkedInTextField(
                   label: 'Risultato',
                   initialValue: 'Superato',
                 ),
               ),
               const SizedBox(width: 16),
-              Expanded(
+                  Expanded(
                 child: LinkedInTextField(
                   label: 'Punteggio',
                   initialValue: '90/100',
@@ -698,13 +777,13 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 child: LinkedInTextField(
                   label: 'Valutazione',
                   initialValue: 'A+',
-                ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
           const SizedBox(height: 24),
 
-          Text(
+                Text(
             'Media (Foto e Video)',
             style: TextStyle(
               fontSize: 16,
@@ -786,49 +865,57 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   }
 
   Widget _buildReviewStep() {
+    final l10n = AppLocalizations.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 768;
+    
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(isTablet ? 24 : 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            'Revisione Certificazione',
+                Text(
+            l10n.getString('certification_review'),
             style: TextStyle(
-              fontSize: 24,
+              fontSize: isTablet ? 28 : 24,
               fontWeight: FontWeight.bold,
               color: AppTheme.primaryBlack,
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Controlla tutti i dettagli prima di inviare la certificazione',
-            style: TextStyle(fontSize: 16, color: AppTheme.textSecondary),
+          SizedBox(height: isTablet ? 12 : 8),
+                Text(
+            l10n.getString('check_details_before_sending'),
+            style: TextStyle(
+              fontSize: isTablet ? 18 : 16, 
+              color: AppTheme.textSecondary
+            ),
           ),
           const SizedBox(height: 24),
 
           _buildReviewCard(),
-          const SizedBox(height: 16),
+              const SizedBox(height: 16),
           _buildMediaReviewCard(),
           const SizedBox(height: 16),
           _buildUsersReviewCard(),
           const SizedBox(height: 16),
           _buildConfirmationCard(),
-          const SizedBox(height: 32),
+              const SizedBox(height: 32),
 
           Row(
             children: [
               Expanded(
                 child: LinkedInButton(
                   onPressed: _previousStep,
-                  text: 'Indietro',
+                  text: l10n.getString('back'),
                   variant: LinkedInButtonVariant.outline,
                 ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: isTablet ? 20 : 16),
               Expanded(
                 child: LinkedInButton(
                   onPressed: _sendCertification,
-                  text: '→ Invia Certificazione',
+                  text: l10n.getString('send_certification'),
                   icon: Icons.send,
                   variant: LinkedInButtonVariant.primary,
                 ),
@@ -844,12 +931,13 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     return LinkedInCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             children: [
               Icon(Icons.info, color: AppTheme.primaryBlue),
               const SizedBox(width: 8),
-              Text(
+                Text(
                 'Informazioni Generali',
                 style: TextStyle(
                   fontSize: 18,
@@ -858,8 +946,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 16),
+              ),
+              const SizedBox(height: 16),
           _buildReviewItem('Titolo', 'Corso Platform Management in-place'),
           _buildReviewItem('Organizzazione', 'La mia Legal Entity'),
           _buildReviewItem(
@@ -875,12 +963,13 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     return LinkedInCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             children: [
               Icon(Icons.camera_alt, color: AppTheme.primaryBlue),
               const SizedBox(width: 8),
-              Text(
+                Text(
                 'Media Real-time (0)',
                 style: TextStyle(
                   fontSize: 18,
@@ -889,8 +978,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 16),
+              ),
+              const SizedBox(height: 16),
           Text(
             'Nessun media generale allegato',
             style: TextStyle(color: AppTheme.textSecondary),
@@ -904,9 +993,10 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     return LinkedInCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            children: [
+              Row(
+                children: [
               Icon(Icons.people, color: AppTheme.primaryBlue),
               const SizedBox(width: 8),
               Text(
@@ -919,19 +1009,19 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
+                const SizedBox(height: 16),
+              Row(
+                children: [
               CircleAvatar(
                 radius: 20,
                 backgroundImage: NetworkImage('https://via.placeholder.com/40'),
               ),
               const SizedBox(width: 12),
-              Expanded(
+                  Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                Text(
                       'Giulia Rossi',
                       style: TextStyle(
                         fontSize: 16,
@@ -944,14 +1034,14 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                       style: TextStyle(
                         fontSize: 14,
                         color: AppTheme.textSecondary,
-                      ),
                     ),
-                  ],
+                  ),
+                ],
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 16),
+              ),
+              const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -966,7 +1056,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 16),
+              const SizedBox(height: 16),
           Text(
             'Media del Certificatore (2)',
             style: TextStyle(
@@ -992,20 +1082,20 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     return LinkedInCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
+      children: [
+              Row(
+                children: [
               Icon(Icons.warning, color: AppTheme.warningOrange),
-              const SizedBox(width: 8),
-              Text(
+        const SizedBox(width: 8),
+        Text(
                 'Conferma Invio',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.primaryBlack,
-                ),
-              ),
-            ],
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppTheme.primaryBlack,
+          ),
+        ),
+      ],
           ),
           const SizedBox(height: 16),
           Text(
@@ -1021,16 +1111,16 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                   // Handle checkbox change
                 },
               ),
-              Expanded(
+                  Expanded(
                 child: Text(
                   'Confermo di aver verificato tutti i dettagli e di voler procedere con l\'invio della certificazione',
                   style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
-                ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
-      ),
     );
   }
 
@@ -1114,26 +1204,26 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
       builder: (context) => AlertDialog(
         content: Column(
           mainAxisSize: MainAxisSize.min,
-          children: [
+      children: [
             Icon(Icons.check_circle, color: AppTheme.successGreen, size: 64),
             const SizedBox(height: 16),
-            Text(
-              'Certificazione Inviata!',
-              style: TextStyle(
+        Text(
+              AppLocalizations.of(context).getString('certification_sent'),
+          style: TextStyle(
                 fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.primaryBlack,
-              ),
-            ),
+            fontWeight: FontWeight.bold,
+            color: AppTheme.primaryBlack,
+          ),
+        ),
             const SizedBox(height: 8),
             Text(
-              'La certificazione "Corso Platform Management in-place" è stata inviato con successo.',
+              AppLocalizations.of(context).getString('certification_sent_success'),
               textAlign: TextAlign.center,
               style: TextStyle(color: AppTheme.textSecondary),
             ),
             const SizedBox(height: 8),
             Text(
-              'I destinatari riceveranno una notifica e potranno visualizzare la certificazione nei loro profili.',
+              AppLocalizations.of(context).getString('recipients_notification'),
               textAlign: TextAlign.center,
               style: TextStyle(color: AppTheme.textSecondary, fontSize: 14),
             ),

@@ -30,23 +30,37 @@ class _HomeScreenState extends State<HomeScreen> {
           body: Row(
             children: [
               // Navigation Rail
-              NavigationRail(
-                selectedIndex: _selectedIndex,
-                onDestinationSelected: (int index) {
-                  setState(() {
-                    _selectedIndex = index;
-                  });
-                },
-                labelType: NavigationRailLabelType.all,
-                destinations: _buildNavigationDestinations(isAdmin),
-                backgroundColor: AppTheme.darkGray,
-                selectedIconTheme: IconThemeData(color: AppTheme.accentGreen),
-                unselectedIconTheme: IconThemeData(
-                  color: AppTheme.primaryBlack,
+              Container(
+                decoration: BoxDecoration(
+                  color: AppTheme.pureWhite,
+                  border: Border(
+                    right: BorderSide(
+                      color: AppTheme.borderGrey,
+                      width: 1,
+                    ),
+                  ),
                 ),
-                selectedLabelTextStyle: TextStyle(color: AppTheme.accentGreen),
-                unselectedLabelTextStyle: TextStyle(
-                  color: AppTheme.primaryBlack,
+                child: NavigationRail(
+                  selectedIndex: _selectedIndex,
+                  onDestinationSelected: (int index) {
+                    setState(() {
+                      _selectedIndex = index;
+                    });
+                  },
+                  labelType: NavigationRailLabelType.all,
+                  destinations: _buildNavigationDestinations(isAdmin),
+                  backgroundColor: Colors.transparent,
+                  selectedIconTheme: IconThemeData(color: AppTheme.primaryBlack),
+                  unselectedIconTheme: IconThemeData(
+                    color: AppTheme.textSecondary,
+                  ),
+                  selectedLabelTextStyle: TextStyle(
+                    color: AppTheme.primaryBlack,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  unselectedLabelTextStyle: TextStyle(
+                    color: AppTheme.textSecondary,
+                  ),
                 ),
               ),
 

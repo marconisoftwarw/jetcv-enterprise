@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/linkedin_button.dart';
 import '../../widgets/linkedin_card.dart';
+import '../../l10n/app_localizations.dart';
 import 'create_certification_screen.dart';
+import 'certification_category_management_screen.dart';
+import 'certification_information_management_screen.dart';
 
 class CertifierDashboardScreen extends StatefulWidget {
   const CertifierDashboardScreen({super.key});
@@ -89,6 +92,91 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
   }
 
   Widget _buildIssuedCertificationsTab() {
+    final l10n = AppLocalizations.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 768;
+    
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(isTablet ? 24 : 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Management Cards
+          Text(
+            'Gestione',
+            style: TextStyle(
+              fontSize: isTablet ? 22 : 20,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.primaryBlack,
+            ),
+          ),
+          SizedBox(height: isTablet ? 16 : 12),
+          
+          Row(
+            children: [
+              Expanded(
+                child: _buildManagementCard(
+                  'Categorie',
+                  'Gestisci le categorie di certificazione',
+                  Icons.category_outlined,
+                  AppTheme.primaryBlue,
+                  () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const CertificationCategoryManagementScreen(
+                          idLegalEntity: 'placeholder', // TODO: Get from context
+                        ),
+                      ),
+                    );
+                  },
+                  isTablet,
+                ),
+              ),
+              SizedBox(width: isTablet ? 16 : 12),
+              Expanded(
+                child: _buildManagementCard(
+                  'Informazioni',
+                  'Gestisci i campi di informazione',
+                  Icons.info_outline,
+                  AppTheme.successGreen,
+                  () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const CertificationInformationManagementScreen(
+                          idLegalEntity: 'placeholder', // TODO: Get from context
+                        ),
+                      ),
+                    );
+                  },
+                  isTablet,
+                ),
+              ),
+            ],
+          ),
+          
+          SizedBox(height: isTablet ? 32 : 24),
+          
+          // Certifications List
+          Text(
+            'Certificazioni Emesse',
+            style: TextStyle(
+              fontSize: isTablet ? 22 : 20,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.primaryBlack,
+            ),
+          ),
+          SizedBox(height: isTablet ? 16 : 12),
+          
+          ..._buildCertificationsList(isTablet),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _buildCertificationsList(bool isTablet) {
     final certifications = [
       {
         'title': 'Certificazione Flutter Developer',
@@ -119,24 +207,76 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
       },
     ];
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: certifications.length,
-      itemBuilder: (context, index) {
-        final cert = certifications[index];
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: _buildCertificationCard(cert),
-        );
-      },
+    return certifications.map((cert) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: _buildCertificationCard(cert),
+      );
+    }).toList();
+  }
+
+  Widget _buildManagementCard(
+    String title,
+    String description,
+    IconData icon,
+    Color color,
+    VoidCallback onTap,
+    bool isTablet,
+  ) {
+    return LinkedInCard(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: EdgeInsets.all(isTablet ? 20 : 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: isTablet ? 48 : 40,
+                height: isTablet ? 48 : 40,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  icon,
+                  color: color,
+                  size: isTablet ? 24 : 20,
+                ),
+              ),
+              SizedBox(height: isTablet ? 12 : 8),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: isTablet ? 18 : 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.primaryBlack,
+                ),
+              ),
+              SizedBox(height: isTablet ? 6 : 4),
+              Text(
+                description,
+                style: TextStyle(
+                  fontSize: isTablet ? 14 : 12,
+                  color: AppTheme.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
   Widget _buildDraftsTab() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(16),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
           Icon(Icons.edit_note, size: 64, color: AppTheme.textSecondary),
           const SizedBox(height: 16),
           Text(
@@ -152,7 +292,8 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
             'Le tue bozze e certificazioni in corso appariranno qui',
             style: TextStyle(color: AppTheme.textSecondary),
           ),
-        ],
+          ],
+        ),
       ),
     );
   }
