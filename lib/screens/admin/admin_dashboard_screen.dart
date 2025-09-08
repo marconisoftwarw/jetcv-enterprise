@@ -9,6 +9,7 @@ import '../../widgets/glass_card.dart';
 import 'create_legal_entity_screen.dart';
 import 'legal_entity_list_screen.dart';
 import '../certification/certifier_dashboard_screen.dart';
+import 'certifier_dashboard_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -601,7 +602,7 @@ class _DashboardContent extends StatelessWidget {
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
-                                  const CertifierDashboardScreen(),
+                                  const AdminCertifierDashboardScreen(),
                             ),
                           );
                         },

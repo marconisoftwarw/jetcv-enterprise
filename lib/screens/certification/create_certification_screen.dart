@@ -6,6 +6,8 @@ import '../../widgets/linkedin_button.dart';
 import '../../widgets/linkedin_card.dart';
 import '../../widgets/linkedin_text_field.dart';
 import '../../l10n/app_localizations.dart';
+import '../../services/certification_edge_service.dart';
+import '../../config/app_config.dart';
 
 class CreateCertificationScreen extends StatefulWidget {
   const CreateCertificationScreen({super.key});
@@ -26,6 +28,11 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   String _selectedActivityType = 'Corso Specifico';
   List<File> _mediaFiles = [];
 
+  // API state
+  bool _isCreating = false;
+  String? _errorMessage;
+  String? _successMessage;
+
   final List<String> _activityTypes = [
     'Corso Specifico',
     'Workshop',
@@ -34,6 +41,16 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     'Esame',
     'Altro',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController.addListener(() {
+      setState(() {
+        _currentStep = _pageController.page?.round() ?? 0;
+      });
+    });
+  }
 
   @override
   void dispose() {
@@ -1166,6 +1183,118 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     }
   }
 
+  Future<void> _createCertification() async {
+    print('🚀 Creating certification...');
+    
+    setState(() {
+      _isCreating = true;
+      _errorMessage = null;
+      _successMessage = null;
+    });
+
+    try {
+      // Prepara i dati della certificazione
+      final certificationData = {
+        'id_certifier': 'current-user-id', // TODO: Get from AuthProvider
+        'id_legal_entity': 'current-legal-entity-id', // TODO: Get from context
+        'id_location': 'default-location-id', // TODO: Get from context
+        'n_users': 1, // Default value
+        'id_certification_category': _selectedActivityType.toLowerCase().replaceAll(' ', '-'),
+        'status': 'draft',
+        'draft_at': DateTime.now().toIso8601String(),
+      };
+
+      print('📋 Certification data: $certificationData');
+
+      // Crea la certificazione
+      final result = await CertificationEdgeService.createCertification(
+        idCertifier: certificationData['id_certifier'] as String,
+        idLegalEntity: certificationData['id_legal_entity'] as String,
+        idLocation: certificationData['id_location'] as String,
+        nUsers: certificationData['n_users'] as int,
+        idCertificationCategory: "126fa831-c3ce-4f12-bfc3-600c24bc25a7",
+        status: certificationData['status'] as String?,
+        draftAt: certificationData['draft_at'] as String?,
+      );
+
+      if (result != null) {
+        print('✅ Certification created successfully: $result');
+        
+        // Se ci sono media files, aggiungili
+        if (_mediaFiles.isNotEmpty) {
+          await _addMediaToCertification(result['id_certification']);
+        }
+
+        setState(() {
+          _successMessage = 'Certificazione creata con successo!';
+          _isCreating = false;
+        });
+
+        // Mostra messaggio di successo e chiudi
+        _showSuccessDialog();
+      } else {
+        throw Exception('Failed to create certification');
+      }
+    } catch (e) {
+      print('💥 Error creating certification: $e');
+      setState(() {
+        _errorMessage = 'Errore nella creazione della certificazione: $e';
+        _isCreating = false;
+      });
+    }
+  }
+
+  Future<void> _addMediaToCertification(String certificationId) async {
+    try {
+      print('📸 Adding media to certification: $certificationId');
+      
+      final mediaData = _mediaFiles.map((file) => {
+        'name': file.path.split('/').last,
+        'description': 'Media file for certification',
+        'acquisition_type': 'camera',
+        'captured_at': DateTime.now().toIso8601String(),
+        'file_type': file.path.split('.').last,
+        'id_location': 'default-location-id', // TODO: Get from context
+      }).toList();
+
+      final result = await CertificationEdgeService.addCertificationMedia(
+        certificationId: certificationId,
+        media: mediaData,
+      );
+
+      print('✅ Media added successfully: ${result.length} files');
+    } catch (e) {
+      print('💥 Error adding media: $e');
+      // Non bloccare la creazione della certificazione per errori sui media
+    }
+  }
+
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.check_circle, color: AppTheme.successGreen),
+            const SizedBox(width: 8),
+            const Text('Successo'),
+          ],
+        ),
+        content: Text(_successMessage ?? 'Certificazione creata con successo!'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Chiudi dialog
+              Navigator.of(context).pop(); // Chiudi screen
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _addMedia() async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
@@ -1230,12 +1359,35 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               style: TextStyle(color: AppTheme.textSecondary, fontSize: 14),
             ),
             const SizedBox(height: 24),
+            
+            // Error message
+            if (_errorMessage != null) ...[
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppTheme.errorRed.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppTheme.errorRed.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.error_outline, color: AppTheme.errorRed, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _errorMessage!,
+                        style: TextStyle(color: AppTheme.errorRed, fontSize: 14),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+            
             LinkedInButton(
-              onPressed: () {
-                Navigator.pop(context);
-                Navigator.pop(context);
-              },
-              text: 'Continua',
+              onPressed: _isCreating ? null : _createCertification,
+              text: _isCreating ? 'Creazione in corso...' : 'Crea Certificazione',
               variant: LinkedInButtonVariant.primary,
               fullWidth: true,
             ),

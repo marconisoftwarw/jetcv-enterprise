@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import '../../models/certification.dart';
 import '../../services/certification_service.dart';
+import '../../services/certification_edge_service.dart';
 import '../../providers/auth_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../widgets/linkedin_button.dart';
@@ -24,15 +27,131 @@ class _CertificationListScreenState extends State<CertificationListScreen>
   late TabController _tabController;
   int _selectedTabIndex = 0;
 
+  // Dati delle certificazioni
+  List<Map<String, dynamic>> _issuedCertifications = [];
+  List<Map<String, dynamic>> _draftCertifications = [];
+  bool _isLoading = false;
+  String? _errorMessage;
+
   @override
   void initState() {
     super.initState();
+    print('🏁 CertificationListScreen initState called');
     _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(() {
       setState(() {
         _selectedTabIndex = _tabController.index;
       });
     });
+    print('📞 CertificationListScreen ready');
+    _loadCertifications();
+  }
+
+  Future<void> _loadCertifications() async {
+    print('🚀 _loadCertifications called in CertificationListScreen!');
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      // Prima testa la connessione alla Edge Function
+      print('🧪 Testing Edge Function connection...');
+      final connectionOk = await CertificationEdgeService.testConnection();
+      
+      if (!connectionOk) {
+        print('⚠️ Edge Function not available, using mock data for testing');
+        _loadMockData();
+        return;
+      }
+
+      print('✅ Edge Function connection OK, loading certifications...');
+
+      // Carica certificazioni emesse (status: completed, closed)
+      print('📋 Loading issued certifications...');
+      final issuedResult = await CertificationEdgeService.getCertifications(
+        status: 'completed',
+        limit: 50,
+        offset: 0,
+      );
+
+      // Carica bozze e in corso (status: draft, submitted)
+      print('📝 Loading draft certifications...');
+      final draftResult = await CertificationEdgeService.getCertifications(
+        status: 'draft',
+        limit: 50,
+        offset: 0,
+      );
+
+      print('📊 Issued certifications: ${issuedResult?['data']?.length ?? 0}');
+      print('📝 Draft certifications: ${draftResult?['data']?.length ?? 0}');
+
+      if (mounted) {
+        setState(() {
+          _issuedCertifications = List<Map<String, dynamic>>.from(
+            issuedResult?['data'] ?? [],
+          );
+          _draftCertifications = List<Map<String, dynamic>>.from(
+            draftResult?['data'] ?? [],
+          );
+          _isLoading = false;
+        });
+        print('✅ State updated with ${_issuedCertifications.length} issued and ${_draftCertifications.length} draft certifications');
+      }
+    } catch (e) {
+      print('💥 Error loading certifications: $e');
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Errore nel caricamento delle certificazioni: $e';
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  void _loadMockData() {
+    print('📝 Loading mock data for testing in CertificationListScreen...');
+    
+    final mockIssued = [
+      {
+        'id_certification': 'cert-001',
+        'serial_number': 'ABC12-DEF34',
+        'status': 'approved',
+        'created_at': DateTime.now().subtract(const Duration(days: 5)).toIso8601String(),
+        'updated_t': DateTime.now().subtract(const Duration(days: 2)).toIso8601String(),
+        'n_users': 3,
+        'id_certification_category': 'tech-skills',
+      },
+      {
+        'id_certification': 'cert-002',
+        'serial_number': 'GHI56-JKL78',
+        'status': 'closed',
+        'created_at': DateTime.now().subtract(const Duration(days: 10)).toIso8601String(),
+        'updated_t': DateTime.now().subtract(const Duration(days: 1)).toIso8601String(),
+        'n_users': 2,
+        'id_certification_category': 'design-skills',
+      },
+    ];
+
+    final mockDrafts = [
+      {
+        'id_certification': 'cert-003',
+        'serial_number': 'MNO90-PQR12',
+        'status': 'draft',
+        'created_at': DateTime.now().subtract(const Duration(days: 1)).toIso8601String(),
+        'n_users': 1,
+        'id_certification_category': 'soft-skills',
+      },
+    ];
+
+    if (mounted) {
+      setState(() {
+        _issuedCertifications = mockIssued;
+        _draftCertifications = mockDrafts;
+        _isLoading = false;
+        _errorMessage = null;
+      });
+    }
   }
 
   @override
@@ -43,6 +162,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
 
   @override
   Widget build(BuildContext context) {
+    print('🎨 CertificationListScreen build called');
     final l10n = AppLocalizations.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 768;
@@ -109,35 +229,62 @@ class _CertificationListScreenState extends State<CertificationListScreen>
     final isTablet = screenWidth > 768;
     final isDesktop = screenWidth > 1024;
 
-    final certifications = [
-      {
-        'title': 'Certificazione Flutter Developer',
-        'organization': 'TechCorp Academy',
-        'description': 'Certificazione avanzata ',
-        'status': l10n.getString('completed'),
-        'date': '22/7/2025',
-        'certifiedCount': 3,
-        'image': 'https://via.placeholder.com/80',
-        'avatars': [
-          'https://via.placeholder.com/32',
-          'https://via.placeholder.com/32',
-          'https://via.placeholder.com/32',
-        ],
-      },
-      {
-        'title': 'Certificazione UX/UI Design',
-        'organization': 'Design Institute',
-        'description': 'Certificazione avanzata ',
-        'status': l10n.getString('completed'),
-        'date': '7/7/2025',
-        'certifiedCount': 2,
-        'image': 'https://via.placeholder.com/80',
-        'avatars': [
-          'https://via.placeholder.com/32',
-          'https://via.placeholder.com/32',
-        ],
-      },
-    ];
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_errorMessage != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 64, color: AppTheme.errorRed),
+            const SizedBox(height: 16),
+            Text('Errore nel caricamento', style: AppTheme.title2),
+            const SizedBox(height: 8),
+            Text(
+              _errorMessage!,
+              style: AppTheme.body2,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _loadCertifications,
+              child: const Text('Riprova'),
+                    ),
+                  ],
+                ),
+      );
+    }
+
+    if (_issuedCertifications.isEmpty) {
+      return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+              Icons.assignment_outlined,
+                          size: 64,
+              color: AppTheme.textSecondary,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+              'Nessuna certificazione emessa',
+                          style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                            color: AppTheme.primaryBlack,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+              'Le certificazioni completate appariranno qui',
+              style: TextStyle(color: AppTheme.textSecondary),
+            ),
+          ],
+        ),
+      );
+    }
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -152,9 +299,9 @@ class _CertificationListScreenState extends State<CertificationListScreen>
             crossAxisSpacing: 16,
             mainAxisSpacing: 16,
           ),
-          itemCount: certifications.length,
+          itemCount: _issuedCertifications.length,
           itemBuilder: (context, index) {
-            final cert = certifications[index];
+            final cert = _issuedCertifications[index];
             return _buildCertificationCard(cert, l10n, isTablet);
           },
         );
@@ -167,38 +314,93 @@ class _CertificationListScreenState extends State<CertificationListScreen>
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 768;
 
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.all(isTablet ? 32 : 16),
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_errorMessage != null) {
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.edit_note,
-              size: isTablet ? 80 : 64,
-              color: AppTheme.textSecondary,
-            ),
-            SizedBox(height: isTablet ? 24 : 16),
+            Icon(Icons.error_outline, size: 64, color: AppTheme.errorRed),
+            const SizedBox(height: 16),
+            Text('Errore nel caricamento', style: AppTheme.title2),
+            const SizedBox(height: 8),
             Text(
-              l10n.getString('no_drafts_available'),
-              style: TextStyle(
-                fontSize: isTablet ? 22 : 18,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.primaryBlack,
-              ),
+              _errorMessage!,
+              style: AppTheme.body2,
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: isTablet ? 12 : 8),
-            Text(
-              l10n.getString('drafts_will_appear_here'),
-              style: TextStyle(
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _loadCertifications,
+              child: const Text('Riprova'),
+                        ),
+                      ],
+                    ),
+      );
+    }
+
+    if (_draftCertifications.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: EdgeInsets.all(isTablet ? 32 : 16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.edit_note,
+                size: isTablet ? 80 : 64,
                 color: AppTheme.textSecondary,
-                fontSize: isTablet ? 16 : 14,
               ),
-              textAlign: TextAlign.center,
-            ),
-          ],
+              SizedBox(height: isTablet ? 24 : 16),
+              Text(
+                l10n.getString('no_drafts_available'),
+                style: TextStyle(
+                  fontSize: isTablet ? 22 : 18,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.primaryBlack,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: isTablet ? 12 : 8),
+              Text(
+                l10n.getString('drafts_will_appear_here'),
+                style: TextStyle(
+                  color: AppTheme.textSecondary,
+                  fontSize: isTablet ? 16 : 14,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
+      );
+    }
+
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(isTablet ? 24 : 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Bozze e In Corso (${_draftCertifications.length})',
+            style: TextStyle(
+              fontSize: isTablet ? 22 : 20,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.primaryBlack,
+            ),
+          ),
+          SizedBox(height: isTablet ? 16 : 12),
+          ..._draftCertifications.map((cert) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: _buildCertificationCard(cert, l10n, isTablet),
+            );
+          }).toList(),
+        ],
       ),
     );
   }
@@ -208,139 +410,168 @@ class _CertificationListScreenState extends State<CertificationListScreen>
     AppLocalizations l10n,
     bool isTablet,
   ) {
+    final status = cert['status'] ?? 'draft';
+    final statusColor = _getStatusColor(status);
+    final statusText = _getStatusText(status);
+    final createdAt = DateTime.tryParse(cert['created_at'] ?? '') ?? DateTime.now();
+    final nUsers = cert['n_users'] ?? 0;
+
     return LinkedInCard(
+      child: InkWell(
+        onTap: () {
+          // TODO: Navigate to certification details
+        },
+        borderRadius: BorderRadius.circular(12),
       child: Padding(
-        padding: EdgeInsets.all(isTablet ? 12 : 8),
+          padding: EdgeInsets.all(isTablet ? 16 : 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
           children: [
             Row(
               children: [
-                Container(
-                  width: isTablet ? 50 : 40,
-                  height: isTablet ? 50 : 40,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(6),
-                    image: DecorationImage(
-                      image: NetworkImage(cert['image']),
-                      fit: BoxFit.cover,
+                  Container(
+                    width: isTablet ? 60 : 50,
+                    height: isTablet ? 60 : 50,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                    ),
+                    child: Icon(
+                      Icons.workspace_premium,
+                      color: AppTheme.primaryBlue,
+                      size: isTablet ? 30 : 24,
                     ),
                   ),
-                ),
-                SizedBox(width: isTablet ? 12 : 8),
+                  SizedBox(width: isTablet ? 16 : 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              cert['title'],
-                              style: TextStyle(
-                                fontSize: isTablet ? 16 : 14,
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.primaryBlack,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: isTablet ? 16 : 12,
-                              vertical: isTablet ? 6 : 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppTheme.successGreen.withValues(
-                                alpha: 0.1,
-                              ),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              cert['status'],
-                              style: TextStyle(
-                                color: AppTheme.successGreen,
-                                fontSize: isTablet ? 14 : 12,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: isTablet ? 4 : 2),
-                      Text(
-                        cert['organization'],
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'Certificazione ${cert['serial_number'] ?? 'N/A'}',
                         style: TextStyle(
-                          fontSize: isTablet ? 12 : 10,
-                          color: AppTheme.textSecondary,
+                                  fontSize: isTablet ? 18 : 16,
+                          fontWeight: FontWeight.bold,
+                                  color: AppTheme.primaryBlack,
+                                ),
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: statusColor.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                statusText,
+                                style: TextStyle(
+                                  color: statusColor,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      SizedBox(height: isTablet ? 4 : 2),
-                      Text(
-                        cert['description'],
-                        style: TextStyle(
-                          fontSize: isTablet ? 12 : 10,
-                          color: AppTheme.primaryBlack,
+                        SizedBox(height: isTablet ? 6 : 4),
+            Text(
+                          'Categoria: ${cert['id_certification_category'] ?? 'N/A'}',
+                          style: TextStyle(
+                            fontSize: isTablet ? 14 : 12,
+                            color: AppTheme.textSecondary,
+                          ),
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
+                        SizedBox(height: isTablet ? 8 : 6),
+                Text(
+                          'Utenti: $nUsers',
+                          style: TextStyle(
+                            fontSize: isTablet ? 14 : 12,
+                            color: AppTheme.primaryBlack,
                   ),
-                ),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  color: AppTheme.textSecondary,
-                  size: isTablet ? 20 : 16,
                 ),
               ],
             ),
-            SizedBox(height: isTablet ? 8 : 4),
+                  ),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    color: AppTheme.textSecondary,
+                    size: 16,
+                  ),
+                ],
+              ),
+              SizedBox(height: isTablet ? 16 : 12),
             Row(
               children: [
-                Text(
-                  '${l10n.getString('certified')}:',
-                  style: TextStyle(
-                    fontSize: isTablet ? 12 : 10,
+                  Icon(
+                    Icons.calendar_today,
+                    size: 16,
                     color: AppTheme.textSecondary,
-                    fontWeight: FontWeight.w500,
                   ),
-                ),
-                SizedBox(width: isTablet ? 8 : 6),
-                ...(cert['avatars'] as List<String>).map((avatar) {
-                  return Padding(
-                    padding: EdgeInsets.only(right: isTablet ? 2 : 1),
-                    child: CircleAvatar(
-                      radius: isTablet ? 10 : 8,
-                      backgroundImage: NetworkImage(avatar),
-                    ),
-                  );
-                }).toList(),
-                const Spacer(),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.calendar_today,
-                      size: isTablet ? 14 : 12,
+                  SizedBox(width: 4),
+                  Text(
+                    'Creata: ${createdAt.day}/${createdAt.month}/${createdAt.year}',
+                    style: TextStyle(
+                      fontSize: 14,
                       color: AppTheme.textSecondary,
                     ),
-                    SizedBox(width: isTablet ? 2 : 1),
+                  ),
+                  const Spacer(),
+                  if (cert['updated_t'] != null) ...[
+                    Icon(Icons.update, size: 16, color: AppTheme.textSecondary),
+                    SizedBox(width: 4),
                     Text(
-                      cert['date'],
+                      'Aggiornata: ${DateTime.tryParse(cert['updated_t'])?.day}/${DateTime.tryParse(cert['updated_t'])?.month}/${DateTime.tryParse(cert['updated_t'])?.year}',
                       style: TextStyle(
-                        fontSize: isTablet ? 12 : 10,
+                        fontSize: 14,
                         color: AppTheme.textSecondary,
                       ),
                     ),
                   ],
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case 'completed':
+      case 'closed':
+        return AppTheme.successGreen;
+      case 'submitted':
+        return AppTheme.warningOrange;
+      case 'draft':
+        return AppTheme.textSecondary;
+      case 'rejected':
+        return AppTheme.errorRed;
+      default:
+        return AppTheme.textSecondary;
+    }
+  }
+
+  String _getStatusText(String status) {
+    switch (status) {
+      case 'completed':
+        return 'Completata';
+      case 'closed':
+        return 'Chiusa';
+      case 'submitted':
+        return 'Inviata';
+      case 'draft':
+        return 'Bozza';
+      case 'rejected':
+        return 'Rifiutata';
+      default:
+        return 'Sconosciuto';
+    }
   }
 }

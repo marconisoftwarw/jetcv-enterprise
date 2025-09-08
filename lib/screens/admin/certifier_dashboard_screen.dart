@@ -8,15 +8,15 @@ import '../../widgets/linkedin_metric_card.dart';
 import '../../services/certification_edge_service.dart';
 import 'invite_certifier_screen.dart';
 
-class CertifierDashboardScreen extends StatefulWidget {
-  const CertifierDashboardScreen({super.key});
+class AdminCertifierDashboardScreen extends StatefulWidget {
+  const AdminCertifierDashboardScreen({super.key});
 
   @override
-  State<CertifierDashboardScreen> createState() =>
-      _CertifierDashboardScreenState();
+  State<AdminCertifierDashboardScreen> createState() =>
+      _AdminCertifierDashboardScreenState();
 }
 
-class _CertifierDashboardScreenState extends State<CertifierDashboardScreen> {
+class _AdminCertifierDashboardScreenState extends State<AdminCertifierDashboardScreen> {
   @override
   void initState() {
     super.initState();
@@ -34,7 +34,7 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Dashboard Certificatori',
+          'Dashboard Certificatorri',
           style: AppTheme.title1.copyWith(color: AppTheme.white),
         ),
         backgroundColor: AppTheme.primaryBlue,

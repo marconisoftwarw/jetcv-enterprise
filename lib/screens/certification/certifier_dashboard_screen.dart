@@ -70,10 +70,10 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
 
       print('✅ Edge Function connection OK, loading certifications...');
 
-      // Carica certificazioni emesse (status: approved, closed)
+      // Carica certificazioni emesse (status: completed, closed)
       print('📋 Loading issued certifications...');
       final issuedResult = await CertificationEdgeService.getCertifications(
-        status: 'approved',
+        status: 'completed',
         limit: 50,
         offset: 0,
       );
@@ -157,6 +157,45 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
     }
   }
 
+  Future<void> _testDirectApiCall() async {
+    print('🧪 Testing direct API call...');
+    
+    try {
+      const String url = '${AppConfig.supabaseUrl}/functions/v1/certification-crud';
+      final headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${AppConfig.supabaseAnonKey}',
+        'apikey': AppConfig.supabaseAnonKey,
+      };
+      
+      print('🌐 Direct URL: $url');
+      print('🔑 Direct Headers: $headers');
+      
+      final response = await http.get(Uri.parse(url), headers: headers);
+      
+      print('📡 Direct Response Status: ${response.statusCode}');
+      print('📄 Direct Response Body: ${response.body}');
+      
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        print('✅ Direct API call successful! Data: $data');
+        
+        if (mounted) {
+          setState(() {
+            _issuedCertifications = List<Map<String, dynamic>>.from(data['data'] ?? []);
+            _draftCertifications = [];
+            _isLoading = false;
+            _errorMessage = null;
+          });
+        }
+      } else {
+        print('❌ Direct API call failed: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      print('💥 Direct API call exception: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -196,6 +235,18 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
                   floatingActionButton: Column(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
+                      FloatingActionButton(
+                        onPressed: () {
+                          print('🧪 Direct API test button pressed');
+                          _testDirectApiCall();
+                        },
+                        backgroundColor: AppTheme.errorRed,
+                        foregroundColor: AppTheme.pureWhite,
+                        elevation: 8,
+                        heroTag: "direct",
+                        child: const Icon(Icons.api),
+                      ),
+                      const SizedBox(height: 8),
                       FloatingActionButton(
                         onPressed: () {
                           print('🧪 Manual test button pressed');
@@ -635,7 +686,7 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
 
   Color _getStatusColor(String status) {
     switch (status) {
-      case 'approved':
+      case 'completed':
       case 'closed':
         return AppTheme.successGreen;
       case 'submitted':
@@ -651,8 +702,8 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
 
   String _getStatusText(String status) {
     switch (status) {
-      case 'approved':
-        return 'Approvata';
+      case 'completed':
+        return 'Completata';
       case 'closed':
         return 'Chiusa';
       case 'submitted':
