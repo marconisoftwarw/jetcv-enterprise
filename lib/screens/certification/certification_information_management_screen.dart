@@ -16,10 +16,12 @@ class CertificationInformationManagementScreen extends StatefulWidget {
   });
 
   @override
-  State<CertificationInformationManagementScreen> createState() => _CertificationInformationManagementScreenState();
+  State<CertificationInformationManagementScreen> createState() =>
+      _CertificationInformationManagementScreenState();
 }
 
-class _CertificationInformationManagementScreenState extends State<CertificationInformationManagementScreen> {
+class _CertificationInformationManagementScreenState
+    extends State<CertificationInformationManagementScreen> {
   final CertificationDBService _service = CertificationDBService();
   List<CertificationInformationDB> _informations = [];
   bool _isLoading = true;
@@ -38,8 +40,9 @@ class _CertificationInformationManagementScreenState extends State<Certification
         _error = '';
       });
 
-      final informations = await _service.getCertificationInformationsByLegalEntity(widget.idLegalEntity);
-      
+      final informations = await _service
+          .getCertificationInformationsByLegalEntity(widget.idLegalEntity);
+
       setState(() {
         _informations = informations;
         _isLoading = false;
@@ -83,12 +86,16 @@ class _CertificationInformationManagementScreenState extends State<Certification
     }
   }
 
-  Future<void> _deleteInformation(CertificationInformationDB information) async {
+  Future<void> _deleteInformation(
+    CertificationInformationDB information,
+  ) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(AppLocalizations.of(context).getString('delete')),
-        content: Text('Sei sicuro di voler eliminare l\'informazione "${information.name}"?'),
+        content: Text(
+          'Sei sicuro di voler eliminare l\'informazione "${information.name}"?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -104,9 +111,11 @@ class _CertificationInformationManagementScreenState extends State<Certification
 
     if (confirmed == true) {
       try {
-        await _service.deleteCertificationInformation(information.idCertificationInformation);
+        await _service.deleteCertificationInformation(
+          information.idCertificationInformation,
+        );
         _loadInformations();
-        
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -156,116 +165,122 @@ class _CertificationInformationManagementScreenState extends State<Certification
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _error.isNotEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 64, color: AppTheme.errorRed),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Errore nel caricamento',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primaryBlack,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _error,
+                    style: TextStyle(color: AppTheme.textSecondary),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  LinkedInButton(
+                    onPressed: _loadInformations,
+                    text: 'Riprova',
+                    variant: LinkedInButtonVariant.primary,
+                  ),
+                ],
+              ),
+            )
+          : _informations.isEmpty
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    size: 64,
+                    color: AppTheme.textSecondary,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Nessuna informazione disponibile',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primaryBlack,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Crea la tua prima informazione di certificazione',
+                    style: TextStyle(color: AppTheme.textSecondary),
+                  ),
+                  const SizedBox(height: 24),
+                  LinkedInButton(
+                    onPressed: _createInformation,
+                    text: 'Crea Informazione',
+                    icon: Icons.add,
+                    variant: LinkedInButtonVariant.primary,
+                  ),
+                ],
+              ),
+            )
+          : Column(
+              children: [
+                Padding(
+                  padding: EdgeInsets.all(isTablet ? 24 : 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Icon(
-                        Icons.error_outline,
-                        size: 64,
-                        color: AppTheme.errorRed,
-                      ),
-                      const SizedBox(height: 16),
                       Text(
-                        'Errore nel caricamento',
+                        'Informazioni (${_informations.length})',
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: isTablet ? 20 : 18,
                           fontWeight: FontWeight.bold,
                           color: AppTheme.primaryBlack,
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        _error,
-                        style: TextStyle(color: AppTheme.textSecondary),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
                       LinkedInButton(
-                        onPressed: _loadInformations,
-                        text: 'Riprova',
+                        onPressed: _createInformation,
+                        text: 'Nuova Informazione',
+                        icon: Icons.add,
                         variant: LinkedInButtonVariant.primary,
                       ),
                     ],
                   ),
-                )
-              : _informations.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.info_outline,
-                            size: 64,
-                            color: AppTheme.textSecondary,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Nessuna informazione disponibile',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.primaryBlack,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Crea la tua prima informazione di certificazione',
-                            style: TextStyle(color: AppTheme.textSecondary),
-                          ),
-                          const SizedBox(height: 24),
-                          LinkedInButton(
-                            onPressed: _createInformation,
-                            text: 'Crea Informazione',
-                            icon: Icons.add,
-                            variant: LinkedInButtonVariant.primary,
-                          ),
-                        ],
-                      ),
-                    )
-                  : Column(
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.all(isTablet ? 24 : 16),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Informazioni (${_informations.length})',
-                                style: TextStyle(
-                                  fontSize: isTablet ? 20 : 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppTheme.primaryBlack,
-                                ),
-                              ),
-                              LinkedInButton(
-                                onPressed: _createInformation,
-                                text: 'Nuova Informazione',
-                                icon: Icons.add,
-                                variant: LinkedInButtonVariant.primary,
-                              ),
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          child: ListView.builder(
-                            padding: EdgeInsets.symmetric(horizontal: isTablet ? 24 : 16),
-                            itemCount: _informations.length,
-                            itemBuilder: (context, index) {
-                              final information = _informations[index];
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 16),
-                                child: _buildInformationCard(information, l10n, isTablet),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isTablet ? 24 : 16,
                     ),
+                    itemCount: _informations.length,
+                    itemBuilder: (context, index) {
+                      final information = _informations[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: _buildInformationCard(
+                          information,
+                          l10n,
+                          isTablet,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
     );
   }
 
-  Widget _buildInformationCard(CertificationInformationDB information, AppLocalizations l10n, bool isTablet) {
+  Widget _buildInformationCard(
+    CertificationInformationDB information,
+    AppLocalizations l10n,
+    bool isTablet,
+  ) {
     return LinkedInCard(
       child: Padding(
         padding: EdgeInsets.all(isTablet ? 20 : 16),
@@ -275,7 +290,9 @@ class _CertificationInformationManagementScreenState extends State<Certification
               width: isTablet ? 60 : 48,
               height: isTablet ? 60 : 48,
               decoration: BoxDecoration(
-                color: _getInformationColor(information.type).withValues(alpha: 0.1),
+                color: _getInformationColor(
+                  information.type,
+                ).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
@@ -448,10 +465,12 @@ class CreateCertificationInformationScreen extends StatefulWidget {
   });
 
   @override
-  State<CreateCertificationInformationScreen> createState() => _CreateCertificationInformationScreenState();
+  State<CreateCertificationInformationScreen> createState() =>
+      _CreateCertificationInformationScreenState();
 }
 
-class _CreateCertificationInformationScreenState extends State<CreateCertificationInformationScreen> {
+class _CreateCertificationInformationScreenState
+    extends State<CreateCertificationInformationScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _labelController = TextEditingController();
@@ -489,9 +508,12 @@ class _CreateCertificationInformationScreenState extends State<CreateCertificati
 
     try {
       final information = CertificationInformationDB(
-        idCertificationInformation: widget.information?.idCertificationInformation ?? '',
+        idCertificationInformation:
+            widget.information?.idCertificationInformation ?? '',
         name: _nameController.text.trim(),
-        order: _orderController.text.isNotEmpty ? int.tryParse(_orderController.text) : null,
+        order: _orderController.text.isNotEmpty
+            ? int.tryParse(_orderController.text)
+            : null,
         createdAt: widget.information?.createdAt ?? DateTime.now(),
         updatedAt: DateTime.now(),
         label: _labelController.text.trim(),
@@ -501,16 +523,24 @@ class _CreateCertificationInformationScreenState extends State<CreateCertificati
       );
 
       if (widget.information != null) {
-        await CertificationDBService().updateCertificationInformation(information);
+        await CertificationDBService().updateCertificationInformation(
+          information,
+        );
       } else {
-        await CertificationDBService().createCertificationInformation(information);
+        await CertificationDBService().createCertificationInformation(
+          information,
+        );
       }
 
       if (mounted) {
         Navigator.pop(context, true);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(widget.information != null ? 'Informazione aggiornata' : 'Informazione creata'),
+            content: Text(
+              widget.information != null
+                  ? 'Informazione aggiornata'
+                  : 'Informazione creata',
+            ),
             backgroundColor: AppTheme.successGreen,
           ),
         );
@@ -546,7 +576,9 @@ class _CreateCertificationInformationScreenState extends State<CreateCertificati
         foregroundColor: AppTheme.primaryBlack,
         elevation: 0,
         title: Text(
-          widget.information != null ? 'Modifica Informazione' : 'Nuova Informazione',
+          widget.information != null
+              ? 'Modifica Informazione'
+              : 'Nuova Informazione',
           style: TextStyle(
             color: AppTheme.primaryBlack,
             fontSize: isTablet ? 24 : 20,

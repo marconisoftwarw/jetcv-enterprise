@@ -34,10 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 decoration: BoxDecoration(
                   color: AppTheme.pureWhite,
                   border: Border(
-                    right: BorderSide(
-                      color: AppTheme.borderGrey,
-                      width: 1,
-                    ),
+                    right: BorderSide(color: AppTheme.borderGrey, width: 1),
                   ),
                 ),
                 child: NavigationRail(
@@ -50,7 +47,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   labelType: NavigationRailLabelType.all,
                   destinations: _buildNavigationDestinations(isAdmin),
                   backgroundColor: Colors.transparent,
-                  selectedIconTheme: IconThemeData(color: AppTheme.primaryBlack),
+                  selectedIconTheme: IconThemeData(
+                    color: AppTheme.primaryBlack,
+                  ),
                   unselectedIconTheme: IconThemeData(
                     color: AppTheme.textSecondary,
                   ),

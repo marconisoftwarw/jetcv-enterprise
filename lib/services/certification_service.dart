@@ -5,6 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/certification.dart';
 import '../models/certification_support.dart';
+import 'certification_edge_service.dart';
 
 class CertificationService {
   static final CertificationService _instance =
@@ -31,48 +32,21 @@ class CertificationService {
     CertificationStatus? status,
   }) async {
     try {
-      final response = await http.get(
-        Uri.parse('$_baseUrl/rest/v1/certification'),
-        headers: {
-          'apikey': _apiKey,
-          'Authorization': 'Bearer $_apiKey',
-          'Content-Type': 'application/json',
-        },
+      final result = await CertificationEdgeService.getCertifications(
+        idLegalEntity: legalEntityId,
+        idCertifier: userId,
+        status: status?.name,
+        limit: 100,
+        offset: 0,
       );
 
-      if (response.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(response.body);
-        List<Certification> certifications = data
-            .map((json) => Certification.fromJson(json))
+      if (result != null && result['data'] != null) {
+        final List<dynamic> data = result['data'];
+        return data
+            .map<Certification>((json) => Certification.fromJson(json))
             .toList();
-
-        // Filtra per entità legale
-        if (legalEntityId != null) {
-          certifications = certifications
-              .where((c) => c.idLegalEntity == legalEntityId)
-              .toList();
-        }
-
-        // Filtra per utente
-        if (userId != null) {
-          certifications = certifications
-              .where((c) => c.idLegalEntity == userId)
-              .toList();
-        }
-
-        // Filtra per status
-        if (status != null) {
-          certifications = certifications
-              .where((c) => c.status == status)
-              .toList();
-        }
-
-        return certifications;
-      } else {
-        throw Exception(
-          'Failed to load certifications: ${response.statusCode}',
-        );
       }
+      return [];
     } catch (e) {
       print('Error getting certifications: $e');
       return [];
@@ -81,20 +55,9 @@ class CertificationService {
 
   Future<Certification?> getCertificationById(String id) async {
     try {
-      final response = await http.get(
-        Uri.parse('$_baseUrl/rest/v1/certification?id=eq.$id'),
-        headers: {
-          'apikey': _apiKey,
-          'Authorization': 'Bearer $_apiKey',
-          'Content-Type': 'application/json',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(response.body);
-        if (data.isNotEmpty) {
-          return Certification.fromJson(data.first);
-        }
+      final result = await CertificationEdgeService.getCertification(id);
+      if (result != null) {
+        return Certification.fromJson(result);
       }
       return null;
     } catch (e) {
@@ -107,24 +70,23 @@ class CertificationService {
     Certification certification,
   ) async {
     try {
-      final response = await http.post(
-        Uri.parse('$_baseUrl/rest/v1/certification'),
-        headers: {
-          'apikey': _apiKey,
-          'Authorization': 'Bearer $_apiKey',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(certification.toJson()),
+      final result = await CertificationEdgeService.createCertification(
+        idCertifier: certification.idCertifier,
+        idLegalEntity: certification.idLegalEntity,
+        idLocation: certification.idLocation,
+        nUsers: certification.nUsers,
+        idCertificationCategory:
+            'default-category', // TODO: Aggiungere campo al modello
+        status: certification.status.name,
+        sentAt: certification.sentAt?.toIso8601String(),
+        draftAt: certification.draftAt?.toIso8601String(),
+        closedAt: certification.closedAt?.toIso8601String(),
       );
 
-      if (response.statusCode == 201) {
-        final data = jsonDecode(response.body);
-        return Certification.fromJson(data);
-      } else {
-        throw Exception(
-          'Failed to create certification: ${response.statusCode}',
-        );
+      if (result != null) {
+        return Certification.fromJson(result);
       }
+      return null;
     } catch (e) {
       print('Error creating certification: $e');
       return null;
@@ -135,23 +97,17 @@ class CertificationService {
     Certification certification,
   ) async {
     try {
-      final response = await http.patch(
-        Uri.parse(
-          '$_baseUrl/rest/v1/certification?id=eq.${certification.idCertification}',
-        ),
-        headers: {
-          'apikey': _apiKey,
-          'Authorization': 'Bearer $_apiKey',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(certification.toJson()),
+      final result = await CertificationEdgeService.updateCertification(
+        certification.idCertification,
+        status: certification.status.name,
+        sentAt: certification.sentAt?.toIso8601String(),
+        draftAt: certification.draftAt?.toIso8601String(),
+        closedAt: certification.closedAt?.toIso8601String(),
+        nUsers: certification.nUsers,
       );
 
-      if (response.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(response.body);
-        if (data.isNotEmpty) {
-          return Certification.fromJson(data.first);
-        }
+      if (result != null) {
+        return Certification.fromJson(result);
       }
       return null;
     } catch (e) {
@@ -162,12 +118,7 @@ class CertificationService {
 
   Future<bool> deleteCertification(String id) async {
     try {
-      final response = await http.delete(
-        Uri.parse('$_baseUrl/rest/v1/certification?id=eq.$id'),
-        headers: {'apikey': _apiKey, 'Authorization': 'Bearer $_apiKey'},
-      );
-
-      return response.statusCode == 204;
+      return await CertificationEdgeService.deleteCertification(id);
     } catch (e) {
       print('Error deleting certification: $e');
       return false;
@@ -210,6 +161,69 @@ class CertificationService {
     } catch (e) {
       print('Error capturing media: $e');
       return null;
+    }
+  }
+
+  // Metodi per gestire i media delle certificazioni tramite Edge Function
+  Future<List<Map<String, dynamic>>> getCertificationMedia(
+    String certificationId,
+  ) async {
+    try {
+      return await CertificationEdgeService.getCertificationMedia(
+        certificationId,
+      );
+    } catch (e) {
+      print('Error getting certification media: $e');
+      return [];
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> addCertificationMedia({
+    required String certificationId,
+    required List<Map<String, dynamic>> media,
+  }) async {
+    try {
+      return await CertificationEdgeService.addCertificationMedia(
+        certificationId: certificationId,
+        media: media,
+      );
+    } catch (e) {
+      print('Error adding certification media: $e');
+      return [];
+    }
+  }
+
+  Future<Map<String, dynamic>?> updateCertificationMedia(
+    String mediaId, {
+    String? name,
+    String? description,
+    String? acquisitionType,
+    String? capturedAt,
+    String? fileType,
+    String? idLocation,
+  }) async {
+    try {
+      return await CertificationEdgeService.updateMedia(
+        mediaId,
+        name: name,
+        description: description,
+        acquisitionType: acquisitionType,
+        capturedAt: capturedAt,
+        fileType: fileType,
+        idLocation: idLocation,
+      );
+    } catch (e) {
+      print('Error updating certification media: $e');
+      return null;
+    }
+  }
+
+  Future<bool> deleteCertificationMedia(String mediaId) async {
+    try {
+      return await CertificationEdgeService.deleteMedia(mediaId);
+    } catch (e) {
+      print('Error deleting certification media: $e');
+      return false;
     }
   }
 

@@ -113,7 +113,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
       {
         'title': 'Certificazione Flutter Developer',
         'organization': 'TechCorp Academy',
-              'description': 'Certificazione avanzata ',
+        'description': 'Certificazione avanzata ',
         'status': l10n.getString('completed'),
         'date': '22/7/2025',
         'certifiedCount': 3,
@@ -170,35 +170,35 @@ class _CertificationListScreenState extends State<CertificationListScreen>
     return Center(
       child: Padding(
         padding: EdgeInsets.all(isTablet ? 32 : 16),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
               Icons.edit_note,
               size: isTablet ? 80 : 64,
               color: AppTheme.textSecondary,
             ),
             SizedBox(height: isTablet ? 24 : 16),
-                        Text(
+            Text(
               l10n.getString('no_drafts_available'),
-                          style: TextStyle(
+              style: TextStyle(
                 fontSize: isTablet ? 22 : 18,
                 fontWeight: FontWeight.w600,
-                            color: AppTheme.primaryBlack,
-                          ),
+                color: AppTheme.primaryBlack,
+              ),
               textAlign: TextAlign.center,
-                        ),
+            ),
             SizedBox(height: isTablet ? 12 : 8),
-                        Text(
+            Text(
               l10n.getString('drafts_will_appear_here'),
-                          style: TextStyle(
+              style: TextStyle(
                 color: AppTheme.textSecondary,
                 fontSize: isTablet ? 16 : 14,
               ),
               textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -319,8 +319,8 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                   );
                 }).toList(),
                 const Spacer(),
-              Row(
-                children: [
+                Row(
+                  children: [
                     Icon(
                       Icons.calendar_today,
                       size: isTablet ? 14 : 12,

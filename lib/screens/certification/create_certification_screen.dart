@@ -76,7 +76,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             child: PageView(
               controller: _pageController,
               onPageChanged: (index) {
-        setState(() {
+                setState(() {
                   _currentStep = index;
                 });
               },
@@ -89,9 +89,9 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             ),
           ),
         ],
-          ),
-        );
-      }
+      ),
+    );
+  }
 
   Widget _buildProgressIndicator() {
     final l10n = AppLocalizations.of(context);
@@ -202,12 +202,12 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
 
     return SingleChildScrollView(
       padding: EdgeInsets.all(isTablet ? 24 : 16),
-        child: Form(
+      child: Form(
         key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
             Text(
               l10n.getString('general_information'),
               style: TextStyle(
@@ -246,13 +246,13 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             ),
             SizedBox(height: isTablet ? 20 : 16),
 
-              DropdownButtonFormField<String>(
+            DropdownButtonFormField<String>(
               value: _selectedActivityType,
-                decoration: InputDecoration(
+              decoration: InputDecoration(
                 labelText: l10n.getString('activity_type'),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
                 contentPadding: EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: isTablet ? 16 : 12,
@@ -260,9 +260,9 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               ),
               items: _activityTypes.map((String type) {
                 return DropdownMenuItem<String>(value: type, child: Text(type));
-                }).toList(),
+              }).toList(),
               onChanged: (String? newValue) {
-                    setState(() {
+                setState(() {
                   _selectedActivityType = newValue!;
                 });
               },
@@ -328,21 +328,21 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             ],
           ),
           SizedBox(height: isTablet ? 20 : 16),
-              Container(
+          Container(
             height: isTablet ? 140 : 120,
             width: double.infinity,
-                decoration: BoxDecoration(
+            decoration: BoxDecoration(
               color: AppTheme.lightGrey,
-                  borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8),
               border: Border.all(
                 color: AppTheme.borderGrey,
                 style: BorderStyle.solid,
-                ),
+              ),
             ),
             child: _mediaFiles.isEmpty
                 ? Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
+                    children: [
                       Icon(
                         Icons.cloud_upload,
                         size: isTablet ? 56 : 48,
@@ -354,9 +354,9 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                         style: TextStyle(
                           color: AppTheme.textSecondary,
                           fontSize: isTablet ? 18 : 16,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
                   )
                 : GridView.builder(
                     padding: const EdgeInsets.all(8),
@@ -395,10 +395,10 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                                   color: AppTheme.pureWhite,
                                   size: 16,
                                 ),
-                        ),
-                      ),
-                    ),
-                  ],
+                              ),
+                            ),
+                          ),
+                        ],
                       );
                     },
                   ),
@@ -412,7 +412,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     final l10n = AppLocalizations.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 768;
-    
+
     return SingleChildScrollView(
       padding: EdgeInsets.all(isTablet ? 24 : 16),
       child: Column(
@@ -431,8 +431,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           Text(
             l10n.getString('enter_participants'),
             style: TextStyle(
-              fontSize: isTablet ? 18 : 16, 
-              color: AppTheme.textSecondary
+              fontSize: isTablet ? 18 : 16,
+              color: AppTheme.textSecondary,
             ),
           ),
           const SizedBox(height: 24),
@@ -441,11 +441,11 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           const SizedBox(height: 24),
 
           _buildUsersList(),
-              const SizedBox(height: 32),
+          const SizedBox(height: 32),
 
-              Row(
-                children: [
-                  Expanded(
+          Row(
+            children: [
+              Expanded(
                 child: LinkedInButton(
                   onPressed: _previousStep,
                   text: 'Indietro',
@@ -453,16 +453,16 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 ),
               ),
               const SizedBox(width: 16),
-                  Expanded(
+              Expanded(
                 child: LinkedInButton(
                   onPressed: _nextStep,
                   text: 'Continua alla Revisione',
                   icon: Icons.arrow_forward,
                   variant: LinkedInButtonVariant.primary,
-                    ),
-                  ),
-                ],
+                ),
               ),
+            ],
+          ),
         ],
       ),
     );
@@ -472,9 +472,9 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     return LinkedInCard(
       child: Column(
         children: [
-              Row(
-                children: [
-                  Expanded(
+          Row(
+            children: [
+              Expanded(
                 child: LinkedInTextField(
                   label: 'Inserisci codice OTP utente',
                   hintText: 'Inserisci codice OT...',
@@ -489,7 +489,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               ),
             ],
           ),
-              const SizedBox(height: 16),
+          const SizedBox(height: 16),
           Row(
             children: [
               Container(height: 1, color: AppTheme.borderGrey, width: 100),
@@ -503,7 +503,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               Expanded(child: Container(height: 1, color: AppTheme.borderGrey)),
             ],
           ),
-                const SizedBox(height: 16),
+          const SizedBox(height: 16),
           Row(
             children: [
               Icon(Icons.qr_code, size: 48, color: AppTheme.primaryBlue),
@@ -583,8 +583,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 style: TextButton.styleFrom(foregroundColor: AppTheme.errorRed),
               ),
             ],
-              ),
-              const SizedBox(height: 16),
+          ),
+          const SizedBox(height: 16),
           ...users.map((user) => _buildUserItem(user)).toList(),
         ],
       ),
@@ -657,7 +657,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     final l10n = AppLocalizations.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 768;
-    
+
     return SingleChildScrollView(
       padding: EdgeInsets.all(isTablet ? 24 : 16),
       child: Column(
@@ -676,22 +676,22 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           Text(
             l10n.getString('enter_results_for_each'),
             style: TextStyle(
-              fontSize: isTablet ? 18 : 16, 
-              color: AppTheme.textSecondary
+              fontSize: isTablet ? 18 : 16,
+              color: AppTheme.textSecondary,
             ),
           ),
           SizedBox(height: isTablet ? 12 : 8),
           Text(
             l10n.getString('fill_fields_for_participants'),
             style: TextStyle(
-              fontSize: isTablet ? 16 : 14, 
-              color: AppTheme.textSecondary
+              fontSize: isTablet ? 16 : 14,
+              color: AppTheme.textSecondary,
             ),
           ),
           const SizedBox(height: 24),
 
           _buildUserResultsCard(),
-              const SizedBox(height: 32),
+          const SizedBox(height: 32),
 
           Row(
             children: [
@@ -724,18 +724,18 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-              Row(
-                children: [
+          Row(
+            children: [
               CircleAvatar(
                 radius: 24,
                 backgroundImage: NetworkImage('https://via.placeholder.com/48'),
               ),
               const SizedBox(width: 16),
-                  Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                Text(
+                    Text(
                       'Giulia Rossi',
                       style: TextStyle(
                         fontSize: 18,
@@ -748,25 +748,25 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                       style: TextStyle(
                         fontSize: 14,
                         color: AppTheme.textSecondary,
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
               ),
             ],
           ),
           const SizedBox(height: 24),
 
-              Row(
-                children: [
-                  Expanded(
+          Row(
+            children: [
+              Expanded(
                 child: LinkedInTextField(
                   label: 'Risultato',
                   initialValue: 'Superato',
                 ),
               ),
               const SizedBox(width: 16),
-                  Expanded(
+              Expanded(
                 child: LinkedInTextField(
                   label: 'Punteggio',
                   initialValue: '90/100',
@@ -777,13 +777,13 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 child: LinkedInTextField(
                   label: 'Valutazione',
                   initialValue: 'A+',
-                    ),
-                  ),
-                ],
+                ),
               ),
+            ],
+          ),
           const SizedBox(height: 24),
 
-                Text(
+          Text(
             'Media (Foto e Video)',
             style: TextStyle(
               fontSize: 16,
@@ -868,14 +868,14 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     final l10n = AppLocalizations.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 768;
-    
+
     return SingleChildScrollView(
       padding: EdgeInsets.all(isTablet ? 24 : 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-                Text(
+          Text(
             l10n.getString('certification_review'),
             style: TextStyle(
               fontSize: isTablet ? 28 : 24,
@@ -884,23 +884,23 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             ),
           ),
           SizedBox(height: isTablet ? 12 : 8),
-                Text(
+          Text(
             l10n.getString('check_details_before_sending'),
             style: TextStyle(
-              fontSize: isTablet ? 18 : 16, 
-              color: AppTheme.textSecondary
+              fontSize: isTablet ? 18 : 16,
+              color: AppTheme.textSecondary,
             ),
           ),
           const SizedBox(height: 24),
 
           _buildReviewCard(),
-              const SizedBox(height: 16),
+          const SizedBox(height: 16),
           _buildMediaReviewCard(),
           const SizedBox(height: 16),
           _buildUsersReviewCard(),
           const SizedBox(height: 16),
           _buildConfirmationCard(),
-              const SizedBox(height: 32),
+          const SizedBox(height: 32),
 
           Row(
             children: [
@@ -937,7 +937,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             children: [
               Icon(Icons.info, color: AppTheme.primaryBlue),
               const SizedBox(width: 8),
-                Text(
+              Text(
                 'Informazioni Generali',
                 style: TextStyle(
                   fontSize: 18,
@@ -946,8 +946,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 ),
               ),
             ],
-              ),
-              const SizedBox(height: 16),
+          ),
+          const SizedBox(height: 16),
           _buildReviewItem('Titolo', 'Corso Platform Management in-place'),
           _buildReviewItem('Organizzazione', 'La mia Legal Entity'),
           _buildReviewItem(
@@ -969,7 +969,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             children: [
               Icon(Icons.camera_alt, color: AppTheme.primaryBlue),
               const SizedBox(width: 8),
-                Text(
+              Text(
                 'Media Real-time (0)',
                 style: TextStyle(
                   fontSize: 18,
@@ -978,8 +978,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 ),
               ),
             ],
-              ),
-              const SizedBox(height: 16),
+          ),
+          const SizedBox(height: 16),
           Text(
             'Nessun media generale allegato',
             style: TextStyle(color: AppTheme.textSecondary),
@@ -995,8 +995,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-              Row(
-                children: [
+          Row(
+            children: [
               Icon(Icons.people, color: AppTheme.primaryBlue),
               const SizedBox(width: 8),
               Text(
@@ -1009,19 +1009,19 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               ),
             ],
           ),
-                const SizedBox(height: 16),
-              Row(
-                children: [
+          const SizedBox(height: 16),
+          Row(
+            children: [
               CircleAvatar(
                 radius: 20,
                 backgroundImage: NetworkImage('https://via.placeholder.com/40'),
               ),
               const SizedBox(width: 12),
-                  Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                Text(
+                    Text(
                       'Giulia Rossi',
                       style: TextStyle(
                         fontSize: 16,
@@ -1034,14 +1034,14 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                       style: TextStyle(
                         fontSize: 14,
                         color: AppTheme.textSecondary,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
                 ),
               ),
             ],
-              ),
-              const SizedBox(height: 16),
+          ),
+          const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -1056,7 +1056,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               ],
             ),
           ),
-              const SizedBox(height: 16),
+          const SizedBox(height: 16),
           Text(
             'Media del Certificatore (2)',
             style: TextStyle(
@@ -1082,20 +1082,20 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     return LinkedInCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-              Row(
-                children: [
+        children: [
+          Row(
+            children: [
               Icon(Icons.warning, color: AppTheme.warningOrange),
-        const SizedBox(width: 8),
-        Text(
+              const SizedBox(width: 8),
+              Text(
                 'Conferma Invio',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: AppTheme.primaryBlack,
-          ),
-        ),
-      ],
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.primaryBlack,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 16),
           Text(
@@ -1111,16 +1111,16 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                   // Handle checkbox change
                 },
               ),
-                  Expanded(
+              Expanded(
                 child: Text(
                   'Confermo di aver verificato tutti i dettagli e di voler procedere con l\'invio della certificazione',
                   style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ],
           ),
+        ],
+      ),
     );
   }
 
@@ -1204,20 +1204,22 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
       builder: (context) => AlertDialog(
         content: Column(
           mainAxisSize: MainAxisSize.min,
-      children: [
+          children: [
             Icon(Icons.check_circle, color: AppTheme.successGreen, size: 64),
             const SizedBox(height: 16),
-        Text(
+            Text(
               AppLocalizations.of(context).getString('certification_sent'),
-          style: TextStyle(
+              style: TextStyle(
                 fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: AppTheme.primaryBlack,
-          ),
-        ),
+                fontWeight: FontWeight.bold,
+                color: AppTheme.primaryBlack,
+              ),
+            ),
             const SizedBox(height: 8),
             Text(
-              AppLocalizations.of(context).getString('certification_sent_success'),
+              AppLocalizations.of(
+                context,
+              ).getString('certification_sent_success'),
               textAlign: TextAlign.center,
               style: TextStyle(color: AppTheme.textSecondary),
             ),

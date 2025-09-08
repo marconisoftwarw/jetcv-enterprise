@@ -1,69 +1,25 @@
 import 'package:uuid/uuid.dart';
 
 // Enums based on DB schema
-enum CertificationStatus {
-  draft,
-  sent,
-  closed,
-}
+enum CertificationStatus { draft, sent, closed }
 
-enum CertificationUserStatus {
-  draft,
-  accepted,
-  rejected,
-}
+enum CertificationUserStatus { draft, accepted, rejected }
 
-enum CertificationCategoryType {
-  course,
-  workshop,
-  seminar,
-  exam,
-  other,
-}
+enum CertificationCategoryType { course, workshop, seminar, exam, other }
 
-enum CertificationInformationType {
-  text,
-  number,
-  date,
-  boolean,
-  file,
-}
+enum CertificationInformationType { text, number, date, boolean, file }
 
-enum CertificationInformationScope {
-  general,
-  user,
-}
+enum CertificationInformationScope { general, user }
 
-enum AcquisitionType {
-  manual,
-  automatic,
-  imported,
-}
+enum AcquisitionType { manual, automatic, imported }
 
-enum FileType {
-  image,
-  video,
-  document,
-  audio,
-}
+enum FileType { image, video, document, audio }
 
-enum Gender {
-  male,
-  female,
-  other,
-  prefer_not_to_say,
-}
+enum Gender { male, female, other, prefer_not_to_say }
 
-enum UserType {
-  individual,
-  organization,
-}
+enum UserType { individual, organization }
 
-enum CreatedBy {
-  user,
-  system,
-  admin,
-}
+enum CreatedBy { user, system, admin }
 
 // Main Certification model
 class CertificationDB {
@@ -110,13 +66,19 @@ class CertificationDB {
         orElse: () => CertificationStatus.draft,
       ),
       createdAt: DateTime.parse(json['created_at']),
-      updatedAt: json['updated_t'] != null ? DateTime.parse(json['updated_t']) : null,
+      updatedAt: json['updated_t'] != null
+          ? DateTime.parse(json['updated_t'])
+          : null,
       serialNumber: json['serial_number'] ?? '',
       idLocation: json['id_location'] ?? '',
       nUsers: json['n_users'] ?? 0,
       sentAt: json['sent_at'] != null ? DateTime.parse(json['sent_at']) : null,
-      draftAt: json['draft_at'] != null ? DateTime.parse(json['draft_at']) : null,
-      closedAt: json['closed_at'] != null ? DateTime.parse(json['closed_at']) : null,
+      draftAt: json['draft_at'] != null
+          ? DateTime.parse(json['draft_at'])
+          : null,
+      closedAt: json['closed_at'] != null
+          ? DateTime.parse(json['closed_at'])
+          : null,
       idCertificationCategory: json['id_certification_category'] ?? '',
     );
   }
@@ -166,7 +128,9 @@ class CertificationCategoryDB {
       idCertificationCategory: json['id_certification_category'] ?? '',
       name: json['name'] ?? '',
       createdAt: DateTime.parse(json['created_at']),
-      updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'])
+          : null,
       type: CertificationCategoryType.values.firstWhere(
         (e) => e.name == json['type'],
         orElse: () => CertificationCategoryType.other,
@@ -219,9 +183,11 @@ class CertificationInformationDB {
       name: json['name'] ?? '',
       order: json['order'],
       createdAt: DateTime.parse(json['created_at']),
-      updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'])
+          : null,
       label: json['label'] ?? '',
-      type: json['type'] != null 
+      type: json['type'] != null
           ? CertificationInformationType.values.firstWhere(
               (e) => e.name == json['type'],
               orElse: () => CertificationInformationType.text,
@@ -274,11 +240,14 @@ class CertificationInformationValueDB {
 
   factory CertificationInformationValueDB.fromJson(Map<String, dynamic> json) {
     return CertificationInformationValueDB(
-      idCertificationInformationValue: json['id_certification_information_value'] ?? 0,
+      idCertificationInformationValue:
+          json['id_certification_information_value'] ?? 0,
       idCertificationInformation: json['id_certification_information'] ?? '',
       value: json['value'],
       createdAt: DateTime.parse(json['created_at']),
-      updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'])
+          : null,
       idCertification: json['id_certification'],
       idCertificationUser: json['id_certification_user'],
     );
@@ -331,7 +300,9 @@ class CertificationMediaDB {
       idMediaHash: json['id_media_hash'] ?? '',
       idCertification: json['id_certification'] ?? '',
       createdAt: DateTime.parse(json['created_at']),
-      updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'])
+          : null,
       name: json['name'],
       description: json['description'],
       acquisitionType: AcquisitionType.values.firstWhere(
@@ -394,7 +365,9 @@ class CertificationUserDB {
       idCertification: json['id_certification'] ?? '',
       idUser: json['id_user'] ?? '',
       createdAt: DateTime.parse(json['created_at']),
-      updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'])
+          : null,
       status: CertificationUserStatus.values.firstWhere(
         (e) => e.name == json['status'],
         orElse: () => CertificationUserStatus.draft,
@@ -457,7 +430,9 @@ class CertifierDB {
       active: json['active'] ?? true,
       role: json['role'],
       createdAt: DateTime.parse(json['created_at']),
-      updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'])
+          : null,
       invitationToken: json['invitation_token'],
       kycPassed: json['kyc_passed'],
       idKycAttempt: json['id_kyc_attempt'],

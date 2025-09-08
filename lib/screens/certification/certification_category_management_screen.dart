@@ -16,10 +16,12 @@ class CertificationCategoryManagementScreen extends StatefulWidget {
   });
 
   @override
-  State<CertificationCategoryManagementScreen> createState() => _CertificationCategoryManagementScreenState();
+  State<CertificationCategoryManagementScreen> createState() =>
+      _CertificationCategoryManagementScreenState();
 }
 
-class _CertificationCategoryManagementScreenState extends State<CertificationCategoryManagementScreen> {
+class _CertificationCategoryManagementScreenState
+    extends State<CertificationCategoryManagementScreen> {
   final CertificationDBService _service = CertificationDBService();
   List<CertificationCategoryDB> _categories = [];
   bool _isLoading = true;
@@ -38,8 +40,10 @@ class _CertificationCategoryManagementScreenState extends State<CertificationCat
         _error = '';
       });
 
-      final categories = await _service.getCertificationCategoriesByLegalEntity(widget.idLegalEntity);
-      
+      final categories = await _service.getCertificationCategoriesByLegalEntity(
+        widget.idLegalEntity,
+      );
+
       setState(() {
         _categories = categories;
         _isLoading = false;
@@ -88,7 +92,9 @@ class _CertificationCategoryManagementScreenState extends State<CertificationCat
       context: context,
       builder: (context) => AlertDialog(
         title: Text(AppLocalizations.of(context).getString('delete')),
-        content: Text('Sei sicuro di voler eliminare la categoria "${category.name}"?'),
+        content: Text(
+          'Sei sicuro di voler eliminare la categoria "${category.name}"?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -104,9 +110,11 @@ class _CertificationCategoryManagementScreenState extends State<CertificationCat
 
     if (confirmed == true) {
       try {
-        await _service.deleteCertificationCategory(category.idCertificationCategory);
+        await _service.deleteCertificationCategory(
+          category.idCertificationCategory,
+        );
         _loadCategories();
-        
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -156,116 +164,118 @@ class _CertificationCategoryManagementScreenState extends State<CertificationCat
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _error.isNotEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 64, color: AppTheme.errorRed),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Errore nel caricamento',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primaryBlack,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _error,
+                    style: TextStyle(color: AppTheme.textSecondary),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  LinkedInButton(
+                    onPressed: _loadCategories,
+                    text: 'Riprova',
+                    variant: LinkedInButtonVariant.primary,
+                  ),
+                ],
+              ),
+            )
+          : _categories.isEmpty
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.category_outlined,
+                    size: 64,
+                    color: AppTheme.textSecondary,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Nessuna categoria disponibile',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primaryBlack,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Crea la tua prima categoria di certificazione',
+                    style: TextStyle(color: AppTheme.textSecondary),
+                  ),
+                  const SizedBox(height: 24),
+                  LinkedInButton(
+                    onPressed: _createCategory,
+                    text: 'Crea Categoria',
+                    icon: Icons.add,
+                    variant: LinkedInButtonVariant.primary,
+                  ),
+                ],
+              ),
+            )
+          : Column(
+              children: [
+                Padding(
+                  padding: EdgeInsets.all(isTablet ? 24 : 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Icon(
-                        Icons.error_outline,
-                        size: 64,
-                        color: AppTheme.errorRed,
-                      ),
-                      const SizedBox(height: 16),
                       Text(
-                        'Errore nel caricamento',
+                        'Categorie (${_categories.length})',
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: isTablet ? 20 : 18,
                           fontWeight: FontWeight.bold,
                           color: AppTheme.primaryBlack,
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        _error,
-                        style: TextStyle(color: AppTheme.textSecondary),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
                       LinkedInButton(
-                        onPressed: _loadCategories,
-                        text: 'Riprova',
+                        onPressed: _createCategory,
+                        text: 'Nuova Categoria',
+                        icon: Icons.add,
                         variant: LinkedInButtonVariant.primary,
                       ),
                     ],
                   ),
-                )
-              : _categories.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.category_outlined,
-                            size: 64,
-                            color: AppTheme.textSecondary,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Nessuna categoria disponibile',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.primaryBlack,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Crea la tua prima categoria di certificazione',
-                            style: TextStyle(color: AppTheme.textSecondary),
-                          ),
-                          const SizedBox(height: 24),
-                          LinkedInButton(
-                            onPressed: _createCategory,
-                            text: 'Crea Categoria',
-                            icon: Icons.add,
-                            variant: LinkedInButtonVariant.primary,
-                          ),
-                        ],
-                      ),
-                    )
-                  : Column(
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.all(isTablet ? 24 : 16),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Categorie (${_categories.length})',
-                                style: TextStyle(
-                                  fontSize: isTablet ? 20 : 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppTheme.primaryBlack,
-                                ),
-                              ),
-                              LinkedInButton(
-                                onPressed: _createCategory,
-                                text: 'Nuova Categoria',
-                                icon: Icons.add,
-                                variant: LinkedInButtonVariant.primary,
-                              ),
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          child: ListView.builder(
-                            padding: EdgeInsets.symmetric(horizontal: isTablet ? 24 : 16),
-                            itemCount: _categories.length,
-                            itemBuilder: (context, index) {
-                              final category = _categories[index];
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 16),
-                                child: _buildCategoryCard(category, l10n, isTablet),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isTablet ? 24 : 16,
                     ),
+                    itemCount: _categories.length,
+                    itemBuilder: (context, index) {
+                      final category = _categories[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: _buildCategoryCard(category, l10n, isTablet),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
     );
   }
 
-  Widget _buildCategoryCard(CertificationCategoryDB category, AppLocalizations l10n, bool isTablet) {
+  Widget _buildCategoryCard(
+    CertificationCategoryDB category,
+    AppLocalizations l10n,
+    bool isTablet,
+  ) {
     return LinkedInCard(
       child: Padding(
         padding: EdgeInsets.all(isTablet ? 20 : 16),
@@ -415,10 +425,12 @@ class CreateCertificationCategoryScreen extends StatefulWidget {
   });
 
   @override
-  State<CreateCertificationCategoryScreen> createState() => _CreateCertificationCategoryScreenState();
+  State<CreateCertificationCategoryScreen> createState() =>
+      _CreateCertificationCategoryScreenState();
 }
 
-class _CreateCertificationCategoryScreenState extends State<CreateCertificationCategoryScreen> {
+class _CreateCertificationCategoryScreenState
+    extends State<CreateCertificationCategoryScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _orderController = TextEditingController();
@@ -456,7 +468,9 @@ class _CreateCertificationCategoryScreenState extends State<CreateCertificationC
         createdAt: widget.category?.createdAt ?? DateTime.now(),
         updatedAt: DateTime.now(),
         type: _selectedType,
-        order: _orderController.text.isNotEmpty ? int.tryParse(_orderController.text) : null,
+        order: _orderController.text.isNotEmpty
+            ? int.tryParse(_orderController.text)
+            : null,
         idLegalEntity: widget.idLegalEntity,
       );
 
@@ -470,7 +484,11 @@ class _CreateCertificationCategoryScreenState extends State<CreateCertificationC
         Navigator.pop(context, true);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(widget.category != null ? 'Categoria aggiornata' : 'Categoria creata'),
+            content: Text(
+              widget.category != null
+                  ? 'Categoria aggiornata'
+                  : 'Categoria creata',
+            ),
             backgroundColor: AppTheme.successGreen,
           ),
         );

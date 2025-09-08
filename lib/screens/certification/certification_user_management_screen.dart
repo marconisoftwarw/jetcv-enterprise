@@ -16,10 +16,12 @@ class CertificationUserManagementScreen extends StatefulWidget {
   });
 
   @override
-  State<CertificationUserManagementScreen> createState() => _CertificationUserManagementScreenState();
+  State<CertificationUserManagementScreen> createState() =>
+      _CertificationUserManagementScreenState();
 }
 
-class _CertificationUserManagementScreenState extends State<CertificationUserManagementScreen> {
+class _CertificationUserManagementScreenState
+    extends State<CertificationUserManagementScreen> {
   final CertificationDBService _service = CertificationDBService();
   List<CertificationUserDB> _users = [];
   bool _isLoading = true;
@@ -38,8 +40,10 @@ class _CertificationUserManagementScreenState extends State<CertificationUserMan
         _error = '';
       });
 
-      final users = await _service.getCertificationUsersByCertification(widget.idCertification);
-      
+      final users = await _service.getCertificationUsersByCertification(
+        widget.idCertification,
+      );
+
       setState(() {
         _users = users;
         _isLoading = false;
@@ -56,9 +60,8 @@ class _CertificationUserManagementScreenState extends State<CertificationUserMan
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => AddCertificationUserScreen(
-          idCertification: widget.idCertification,
-        ),
+        builder: (context) =>
+            AddCertificationUserScreen(idCertification: widget.idCertification),
       ),
     );
 
@@ -88,7 +91,9 @@ class _CertificationUserManagementScreenState extends State<CertificationUserMan
       context: context,
       builder: (context) => AlertDialog(
         title: Text(AppLocalizations.of(context).getString('delete')),
-        content: Text('Sei sicuro di voler rimuovere questo utente dalla certificazione?'),
+        content: Text(
+          'Sei sicuro di voler rimuovere questo utente dalla certificazione?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -106,7 +111,7 @@ class _CertificationUserManagementScreenState extends State<CertificationUserMan
       try {
         await _service.deleteCertificationUser(user.idCertificationUser);
         _loadUsers();
-        
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -156,116 +161,118 @@ class _CertificationUserManagementScreenState extends State<CertificationUserMan
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _error.isNotEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 64, color: AppTheme.errorRed),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Errore nel caricamento',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primaryBlack,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _error,
+                    style: TextStyle(color: AppTheme.textSecondary),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  LinkedInButton(
+                    onPressed: _loadUsers,
+                    text: 'Riprova',
+                    variant: LinkedInButtonVariant.primary,
+                  ),
+                ],
+              ),
+            )
+          : _users.isEmpty
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.people_outline,
+                    size: 64,
+                    color: AppTheme.textSecondary,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Nessun utente aggiunto',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primaryBlack,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Aggiungi utenti alla certificazione',
+                    style: TextStyle(color: AppTheme.textSecondary),
+                  ),
+                  const SizedBox(height: 24),
+                  LinkedInButton(
+                    onPressed: _addUser,
+                    text: 'Aggiungi Utente',
+                    icon: Icons.add,
+                    variant: LinkedInButtonVariant.primary,
+                  ),
+                ],
+              ),
+            )
+          : Column(
+              children: [
+                Padding(
+                  padding: EdgeInsets.all(isTablet ? 24 : 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Icon(
-                        Icons.error_outline,
-                        size: 64,
-                        color: AppTheme.errorRed,
-                      ),
-                      const SizedBox(height: 16),
                       Text(
-                        'Errore nel caricamento',
+                        'Utenti (${_users.length})',
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: isTablet ? 20 : 18,
                           fontWeight: FontWeight.bold,
                           color: AppTheme.primaryBlack,
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        _error,
-                        style: TextStyle(color: AppTheme.textSecondary),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
                       LinkedInButton(
-                        onPressed: _loadUsers,
-                        text: 'Riprova',
+                        onPressed: _addUser,
+                        text: 'Aggiungi Utente',
+                        icon: Icons.add,
                         variant: LinkedInButtonVariant.primary,
                       ),
                     ],
                   ),
-                )
-              : _users.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.people_outline,
-                            size: 64,
-                            color: AppTheme.textSecondary,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Nessun utente aggiunto',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.primaryBlack,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Aggiungi utenti alla certificazione',
-                            style: TextStyle(color: AppTheme.textSecondary),
-                          ),
-                          const SizedBox(height: 24),
-                          LinkedInButton(
-                            onPressed: _addUser,
-                            text: 'Aggiungi Utente',
-                            icon: Icons.add,
-                            variant: LinkedInButtonVariant.primary,
-                          ),
-                        ],
-                      ),
-                    )
-                  : Column(
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.all(isTablet ? 24 : 16),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Utenti (${_users.length})',
-                                style: TextStyle(
-                                  fontSize: isTablet ? 20 : 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppTheme.primaryBlack,
-                                ),
-                              ),
-                              LinkedInButton(
-                                onPressed: _addUser,
-                                text: 'Aggiungi Utente',
-                                icon: Icons.add,
-                                variant: LinkedInButtonVariant.primary,
-                              ),
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          child: ListView.builder(
-                            padding: EdgeInsets.symmetric(horizontal: isTablet ? 24 : 16),
-                            itemCount: _users.length,
-                            itemBuilder: (context, index) {
-                              final user = _users[index];
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 16),
-                                child: _buildUserCard(user, l10n, isTablet),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isTablet ? 24 : 16,
                     ),
+                    itemCount: _users.length,
+                    itemBuilder: (context, index) {
+                      final user = _users[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: _buildUserCard(user, l10n, isTablet),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
     );
   }
 
-  Widget _buildUserCard(CertificationUserDB user, AppLocalizations l10n, bool isTablet) {
+  Widget _buildUserCard(
+    CertificationUserDB user,
+    AppLocalizations l10n,
+    bool isTablet,
+  ) {
     return LinkedInCard(
       child: Padding(
         padding: EdgeInsets.all(isTablet ? 20 : 16),
@@ -273,7 +280,9 @@ class _CertificationUserManagementScreenState extends State<CertificationUserMan
           children: [
             CircleAvatar(
               radius: isTablet ? 30 : 24,
-              backgroundColor: _getStatusColor(user.status).withValues(alpha: 0.1),
+              backgroundColor: _getStatusColor(
+                user.status,
+              ).withValues(alpha: 0.1),
               child: Icon(
                 Icons.person,
                 color: _getStatusColor(user.status),
@@ -310,7 +319,9 @@ class _CertificationUserManagementScreenState extends State<CertificationUserMan
                           vertical: isTablet ? 4 : 2,
                         ),
                         decoration: BoxDecoration(
-                          color: _getStatusColor(user.status).withValues(alpha: 0.1),
+                          color: _getStatusColor(
+                            user.status,
+                          ).withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
@@ -419,10 +430,12 @@ class AddCertificationUserScreen extends StatefulWidget {
   });
 
   @override
-  State<AddCertificationUserScreen> createState() => _AddCertificationUserScreenState();
+  State<AddCertificationUserScreen> createState() =>
+      _AddCertificationUserScreenState();
 }
 
-class _AddCertificationUserScreenState extends State<AddCertificationUserScreen> {
+class _AddCertificationUserScreenState
+    extends State<AddCertificationUserScreen> {
   final _formKey = GlobalKey<FormState>();
   final _userIdController = TextEditingController();
   final _otpIdController = TextEditingController();
@@ -464,8 +477,12 @@ class _AddCertificationUserScreenState extends State<AddCertificationUserScreen>
         createdAt: widget.user?.createdAt ?? DateTime.now(),
         updatedAt: DateTime.now(),
         status: _selectedStatus,
-        serialNumber: widget.user?.serialNumber ?? 'SN-${DateTime.now().millisecondsSinceEpoch}',
-        rejectionReason: _rejectionReasonController.text.trim().isNotEmpty ? _rejectionReasonController.text.trim() : null,
+        serialNumber:
+            widget.user?.serialNumber ??
+            'SN-${DateTime.now().millisecondsSinceEpoch}',
+        rejectionReason: _rejectionReasonController.text.trim().isNotEmpty
+            ? _rejectionReasonController.text.trim()
+            : null,
         idOtp: _otpIdController.text.trim(),
       );
 
@@ -479,7 +496,9 @@ class _AddCertificationUserScreenState extends State<AddCertificationUserScreen>
         Navigator.pop(context, true);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(widget.user != null ? 'Utente aggiornato' : 'Utente aggiunto'),
+            content: Text(
+              widget.user != null ? 'Utente aggiornato' : 'Utente aggiunto',
+            ),
             backgroundColor: AppTheme.successGreen,
           ),
         );
@@ -614,7 +633,7 @@ class _AddCertificationUserScreenState extends State<AddCertificationUserScreen>
                   hintText: 'Spiega perché è stata rifiutata',
                   maxLines: 3,
                   validator: (value) {
-                    if (_selectedStatus == CertificationUserStatus.rejected && 
+                    if (_selectedStatus == CertificationUserStatus.rejected &&
                         (value == null || value.isEmpty)) {
                       return 'Inserisci il motivo del rifiuto';
                     }

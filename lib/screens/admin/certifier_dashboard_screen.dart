@@ -5,6 +5,7 @@ import '../../providers/auth_provider.dart';
 import '../../models/certifier.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/linkedin_metric_card.dart';
+import '../../services/certification_edge_service.dart';
 import 'invite_certifier_screen.dart';
 
 class CertifierDashboardScreen extends StatefulWidget {

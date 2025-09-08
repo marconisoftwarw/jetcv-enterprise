@@ -18,10 +18,12 @@ class CertificationMediaManagementScreen extends StatefulWidget {
   });
 
   @override
-  State<CertificationMediaManagementScreen> createState() => _CertificationMediaManagementScreenState();
+  State<CertificationMediaManagementScreen> createState() =>
+      _CertificationMediaManagementScreenState();
 }
 
-class _CertificationMediaManagementScreenState extends State<CertificationMediaManagementScreen> {
+class _CertificationMediaManagementScreenState
+    extends State<CertificationMediaManagementScreen> {
   final CertificationDBService _service = CertificationDBService();
   List<CertificationMediaDB> _medias = [];
   bool _isLoading = true;
@@ -40,8 +42,10 @@ class _CertificationMediaManagementScreenState extends State<CertificationMediaM
         _error = '';
       });
 
-      final medias = await _service.getCertificationMediasByCertification(widget.idCertification);
-      
+      final medias = await _service.getCertificationMediasByCertification(
+        widget.idCertification,
+      );
+
       setState(() {
         _medias = medias;
         _isLoading = false;
@@ -108,7 +112,7 @@ class _CertificationMediaManagementScreenState extends State<CertificationMediaM
       try {
         await _service.deleteCertificationMedia(media.idCertificationMedia);
         _loadMedias();
-        
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -158,119 +162,121 @@ class _CertificationMediaManagementScreenState extends State<CertificationMediaM
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _error.isNotEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 64, color: AppTheme.errorRed),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Errore nel caricamento',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primaryBlack,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _error,
+                    style: TextStyle(color: AppTheme.textSecondary),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  LinkedInButton(
+                    onPressed: _loadMedias,
+                    text: 'Riprova',
+                    variant: LinkedInButtonVariant.primary,
+                  ),
+                ],
+              ),
+            )
+          : _medias.isEmpty
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.photo_library_outlined,
+                    size: 64,
+                    color: AppTheme.textSecondary,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Nessun media disponibile',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primaryBlack,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Aggiungi foto e video alla certificazione',
+                    style: TextStyle(color: AppTheme.textSecondary),
+                  ),
+                  const SizedBox(height: 24),
+                  LinkedInButton(
+                    onPressed: _addMedia,
+                    text: 'Aggiungi Media',
+                    icon: Icons.add,
+                    variant: LinkedInButtonVariant.primary,
+                  ),
+                ],
+              ),
+            )
+          : Column(
+              children: [
+                Padding(
+                  padding: EdgeInsets.all(isTablet ? 24 : 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Icon(
-                        Icons.error_outline,
-                        size: 64,
-                        color: AppTheme.errorRed,
-                      ),
-                      const SizedBox(height: 16),
                       Text(
-                        'Errore nel caricamento',
+                        'Media (${_medias.length})',
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: isTablet ? 20 : 18,
                           fontWeight: FontWeight.bold,
                           color: AppTheme.primaryBlack,
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        _error,
-                        style: TextStyle(color: AppTheme.textSecondary),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
                       LinkedInButton(
-                        onPressed: _loadMedias,
-                        text: 'Riprova',
+                        onPressed: _addMedia,
+                        text: 'Aggiungi Media',
+                        icon: Icons.add,
                         variant: LinkedInButtonVariant.primary,
                       ),
                     ],
                   ),
-                )
-              : _medias.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.photo_library_outlined,
-                            size: 64,
-                            color: AppTheme.textSecondary,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Nessun media disponibile',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.primaryBlack,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Aggiungi foto e video alla certificazione',
-                            style: TextStyle(color: AppTheme.textSecondary),
-                          ),
-                          const SizedBox(height: 24),
-                          LinkedInButton(
-                            onPressed: _addMedia,
-                            text: 'Aggiungi Media',
-                            icon: Icons.add,
-                            variant: LinkedInButtonVariant.primary,
-                          ),
-                        ],
-                      ),
-                    )
-                  : Column(
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.all(isTablet ? 24 : 16),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Media (${_medias.length})',
-                                style: TextStyle(
-                                  fontSize: isTablet ? 20 : 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppTheme.primaryBlack,
-                                ),
-                              ),
-                              LinkedInButton(
-                                onPressed: _addMedia,
-                                text: 'Aggiungi Media',
-                                icon: Icons.add,
-                                variant: LinkedInButtonVariant.primary,
-                              ),
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          child: GridView.builder(
-                            padding: EdgeInsets.symmetric(horizontal: isTablet ? 24 : 16),
-                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: isTablet ? 3 : 2,
-                              childAspectRatio: 1.0,
-                              crossAxisSpacing: 16,
-                              mainAxisSpacing: 16,
-                            ),
-                            itemCount: _medias.length,
-                            itemBuilder: (context, index) {
-                              final media = _medias[index];
-                              return _buildMediaCard(media, l10n, isTablet);
-                            },
-                          ),
-                        ),
-                      ],
+                ),
+                Expanded(
+                  child: GridView.builder(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isTablet ? 24 : 16,
                     ),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: isTablet ? 3 : 2,
+                      childAspectRatio: 1.0,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                    ),
+                    itemCount: _medias.length,
+                    itemBuilder: (context, index) {
+                      final media = _medias[index];
+                      return _buildMediaCard(media, l10n, isTablet);
+                    },
+                  ),
+                ),
+              ],
+            ),
     );
   }
 
-  Widget _buildMediaCard(CertificationMediaDB media, AppLocalizations l10n, bool isTablet) {
+  Widget _buildMediaCard(
+    CertificationMediaDB media,
+    AppLocalizations l10n,
+    bool isTablet,
+  ) {
     return LinkedInCard(
       child: InkWell(
         onTap: () => _editMedia(media),
@@ -344,7 +350,11 @@ class _CertificationMediaManagementScreenState extends State<CertificationMediaM
                       value: 'edit',
                       child: Row(
                         children: [
-                          Icon(Icons.edit, color: AppTheme.primaryBlue, size: 16),
+                          Icon(
+                            Icons.edit,
+                            color: AppTheme.primaryBlue,
+                            size: 16,
+                          ),
                           const SizedBox(width: 8),
                           Text('Modifica'),
                         ],
@@ -354,7 +364,11 @@ class _CertificationMediaManagementScreenState extends State<CertificationMediaM
                       value: 'delete',
                       child: Row(
                         children: [
-                          Icon(Icons.delete, color: AppTheme.errorRed, size: 16),
+                          Icon(
+                            Icons.delete,
+                            color: AppTheme.errorRed,
+                            size: 16,
+                          ),
                           const SizedBox(width: 8),
                           Text('Elimina'),
                         ],
@@ -379,32 +393,16 @@ class _CertificationMediaManagementScreenState extends State<CertificationMediaM
             'https://via.placeholder.com/200',
             fit: BoxFit.cover,
             errorBuilder: (context, error, stackTrace) {
-              return Icon(
-                Icons.image,
-                size: 48,
-                color: AppTheme.textSecondary,
-              );
+              return Icon(Icons.image, size: 48, color: AppTheme.textSecondary);
             },
           ),
         );
       case FileType.video:
-        return Icon(
-          Icons.videocam,
-          size: 48,
-          color: AppTheme.primaryBlue,
-        );
+        return Icon(Icons.videocam, size: 48, color: AppTheme.primaryBlue);
       case FileType.document:
-        return Icon(
-          Icons.description,
-          size: 48,
-          color: AppTheme.warningOrange,
-        );
+        return Icon(Icons.description, size: 48, color: AppTheme.warningOrange);
       case FileType.audio:
-        return Icon(
-          Icons.audiotrack,
-          size: 48,
-          color: AppTheme.successGreen,
-        );
+        return Icon(Icons.audiotrack, size: 48, color: AppTheme.successGreen);
     }
   }
 
@@ -459,10 +457,12 @@ class AddCertificationMediaScreen extends StatefulWidget {
   });
 
   @override
-  State<AddCertificationMediaScreen> createState() => _AddCertificationMediaScreenState();
+  State<AddCertificationMediaScreen> createState() =>
+      _AddCertificationMediaScreenState();
 }
 
-class _AddCertificationMediaScreenState extends State<AddCertificationMediaScreen> {
+class _AddCertificationMediaScreenState
+    extends State<AddCertificationMediaScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
@@ -492,7 +492,7 @@ class _AddCertificationMediaScreenState extends State<AddCertificationMediaScree
   Future<void> _pickFile() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    
+
     if (pickedFile != null) {
       setState(() {
         _selectedFile = File(pickedFile.path);
@@ -519,15 +519,19 @@ class _AddCertificationMediaScreenState extends State<AddCertificationMediaScree
     try {
       // TODO: Upload file to storage and get URL
       final mediaUrl = 'https://via.placeholder.com/200';
-      
+
       final media = CertificationMediaDB(
         idCertificationMedia: widget.media?.idCertificationMedia ?? '',
         idMediaHash: 'hash_${DateTime.now().millisecondsSinceEpoch}',
         idCertification: widget.idCertification,
         createdAt: widget.media?.createdAt ?? DateTime.now(),
         updatedAt: DateTime.now(),
-        name: _nameController.text.trim().isNotEmpty ? _nameController.text.trim() : null,
-        description: _descriptionController.text.trim().isNotEmpty ? _descriptionController.text.trim() : null,
+        name: _nameController.text.trim().isNotEmpty
+            ? _nameController.text.trim()
+            : null,
+        description: _descriptionController.text.trim().isNotEmpty
+            ? _descriptionController.text.trim()
+            : null,
         acquisitionType: _selectedAcquisitionType,
         capturedAt: widget.media?.capturedAt ?? DateTime.now(),
         idLocation: null, // TODO: Get from current location
@@ -544,7 +548,9 @@ class _AddCertificationMediaScreenState extends State<AddCertificationMediaScree
         Navigator.pop(context, true);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(widget.media != null ? 'Media aggiornato' : 'Media aggiunto'),
+            content: Text(
+              widget.media != null ? 'Media aggiornato' : 'Media aggiunto',
+            ),
             backgroundColor: AppTheme.successGreen,
           ),
         );
