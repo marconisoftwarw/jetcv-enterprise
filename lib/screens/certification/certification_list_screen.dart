@@ -113,7 +113,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
       {
         'title': 'Certificazione Flutter Developer',
         'organization': 'TechCorp Academy',
-        'description': 'Certificazione avanzata per sviluppatori Flutter',
+              'description': 'Certificazione avanzata ',
         'status': l10n.getString('completed'),
         'date': '22/7/2025',
         'certifiedCount': 3,
@@ -127,7 +127,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
       {
         'title': 'Certificazione UX/UI Design',
         'organization': 'Design Institute',
-        'description': 'Certificazione per designer digitali',
+        'description': 'Certificazione avanzata ',
         'status': l10n.getString('completed'),
         'date': '7/7/2025',
         'certifiedCount': 2,
@@ -170,35 +170,35 @@ class _CertificationListScreenState extends State<CertificationListScreen>
     return Center(
       child: Padding(
         padding: EdgeInsets.all(isTablet ? 32 : 16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
               Icons.edit_note,
               size: isTablet ? 80 : 64,
               color: AppTheme.textSecondary,
             ),
             SizedBox(height: isTablet ? 24 : 16),
-            Text(
+                        Text(
               l10n.getString('no_drafts_available'),
-              style: TextStyle(
+                          style: TextStyle(
                 fontSize: isTablet ? 22 : 18,
                 fontWeight: FontWeight.w600,
-                color: AppTheme.primaryBlack,
-              ),
+                            color: AppTheme.primaryBlack,
+                          ),
               textAlign: TextAlign.center,
-            ),
+                        ),
             SizedBox(height: isTablet ? 12 : 8),
-            Text(
+                        Text(
               l10n.getString('drafts_will_appear_here'),
-              style: TextStyle(
+                          style: TextStyle(
                 color: AppTheme.textSecondary,
                 fontSize: isTablet ? 16 : 14,
               ),
               textAlign: TextAlign.center,
-            ),
-          ],
-        ),
+                        ),
+                      ],
+                    ),
       ),
     );
   }
@@ -210,24 +210,25 @@ class _CertificationListScreenState extends State<CertificationListScreen>
   ) {
     return LinkedInCard(
       child: Padding(
-        padding: EdgeInsets.all(isTablet ? 20 : 16),
+        padding: EdgeInsets.all(isTablet ? 12 : 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Row(
               children: [
                 Container(
-                  width: isTablet ? 80 : 60,
-                  height: isTablet ? 80 : 60,
+                  width: isTablet ? 50 : 40,
+                  height: isTablet ? 50 : 40,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(6),
                     image: DecorationImage(
                       image: NetworkImage(cert['image']),
                       fit: BoxFit.cover,
                     ),
                   ),
                 ),
-                SizedBox(width: isTablet ? 20 : 16),
+                SizedBox(width: isTablet ? 12 : 8),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -238,11 +239,11 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                             child: Text(
                               cert['title'],
                               style: TextStyle(
-                                fontSize: isTablet ? 20 : 18,
+                                fontSize: isTablet ? 16 : 14,
                                 fontWeight: FontWeight.bold,
                                 color: AppTheme.primaryBlack,
                               ),
-                              maxLines: 2,
+                              maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -268,22 +269,22 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                           ),
                         ],
                       ),
-                      SizedBox(height: isTablet ? 6 : 4),
+                      SizedBox(height: isTablet ? 4 : 2),
                       Text(
                         cert['organization'],
                         style: TextStyle(
-                          fontSize: isTablet ? 16 : 14,
+                          fontSize: isTablet ? 12 : 10,
                           color: AppTheme.textSecondary,
                         ),
                       ),
-                      SizedBox(height: isTablet ? 10 : 8),
+                      SizedBox(height: isTablet ? 4 : 2),
                       Text(
                         cert['description'],
                         style: TextStyle(
-                          fontSize: isTablet ? 16 : 14,
+                          fontSize: isTablet ? 12 : 10,
                           color: AppTheme.primaryBlack,
                         ),
-                        maxLines: 2,
+                        maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],
@@ -296,40 +297,40 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                 ),
               ],
             ),
-            SizedBox(height: isTablet ? 20 : 16),
+            SizedBox(height: isTablet ? 8 : 4),
             Row(
               children: [
                 Text(
                   '${l10n.getString('certified')}:',
                   style: TextStyle(
-                    fontSize: isTablet ? 16 : 14,
+                    fontSize: isTablet ? 12 : 10,
                     color: AppTheme.textSecondary,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                SizedBox(width: isTablet ? 12 : 8),
+                SizedBox(width: isTablet ? 8 : 6),
                 ...(cert['avatars'] as List<String>).map((avatar) {
                   return Padding(
-                    padding: EdgeInsets.only(right: isTablet ? 6 : 4),
+                    padding: EdgeInsets.only(right: isTablet ? 2 : 1),
                     child: CircleAvatar(
-                      radius: isTablet ? 16 : 12,
+                      radius: isTablet ? 10 : 8,
                       backgroundImage: NetworkImage(avatar),
                     ),
                   );
                 }).toList(),
                 const Spacer(),
-                Row(
-                  children: [
+              Row(
+                children: [
                     Icon(
                       Icons.calendar_today,
-                      size: isTablet ? 18 : 16,
+                      size: isTablet ? 14 : 12,
                       color: AppTheme.textSecondary,
                     ),
-                    SizedBox(width: isTablet ? 6 : 4),
+                    SizedBox(width: isTablet ? 2 : 1),
                     Text(
                       cert['date'],
                       style: TextStyle(
-                        fontSize: isTablet ? 16 : 14,
+                        fontSize: isTablet ? 12 : 10,
                         color: AppTheme.textSecondary,
                       ),
                     ),

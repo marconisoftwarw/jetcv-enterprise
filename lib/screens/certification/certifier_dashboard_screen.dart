@@ -181,7 +181,7 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
       {
         'title': 'Certificazione Flutter Developer',
         'organization': 'TechCorp Academy',
-        'description': 'Certificazione avanzata per sviluppatori Flutter',
+        'description': 'Certificazione avanzata ',
         'status': 'Completata',
         'date': '22/7/2025',
         'certifiedCount': 3,
@@ -195,7 +195,7 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
       {
         'title': 'Certificazione UX/UI Design',
         'organization': 'Design Institute',
-        'description': 'Certificazione per designer digitali',
+                'description': 'Certificazione avanzata ',
         'status': 'Completata',
         'date': '7/7/2025',
         'certifiedCount': 2,
