@@ -8,6 +8,7 @@ import '../../widgets/glass_card.dart';
 
 import 'create_legal_entity_screen.dart';
 import 'legal_entity_list_screen.dart';
+import '../certification/certifier_dashboard_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -15,7 +16,6 @@ class AdminDashboardScreen extends StatefulWidget {
   @override
   State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
 }
-
 
 class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   int _selectedIndex = 0;
@@ -56,9 +56,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           // Sidebar Navigation
           Container(
             decoration: BoxDecoration(
-              color: AppTheme.darkCharcoal,
+              color: AppTheme.pureWhite,
               border: Border(
-                right: BorderSide(color: AppTheme.primaryBlack, width: 1),
+                right: BorderSide(color: AppTheme.borderGrey, width: 1),
               ),
             ),
             child: NavigationRail(
@@ -69,7 +69,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 });
               },
               labelType: NavigationRailLabelType.all,
-              backgroundColor: AppTheme.darkCharcoal,
+              backgroundColor: AppTheme.pureWhite,
               selectedIconTheme: IconThemeData(color: AppTheme.accentGreen),
               unselectedIconTheme: IconThemeData(color: AppTheme.primaryBlack),
               selectedLabelTextStyle: TextStyle(
@@ -597,6 +597,62 @@ class _DashboardContent extends StatelessWidget {
                       isHoverable: true,
                       child: InkWell(
                         onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const CertifierDashboardScreen(),
+                            ),
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(16),
+                        child: Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  gradient: AppTheme.accentGradient,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Icon(
+                                  Icons.verified_user,
+                                  color: AppTheme.pureWhite,
+                                  size: 32,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'Certificazioni',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.primaryBlack,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Gestisci e crea certificazioni',
+                                style: TextStyle(
+                                  color: AppTheme.primaryBlack,
+                                  fontSize: 14,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: GlassCard(
+                      isHoverable: true,
+                      child: InkWell(
+                        onTap: () {
                           // Navigate to user management
                         },
                         borderRadius: BorderRadius.circular(16),
@@ -641,7 +697,13 @@ class _DashboardContent extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                ],
+              ),
+
+              const SizedBox(height: 16),
+
+              Row(
+                children: [
                   Expanded(
                     child: GlassCard(
                       isHoverable: true,
@@ -679,6 +741,56 @@ class _DashboardContent extends StatelessWidget {
                               const SizedBox(height: 8),
                               Text(
                                 'Invite new users to join the platform',
+                                style: TextStyle(
+                                  color: AppTheme.primaryBlack,
+                                  fontSize: 14,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: GlassCard(
+                      isHoverable: true,
+                      child: InkWell(
+                        onTap: () {
+                          // Analytics placeholder
+                        },
+                        borderRadius: BorderRadius.circular(16),
+                        child: Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  gradient: AppTheme.accentGradient,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Icon(
+                                  Icons.analytics,
+                                  color: AppTheme.pureWhite,
+                                  size: 32,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'Analytics',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.primaryBlack,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'View platform analytics',
                                 style: TextStyle(
                                   color: AppTheme.primaryBlack,
                                   fontSize: 14,

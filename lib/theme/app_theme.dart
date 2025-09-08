@@ -119,6 +119,7 @@ class AppTheme {
   static Color get lightGray => _lightGray;
   static Color get mediumGray => _mediumGray;
   static Color get darkGray => _darkGray;
+  static Color get backgroundGrey => _offWhite;
 
   static Color get glassDark => _glassDark;
   static Color get glassMedium => _glassMedium;

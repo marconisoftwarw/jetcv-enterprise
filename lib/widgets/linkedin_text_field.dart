@@ -4,6 +4,7 @@ import '../theme/app_theme.dart';
 class LinkedInTextField extends StatelessWidget {
   final String? label;
   final String? hint;
+  final String? hintText;
   final String? initialValue;
   final TextEditingController? controller;
   final TextInputType? keyboardType;
@@ -27,6 +28,7 @@ class LinkedInTextField extends StatelessWidget {
     super.key,
     this.label,
     this.hint,
+    this.hintText,
     this.initialValue,
     this.controller,
     this.keyboardType,
@@ -77,7 +79,7 @@ class LinkedInTextField extends StatelessWidget {
           expands: expands,
           style: AppTheme.body1,
           decoration: InputDecoration(
-            hintText: hint,
+            hintText: hintText ?? hint,
             hintStyle: AppTheme.body1,
             prefixIcon: prefixIcon != null
                 ? Padding(

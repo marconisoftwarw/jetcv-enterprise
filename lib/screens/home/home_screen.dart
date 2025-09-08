@@ -99,9 +99,9 @@ class _HomeScreenState extends State<HomeScreen> {
       case 0:
         return const _DashboardContent();
       case 1:
-        return const CertificationListScreen();
+        return const Center(child: Text('My Company'));
       case 2:
-        return const Center(child: Text('Certificazioni'));
+        return const CertificationListScreen();
       case 3:
         return const Center(child: Text('Profilo'));
       case 4:

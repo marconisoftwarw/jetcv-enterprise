@@ -1,25 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../models/certification.dart';
-import '../../services/certification_service.dart';
-import '../../providers/auth_provider.dart';
-import '../../l10n/app_localizations.dart';
+import '../../theme/app_theme.dart';
 import '../../widgets/linkedin_button.dart';
 import '../../widgets/linkedin_card.dart';
-import '../../widgets/linkedin_text_field.dart';
-import '../../theme/app_theme.dart';
-import '../../config/app_config.dart';
 import 'create_certification_screen.dart';
 
-class CertificationListScreen extends StatefulWidget {
-  const CertificationListScreen({super.key});
+class CertifierDashboardScreen extends StatefulWidget {
+  const CertifierDashboardScreen({super.key});
 
   @override
-  State<CertificationListScreen> createState() =>
-      _CertificationListScreenState();
+  State<CertifierDashboardScreen> createState() =>
+      _CertifierDashboardScreenState();
 }
 
-class _CertificationListScreenState extends State<CertificationListScreen>
+class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   int _selectedTabIndex = 0;
@@ -75,10 +68,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [
-          _buildIssuedCertificationsTab(),
-          _buildDraftsTab(),
-        ],
+        children: [_buildIssuedCertificationsTab(), _buildDraftsTab()],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
@@ -147,11 +137,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.edit_note,
-            size: 64,
-            color: AppTheme.textSecondary,
-          ),
+          Icon(Icons.edit_note, size: 64, color: AppTheme.textSecondary),
           const SizedBox(height: 16),
           Text(
             'Nessuna bozza disponibile',
@@ -164,9 +150,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
           const SizedBox(height: 8),
           Text(
             'Le tue bozze e certificazioni in corso appariranno qui',
-            style: TextStyle(
-              color: AppTheme.textSecondary,
-            ),
+            style: TextStyle(color: AppTheme.textSecondary),
           ),
         ],
       ),
@@ -259,10 +243,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
             children: [
               Text(
                 'Certificati:',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: AppTheme.textSecondary,
-                ),
+                style: TextStyle(fontSize: 14, color: AppTheme.textSecondary),
               ),
               const SizedBox(width: 8),
               ...(cert['avatars'] as List<String>).map((avatar) {

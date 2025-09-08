@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../models/certification.dart';
-import '../../models/user.dart';
-import '../../providers/auth_provider.dart';
-import '../../services/certification_service.dart';
-import '../../widgets/neon_button.dart';
-import '../../widgets/neon_text_field.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 import '../../theme/app_theme.dart';
-import '../../l10n/app_localizations.dart';
-import '../../config/app_config.dart';
+import '../../widgets/linkedin_button.dart';
+import '../../widgets/linkedin_card.dart';
+import '../../widgets/linkedin_text_field.dart';
 
 class CreateCertificationScreen extends StatefulWidget {
   const CreateCertificationScreen({super.key});
@@ -18,630 +14,1142 @@ class CreateCertificationScreen extends StatefulWidget {
       _CreateCertificationScreenState();
 }
 
-// Route guard to ensure authentication
-class CreateCertificationScreenRoute extends StatefulWidget {
-  final Widget child;
-
-  const CreateCertificationScreenRoute({super.key, required this.child});
-
-  @override
-  State<CreateCertificationScreenRoute> createState() =>
-      _CreateCertificationScreenRouteState();
-}
-
-class _CreateCertificationScreenRouteState
-    extends State<CreateCertificationScreenRoute> {
-  bool _isChecking = false;
-
-  @override
-  void initState() {
-    super.initState();
-    // Force authentication check on init
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkAuth();
-    });
-  }
-
-  Future<void> _checkAuth() async {
-    final authProvider = context.read<AuthProvider>();
-
-    setState(() {
-      _isChecking = true;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // Rimuovi il controllo di autenticazione - vai direttamente al child
-    return widget.child;
-  }
-}
-
 class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
+  int _currentStep = 0;
+  final PageController _pageController = PageController();
+
+  // Form data
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
-  final _codeController = TextEditingController();
-  final _detailController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final _resultController = TextEditingController();
+  String _selectedActivityType = 'Corso Specifico';
+  List<File> _mediaFiles = [];
 
-  String _selectedType = 'Standard';
-  List<String> _media = [];
-  String? _location;
-  List<String> _attachments = [];
-  List<String> _users = [];
-  bool _isLoading = false;
-  bool _isOffline = false;
-
-  final CertificationService _certificationService = CertificationService();
-
-  @override
-  void initState() {
-    super.initState();
-    _getCurrentLocation();
-    // Rimuovi refresh autenticazione - non necessaria
-  }
-
-  // Rimossi metodi di autenticazione - non più necessari
+  final List<String> _activityTypes = [
+    'Corso Specifico',
+    'Workshop',
+    'Seminario',
+    'Formazione Online',
+    'Esame',
+    'Altro',
+  ];
 
   @override
   void dispose() {
     _titleController.dispose();
-    _codeController.dispose();
-    _detailController.dispose();
     _descriptionController.dispose();
-    _resultController.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
-  Future<void> _getCurrentLocation() async {
-    try {
-      final location = await _certificationService.getCurrentLocation();
-      if (location != null) {
-        setState(() {
-          _location =
-              '${location.latitude.toStringAsFixed(6)}, ${location.longitude.toStringAsFixed(6)}';
-        });
-      }
-    } catch (e) {
-      print('Error getting location: $e');
-    }
-  }
-
-  Future<void> _captureMedia(String type) async {
-    try {
-      final media = await _certificationService.captureMedia(type);
-      if (media != null) {
-        setState(() {
-          _media.add(media.toString());
-        });
-      }
-    } catch (e) {
-      print('Error capturing media: $e');
-    }
-  }
-
-  Future<void> _addAttachment() async {
-    try {
-      // Per ora, simuliamo l'aggiunta di un allegato
-      final attachment =
-          'attachment_${DateTime.now().millisecondsSinceEpoch}.txt';
-
-      setState(() {
-        _attachments.add(attachment);
-      });
-    } catch (e) {
-      print('Error adding attachment: $e');
-    }
-  }
-
-  Future<void> _addUser() async {
-    // Per ora, aggiungiamo un utente temporaneo
-    // In produzione, dovresti implementare un form per inserire i dati utente
-    final user = 'Utente Temporaneo (temp@example.com)';
-
-    setState(() {
-      _users.add(user);
-    });
-  }
-
-  Future<void> _createCertification() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final authProvider = context.read<AuthProvider>();
-
-      // Usa dati utente mock per permettere la creazione senza autenticazione
-      final currentUser = AppUser(
-        idUser:
-            '550e8400-e29b-41d4-a716-446655440002', // UUID valido per utente temporaneo
-        firstName: 'Utente',
-        lastName: 'Temporaneo',
-        email: 'temp@example.com',
-        type: UserType.user,
-        idUserHash: 'temp_hash_${DateTime.now().millisecondsSinceEpoch}',
-      );
-
-      // Simula controllo permessi per utente temporaneo
-      if (!_canCreateCertification(currentUser)) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'You do not have permission to create certifications. Please contact your administrator.',
-            ),
-            backgroundColor: Colors.orange,
-            action: SnackBarAction(
-              label: 'Go to Dashboard',
-              textColor: Colors.white,
-              onPressed: () {
-                Navigator.pushReplacementNamed(context, '/home');
-              },
-            ),
-          ),
-        );
-        return;
-      }
-
-      // Show progress message
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Creating certification...'),
-            backgroundColor: Colors.blue,
-          ),
-        );
-      }
-
-      // Crea la certificazione
-      final certification = Certification(
-        idLegalEntity: currentUser.idUser!,
-        idCertificationHash: 'hash_${DateTime.now().millisecondsSinceEpoch}',
-        serialNumber: _codeController.text.trim(),
-        idCertifier:
-            '550e8400-e29b-41d4-a716-446655440000', // UUID valido per certifier temporaneo
-        idLocation:
-            '550e8400-e29b-41d4-a716-446655440001', // UUID valido per location temporanea
-        status: CertificationStatus.draft,
-        nUsers: 1,
-      );
-
-      // Salva la certificazione
-      final result = await _certificationService.createCertification(
-        certification,
-      );
-
-      if (result != null) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(AppLocalizations.of(context).getString('success')),
-              backgroundColor: Colors.green,
-            ),
-          );
-          Navigator.pop(context, result);
-        }
-      } else {
-        throw Exception('Failed to create certification');
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '${AppLocalizations.of(context).getString('error')}: $e',
-            ),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
-  bool _canCreateCertification(AppUser user) {
-    // Permetti sempre la creazione per utenti temporanei o admin
-    if (user.type == UserType.admin) return true;
-
-    // Permetti la creazione per utenti temporanei (con UUID specifico)
-    if (user.idUser == '550e8400-e29b-41d4-a716-446655440002') return true;
-
-    // Check company role permissions
-    // Check if user has permission to create certifications
-    return user.type == UserType.admin || user.type == UserType.manager;
-  }
-
-  // Rimosso metodo _redirectBasedOnRole - non più necessario
-
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final authProvider = context.watch<AuthProvider>();
-
-    // Rimuovi controllo di autenticazione - procedi normalmente
-
     return Scaffold(
+      backgroundColor: AppTheme.backgroundGrey,
       appBar: AppBar(
-        title: Text(l10n.getString('certification_type')),
-        backgroundColor: Color(AppConfig.primaryColorValue),
-        foregroundColor: Colors.white,
-        // Rimossi pulsanti di autenticazione - non necessari
+        backgroundColor: AppTheme.pureWhite,
+        foregroundColor: AppTheme.primaryBlack,
+        elevation: 0,
+        title: Text(
+          'Nuova Certificazione',
+          style: TextStyle(
+            color: AppTheme.primaryBlack,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: AppTheme.primaryBlack),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
-      body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Tipo certificazione
-              _buildSectionHeader(
-                l10n.getString('certification_type'),
-                Icons.category,
-              ),
-              const SizedBox(height: 16),
+      body: Column(
+        children: [
+          _buildProgressIndicator(),
+          Expanded(
+            child: PageView(
+              controller: _pageController,
+              onPageChanged: (index) {
+                setState(() {
+                  _currentStep = index;
+                });
+              },
+              children: [
+                _buildGeneralInfoStep(),
+                _buildUsersStep(),
+                _buildResultsStep(),
+                _buildReviewStep(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-              DropdownButtonFormField<String>(
-                value: _selectedType,
-                decoration: InputDecoration(
-                  labelText: l10n.getString('certification_type'),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+  Widget _buildProgressIndicator() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      color: AppTheme.pureWhite,
+      child: Row(
+        children: [
+          _buildStepIndicator(0, 'Info Generali', _currentStep >= 0),
+          _buildStepConnector(),
+          _buildStepIndicator(1, 'Utenti', _currentStep >= 1),
+          _buildStepConnector(),
+          _buildStepIndicator(2, 'Risultati', _currentStep >= 2),
+          _buildStepConnector(),
+          _buildStepIndicator(3, 'Revisione', _currentStep >= 3),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStepIndicator(int stepNumber, String label, bool isActive) {
+    return Column(
+      children: [
+        Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            color: isActive ? AppTheme.primaryBlack : AppTheme.lightGrey,
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: isActive
+                ? Icon(Icons.check, color: AppTheme.pureWhite, size: 20)
+                : Text(
+                    '${stepNumber + 1}',
+                    style: TextStyle(
+                      color: AppTheme.primaryBlack,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                items: ['Standard', 'Premium', 'Enterprise'].map((type) {
-                  return DropdownMenuItem<String>(
-                    value: type,
-                    child: Text(type),
-                  );
-                }).toList(),
-                onChanged: (String? value) {
-                  if (value != null) {
-                    setState(() {
-                      _selectedType = value;
-                    });
-                  }
-                },
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: isActive ? AppTheme.primaryBlack : AppTheme.textSecondary,
+            fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStepConnector() {
+    return Expanded(
+      child: Container(
+        height: 2,
+        margin: const EdgeInsets.symmetric(horizontal: 8),
+        color: AppTheme.lightGrey,
+      ),
+    );
+  }
+
+  Widget _buildGeneralInfoStep() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Informazioni Generali',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.primaryBlack,
               ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Inserisci i dettagli principali della certificazione',
+              style: TextStyle(fontSize: 16, color: AppTheme.textSecondary),
+            ),
+            const SizedBox(height: 24),
 
-              const SizedBox(height: 16),
+            LinkedInTextField(
+              controller: _titleController,
+              label: 'Titolo Certificazione',
+              hintText: 'Titolo Certificazione',
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Inserisci il titolo della certificazione';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
 
-              // Avviso per tipo attività non incluso
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.orange[50],
-                  border: Border.all(color: Colors.orange[200]!),
+            LinkedInTextField(
+              label: 'Organizzazione Emittente',
+              initialValue: 'La mia Legal Entity',
+              enabled: false,
+            ),
+            const SizedBox(height: 16),
+
+            DropdownButtonFormField<String>(
+              value: _selectedActivityType,
+              decoration: InputDecoration(
+                labelText: 'Tipo Attività',
+                border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Row(
-                  children: [
-                    Icon(Icons.info_outline, color: Colors.orange[700]),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        l10n.getString('activity_type_not_found'),
-                        style: TextStyle(
-                          color: Colors.orange[700],
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                  ],
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
                 ),
               ),
+              items: _activityTypes.map((String type) {
+                return DropdownMenuItem<String>(value: type, child: Text(type));
+              }).toList(),
+              onChanged: (String? newValue) {
+                setState(() {
+                  _selectedActivityType = newValue!;
+                });
+              },
+            ),
+            const SizedBox(height: 16),
 
-              const SizedBox(height: 32),
+            LinkedInTextField(
+              controller: _descriptionController,
+              label: 'Descrizione',
+              hintText: 'Descrizione',
+              maxLines: 4,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Inserisci una descrizione';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 24),
 
-              // Informazioni base
-              _buildSectionHeader(
-                l10n.getString('certification_title'),
-                Icons.title,
-              ),
-              const SizedBox(height: 16),
+            _buildMediaSection(),
+            const SizedBox(height: 32),
 
-              NeonTextField(
-                controller: _titleController,
-                labelText: l10n.getString('certification_title'),
-                hintText: 'Inserisci il titolo della certificazione',
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Il titolo è obbligatorio';
-                  }
-                  return null;
-                },
-              ),
-
-              const SizedBox(height: 16),
-
-              NeonTextField(
-                controller: _codeController,
-                labelText: l10n.getString('certification_code'),
-                hintText: 'Inserisci il codice della certificazione',
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Il codice è obbligatorio';
-                  }
-                  return null;
-                },
-              ),
-
-              const SizedBox(height: 16),
-
-              NeonTextField(
-                controller: _detailController,
-                labelText: l10n.getString('certification_detail'),
-                hintText: 'Inserisci i dettagli della certificazione',
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'I dettagli sono obbligatori';
-                  }
-                  return null;
-                },
-              ),
-
-              const SizedBox(height: 32),
-
-              // Media
-              _buildSectionHeader(
-                l10n.getString('certification_media'),
-                Icons.photo_camera,
-              ),
-              const SizedBox(height: 16),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: NeonButton(
-                      onPressed: () => _captureMedia('camera'),
-                      text: l10n.getString('camera'),
-                      icon: Icons.camera_alt,
-                      neonColor: AppTheme.accentGreen,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: NeonButton(
-                      onPressed: () => _captureMedia('gallery'),
-                      text: l10n.getString('gallery'),
-                      icon: Icons.photo_library,
-                      neonColor: AppTheme.accentBlue,
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 8),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: NeonButton(
-                      onPressed: () => _captureMedia('liveVideo'),
-                      text: l10n.getString('live_video'),
-                      icon: Icons.videocam,
-                      neonColor: AppTheme.accentPurple,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: NeonButton(
-                      onPressed: () => _captureMedia('fileAttachment'),
-                      text: l10n.getString('file_attachment'),
-                      icon: Icons.attach_file,
-                      neonColor: AppTheme.accentOrange,
-                    ),
-                  ),
-                ],
-              ),
-
-              if (_media.isNotEmpty) ...[
-                const SizedBox(height: 16),
-                Text('Media catturati: ${_media.length}'),
-                // Qui puoi mostrare una preview dei media
-              ],
-
-              const SizedBox(height: 32),
-
-              // Geolocalizzazione
-              _buildSectionHeader(
-                l10n.getString('geolocation'),
-                Icons.location_on,
-              ),
-              const SizedBox(height: 16),
-
-              if (_location != null) ...[
-                Text(
-                  'Posizione: ${_location!}',
-                  style: TextStyle(color: AppTheme.primaryBlack),
-                ),
-              ] else ...[
-                Text(
-                  'Posizione non disponibile',
-                  style: TextStyle(color: AppTheme.primaryBlack),
-                ),
-              ],
-
-              NeonButton(
-                onPressed: _getCurrentLocation,
-                text: 'Aggiorna Posizione',
-                icon: Icons.my_location,
-                neonColor: AppTheme.accentGreen,
-              ),
-
-              const SizedBox(height: 32),
-
-              // Descrizione
-              _buildSectionHeader(
-                l10n.getString('certification_description'),
-                Icons.description,
-              ),
-              const SizedBox(height: 16),
-
-              NeonTextField(
-                controller: _descriptionController,
-                labelText: l10n.getString('certification_description'),
-                hintText: 'Inserisci la descrizione della certificazione',
-                maxLines: 3,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'La descrizione è obbligatoria';
-                  }
-                  return null;
-                },
-              ),
-
-              const SizedBox(height: 32),
-
-              // Allegati
-              _buildSectionHeader(
-                l10n.getString('certification_attachments'),
-                Icons.attach_file,
-              ),
-              const SizedBox(height: 16),
-
-              NeonButton(
-                onPressed: _addAttachment,
-                text: 'Aggiungi Allegato',
-                icon: Icons.add,
-                neonColor: AppTheme.accentBlue,
-              ),
-
-              if (_attachments.isNotEmpty) ...[
-                const SizedBox(height: 16),
-                Text(
-                  'Allegati: ${_attachments.length}',
-                  style: TextStyle(color: AppTheme.primaryBlack),
-                ),
-                // Qui puoi mostrare la lista degli allegati
-              ],
-
-              const SizedBox(height: 32),
-
-              // Utenti
-              _buildSectionHeader(
-                l10n.getString('certification_users'),
-                Icons.people,
-              ),
-              const SizedBox(height: 16),
-
-              NeonButton(
-                onPressed: _addUser,
-                text: l10n.getString('add_user'),
-                icon: Icons.person_add,
-                neonColor: AppTheme.accentPurple,
-              ),
-
-              if (_users.isNotEmpty) ...[
-                const SizedBox(height: 16),
-                Text(
-                  'Utenti: ${_users.length}',
-                  style: TextStyle(color: AppTheme.primaryBlack),
-                ),
-                // Qui puoi mostrare la lista degli utenti
-              ],
-
-              const SizedBox(height: 32),
-
-              // Esito
-              _buildSectionHeader(
-                l10n.getString('certification_result'),
-                Icons.assessment,
-              ),
-              const SizedBox(height: 16),
-
-              NeonTextField(
-                controller: _resultController,
-                labelText: l10n.getString('certification_result'),
-                hintText: 'Inserisci l\'esito della certificazione',
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'L\'esito è obbligatorio';
-                  }
-                  return null;
-                },
-              ),
-
-              const SizedBox(height: 32),
-
-              // Modalità offline
-              _buildSectionHeader('Modalità Offline', Icons.offline_bolt),
-              const SizedBox(height: 16),
-
-              SwitchListTile(
-                title: Text(
-                  'Salva offline',
-                  style: TextStyle(color: AppTheme.primaryBlack),
-                ),
-                subtitle: Text(
-                  'I dati verranno sincronizzati quando torni online',
-                  style: TextStyle(color: AppTheme.primaryBlack),
-                ),
-                value: _isOffline,
-                onChanged: (value) {
-                  setState(() {
-                    _isOffline = value;
-                  });
-                },
-              ),
-
-              const SizedBox(height: 32),
-
-              // Pulsanti di azione
-              Row(
-                children: [
-                  Expanded(
-                    child: NeonButton(
-                      onPressed: _isLoading
-                          ? null
-                          : () => Navigator.pop(context),
-                      text: l10n.getString('cancel'),
-                      isOutlined: true,
-                      neonColor: AppTheme.accentOrange,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: NeonButton(
-                      onPressed: _isLoading ? null : _createCertification,
-                      text: _isLoading
-                          ? 'Creazione...'
-                          : l10n.getString('save'),
-                      isLoading: _isLoading,
-                      neonColor: AppTheme.accentGreen,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+            LinkedInButton(
+              onPressed: _nextStep,
+              text: 'Continua',
+              icon: Icons.arrow_forward,
+              variant: LinkedInButtonVariant.primary,
+              fullWidth: true,
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildSectionHeader(String title, IconData icon) {
-    return Row(
+  Widget _buildMediaSection() {
+    return LinkedInCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Media (Foto e Video)',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.primaryBlack,
+                ),
+              ),
+              LinkedInButton(
+                onPressed: _addMedia,
+                text: '+ Aggiungi',
+                variant: LinkedInButtonVariant.outline,
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Container(
+            height: 120,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: AppTheme.lightGrey,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: AppTheme.borderGrey,
+                style: BorderStyle.solid,
+              ),
+            ),
+            child: _mediaFiles.isEmpty
+                ? Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.cloud_upload,
+                        size: 48,
+                        color: AppTheme.textSecondary,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Aggiungi foto e video',
+                        style: TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  )
+                : GridView.builder(
+                    padding: const EdgeInsets.all(8),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          crossAxisSpacing: 8,
+                          mainAxisSpacing: 8,
+                        ),
+                    itemCount: _mediaFiles.length,
+                    itemBuilder: (context, index) {
+                      return Stack(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.file(
+                              _mediaFiles[index],
+                              width: double.infinity,
+                              height: double.infinity,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          Positioned(
+                            top: 4,
+                            right: 4,
+                            child: GestureDetector(
+                              onTap: () => _removeMedia(index),
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.errorRed,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.close,
+                                  color: AppTheme.pureWhite,
+                                  size: 16,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUsersStep() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Aggiungi Utenti',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.primaryBlack,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Inserisci i partecipanti alla certificazione',
+            style: TextStyle(fontSize: 16, color: AppTheme.textSecondary),
+          ),
+          const SizedBox(height: 24),
+
+          _buildAddUserSection(),
+          const SizedBox(height: 24),
+
+          _buildUsersList(),
+          const SizedBox(height: 32),
+
+          Row(
+            children: [
+              Expanded(
+                child: LinkedInButton(
+                  onPressed: _previousStep,
+                  text: 'Indietro',
+                  variant: LinkedInButtonVariant.outline,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: LinkedInButton(
+                  onPressed: _nextStep,
+                  text: 'Continua alla Revisione',
+                  icon: Icons.arrow_forward,
+                  variant: LinkedInButtonVariant.primary,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAddUserSection() {
+    return LinkedInCard(
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: LinkedInTextField(
+                  label: 'Inserisci codice OTP utente',
+                  hintText: 'Inserisci codice OT...',
+                  prefixIcon: Icon(Icons.numbers),
+                ),
+              ),
+              const SizedBox(width: 12),
+              LinkedInButton(
+                onPressed: _addUserByOTP,
+                text: 'Aggiungi',
+                variant: LinkedInButtonVariant.primary,
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Container(height: 1, color: AppTheme.borderGrey, width: 100),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  'oppure',
+                  style: TextStyle(color: AppTheme.textSecondary),
+                ),
+              ),
+              Expanded(child: Container(height: 1, color: AppTheme.borderGrey)),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Icon(Icons.qr_code, size: 48, color: AppTheme.primaryBlue),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Scansiona codice QR',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.primaryBlack,
+                      ),
+                    ),
+                    Text(
+                      'Scansiona il QR code dall\'app utente',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: AppTheme.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              LinkedInButton(
+                onPressed: _scanQRCode,
+                text: 'Scansiona',
+                icon: Icons.qr_code_scanner,
+                variant: LinkedInButtonVariant.primary,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUsersList() {
+    // Mock data - in real app this would come from state
+    final users = [
+      {
+        'name': 'Marco Bianchi',
+        'email': 'marco.bianchi@email.it',
+        'location': 'Milano, Italia',
+        'avatar': 'https://via.placeholder.com/40',
+      },
+      {
+        'name': 'Simone Moretti',
+        'email': 'simone.moretti@email.it',
+        'location': 'Firenze, Italia',
+        'avatar': 'https://via.placeholder.com/40',
+      },
+    ];
+
+    return LinkedInCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Utenti Aggiunti (${users.length})',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.primaryBlack,
+                ),
+              ),
+              TextButton.icon(
+                onPressed: _removeAllUsers,
+                icon: Icon(Icons.clear_all, size: 16),
+                label: Text('Rimuovi Tutti'),
+                style: TextButton.styleFrom(foregroundColor: AppTheme.errorRed),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          ...users.map((user) => _buildUserItem(user)).toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUserItem(Map<String, String> user) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 20,
+            backgroundImage: NetworkImage(user['avatar']!),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  user['name']!,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.primaryBlack,
+                  ),
+                ),
+                Text(
+                  user['email']!,
+                  style: TextStyle(fontSize: 14, color: AppTheme.textSecondary),
+                ),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.location_on,
+                      size: 14,
+                      color: AppTheme.textSecondary,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      user['location']!,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: AppTheme.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          GestureDetector(
+            onTap: () => _removeUser(user),
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppTheme.errorRed,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.remove, color: AppTheme.pureWhite, size: 16),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildResultsStep() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Risultati Utenti',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.primaryBlack,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Inserisci i risultati per ogni utente',
+            style: TextStyle(fontSize: 16, color: AppTheme.textSecondary),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Compila i campi per ogni partecipante alla certificazione',
+            style: TextStyle(fontSize: 14, color: AppTheme.textSecondary),
+          ),
+          const SizedBox(height: 24),
+
+          _buildUserResultsCard(),
+          const SizedBox(height: 32),
+
+          Row(
+            children: [
+              Expanded(
+                child: LinkedInButton(
+                  onPressed: _previousStep,
+                  text: 'Indietro',
+                  variant: LinkedInButtonVariant.outline,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: LinkedInButton(
+                  onPressed: _nextStep,
+                  text: 'Continua alla Revisione',
+                  icon: Icons.arrow_forward,
+                  variant: LinkedInButtonVariant.primary,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUserResultsCard() {
+    return LinkedInCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 24,
+                backgroundImage: NetworkImage('https://via.placeholder.com/48'),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Giulia Rossi',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.primaryBlack,
+                      ),
+                    ),
+                    Text(
+                      'giulia.rossi@email.it',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: AppTheme.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+
+          Row(
+            children: [
+              Expanded(
+                child: LinkedInTextField(
+                  label: 'Risultato',
+                  initialValue: 'Superato',
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: LinkedInTextField(
+                  label: 'Punteggio',
+                  initialValue: '90/100',
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: LinkedInTextField(
+                  label: 'Valutazione',
+                  initialValue: 'A+',
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+
+          Text(
+            'Media (Foto e Video)',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.primaryBlack,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              _buildMediaThumbnail(),
+              const SizedBox(width: 12),
+              _buildMediaThumbnail(),
+              const SizedBox(width: 12),
+              GestureDetector(
+                onTap: _addMedia,
+                child: Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: AppTheme.lightGrey,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: AppTheme.borderGrey,
+                      style: BorderStyle.solid,
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      '+ Aggiungi',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppTheme.primaryBlue,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMediaThumbnail() {
+    return Stack(
       children: [
-        Icon(icon, color: AppTheme.accentGreen),
-        const SizedBox(width: 8),
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: AppTheme.primaryBlack,
+        Container(
+          width: 60,
+          height: 60,
+          decoration: BoxDecoration(
+            color: AppTheme.lightGrey,
+            borderRadius: BorderRadius.circular(8),
+            image: DecorationImage(
+              image: NetworkImage('https://via.placeholder.com/60'),
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+        Positioned(
+          top: 4,
+          right: 4,
+          child: GestureDetector(
+            onTap: () {}, // Remove media
+            child: Container(
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                color: AppTheme.errorRed,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.close, color: AppTheme.pureWhite, size: 12),
+            ),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildReviewStep() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Revisione Certificazione',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.primaryBlack,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Controlla tutti i dettagli prima di inviare la certificazione',
+            style: TextStyle(fontSize: 16, color: AppTheme.textSecondary),
+          ),
+          const SizedBox(height: 24),
+
+          _buildReviewCard(),
+          const SizedBox(height: 16),
+          _buildMediaReviewCard(),
+          const SizedBox(height: 16),
+          _buildUsersReviewCard(),
+          const SizedBox(height: 16),
+          _buildConfirmationCard(),
+          const SizedBox(height: 32),
+
+          Row(
+            children: [
+              Expanded(
+                child: LinkedInButton(
+                  onPressed: _previousStep,
+                  text: 'Indietro',
+                  variant: LinkedInButtonVariant.outline,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: LinkedInButton(
+                  onPressed: _sendCertification,
+                  text: '→ Invia Certificazione',
+                  icon: Icons.send,
+                  variant: LinkedInButtonVariant.primary,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReviewCard() {
+    return LinkedInCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.info, color: AppTheme.primaryBlue),
+              const SizedBox(width: 8),
+              Text(
+                'Informazioni Generali',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.primaryBlack,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _buildReviewItem('Titolo', 'Corso Platform Management in-place'),
+          _buildReviewItem('Organizzazione', 'La mia Legal Entity'),
+          _buildReviewItem(
+            'Descrizione',
+            'I partecipanti apprenderanno le modalità specifiche della gestione di una piattaforma in loco.',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMediaReviewCard() {
+    return LinkedInCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.camera_alt, color: AppTheme.primaryBlue),
+              const SizedBox(width: 8),
+              Text(
+                'Media Real-time (0)',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.primaryBlack,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Nessun media generale allegato',
+            style: TextStyle(color: AppTheme.textSecondary),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUsersReviewCard() {
+    return LinkedInCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.people, color: AppTheme.primaryBlue),
+              const SizedBox(width: 8),
+              Text(
+                'Utenti (1)',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.primaryBlack,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 20,
+                backgroundImage: NetworkImage('https://via.placeholder.com/40'),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Giulia Rossi',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.primaryBlack,
+                      ),
+                    ),
+                    Text(
+                      'giulia.rossi@example.com',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: AppTheme.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppTheme.lightGrey,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
+              children: [
+                _buildReviewItem('Risultato', 'Superato'),
+                _buildReviewItem('Punteggio', 'A+'),
+                _buildReviewItem('Valutazione', 'Non valutato'),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Media del Certificatore (2)',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.primaryBlack,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              _buildMediaThumbnail(),
+              const SizedBox(width: 8),
+              _buildMediaThumbnail(),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildConfirmationCard() {
+    return LinkedInCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.warning, color: AppTheme.warningOrange),
+              const SizedBox(width: 8),
+              Text(
+                'Conferma Invio',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.primaryBlack,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Una volta inviata, la certificazione verrà inviata agli utenti destinatari e non sarà più modificabile. Una volta che gli utenti accetteranno la certificazione, questa verrà notarizzata sulla blockchain. Questa azione non può essere annullata.',
+            style: TextStyle(color: AppTheme.textSecondary, fontSize: 14),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Checkbox(
+                value: false, // This should be managed by state
+                onChanged: (value) {
+                  // Handle checkbox change
+                },
+              ),
+              Expanded(
+                child: Text(
+                  'Confermo di aver verificato tutti i dettagli e di voler procedere con l\'invio della certificazione',
+                  style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReviewItem(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 100,
+            child: Text(
+              '$label:',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: AppTheme.primaryBlack,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(value, style: TextStyle(color: AppTheme.textSecondary)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _nextStep() {
+    if (_currentStep < 3) {
+      _pageController.nextPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  void _previousStep() {
+    if (_currentStep > 0) {
+      _pageController.previousPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  void _addMedia() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() {
+        _mediaFiles.add(File(image.path));
+      });
+    }
+  }
+
+  void _removeMedia(int index) {
+    setState(() {
+      _mediaFiles.removeAt(index);
+    });
+  }
+
+  void _addUserByOTP() {
+    // Implement OTP user addition
+  }
+
+  void _scanQRCode() {
+    // Implement QR code scanning
+  }
+
+  void _removeUser(Map<String, String> user) {
+    // Implement user removal
+  }
+
+  void _removeAllUsers() {
+    // Implement remove all users
+  }
+
+  void _sendCertification() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.check_circle, color: AppTheme.successGreen, size: 64),
+            const SizedBox(height: 16),
+            Text(
+              'Certificazione Inviata!',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.primaryBlack,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'La certificazione "Corso Platform Management in-place" è stata inviato con successo.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppTheme.textSecondary),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'I destinatari riceveranno una notifica e potranno visualizzare la certificazione nei loro profili.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppTheme.textSecondary, fontSize: 14),
+            ),
+            const SizedBox(height: 24),
+            LinkedInButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pop(context);
+              },
+              text: 'Continua',
+              variant: LinkedInButtonVariant.primary,
+              fullWidth: true,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

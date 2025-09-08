@@ -156,9 +156,7 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
             '/admin': (context) => const AdminDashboardScreen(),
             '/public': (context) => const PublicHomeScreen(),
             '/create-certification': (context) =>
-                const CreateCertificationScreenRoute(
-                  child: CreateCertificationScreen(),
-                ),
+                const CreateCertificationScreen(),
             '/profile': (context) => const UserProfileScreen(),
             '/settings': (context) => const UserSettingsScreen(),
             '/veriff': (context) => const VeriffVerificationScreen(),
@@ -189,9 +187,7 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
                 );
               case '/create-certification':
                 return MaterialPageRoute(
-                  builder: (_) => const CreateCertificationScreenRoute(
-                    child: CreateCertificationScreen(),
-                  ),
+                  builder: (_) => const CreateCertificationScreen(),
                 );
               case '/profile':
                 return MaterialPageRoute(
