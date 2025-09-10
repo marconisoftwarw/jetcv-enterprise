@@ -167,14 +167,14 @@ class DefaultIdsService {
       print('📝 No certifier found, using real IDs from database...');
       return {
         'certifierId': 'b909b067-adff-4907-a566-b444287c25cd',
-        'legalEntityId': 'db46268e-5ad5-44a4-9892-87dcbe7e88e1',
+        'legalEntityId': '4d74ce06-18a0-48b0-95a6-c79c8cb42f9e',
       };
     } catch (e) {
       print('❌ Exception fetching certifier: $e');
       // Fallback agli ID reali esistenti dal database
       return {
         'certifierId': 'b909b067-adff-4907-a566-b444287c25cd',
-        'legalEntityId': 'db46268e-5ad5-44a4-9892-87dcbe7e88e1',
+        'legalEntityId': '4d74ce06-18a0-48b0-95a6-c79c8cb42f9e',
       };
     }
   }
@@ -194,11 +194,11 @@ class DefaultIdsService {
 
       // Se non riesce a ottenere la legal entity, usa quella reale dal database
       print('🔍 Using real legal entity ID as fallback');
-      return 'db46268e-5ad5-44a4-9892-87dcbe7e88e1';
+      return '4d74ce06-18a0-48b0-95a6-c79c8cb42f9e';
     } catch (e) {
       print('❌ Exception fetching legal entity for user: $e');
       // Fallback alla legal entity reale dal database
-      return 'db46268e-5ad5-44a4-9892-87dcbe7e88e1';
+      return '4d74ce06-18a0-48b0-95a6-c79c8cb42f9e';
     }
   }
 

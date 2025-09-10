@@ -93,22 +93,10 @@ class _CertificationListScreenState extends State<CertificationListScreen>
         offset: 0,
       );
 
-      // Carica certificazioni in corso (status: pending)
-      print('⏳ Loading pending certifications...');
-      final pendingResult = await CertificationServiceV2.getCertifications(
-        status: 'pending',
-        limit: 50,
-        offset: 0,
-      );
-
       print('📝 Draft certifications: ${draftResult?['data']?.length ?? 0}');
-      print('⏳ Pending certifications: ${pendingResult?['data']?.length ?? 0}');
 
-      // Combina draft e pending in un unico array
-      final allDraftAndPending = [
-        ...(draftResult?['data'] ?? []),
-        ...(pendingResult?['data'] ?? []),
-      ];
+      // Usa solo le certificazioni draft (pending non esiste nell'enum certification_status)
+      final allDraftAndPending = draftResult?['data'] ?? [];
 
       if (mounted) {
         setState(() {
@@ -119,7 +107,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
           _isLoading = false;
         });
         print(
-          '✅ State updated with ${_draftCertifications.length} draft and pending certifications',
+          '✅ State updated with ${_draftCertifications.length} draft certifications',
         );
       }
     } catch (e) {

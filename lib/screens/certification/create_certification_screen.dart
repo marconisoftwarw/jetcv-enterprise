@@ -1389,6 +1389,24 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
         'draft_at': DateTime.now().toIso8601String(),
       };
 
+      // Prepara l'array certification_users
+      List<Map<String, dynamic>> certificationUsers = [];
+      if (_addedUsers.isNotEmpty) {
+        for (final user in _addedUsers) {
+          final otpData = _usedOtps.firstWhere(
+            (otp) => otp['user_id'] == user.idUser,
+            orElse: () => {},
+          );
+
+          certificationUsers.add({
+            'id_user': user.idUser,
+            'id_otp': otpData['otp_id'],
+            'status': 'draft',
+            'rejection_reason': null,
+          });
+        }
+      }
+
       print('📋 Certification data: $certificationData');
 
       // Test della connessione prima di creare
@@ -1423,12 +1441,15 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
         sentAt: sentAt,
         draftAt: certificationData['draft_at'] as String?,
         media: _mediaFiles.isNotEmpty ? _convertMediaFilesToMaps() : null,
+        certificationUsers: certificationUsers.isNotEmpty
+            ? certificationUsers
+            : null,
       );
 
       if (result != null) {
         print('✅ Certification created successfully: $result');
 
-        // Blocca gli OTP utilizzati
+        // Blocca gli OTP utilizzati dopo la creazione della certificazione
         await _blockUsedOtps(
           result['data']['id_certification'],
           certificationData,
