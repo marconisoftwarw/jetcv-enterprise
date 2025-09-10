@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../config/app_config.dart';
-import 'location_service.dart';
 
 class DefaultIdsService {
   static const String _baseUrl = '${AppConfig.supabaseUrl}/rest/v1';
@@ -106,17 +105,21 @@ class DefaultIdsService {
   }
 
   /// Ottiene o crea una legal entity valida per il certifier
-  static Future<String?> getValidLegalEntityIdForCertifier(String certifierId) async {
+  static Future<String?> getValidLegalEntityIdForCertifier(
+    String certifierId,
+  ) async {
     try {
       // Prima prova a ottenere la legal entity del certifier
       final legalEntityId = await getLegalEntityIdForCertifier(certifierId);
       if (legalEntityId != null) {
         // Verifica che la legal entity esista realmente
         final verifyResponse = await http.get(
-          Uri.parse('$_baseUrl/legal_entity?id_legal_entity=eq.$legalEntityId&limit=1'),
+          Uri.parse(
+            '$_baseUrl/legal_entity?id_legal_entity=eq.$legalEntityId&limit=1',
+          ),
           headers: _headers,
         );
-        
+
         if (verifyResponse.statusCode == 200) {
           final List<dynamic> data = json.decode(verifyResponse.body);
           if (data.isNotEmpty) {
@@ -152,7 +155,9 @@ class DefaultIdsService {
           return certifierId;
         }
       } else {
-        print('❌ Error fetching certifier for user: ${response.statusCode} - ${response.body}');
+        print(
+          '❌ Error fetching certifier for user: ${response.statusCode} - ${response.body}',
+        );
       }
       return null;
     } catch (e) {
@@ -178,7 +183,9 @@ class DefaultIdsService {
           return legalEntityId;
         }
       } else {
-        print('❌ Error fetching legal entity for user: ${response.statusCode} - ${response.body}');
+        print(
+          '❌ Error fetching legal entity for user: ${response.statusCode} - ${response.body}',
+        );
       }
       return null;
     } catch (e) {
@@ -187,23 +194,12 @@ class DefaultIdsService {
     }
   }
 
-  /// Ottiene o crea una location per l'utente loggato
-  static Future<String?> getLocationForUser(String userId) async {
-    try {
-      print('🔍 Getting location for user: $userId');
-      return await LocationService.getOrCreateLocationForUser(userId);
-    } catch (e) {
-      print('❌ Error getting location for user: $e');
-      return null;
-    }
-  }
-
-  /// Ottiene o crea un ID di default per una location
+  /// Ottiene un ID di location di default (solo lettura)
   static Future<String?> getDefaultLocationId() async {
     try {
       print('🔍 Getting default location ID...');
 
-      // Prima prova a ottenere una location esistente
+      // Prova a ottenere una location esistente
       final response = await http.get(
         Uri.parse('$_baseUrl/location?limit=1'),
         headers: _headers,
@@ -218,9 +214,9 @@ class DefaultIdsService {
         }
       }
 
-      // Se non ci sono locations, crea una di default
-      print('📝 No locations found, creating default...');
-      return await _createDefaultLocation();
+      // Se non ci sono locations, restituisci null
+      print('❌ No locations found');
+      return null;
     } catch (e) {
       print('❌ Error getting default location ID: $e');
       return null;
@@ -312,51 +308,4 @@ class DefaultIdsService {
     }
   }
 
-  /// Crea una location di default
-  static Future<String?> _createDefaultLocation() async {
-    try {
-      final data = {
-        'id_user': '550e8400-e29b-41d4-a716-446655440001',
-        'aquired_at': DateTime.now().toIso8601String(),
-        'latitude': 41.9028,
-        'longitude': 12.4964,
-        'accuracy_m': 10.0,
-        'is_moked': false,
-        'altitude': 50.0,
-        'altitude_accuracy_m': 5.0,
-        'name': 'Default Location',
-        'street': 'Default Street',
-        'locality': 'Default Locality',
-        'sub_locality': 'Default Sub Locality',
-        'administrative_area': 'Default Administrative Area',
-        'sub_administrative_area': 'Default Sub Administrative Area',
-        'postal_code': '00000',
-        'iso_country_code': 'IT',
-        'country': 'Italy',
-        'thoroughfare': 'Default Thoroughfare',
-        'sub_thoroughfare': 'Default Sub Thoroughfare',
-      };
-
-      final response = await http.post(
-        Uri.parse('$_baseUrl/location'),
-        headers: _headers,
-        body: json.encode(data),
-      );
-
-      if (response.statusCode == 201) {
-        final result = json.decode(response.body);
-        final locationId = result['id_location'] as String?;
-        print('✅ Created default location: $locationId');
-        return locationId;
-      } else {
-        print(
-          '❌ Error creating default location: ${response.statusCode} - ${response.body}',
-        );
-        return null;
-      }
-    } catch (e) {
-      print('❌ Exception creating default location: $e');
-      return null;
-    }
-  }
 }

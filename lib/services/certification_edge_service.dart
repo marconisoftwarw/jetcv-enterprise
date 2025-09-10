@@ -124,6 +124,15 @@ class CertificationEdgeService {
     List<Map<String, dynamic>>? media,
   }) async {
     try {
+      print('🔍 Creating certification with params:');
+      print('  - idCertifier: $idCertifier');
+      print('  - idLegalEntity: $idLegalEntity');
+      print('  - idLocation: $idLocation');
+      print('  - nUsers: $nUsers');
+      print('  - idCertificationCategory: $idCertificationCategory');
+      print('  - status: $status');
+      print('  - draftAt: $draftAt');
+
       final body = {
         'id_certifier': idCertifier,
         'id_legal_entity': idLegalEntity,
@@ -137,11 +146,18 @@ class CertificationEdgeService {
         if (media != null) 'media': media,
       };
 
+      print('📤 Sending POST request to: $_baseUrl');
+      print('📤 Headers: $_headers');
+      print('📤 Body: ${json.encode(body)}');
+
       final response = await http.post(
         Uri.parse(_baseUrl),
         headers: _headers,
         body: json.encode(body),
       );
+
+      print('📡 Response Status: ${response.statusCode}');
+      print('📄 Response Body: ${response.body}');
 
       if (response.statusCode == 201) {
         final data = json.decode(response.body);
