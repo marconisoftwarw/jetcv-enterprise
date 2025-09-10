@@ -518,14 +518,13 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             LinkedInTextField(
               controller: _locationController,
               label: l10n.getString('location'),
-              hintText: l10n.getString('enter_location'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
+              validator: (value) {
+                if (value == null || value.isEmpty) {
                   return 'Inserisci il luogo della certificazione';
-                  }
-                  return null;
-                },
-              ),
+                }
+                return null;
+              },
+            ),
             const SizedBox(height: 24),
 
             _buildMediaSection(),

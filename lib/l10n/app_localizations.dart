@@ -265,7 +265,7 @@ class AppLocalizations {
       'certification_code': 'Code',
       'certification_detail': 'Detail',
       'certification_media': 'Media',
-      'certification_location': 'Location',
+      'certification_location': 'Luogo',
       'certification_timestamp': 'Timestamp',
       'certification_description': 'Description',
       'certification_attachments': 'Attachments',
