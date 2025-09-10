@@ -37,7 +37,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
   void initState() {
     super.initState();
     print('🏁 CertificationListScreen initState called');
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 1, vsync: this);
     _tabController.addListener(() {
       setState(() {
         _selectedTabIndex = _tabController.index;
@@ -86,18 +86,20 @@ class _CertificationListScreenState extends State<CertificationListScreen>
       print('📝 Draft certifications: ${draftResult?['data']?.length ?? 0}');
       print('⏳ Pending certifications: ${pendingResult?['data']?.length ?? 0}');
 
+      // Combina draft e pending in un unico array
+      final allDraftAndPending = [
+        ...(draftResult?['data'] ?? []),
+        ...(pendingResult?['data'] ?? []),
+      ];
+
       if (mounted) {
         setState(() {
-          _draftCertifications = List<Map<String, dynamic>>.from(
-            draftResult?['data'] ?? [],
-          );
-          _pendingCertifications = List<Map<String, dynamic>>.from(
-            pendingResult?['data'] ?? [],
-          );
+          _draftCertifications = List<Map<String, dynamic>>.from(allDraftAndPending);
+          _pendingCertifications = []; // Non più necessario
           _isLoading = false;
         });
         print(
-          '✅ State updated with ${_draftCertifications.length} draft and ${_pendingCertifications.length} pending certifications',
+          '✅ State updated with ${_draftCertifications.length} draft and pending certifications',
         );
       }
     } catch (e) {
@@ -150,10 +152,13 @@ class _CertificationListScreenState extends State<CertificationListScreen>
       },
     ];
 
+    // Combina draft e pending in un unico array
+    final allDraftAndPending = [...mockDrafts, ...mockPending];
+
     if (mounted) {
       setState(() {
-        _draftCertifications = mockDrafts;
-        _pendingCertifications = mockPending;
+        _draftCertifications = allDraftAndPending;
+        _pendingCertifications = []; // Non più necessario
         _isLoading = false;
         _errorMessage = null;
       });
@@ -202,14 +207,13 @@ class _CertificationListScreenState extends State<CertificationListScreen>
             fontSize: isTablet ? 16 : 14,
           ),
           tabs: [
-            Tab(text: 'Bozze'),
-            Tab(text: 'In corso'),
+            Tab(text: 'Bozze e In corso'),
           ],
         ),
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [_buildDraftsTab(), _buildPendingTab()],
+        children: [_buildDraftsTab()],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
@@ -271,7 +275,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
             Icon(Icons.edit_outlined, size: 64, color: AppTheme.textSecondary),
             const SizedBox(height: 16),
             Text(
-              'Nessuna bozza',
+              'Nessuna certificazione',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -280,7 +284,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
             ),
             const SizedBox(height: 8),
             Text(
-              'Le certificazioni in bozza appariranno qui',
+              'Le certificazioni in bozza e in corso appariranno qui',
               style: TextStyle(color: AppTheme.textSecondary),
             ),
           ],
@@ -293,119 +297,42 @@ class _CertificationListScreenState extends State<CertificationListScreen>
         final crossAxisCount = isDesktop ? 2 : 1;
         final childAspectRatio = isDesktop ? 2.5 : 1.0;
 
-        return GridView.builder(
-          padding: EdgeInsets.all(isTablet ? 24 : 16),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: crossAxisCount,
-            childAspectRatio: childAspectRatio,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-          ),
-          itemCount: _draftCertifications.length,
-          itemBuilder: (context, index) {
-            final cert = _draftCertifications[index];
-            return _buildCertificationCard(cert, l10n, isTablet);
-          },
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: EdgeInsets.all(isTablet ? 24 : 16),
+              child: Text(
+                'Bozze e In corso (${_draftCertifications.length})',
+                style: TextStyle(
+                  fontSize: isTablet ? 20 : 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.primaryBlack,
+                ),
+              ),
+            ),
+            Expanded(
+              child: GridView.builder(
+                padding: EdgeInsets.symmetric(horizontal: isTablet ? 24 : 16),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: crossAxisCount,
+                  childAspectRatio: isDesktop ? 3.0 : 2.0, // Aumentato per dare più spazio verticale
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                ),
+                itemCount: _draftCertifications.length,
+                itemBuilder: (context, index) {
+                  final cert = _draftCertifications[index];
+                  return _buildCertificationCard(cert, l10n, isTablet);
+                },
+              ),
+            ),
+          ],
         );
       },
     );
   }
 
-  Widget _buildPendingTab() {
-    final l10n = AppLocalizations.of(context);
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isTablet = screenWidth > 768;
-
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (_errorMessage != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, size: 64, color: AppTheme.errorRed),
-            const SizedBox(height: 16),
-            Text('Errore nel caricamento', style: AppTheme.title2),
-            const SizedBox(height: 8),
-            Text(
-              _errorMessage!,
-              style: AppTheme.body2,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _loadCertifications,
-              child: const Text('Riprova'),
-            ),
-          ],
-        ),
-      );
-    }
-
-    if (_pendingCertifications.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: EdgeInsets.all(isTablet ? 32 : 16),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.hourglass_empty,
-                size: isTablet ? 80 : 64,
-                color: AppTheme.textSecondary,
-              ),
-              SizedBox(height: isTablet ? 24 : 16),
-              Text(
-                'Nessuna certificazione in corso',
-                style: TextStyle(
-                  fontSize: isTablet ? 22 : 18,
-                  fontWeight: FontWeight.w600,
-                  color: AppTheme.primaryBlack,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: isTablet ? 12 : 8),
-              Text(
-                'Le certificazioni in elaborazione appariranno qui',
-                style: TextStyle(
-                  color: AppTheme.textSecondary,
-                  fontSize: isTablet ? 16 : 14,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(isTablet ? 24 : 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'In corso (${_pendingCertifications.length})',
-            style: TextStyle(
-              fontSize: isTablet ? 22 : 20,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.primaryBlack,
-            ),
-          ),
-          SizedBox(height: isTablet ? 16 : 12),
-          ..._pendingCertifications.map((cert) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: _buildCertificationCard(cert, l10n, isTablet),
-            );
-          }).toList(),
-        ],
-      ),
-    );
-  }
 
   Widget _buildCertificationCard(
     Map<String, dynamic> cert,
@@ -429,6 +356,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
           padding: EdgeInsets.all(isTablet ? 16 : 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Row(
                 children: [
@@ -517,27 +445,37 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                     color: AppTheme.textSecondary,
                   ),
                   SizedBox(width: 4),
-                  Text(
-                    'Creata: ${createdAt.day}/${createdAt.month}/${createdAt.year}',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: AppTheme.textSecondary,
-                    ),
-                  ),
-                  const Spacer(),
-                  if (cert['updated_t'] != null) ...[
-                    Icon(Icons.update, size: 16, color: AppTheme.textSecondary),
-                    SizedBox(width: 4),
-                    Text(
-                      'Aggiornata: ${DateTime.tryParse(cert['updated_t'])?.day}/${DateTime.tryParse(cert['updated_t'])?.month}/${DateTime.tryParse(cert['updated_t'])?.year}',
+                  Expanded(
+                    child: Text(
+                      'Creata: ${createdAt.day}/${createdAt.month}/${createdAt.year}',
                       style: TextStyle(
                         fontSize: 14,
                         color: AppTheme.textSecondary,
                       ),
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ],
+                  ),
                 ],
               ),
+              if (cert['updated_t'] != null) ...[
+                SizedBox(height: isTablet ? 8 : 4),
+                Row(
+                  children: [
+                    Icon(Icons.update, size: 16, color: AppTheme.textSecondary),
+                    SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        'Aggiornata: ${DateTime.tryParse(cert['updated_t'])?.day}/${DateTime.tryParse(cert['updated_t'])?.month}/${DateTime.tryParse(cert['updated_t'])?.year}',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: AppTheme.textSecondary,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ],
           ),
         ),
