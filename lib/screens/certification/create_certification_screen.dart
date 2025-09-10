@@ -15,6 +15,7 @@ import '../../services/certification_category_edge_service.dart';
 import '../../services/certification_information_service.dart';
 import '../../services/otp_verification_service.dart';
 import '../../services/default_ids_service.dart';
+import '../../services/legal_entity_service.dart';
 import '../../config/app_config.dart';
 import '../../providers/auth_provider.dart';
 
@@ -147,15 +148,16 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   Future<void> _loadLegalEntityName() async {
     try {
       print('🔍 Loading legal entity name...');
-      // Usa l'ID della legal entity di default
-      final String? legalEntityId =
-          await DefaultIdsService.getDefaultLegalEntityId();
-      if (legalEntityId == null) {
-        print('❌ No legal entity ID available');
+      // Usa il metodo che ha fallback per ID fissi
+      final certifierData = await DefaultIdsService.getValidCertifierWithLegalEntity();
+      if (certifierData == null) {
+        print('❌ No certifier data available');
         return;
       }
+      
+      final String legalEntityId = certifierData['legalEntityId']!;
       final String? legalEntityName =
-          await DefaultIdsService.getLegalEntityName(legalEntityId);
+          await LegalEntityService.getLegalEntityName(legalEntityId);
 
       if (legalEntityName != null) {
         setState(() {
