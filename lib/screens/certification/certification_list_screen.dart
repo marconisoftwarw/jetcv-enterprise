@@ -5,6 +5,9 @@ import 'package:http/http.dart' as http;
 import '../../models/certification.dart';
 import '../../services/certification_service.dart';
 import '../../services/certification_edge_service.dart';
+import '../../services/certification_service_v2.dart';
+import '../../services/certification_category_service.dart';
+import '../../services/location_service.dart';
 import '../../providers/auth_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../widgets/linkedin_button.dart';
@@ -31,6 +34,8 @@ class _CertificationListScreenState extends State<CertificationListScreen>
   List<Map<String, dynamic>> _draftCertifications = [];
   List<Map<String, dynamic>> _pendingCertifications = [];
   bool _isLoading = false;
+  Map<String, String> _categoryNames = {};
+  Map<String, String> _locationNames = {};
   String? _errorMessage;
 
   @override
@@ -55,9 +60,22 @@ class _CertificationListScreenState extends State<CertificationListScreen>
     });
 
     try {
+      // Carica i nomi delle categorie e luoghi in parallelo
+      print('📋 Loading category and location names...');
+      final futures = await Future.wait([
+        CertificationCategoryService.getCategoryNames(),
+        LocationService.getLocationNames(),
+      ]);
+
+      _categoryNames = futures[0] as Map<String, String>;
+      _locationNames = futures[1] as Map<String, String>;
+      print(
+        '📋 Loaded ${_categoryNames.length} categories and ${_locationNames.length} locations',
+      );
+
       // Prima testa la connessione alla Edge Function
-      print('🧪 Testing Edge Function connection...');
-      final connectionOk = await CertificationEdgeService.testConnection();
+      print('🧪 Testing certifications Edge Function connection...');
+      final connectionOk = await CertificationServiceV2.testConnection();
 
       if (!connectionOk) {
         print('⚠️ Edge Function not available, using mock data for testing');
@@ -69,7 +87,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
 
       // Carica certificazioni in bozza (status: draft)
       print('📝 Loading draft certifications...');
-      final draftResult = await CertificationEdgeService.getCertifications(
+      final draftResult = await CertificationServiceV2.getCertifications(
         status: 'draft',
         limit: 50,
         offset: 0,
@@ -77,7 +95,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
 
       // Carica certificazioni in corso (status: pending)
       print('⏳ Loading pending certifications...');
-      final pendingResult = await CertificationEdgeService.getCertifications(
+      final pendingResult = await CertificationServiceV2.getCertifications(
         status: 'pending',
         limit: 50,
         offset: 0,
@@ -333,7 +351,15 @@ class _CertificationListScreenState extends State<CertificationListScreen>
     final statusText = _getStatusText(status);
     final createdAt =
         DateTime.tryParse(cert['created_at'] ?? '') ?? DateTime.now();
+    final sentAt = cert['sent_at'] != null
+        ? DateTime.tryParse(cert['sent_at'])
+        : null;
     final nUsers = cert['n_users'] ?? 0;
+    final serialNumber = cert['serial_number'] ?? 'N/A';
+    final categoryId = cert['id_certification_category'] ?? '';
+    final locationId = cert['id_location'] ?? '';
+    final categoryName = _categoryNames[categoryId] ?? 'Categoria sconosciuta';
+    final locationName = _locationNames[locationId] ?? 'Luogo sconosciuto';
 
     return LinkedInCard(
       child: InkWell(
@@ -372,7 +398,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                             children: [
                               Expanded(
                                 child: Text(
-                                  'Certificazione ${cert['serial_number'] ?? 'N/A'}',
+                                  '$categoryName - $serialNumber',
                                   style: TextStyle(
                                     fontSize: isTablet ? 16 : 14,
                                     fontWeight: FontWeight.bold,
@@ -402,7 +428,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                           ),
                           SizedBox(height: isTablet ? 2 : 1),
                           Text(
-                            'Categoria: ${cert['id_certification_category'] ?? 'N/A'}',
+                            'Utenti: $nUsers • Luogo: $locationName',
                             style: TextStyle(
                               fontSize: isTablet ? 12 : 10,
                               color: AppTheme.textSecondary,
@@ -410,7 +436,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                           ),
                           SizedBox(height: isTablet ? 2 : 1),
                           Text(
-                            'Utenti: $nUsers',
+                            'Status: $statusText',
                             style: TextStyle(
                               fontSize: isTablet ? 12 : 10,
                               color: AppTheme.primaryBlack,
@@ -447,19 +473,15 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                     ),
                   ],
                 ),
-                if (cert['updated_t'] != null) ...[
+                if (sentAt != null) ...[
                   SizedBox(height: isTablet ? 2 : 1),
                   Row(
                     children: [
-                      Icon(
-                        Icons.update,
-                        size: 16,
-                        color: AppTheme.textSecondary,
-                      ),
+                      Icon(Icons.send, size: 16, color: AppTheme.textSecondary),
                       SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          'Aggiornata: ${DateTime.tryParse(cert['updated_t'])?.day}/${DateTime.tryParse(cert['updated_t'])?.month}/${DateTime.tryParse(cert['updated_t'])?.year}',
+                          'Inviata: ${sentAt.day}/${sentAt.month}/${sentAt.year}',
                           style: TextStyle(
                             fontSize: 12,
                             color: AppTheme.textSecondary,

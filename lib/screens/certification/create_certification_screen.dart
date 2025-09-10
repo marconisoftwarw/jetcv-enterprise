@@ -8,6 +8,8 @@ import '../../widgets/linkedin_card.dart';
 import '../../widgets/linkedin_text_field.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/certification_edge_service.dart';
+import '../../services/certification_service_v2.dart';
+import '../../services/otp_service.dart';
 import '../../services/certification_category_service.dart';
 import '../../services/certification_category_edge_service.dart';
 import '../../services/certification_information_service.dart';
@@ -41,6 +43,9 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   String? _errorMessage;
   String? _successMessage;
   bool _isLoadingCategories = true;
+
+  // Dati per il blocco degli OTP
+  List<Map<String, dynamic>> _usedOtps = [];
   bool _isVerifyingOtp = false;
 
   // Dynamic categories from Edge Function
@@ -1400,7 +1405,14 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
 
       // Crea la certificazione
       print('🚀 Starting certification creation...');
-      final result = await CertificationEdgeService.createCertification(
+      // Imposta la data di invio se lo status è "sent"
+      String? sentAt;
+      if (certificationData['status'] == 'sent') {
+        sentAt = DateTime.now().toIso8601String();
+        print('📤 Setting sent_at to: $sentAt');
+      }
+
+      final result = await CertificationServiceV2.createCertification(
         idCertifier: certificationData['id_certifier'] as String,
         idLegalEntity: certificationData['id_legal_entity'] as String,
         idLocation: certificationData['id_location'] as String,
@@ -1408,15 +1420,20 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
         idCertificationCategory:
             certificationData['id_certification_category'] as String,
         status: certificationData['status'] as String?,
+        sentAt: sentAt,
         draftAt: certificationData['draft_at'] as String?,
+        media: _mediaFiles.isNotEmpty ? _mediaFiles : null,
       );
 
       if (result != null) {
         print('✅ Certification created successfully: $result');
 
+        // Blocca gli OTP utilizzati
+        await _blockUsedOtps(result['data']['id_certification']);
+
         // Se ci sono media files, aggiungili
         if (_mediaFiles.isNotEmpty) {
-          await _addMediaToCertification(result['id_certification']);
+          await _addMediaToCertification(result['data']['id_certification']);
         }
 
         setState(() {
@@ -1436,6 +1453,44 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
         _isCreating = false;
       });
     }
+  }
+
+  /// Blocca gli OTP utilizzati dopo la creazione della certificazione
+  Future<void> _blockUsedOtps(String certificationId) async {
+    if (_usedOtps.isEmpty) {
+      print('ℹ️ No OTPs to block');
+      return;
+    }
+
+    print(
+      '🔒 Blocking ${_usedOtps.length} OTPs after certification creation...',
+    );
+
+    for (final otpData in _usedOtps) {
+      final otpId = otpData['otp_id'] as String?;
+      final userId = otpData['user_id'] as String?;
+
+      if (otpId != null && userId != null) {
+        final success = await OtpService.blockOtpAfterUse(
+          otpId: otpId,
+          userId: userId,
+          certificationId: certificationId,
+          certifierId: _certificationData['id_certifier'] as String,
+          legalEntityId: _certificationData['id_legal_entity'] as String,
+        );
+
+        if (success) {
+          print('✅ OTP $otpId blocked successfully');
+        } else {
+          print('❌ Failed to block OTP $otpId');
+        }
+      } else {
+        print('⚠️ Invalid OTP data: $otpData');
+      }
+    }
+
+    // Pulisci la lista degli OTP utilizzati
+    _usedOtps.clear();
   }
 
   Future<void> _addMediaToCertification(String certificationId) async {
@@ -1588,6 +1643,12 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           } else {
             setState(() {
               _addedUsers.add(result.user!);
+              // Memorizza i dati dell'OTP per il blocco successivo
+              _usedOtps.add({
+                'otp_id': result.otp?.idOtp,
+                'user_id': result.user!.idUser,
+                'otp_code': otpCode,
+              });
               // Inizializza i valori dei campi per il nuovo utente
               _userFieldValues[result.user!.idUser] = {};
               _otpController.clear();
