@@ -17,11 +17,11 @@ class CertificationServiceV2 {
   static Future<bool> testConnection() async {
     try {
       print('🧪 Testing certifications Edge Function connection...');
-      print('🌐 URL: $_baseUrl/functions/v1/certifications');
+      print('🌐 URL: $_baseUrl/functions/v1/certification-crud');
       print('🔑 Headers: $_headers');
 
       final response = await http.get(
-        Uri.parse('$_baseUrl/functions/v1/certifications'),
+        Uri.parse('$_baseUrl/functions/v1/certification-crud'),
         headers: _headers,
       );
 
@@ -58,7 +58,7 @@ class CertificationServiceV2 {
       if (serialNumber != null) queryParams['serial_number'] = serialNumber;
 
       final uri = Uri.parse(
-        '$_baseUrl/functions/v1/certifications',
+        '$_baseUrl/functions/v1/certification-crud',
       ).replace(queryParameters: queryParams);
 
       print('🔍 GET Certifications: $uri');
@@ -120,12 +120,12 @@ class CertificationServiceV2 {
         if (media != null && media.isNotEmpty) 'media': media,
       };
 
-      print('🚀 POST Certification: $_baseUrl/functions/v1/certifications');
+      print('🚀 POST Certification: $_baseUrl/functions/v1/certification-crud');
       print('🔑 Headers: $_headers');
       print('📄 Body: ${json.encode(body)}');
 
       final response = await http.post(
-        Uri.parse('$_baseUrl/functions/v1/certifications'),
+        Uri.parse('$_baseUrl/functions/v1/certification-crud'),
         headers: _headers,
         body: json.encode(body),
       );
@@ -150,7 +150,7 @@ class CertificationServiceV2 {
   /// Ottiene una singola certificazione con i suoi media
   static Future<Map<String, dynamic>?> getCertification(String id) async {
     try {
-      final url = '$_baseUrl/functions/v1/certifications?id=$id';
+      final url = '$_baseUrl/functions/v1/certification-crud?id=$id';
       print('🔍 GET Certification: $url');
       print('🔑 Headers: $_headers');
 
@@ -183,7 +183,7 @@ class CertificationServiceV2 {
       print('📄 Updates: ${json.encode(updates)}');
 
       final response = await http.patch(
-        Uri.parse('$_baseUrl/functions/v1/certifications?id=$id'),
+        Uri.parse('$_baseUrl/functions/v1/certification-crud?id=$id'),
         headers: _headers,
         body: json.encode(updates),
       );
@@ -211,7 +211,7 @@ class CertificationServiceV2 {
       print('🔍 Deleting certification: $id');
 
       final response = await http.delete(
-        Uri.parse('$_baseUrl/functions/v1/certifications?id=$id'),
+        Uri.parse('$_baseUrl/functions/v1/certification-crud?id=$id'),
         headers: _headers,
       );
 

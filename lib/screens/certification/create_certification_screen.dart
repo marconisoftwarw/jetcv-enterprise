@@ -1366,7 +1366,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
       final certifierId = certifierData['certifierId']!;
       final legalEntityId = certifierData['legalEntityId']!;
       final locationId =
-          '912eda0d-1426-4a2f-8215-621b993ddb2d'; // ID fisso per location
+          'a5196c46-3d57-4e8c-b293-f4dff308a1a0'; // ID fisso per location
 
       print('🔍 Using valid IDs from database:');
       print('  - Certifier ID: $certifierId');
@@ -1422,14 +1422,17 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
         status: certificationData['status'] as String?,
         sentAt: sentAt,
         draftAt: certificationData['draft_at'] as String?,
-        media: _mediaFiles.isNotEmpty ? _mediaFiles : null,
+        media: _mediaFiles.isNotEmpty ? _convertMediaFilesToMaps() : null,
       );
 
       if (result != null) {
         print('✅ Certification created successfully: $result');
 
         // Blocca gli OTP utilizzati
-        await _blockUsedOtps(result['data']['id_certification']);
+        await _blockUsedOtps(
+          result['data']['id_certification'],
+          certificationData,
+        );
 
         // Se ci sono media files, aggiungili
         if (_mediaFiles.isNotEmpty) {
@@ -1455,8 +1458,28 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     }
   }
 
+  /// Converte i File in Map per l'API
+  List<Map<String, dynamic>> _convertMediaFilesToMaps() {
+    return _mediaFiles.map((file) {
+      return {
+        'id_media_hash':
+            'media_${DateTime.now().millisecondsSinceEpoch}_${file.path.hashCode}',
+        'acquisition_type': 'upload',
+        'captured_at': DateTime.now().toIso8601String(),
+        'file_type': file.path.split('.').last.toLowerCase(),
+        'name': file.path.split('/').last,
+        'description': null,
+        'id_location':
+            'a5196c46-3d57-4e8c-b293-f4dff308a1a0', // ID fisso per location
+      };
+    }).toList();
+  }
+
   /// Blocca gli OTP utilizzati dopo la creazione della certificazione
-  Future<void> _blockUsedOtps(String certificationId) async {
+  Future<void> _blockUsedOtps(
+    String certificationId,
+    Map<String, dynamic> certificationData,
+  ) async {
     if (_usedOtps.isEmpty) {
       print('ℹ️ No OTPs to block');
       return;
@@ -1475,8 +1498,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           otpId: otpId,
           userId: userId,
           certificationId: certificationId,
-          certifierId: _certificationData['id_certifier'] as String,
-          legalEntityId: _certificationData['id_legal_entity'] as String,
+          certifierId: certificationData['id_certifier'] as String,
+          legalEntityId: certificationData['id_legal_entity'] as String,
         );
 
         if (success) {
@@ -1498,7 +1521,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
       print('📸 Adding media to certification: $certificationId');
 
       // Usa l'ID di location fisso
-      final locationId = '912eda0d-1426-4a2f-8215-621b993ddb2d';
+      final locationId = 'a5196c46-3d57-4e8c-b293-f4dff308a1a0';
 
       final mediaData = _mediaFiles
           .map(

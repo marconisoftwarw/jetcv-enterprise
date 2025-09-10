@@ -34,10 +34,7 @@ class OtpService {
         headers: _headers,
         body: json.encode({
           'used_by_id_user': userId,
-          'id_certification': certificationId,
-          'id_certifier': certifierId,
           'id_legal_entity': legalEntityId,
-          'used_at': DateTime.now().toIso8601String(),
         }),
       );
 
