@@ -292,14 +292,9 @@ class _CertificationListScreenState extends State<CertificationListScreen>
       );
     }
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final crossAxisCount = isDesktop ? 2 : 1;
-        final childAspectRatio = isDesktop ? 2.5 : 1.0;
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
             Padding(
               padding: EdgeInsets.all(isTablet ? 24 : 16),
               child: Text(
@@ -312,25 +307,20 @@ class _CertificationListScreenState extends State<CertificationListScreen>
               ),
             ),
             Expanded(
-              child: GridView.builder(
+              child: ListView.builder(
                 padding: EdgeInsets.symmetric(horizontal: isTablet ? 24 : 16),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: crossAxisCount,
-                  childAspectRatio: isDesktop ? 3.0 : 2.0, // Aumentato per dare più spazio verticale
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                ),
                 itemCount: _draftCertifications.length,
                 itemBuilder: (context, index) {
                   final cert = _draftCertifications[index];
-                  return _buildCertificationCard(cert, l10n, isTablet);
+                  return Padding(
+                    padding: EdgeInsets.only(bottom: 16),
+                    child: _buildCertificationCard(cert, l10n, isTablet),
+                  );
                 },
               ),
             ),
           ],
         );
-      },
-    );
   }
 
 
@@ -352,122 +342,105 @@ class _CertificationListScreenState extends State<CertificationListScreen>
           // TODO: Navigate to certification details
         },
         borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: EdgeInsets.all(isTablet ? 16 : 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: isTablet ? 60 : 50,
-                    height: isTablet ? 60 : 50,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      color: AppTheme.primaryBlue.withValues(alpha: 0.1),
-                    ),
-                    child: Icon(
-                      Icons.workspace_premium,
-                      color: AppTheme.primaryBlue,
-                      size: isTablet ? 30 : 24,
-                    ),
-                  ),
-                  SizedBox(width: isTablet ? 16 : 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                'Certificazione ${cert['serial_number'] ?? 'N/A'}',
-                                style: TextStyle(
-                                  fontSize: isTablet ? 18 : 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppTheme.primaryBlack,
-                                ),
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: statusColor.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                statusText,
-                                style: TextStyle(
-                                  color: statusColor,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: isTablet ? 6 : 4),
-                        Text(
-                          'Categoria: ${cert['id_certification_category'] ?? 'N/A'}',
-                          style: TextStyle(
-                            fontSize: isTablet ? 14 : 12,
-                            color: AppTheme.textSecondary,
-                          ),
-                        ),
-                        SizedBox(height: isTablet ? 8 : 6),
-                        Text(
-                          'Utenti: $nUsers',
-                          style: TextStyle(
-                            fontSize: isTablet ? 14 : 12,
-                            color: AppTheme.primaryBlack,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(
-                    Icons.arrow_forward_ios,
-                    color: AppTheme.textSecondary,
-                    size: 16,
-                  ),
-                ],
-              ),
-              SizedBox(height: isTablet ? 16 : 12),
-              Row(
-                children: [
-                  Icon(
-                    Icons.calendar_today,
-                    size: 16,
-                    color: AppTheme.textSecondary,
-                  ),
-                  SizedBox(width: 4),
-                  Expanded(
-                    child: Text(
-                      'Creata: ${createdAt.day}/${createdAt.month}/${createdAt.year}',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: AppTheme.textSecondary,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-              if (cert['updated_t'] != null) ...[
-                SizedBox(height: isTablet ? 8 : 4),
+        child: ClipRect(
+          child: Padding(
+            padding: EdgeInsets.all(isTablet ? 12 : 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
                 Row(
                   children: [
-                    Icon(Icons.update, size: 16, color: AppTheme.textSecondary),
+                    Container(
+                      width: isTablet ? 50 : 40,
+                      height: isTablet ? 50 : 40,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                      ),
+                      child: Icon(
+                        Icons.workspace_premium,
+                        color: AppTheme.primaryBlue,
+                        size: isTablet ? 24 : 20,
+                      ),
+                    ),
+                    SizedBox(width: isTablet ? 12 : 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  'Certificazione ${cert['serial_number'] ?? 'N/A'}',
+                                  style: TextStyle(
+                                    fontSize: isTablet ? 16 : 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppTheme.primaryBlack,
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: statusColor.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  statusText,
+                                  style: TextStyle(
+                                    color: statusColor,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: isTablet ? 2 : 1),
+                          Text(
+                            'Categoria: ${cert['id_certification_category'] ?? 'N/A'}',
+                            style: TextStyle(
+                              fontSize: isTablet ? 12 : 10,
+                              color: AppTheme.textSecondary,
+                            ),
+                          ),
+                          SizedBox(height: isTablet ? 2 : 1),
+                          Text(
+                            'Utenti: $nUsers',
+                            style: TextStyle(
+                              fontSize: isTablet ? 12 : 10,
+                              color: AppTheme.primaryBlack,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      Icons.arrow_forward_ios,
+                      color: AppTheme.textSecondary,
+                      size: 16,
+                    ),
+                  ],
+                ),
+                SizedBox(height: isTablet ? 8 : 6),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.calendar_today,
+                      size: 16,
+                      color: AppTheme.textSecondary,
+                    ),
                     SizedBox(width: 4),
                     Expanded(
                       child: Text(
-                        'Aggiornata: ${DateTime.tryParse(cert['updated_t'])?.day}/${DateTime.tryParse(cert['updated_t'])?.month}/${DateTime.tryParse(cert['updated_t'])?.year}',
+                        'Creata: ${createdAt.day}/${createdAt.month}/${createdAt.year}',
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 12,
                           color: AppTheme.textSecondary,
                         ),
                         overflow: TextOverflow.ellipsis,
@@ -475,10 +448,29 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                     ),
                   ],
                 ),
-              ],
+                if (cert['updated_t'] != null) ...[
+                  SizedBox(height: isTablet ? 2 : 1),
+                  Row(
+                    children: [
+                      Icon(Icons.update, size: 16, color: AppTheme.textSecondary),
+                      SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          'Aggiornata: ${DateTime.tryParse(cert['updated_t'])?.day}/${DateTime.tryParse(cert['updated_t'])?.month}/${DateTime.tryParse(cert['updated_t'])?.year}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppTheme.textSecondary,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
             ],
           ),
         ),
+      ),
       ),
     );
   }
