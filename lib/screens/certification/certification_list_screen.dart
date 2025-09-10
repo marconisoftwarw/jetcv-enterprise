@@ -32,7 +32,8 @@ class _CertificationListScreenState extends State<CertificationListScreen>
 
   // Dati delle certificazioni
   List<Map<String, dynamic>> _draftCertifications = [];
-  List<Map<String, dynamic>> _pendingCertifications = [];
+  List<Map<String, dynamic>> _sentCertifications = [];
+  List<Map<String, dynamic>> _closedCertifications = [];
   bool _isLoading = false;
   Map<String, String> _categoryNames = {};
   Map<String, String> _locationNames = {};
@@ -42,7 +43,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
   void initState() {
     super.initState();
     print('🏁 CertificationListScreen initState called');
-    _tabController = TabController(length: 1, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(() {
       setState(() {
         _selectedTabIndex = _tabController.index;
@@ -88,21 +89,41 @@ class _CertificationListScreenState extends State<CertificationListScreen>
         offset: 0,
       );
 
-      print('📝 Draft certifications: ${draftResult?['data']?.length ?? 0}');
+      // Carica certificazioni inviate (status: sent)
+      print('📤 Loading sent certifications...');
+      final sentResult = await CertificationServiceV2.getCertifications(
+        status: 'sent',
+        limit: 50,
+        offset: 0,
+      );
 
-      // Usa solo le certificazioni draft (pending non esiste nell'enum certification_status)
-      final allDraftAndPending = draftResult?['data'] ?? [];
+      // Carica certificazioni chiuse (status: closed)
+      print('🔒 Loading closed certifications...');
+      final closedResult = await CertificationServiceV2.getCertifications(
+        status: 'closed',
+        limit: 50,
+        offset: 0,
+      );
+
+      print('📝 Draft certifications: ${draftResult?['data']?.length ?? 0}');
+      print('📤 Sent certifications: ${sentResult?['data']?.length ?? 0}');
+      print('🔒 Closed certifications: ${closedResult?['data']?.length ?? 0}');
 
       if (mounted) {
         setState(() {
           _draftCertifications = List<Map<String, dynamic>>.from(
-            allDraftAndPending,
+            draftResult?['data'] ?? [],
           );
-          _pendingCertifications = []; // Non più necessario
+          _sentCertifications = List<Map<String, dynamic>>.from(
+            sentResult?['data'] ?? [],
+          );
+          _closedCertifications = List<Map<String, dynamic>>.from(
+            closedResult?['data'] ?? [],
+          );
           _isLoading = false;
         });
         print(
-          '✅ State updated with ${_draftCertifications.length} draft certifications',
+          '✅ State updated with ${_draftCertifications.length} draft, ${_sentCertifications.length} sent, ${_closedCertifications.length} closed certifications',
         );
       }
     } catch (e) {
@@ -142,11 +163,11 @@ class _CertificationListScreenState extends State<CertificationListScreen>
       },
     ];
 
-    final mockPending = [
+    final mockSent = [
       {
         'id_certification': 'cert-003',
         'serial_number': 'MNO90-PQR12',
-        'status': 'pending',
+        'status': 'sent',
         'created_at': DateTime.now()
             .subtract(const Duration(hours: 6))
             .toIso8601String(),
@@ -155,13 +176,24 @@ class _CertificationListScreenState extends State<CertificationListScreen>
       },
     ];
 
-    // Combina draft e pending in un unico array
-    final allDraftAndPending = [...mockDrafts, ...mockPending];
+    final mockClosed = [
+      {
+        'id_certification': 'cert-004',
+        'serial_number': 'STU34-VWX56',
+        'status': 'closed',
+        'created_at': DateTime.now()
+            .subtract(const Duration(days: 7))
+            .toIso8601String(),
+        'n_users': 1,
+        'id_certification_category': 'leadership',
+      },
+    ];
 
     if (mounted) {
       setState(() {
-        _draftCertifications = allDraftAndPending;
-        _pendingCertifications = []; // Non più necessario
+        _draftCertifications = mockDrafts;
+        _sentCertifications = mockSent;
+        _closedCertifications = mockClosed;
         _isLoading = false;
         _errorMessage = null;
       });
@@ -209,12 +241,20 @@ class _CertificationListScreenState extends State<CertificationListScreen>
             fontWeight: FontWeight.w600,
             fontSize: isTablet ? 16 : 14,
           ),
-          tabs: [Tab(text: 'Bozze e In corso')],
+          tabs: [
+            Tab(text: 'Bozze e In corso'),
+            Tab(text: 'Inviate'),
+            Tab(text: 'Chiuse'),
+          ],
         ),
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [_buildDraftsTab()],
+        children: [
+          _buildDraftsTab(),
+          _buildSentTab(),
+          _buildClosedTab(),
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
@@ -511,5 +551,185 @@ class _CertificationListScreenState extends State<CertificationListScreen>
       default:
         return 'Sconosciuto';
     }
+  }
+
+  Widget _buildSentTab() {
+    final l10n = AppLocalizations.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 768;
+    final isDesktop = screenWidth > 1024;
+
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_errorMessage != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 64, color: AppTheme.errorRed),
+            const SizedBox(height: 16),
+            Text('Errore nel caricamento', style: AppTheme.title2),
+            const SizedBox(height: 8),
+            Text(
+              _errorMessage!,
+              style: AppTheme.body2,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _loadCertifications,
+              child: const Text('Riprova'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_sentCertifications.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.send_outlined, size: 64, color: AppTheme.textSecondary),
+            const SizedBox(height: 16),
+            Text(
+              'Nessuna certificazione inviata',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.primaryBlack,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Le certificazioni inviate appariranno qui',
+              style: TextStyle(color: AppTheme.textSecondary),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.all(isTablet ? 24 : 16),
+          child: Text(
+            'Certificazioni Inviate (${_sentCertifications.length})',
+            style: TextStyle(
+              fontSize: isTablet ? 24 : 20,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.primaryBlack,
+            ),
+          ),
+        ),
+        Expanded(
+          child: ListView.builder(
+            padding: EdgeInsets.symmetric(horizontal: isTablet ? 24 : 16),
+            itemCount: _sentCertifications.length,
+            itemBuilder: (context, index) {
+              final certification = _sentCertifications[index];
+              return Padding(
+                padding: EdgeInsets.only(bottom: 16),
+                child: _buildCertificationCard(certification, l10n, isTablet),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildClosedTab() {
+    final l10n = AppLocalizations.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 768;
+    final isDesktop = screenWidth > 1024;
+
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_errorMessage != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 64, color: AppTheme.errorRed),
+            const SizedBox(height: 16),
+            Text('Errore nel caricamento', style: AppTheme.title2),
+            const SizedBox(height: 8),
+            Text(
+              _errorMessage!,
+              style: AppTheme.body2,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _loadCertifications,
+              child: const Text('Riprova'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_closedCertifications.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.check_circle_outline, size: 64, color: AppTheme.textSecondary),
+            const SizedBox(height: 16),
+            Text(
+              'Nessuna certificazione chiusa',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.primaryBlack,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Le certificazioni chiuse appariranno qui',
+              style: TextStyle(color: AppTheme.textSecondary),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.all(isTablet ? 24 : 16),
+          child: Text(
+            'Certificazioni Chiuse (${_closedCertifications.length})',
+            style: TextStyle(
+              fontSize: isTablet ? 24 : 20,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.primaryBlack,
+            ),
+          ),
+        ),
+        Expanded(
+          child: ListView.builder(
+            padding: EdgeInsets.symmetric(horizontal: isTablet ? 24 : 16),
+            itemCount: _closedCertifications.length,
+            itemBuilder: (context, index) {
+              final certification = _closedCertifications[index];
+              return Padding(
+                padding: EdgeInsets.only(bottom: 16),
+                child: _buildCertificationCard(certification, l10n, isTablet),
+              );
+            },
+          ),
+        ),
+      ],
+    );
   }
 }
