@@ -1493,7 +1493,12 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 // Se è un messaggio di successo per utente aggiunto, non chiudere la schermata
                 return;
               }
-              Navigator.of(context).pop(); // Chiudi screen
+              // Naviga alla dashboard dei certificatori (indice 2 nella HomeScreen)
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                '/home',
+                (route) => false,
+                arguments: {'selectedIndex': 2},
+              );
             },
             child: const Text('OK'),
           ),

@@ -35,7 +35,7 @@ class _AdminCertifierDashboardScreenState
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Dashboard Certificatorri',
+          'Dashboard Certificatori',
           style: AppTheme.title1.copyWith(color: AppTheme.white),
         ),
         backgroundColor: AppTheme.primaryBlue,

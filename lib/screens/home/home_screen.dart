@@ -19,6 +19,21 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Controlla se ci sono argomenti passati per impostare l'indice selezionato
+    final args =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    if (args != null && args['selectedIndex'] != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setState(() {
+          _selectedIndex = args!['selectedIndex'] as int;
+        });
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
