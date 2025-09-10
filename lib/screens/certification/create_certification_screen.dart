@@ -518,13 +518,13 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             LinkedInTextField(
               controller: _locationController,
               label: l10n.getString('location'),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
                   return 'Inserisci il luogo della certificazione';
-                }
-                return null;
-              },
-            ),
+                  }
+                  return null;
+                },
+              ),
             const SizedBox(height: 24),
 
             _buildMediaSection(),
@@ -1607,7 +1607,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
         'id_location': locationId,
         'n_users': _addedUsers.isNotEmpty ? 1 : 0,
         'id_certification_category': categoryId,
-        'status': 'draft',
+        'status': 'pending',
         'draft_at': DateTime.now().toIso8601String(),
       };
 
@@ -1623,7 +1623,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           certificationUsers.add({
             'id_user': user.idUser,
             'id_otp': otpData['otp_id'],
-            'status': 'draft',
+            'status': 'pending',
             'rejection_reason': null,
           });
         }
