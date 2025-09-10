@@ -147,17 +147,22 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
 
   Future<void> _loadLegalEntityName() async {
     try {
-      print('🔍 Loading legal entity name...');
-      // Usa il metodo che ha fallback per ID fissi
-      final certifierData = await DefaultIdsService.getValidCertifierWithLegalEntity();
-      if (certifierData == null) {
-        print('❌ No certifier data available');
+      print('🔍 Loading legal entity name by user...');
+      
+      // Ottieni l'utente loggato
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final currentUserId = await authProvider.getCurrentUserId();
+      
+      if (currentUserId == null) {
+        print('❌ No current user ID available');
         return;
       }
       
-      final String legalEntityId = certifierData['legalEntityId']!;
+      print('🔍 Current user ID: $currentUserId');
+      
+      // Usa il nuovo metodo che richiede l'ID dell'utente
       final String? legalEntityName =
-          await LegalEntityService.getLegalEntityName(legalEntityId);
+          await LegalEntityService.getLegalEntityNameByUser(currentUserId);
 
       if (legalEntityName != null) {
         setState(() {
@@ -165,7 +170,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
         });
         print('✅ Loaded legal entity name: $legalEntityName');
       } else {
-        print('❌ No legal entity name loaded');
+        print('❌ No legal entity name loaded for user');
       }
     } catch (e) {
       print('❌ Error loading legal entity name: $e');
