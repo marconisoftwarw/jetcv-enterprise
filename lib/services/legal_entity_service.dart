@@ -4,20 +4,22 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/app_config.dart';
 
 class LegalEntityService {
-  static Future<List<Map<String, dynamic>>?> getLegalEntitiesByUser(String userId) async {
+  static Future<List<Map<String, dynamic>>?> getLegalEntitiesByUser(
+    String userId,
+  ) async {
     try {
       print('🔍 Fetching legal entities by user from Edge Function...');
       print('🔍 User ID: $userId');
-      
+
       // Get the current user's access token
       final session = Supabase.instance.client.auth.currentSession;
       if (session == null) {
         print('❌ No active session found');
         return null;
       }
-      
-      final url = '${AppConfig.supabaseUrl}/functions/v1/get-legal-entities-by-user';
-      
+
+      final url = '${AppConfig.supabaseUrl}/functions/v1/get-legal-of-user';
+
       final response = await http.post(
         Uri.parse(url),
         headers: {
@@ -25,18 +27,18 @@ class LegalEntityService {
           'Authorization': 'Bearer ${session.accessToken}',
           'apikey': AppConfig.supabaseAnonKey,
         },
-        body: json.encode({
-          'id_user': userId,
-        }),
+        body: json.encode({'id_user': userId}),
       );
-      
+
       print('🔍 Response status: ${response.statusCode}');
       print('🔍 Response body: ${response.body}');
-      
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['ok'] == true && data['data'] != null) {
-          print('✅ Successfully fetched ${data['count']} legal entities for user');
+          print(
+            '✅ Successfully fetched ${data['count']} legal entities for user',
+          );
           return List<Map<String, dynamic>>.from(data['data']);
         } else {
           print('❌ Error in response: ${data['message']}');
@@ -51,15 +53,18 @@ class LegalEntityService {
       return null;
     }
   }
-  
+
   static Future<String?> getLegalEntityNameByUser(String userId) async {
     try {
       final legalEntities = await getLegalEntitiesByUser(userId);
       if (legalEntities != null && legalEntities.isNotEmpty) {
-        // Prendi la prima legal entity associata all'utente
+        // Prendi sempre la prima legal entity associata all'utente
+        // Se ce ne sono più di una, viene caricata sempre la prima
         final legalEntity = legalEntities.first;
         final legalName = legalEntity['legal_name'] as String?;
-        print('✅ Found legal entity name for user: $legalName');
+        print(
+          '✅ Found legal entity name for user: $legalName (first of ${legalEntities.length} entities)',
+        );
         return legalName;
       } else {
         print('❌ No legal entities found for user');
@@ -70,21 +75,21 @@ class LegalEntityService {
       return null;
     }
   }
-  
+
   // Metodo di fallback per compatibilità
   static Future<List<Map<String, dynamic>>?> getLegalEntities() async {
     try {
       print('🔍 Fetching legal entities from Edge Function...');
-      
+
       // Get the current user's access token
       final session = Supabase.instance.client.auth.currentSession;
       if (session == null) {
         print('❌ No active session found');
         return null;
       }
-      
+
       final url = '${AppConfig.supabaseUrl}/functions/v1/get-legal-entities';
-      
+
       final response = await http.get(
         Uri.parse(url),
         headers: {
@@ -92,7 +97,7 @@ class LegalEntityService {
           'Authorization': 'Bearer ${session.accessToken}',
         },
       );
-      
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['ok'] == true && data['data'] != null) {
@@ -111,7 +116,7 @@ class LegalEntityService {
       return null;
     }
   }
-  
+
   static Future<String?> getLegalEntityName(String legalEntityId) async {
     try {
       final legalEntities = await getLegalEntities();

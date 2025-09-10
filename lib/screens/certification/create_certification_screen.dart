@@ -56,6 +56,9 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
 
   // Legal entity information
   String? _legalEntityName;
+  List<Map<String, dynamic>> _legalEntities = [];
+  String? _selectedLegalEntityId;
+  bool _isLoadingLegalEntities = true;
 
   // Users management
   List<UserData> _addedUsers = [];
@@ -79,8 +82,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     _loadCategories();
     // Carica le informazioni di certificazione
     _loadCertificationFields();
-    // Carica il nome della legal entity
-    _loadLegalEntityName();
+    // Carica le legal entities dell'utente
+    _loadLegalEntities();
   }
 
   Future<void> _loadCategories() async {
@@ -145,35 +148,55 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     }
   }
 
-  Future<void> _loadLegalEntityName() async {
+  Future<void> _loadLegalEntities() async {
     try {
-      print('🔍 Loading legal entity name by user...');
-      
+      print('🔍 Loading legal entities by user...');
+
+      setState(() {
+        _isLoadingLegalEntities = true;
+      });
+
       // Ottieni l'utente loggato
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final currentUserId = await authProvider.getCurrentUserId();
-      
+
       if (currentUserId == null) {
         print('❌ No current user ID available');
+        setState(() {
+          _isLoadingLegalEntities = false;
+        });
         return;
       }
-      
-      print('🔍 Current user ID: $currentUserId');
-      
-      // Usa il nuovo metodo che richiede l'ID dell'utente
-      final String? legalEntityName =
-          await LegalEntityService.getLegalEntityNameByUser(currentUserId);
 
-      if (legalEntityName != null) {
+      print('🔍 Current user ID: $currentUserId');
+
+      // Carica tutte le legal entities dell'utente
+      final legalEntities = await LegalEntityService.getLegalEntitiesByUser(
+        currentUserId,
+      );
+
+      if (legalEntities != null && legalEntities.isNotEmpty) {
         setState(() {
-          _legalEntityName = legalEntityName;
+          _legalEntities = legalEntities;
+          // Seleziona automaticamente la prima legal entity
+          _selectedLegalEntityId =
+              legalEntities.first['id_legal_entity'] as String?;
+          _legalEntityName = legalEntities.first['legal_name'] as String?;
+          _isLoadingLegalEntities = false;
         });
-        print('✅ Loaded legal entity name: $legalEntityName');
+        print('✅ Loaded ${legalEntities.length} legal entities for user');
+        print('✅ Selected first legal entity: $_legalEntityName');
       } else {
-        print('❌ No legal entity name loaded for user');
+        print('❌ No legal entities found for user');
+        setState(() {
+          _isLoadingLegalEntities = false;
+        });
       }
     } catch (e) {
-      print('❌ Error loading legal entity name: $e');
+      print('❌ Error loading legal entities: $e');
+      setState(() {
+        _isLoadingLegalEntities = false;
+      });
     }
   }
 
@@ -382,11 +405,48 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             ),
             SizedBox(height: isTablet ? 20 : 16),
 
-            LinkedInTextField(
-              label: l10n.getString('issuing_organization'),
-              initialValue:
-                  _legalEntityName ?? l10n.getString('my_legal_entity'),
-              enabled: false,
+            DropdownButtonFormField<String>(
+              value: _selectedLegalEntityId,
+              decoration: InputDecoration(
+                labelText: l10n.getString('issuing_organization'),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: isTablet ? 16 : 12,
+                ),
+              ),
+              items: _isLoadingLegalEntities
+                  ? [
+                      DropdownMenuItem<String>(
+                        value: null,
+                        child: Text('Caricamento legal entities...'),
+                      ),
+                    ]
+                  : _legalEntities.map((legalEntity) {
+                      return DropdownMenuItem<String>(
+                        value: legalEntity['id_legal_entity'] as String,
+                        child: Text(legalEntity['legal_name'] as String),
+                      );
+                    }).toList(),
+              onChanged: _isLoadingLegalEntities
+                  ? null
+                  : (String? newValue) {
+                      if (newValue != null) {
+                        setState(() {
+                          _selectedLegalEntityId = newValue;
+                          // Trova il nome della legal entity selezionata
+                          final selectedEntity = _legalEntities.firstWhere(
+                            (entity) => entity['id_legal_entity'] == newValue,
+                            orElse: () => _legalEntities.first,
+                          );
+                          _legalEntityName =
+                              selectedEntity['legal_name'] as String?;
+                          print('🔍 Selected legal entity: $_legalEntityName');
+                        });
+                      }
+                    },
             ),
             SizedBox(height: isTablet ? 20 : 16),
 
@@ -1465,6 +1525,16 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
 
       print('🔍 Current user ID: $currentUserId');
 
+      // Verifica che sia stata selezionata una legal entity
+      if (_selectedLegalEntityId == null) {
+        print('❌ No legal entity selected');
+        setState(() {
+          _isCreating = false;
+          _errorMessage = 'Seleziona una legal entity prima di procedere.';
+        });
+        return;
+      }
+
       // Ottieni un certifier esistente con legal entity valida
       final certifierData =
           await DefaultIdsService.getValidCertifierWithLegalEntity();
@@ -1479,7 +1549,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
       }
 
       final certifierId = certifierData['certifierId']!;
-      final legalEntityId = certifierData['legalEntityId']!;
+      final legalEntityId =
+          _selectedLegalEntityId!; // Usa la legal entity selezionata
       final locationId =
           'a5196c46-3d57-4e8c-b293-f4dff308a1a0'; // ID fisso per location
 
