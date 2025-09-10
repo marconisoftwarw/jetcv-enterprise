@@ -74,6 +74,36 @@ class DefaultIdsService {
     }
   }
 
+  /// Ottiene l'ID della legal entity associata a un certifier specifico
+  static Future<String?> getLegalEntityIdForCertifier(
+    String certifierId,
+  ) async {
+    try {
+      print('🔍 Getting legal entity for certifier: $certifierId');
+      final uri = Uri.parse(
+        '$_baseUrl/certifier?id_certifier=eq.$certifierId&select=id_legal_entity&limit=1',
+      );
+      final response = await http.get(uri, headers: _headers);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        if (data.isNotEmpty) {
+          final legalEntityId = data[0]['id_legal_entity'] as String?;
+          print('✅ Found legal entity for certifier: $legalEntityId');
+          return legalEntityId;
+        }
+      } else {
+        print(
+          '❌ Error fetching legal entity for certifier: ${response.statusCode} - ${response.body}',
+        );
+      }
+      return null;
+    } catch (e) {
+      print('❌ Exception fetching legal entity for certifier: $e');
+      return null;
+    }
+  }
+
   /// Ottiene o crea un ID di default per una location
   static Future<String?> getDefaultLocationId() async {
     try {

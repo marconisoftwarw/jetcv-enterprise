@@ -8,6 +8,9 @@ import '../../widgets/linkedin_text_field.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/certification_edge_service.dart';
 import '../../services/certification_category_service.dart';
+import '../../services/certification_category_edge_service.dart';
+import '../../services/certification_information_service.dart';
+import '../../services/otp_verification_service.dart';
 import '../../services/default_ids_service.dart';
 import '../../config/app_config.dart';
 
@@ -27,22 +30,29 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
-  String _selectedActivityType = 'Corso Specifico';
+  final _otpController = TextEditingController();
+  String _selectedActivityType = '';
   List<File> _mediaFiles = [];
 
   // API state
   bool _isCreating = false;
   String? _errorMessage;
   String? _successMessage;
+  bool _isLoadingCategories = true;
+  bool _isVerifyingOtp = false;
 
-  final List<String> _activityTypes = [
-    'Corso Specifico',
-    'Workshop',
-    'Seminario',
-    'Formazione Online',
-    'Esame',
-    'Altro',
-  ];
+  // Dynamic categories from Edge Function
+  List<CertificationCategoryEdge> _categories = [];
+  String? _selectedCategoryId;
+
+  // Users management
+  List<UserData> _addedUsers = [];
+
+  // Certification information fields
+  List<CertificationInformation> _certificationUserFields = [];
+  bool _isLoadingCertificationFields = true;
+  Map<String, Map<String, String>> _userFieldValues =
+      {}; // user_id -> field_name -> value
 
   @override
   void initState() {
@@ -53,15 +63,70 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
       });
     });
 
-    // Inizializza le categorie predefinite
-    _initializeCategories();
+    // Carica le categorie dalla Edge Function
+    _loadCategories();
+    // Carica le informazioni di certificazione
+    _loadCertificationFields();
   }
 
-  Future<void> _initializeCategories() async {
+  Future<void> _loadCategories() async {
     try {
-      await CertificationCategoryService.createDefaultCategories();
+      setState(() {
+        _isLoadingCategories = true;
+      });
+
+      print('🔍 Loading categories from Edge Function...');
+      final categories = await CertificationCategoryEdgeService.getCategories();
+
+      if (categories.isNotEmpty) {
+        setState(() {
+          _categories = categories;
+          _selectedActivityType = categories.first.name;
+          _selectedCategoryId = categories.first.idCertificationCategory;
+          _isLoadingCategories = false;
+        });
+        print('✅ Loaded ${categories.length} categories');
+      } else {
+        print('❌ No categories loaded, using fallback');
+        setState(() {
+          _isLoadingCategories = false;
+        });
+      }
     } catch (e) {
-      print('❌ Error initializing categories: $e');
+      print('❌ Error loading categories: $e');
+      setState(() {
+        _isLoadingCategories = false;
+      });
+    }
+  }
+
+  Future<void> _loadCertificationFields() async {
+    try {
+      setState(() {
+        _isLoadingCertificationFields = true;
+      });
+
+      print('🔍 Loading certification fields from Edge Function...');
+      final fields =
+          await CertificationInformationService.getCertificationUserInformations();
+
+      if (fields.isNotEmpty) {
+        setState(() {
+          _certificationUserFields = fields;
+          _isLoadingCertificationFields = false;
+        });
+        print('✅ Loaded ${fields.length} certification user fields');
+      } else {
+        print('❌ No certification fields loaded');
+        setState(() {
+          _isLoadingCertificationFields = false;
+        });
+      }
+    } catch (e) {
+      print('❌ Error loading certification fields: $e');
+      setState(() {
+        _isLoadingCertificationFields = false;
+      });
     }
   }
 
@@ -69,6 +134,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
+    _otpController.dispose();
     _pageController.dispose();
     super.dispose();
   }
@@ -288,14 +354,38 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                   vertical: isTablet ? 16 : 12,
                 ),
               ),
-              items: _activityTypes.map((String type) {
-                return DropdownMenuItem<String>(value: type, child: Text(type));
-              }).toList(),
-              onChanged: (String? newValue) {
-                setState(() {
-                  _selectedActivityType = newValue!;
-                });
-              },
+              items: _isLoadingCategories
+                  ? [
+                      DropdownMenuItem<String>(
+                        value: '',
+                        child: Text('Caricamento...'),
+                      ),
+                    ]
+                  : _categories.map((CertificationCategoryEdge category) {
+                      return DropdownMenuItem<String>(
+                        value: category.name,
+                        child: Text(category.name),
+                      );
+                    }).toList(),
+              onChanged: _isLoadingCategories
+                  ? null
+                  : (String? newValue) {
+                      if (newValue != null) {
+                        setState(() {
+                          _selectedActivityType = newValue;
+                          // Trova l'ID della categoria selezionata
+                          final selectedCategory = _categories.firstWhere(
+                            (cat) => cat.name == newValue,
+                            orElse: () => _categories.first,
+                          );
+                          _selectedCategoryId =
+                              selectedCategory.idCertificationCategory;
+                          print(
+                            '🔍 Selected category: $newValue with ID: $_selectedCategoryId',
+                          );
+                        });
+                      }
+                    },
             ),
             SizedBox(height: isTablet ? 20 : 16),
 
@@ -506,15 +596,16 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             children: [
               Expanded(
                 child: LinkedInTextField(
+                  controller: _otpController,
                   label: 'Inserisci codice OTP utente',
-                  hintText: 'Inserisci codice OT...',
+                  hintText: 'Inserisci codice OTP...',
                   prefixIcon: Icon(Icons.numbers),
                 ),
               ),
               const SizedBox(width: 12),
               LinkedInButton(
-                onPressed: _addUserByOTP,
-                text: 'Aggiungi',
+                onPressed: _isVerifyingOtp ? null : _addUserByOTP,
+                text: _isVerifyingOtp ? 'Verificando...' : 'Aggiungi',
                 variant: LinkedInButtonVariant.primary,
               ),
             ],
@@ -574,21 +665,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   }
 
   Widget _buildUsersList() {
-    // Mock data - in real app this would come from state
-    final users = [
-      {
-        'name': 'Marco Bianchi',
-        'email': 'marco.bianchi@email.it',
-        'location': 'Milano, Italia',
-        'avatar': 'https://via.placeholder.com/40',
-      },
-      {
-        'name': 'Simone Moretti',
-        'email': 'simone.moretti@email.it',
-        'location': 'Firenze, Italia',
-        'avatar': 'https://via.placeholder.com/40',
-      },
-    ];
+    final isTablet = MediaQuery.of(context).size.width > 768;
 
     return LinkedInCard(
       child: Column(
@@ -599,36 +676,55 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Utenti Aggiunti (${users.length})',
+                _addedUsers.isEmpty ? 'Aggiungi Utente' : 'Utente Aggiunto',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: AppTheme.primaryBlack,
                 ),
               ),
-              TextButton.icon(
-                onPressed: _removeAllUsers,
-                icon: Icon(Icons.clear_all, size: 16),
-                label: Text('Rimuovi Tutti'),
-                style: TextButton.styleFrom(foregroundColor: AppTheme.errorRed),
-              ),
+              if (_addedUsers.isNotEmpty)
+                TextButton.icon(
+                  onPressed: _removeUser,
+                  icon: Icon(Icons.person_remove, size: 16),
+                  label: Text('Rimuovi Utente'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppTheme.errorRed,
+                  ),
+                ),
             ],
           ),
           const SizedBox(height: 16),
-          ...users.map((user) => _buildUserItem(user)).toList(),
+          if (_addedUsers.isEmpty)
+            Container(
+              padding: const EdgeInsets.all(20),
+              child: Center(
+                child: Text(
+                  'Nessun utente aggiunto. Inserisci un codice OTP per aggiungere un utente.',
+                  style: TextStyle(color: AppTheme.textSecondary, fontSize: 16),
+                ),
+              ),
+            )
+          else
+            ..._addedUsers.map((user) => _buildUserItem(user)).toList(),
         ],
       ),
     );
   }
 
-  Widget _buildUserItem(Map<String, String> user) {
+  Widget _buildUserItem(UserData user) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
           CircleAvatar(
             radius: 20,
-            backgroundImage: NetworkImage(user['avatar']!),
+            backgroundImage: user.profilePicture != null
+                ? NetworkImage(user.profilePicture!)
+                : null,
+            child: user.profilePicture == null
+                ? Icon(Icons.person, color: AppTheme.textSecondary)
+                : null,
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -636,46 +732,50 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  user['name']!,
+                  user.displayName,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: AppTheme.primaryBlack,
                   ),
                 ),
+                const SizedBox(height: 4),
                 Text(
-                  user['email']!,
+                  user.email,
                   style: TextStyle(fontSize: 14, color: AppTheme.textSecondary),
                 ),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.location_on,
-                      size: 14,
-                      color: AppTheme.textSecondary,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      user['location']!,
-                      style: TextStyle(
-                        fontSize: 14,
+                if (user.location.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.location_on,
+                        size: 14,
                         color: AppTheme.textSecondary,
                       ),
-                    ),
-                  ],
-                ),
+                      const SizedBox(width: 4),
+                      Text(
+                        user.location,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: AppTheme.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
           GestureDetector(
-            onTap: () => _removeUser(user),
+            onTap: () => _removeUser(),
             child: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: AppTheme.errorRed,
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.remove, color: AppTheme.pureWhite, size: 16),
+              child: Icon(Icons.close, color: AppTheme.pureWhite, size: 16),
             ),
           ),
         ],
@@ -749,16 +849,59 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   }
 
   Widget _buildUserResultsCard() {
+    final isTablet = MediaQuery.of(context).size.width > 768;
+
+    if (_addedUsers.isEmpty) {
+      return LinkedInCard(
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          child: Center(
+            child: Text(
+              'Nessun utente aggiunto. Inserisci un codice OTP per aggiungere un utente alla certificazione.',
+              style: TextStyle(color: AppTheme.textSecondary, fontSize: 16),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      );
+    }
+
     return LinkedInCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
+          if (_isLoadingCertificationFields)
+            Container(
+              padding: const EdgeInsets.all(20),
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else
+            ..._addedUsers
+                .map((user) => _buildUserResultSection(user, isTablet))
+                .toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUserResultSection(UserData user, bool isTablet) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header utente
           Row(
             children: [
               CircleAvatar(
                 radius: 24,
-                backgroundImage: NetworkImage('https://via.placeholder.com/48'),
+                backgroundImage: user.profilePicture != null
+                    ? NetworkImage(user.profilePicture!)
+                    : null,
+                child: user.profilePicture == null
+                    ? Icon(Icons.person, color: AppTheme.textSecondary)
+                    : null,
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -766,7 +909,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Giulia Rossi',
+                      user.displayName,
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -774,7 +917,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                       ),
                     ),
                     Text(
-                      'giulia.rossi@email.it',
+                      user.email,
                       style: TextStyle(
                         fontSize: 14,
                         color: AppTheme.textSecondary,
@@ -787,75 +930,41 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           ),
           const SizedBox(height: 24),
 
-          Row(
-            children: [
-              Expanded(
-                child: LinkedInTextField(
-                  label: 'Risultato',
-                  initialValue: 'Superato',
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: LinkedInTextField(
-                  label: 'Punteggio',
-                  initialValue: '90/100',
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: LinkedInTextField(
-                  label: 'Valutazione',
-                  initialValue: 'A+',
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-
-          Text(
-            'Media (Foto e Video)',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.primaryBlack,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              _buildMediaThumbnail(),
-              const SizedBox(width: 12),
-              _buildMediaThumbnail(),
-              const SizedBox(width: 12),
-              GestureDetector(
-                onTap: _addMedia,
-                child: Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: AppTheme.lightGrey,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: AppTheme.borderGrey,
-                      style: BorderStyle.solid,
-                    ),
-                  ),
-                  child: Center(
-                    child: Text(
-                      '+ Aggiungi',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: AppTheme.primaryBlue,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+          // Campi dinamici per questo utente
+          if (_certificationUserFields.isEmpty)
+            Text(
+              'Nessun campo di informazione disponibile',
+              style: TextStyle(color: AppTheme.textSecondary, fontSize: 14),
+            )
+          else
+            ..._certificationUserFields
+                .map((field) => _buildFieldInput(user, field, isTablet))
+                .toList(),
         ],
+      ),
+    );
+  }
+
+  Widget _buildFieldInput(
+    UserData user,
+    CertificationInformation field,
+    bool isTablet,
+  ) {
+    final currentValue = _userFieldValues[user.idUser]?[field.name] ?? '';
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: LinkedInTextField(
+        label: field.label,
+        initialValue: currentValue,
+        onChanged: (value) {
+          setState(() {
+            if (_userFieldValues[user.idUser] == null) {
+              _userFieldValues[user.idUser] = {};
+            }
+            _userFieldValues[user.idUser]![field.name] = value;
+          });
+        },
       ),
     );
   }
@@ -1206,24 +1315,29 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     });
 
     try {
-      // Ottieni l'ID della categoria
-      final categoryId = await CertificationCategoryService.getCategoryIdByName(
-        _selectedActivityType,
-      );
+      // Usa l'ID della categoria selezionata
+      final categoryId = _selectedCategoryId;
       if (categoryId == null) {
         setState(() {
           _isCreating = false;
-          _errorMessage = 'Categoria non trovata: $_selectedActivityType';
+          _errorMessage = 'Nessuna categoria selezionata';
         });
         return;
       }
+
+      print(
+        '🔍 Using category ID: $categoryId for activity: $_selectedActivityType',
+      );
 
       // Ottieni gli ID di default
       print('🔍 Getting default IDs...');
       final certifierId = await DefaultIdsService.getDefaultCertifierId();
       print('🔍 Certifier ID: $certifierId');
 
-      final legalEntityId = await DefaultIdsService.getDefaultLegalEntityId();
+      // Usa la legal entity del certificatore
+      final legalEntityId = certifierId != null
+          ? await DefaultIdsService.getLegalEntityIdForCertifier(certifierId)
+          : null;
       print('🔍 Legal Entity ID: $legalEntityId');
 
       final locationId = await DefaultIdsService.getDefaultLocationId();
@@ -1252,7 +1366,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           'id_certifier': fallbackCertifierId,
           'id_legal_entity': fallbackLegalEntityId,
           'id_location': fallbackLocationId,
-          'n_users': 1, // Default value
+          'n_users': _addedUsers.isNotEmpty ? 1 : 0,
           'id_certification_category': categoryId,
           'status': 'draft',
           'draft_at': DateTime.now().toIso8601String(),
@@ -1299,7 +1413,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
         'id_certifier': certifierId,
         'id_legal_entity': legalEntityId,
         'id_location': locationId,
-        'n_users': 1, // Default value
+        'n_users': _addedUsers.isNotEmpty ? 1 : 0,
         'id_certification_category': categoryId,
         'status': 'draft',
         'draft_at': DateTime.now().toIso8601String(),
@@ -1313,7 +1427,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
         idLegalEntity: certificationData['id_legal_entity'] as String,
         idLocation: certificationData['id_location'] as String,
         nUsers: certificationData['n_users'] as int,
-        idCertificationCategory: "126fa831-c3ce-4f12-bfc3-600c24bc25a7",
+        idCertificationCategory:
+            certificationData['id_certification_category'] as String,
         status: certificationData['status'] as String?,
         draftAt: certificationData['draft_at'] as String?,
       );
@@ -1381,7 +1496,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     }
   }
 
-  void _showSuccessDialog() {
+  void _showSuccessDialog([String? message]) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -1393,14 +1508,52 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             const Text('Successo'),
           ],
         ),
-        content: Text(_successMessage ?? 'Certificazione creata con successo!'),
+        content: Text(
+          message ?? _successMessage ?? 'Certificazione creata con successo!',
+        ),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(context).pop(); // Chiudi dialog
+              if (message != null) {
+                // Se è un messaggio di successo per utente aggiunto, non chiudere la schermata
+                return;
+              }
               Navigator.of(context).pop(); // Chiudi screen
             },
             child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.error, color: AppTheme.errorRed),
+            const SizedBox(width: 8),
+            const Text('Errore'),
+          ],
+        ),
+        content: Text(
+          message,
+          style: TextStyle(fontSize: 16, color: AppTheme.primaryBlack),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'OK',
+              style: TextStyle(
+                color: AppTheme.primaryBlue,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
           ),
         ],
       ),
@@ -1423,20 +1576,79 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     });
   }
 
-  void _addUserByOTP() {
-    // Implement OTP user addition
+  Future<void> _addUserByOTP() async {
+    final otpCode = _otpController.text.trim();
+
+    if (otpCode.isEmpty) {
+      _showErrorDialog('Inserisci un codice OTP valido');
+      return;
+    }
+
+    setState(() {
+      _isVerifyingOtp = true;
+    });
+
+    try {
+      print('🔍 Verifying OTP: $otpCode');
+      final result = await OtpVerificationService.verifyOtp(otpCode);
+
+      if (result.success && result.user != null) {
+        // Verifica se c'è già un utente (massimo 1 per certificazione)
+        if (_addedUsers.isNotEmpty) {
+          _showErrorDialog(
+            'È possibile aggiungere solo un utente per certificazione',
+          );
+        } else {
+          // Verifica se l'utente è già stato aggiunto (controllo ridondante ma sicuro)
+          final existingUser = _addedUsers.any(
+            (user) => user.idUser == result.user!.idUser,
+          );
+
+          if (existingUser) {
+            _showErrorDialog('Questo utente è già stato aggiunto');
+          } else {
+            setState(() {
+              _addedUsers.add(result.user!);
+              // Inizializza i valori dei campi per il nuovo utente
+              _userFieldValues[result.user!.idUser] = {};
+              _otpController.clear();
+            });
+            _showSuccessDialog('Utente aggiunto con successo!');
+          }
+        }
+      } else {
+        _showErrorDialog(
+          result.errorMessage ?? 'Errore durante la verifica OTP',
+        );
+      }
+    } catch (e) {
+      print('❌ Error adding user by OTP: $e');
+      _showErrorDialog('Errore di connessione: $e');
+    } finally {
+      setState(() {
+        _isVerifyingOtp = false;
+      });
+    }
   }
 
   void _scanQRCode() {
     // Implement QR code scanning
   }
 
-  void _removeUser(Map<String, String> user) {
-    // Implement user removal
+  void _removeUser() {
+    if (_addedUsers.isNotEmpty) {
+      setState(() {
+        _addedUsers.clear();
+        _userFieldValues.clear();
+      });
+    }
   }
 
   void _removeAllUsers() {
-    // Implement remove all users
+    setState(() {
+      _addedUsers.clear();
+      _userFieldValues.clear();
+    });
   }
 
   void _sendCertification() {
