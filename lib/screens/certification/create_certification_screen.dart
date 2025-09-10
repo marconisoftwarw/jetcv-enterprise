@@ -51,6 +51,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   // Dynamic categories from Edge Function
   List<CertificationCategoryEdge> _categories = [];
   String? _selectedCategoryId;
+  String? _selectedCategoryName;
 
   // Users management
   List<UserData> _addedUsers = [];
@@ -90,6 +91,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           _categories = categories;
           _selectedActivityType = categories.first.name;
           _selectedCategoryId = categories.first.idCertificationCategory;
+          _selectedCategoryName = categories.first.name;
           _isLoadingCategories = false;
         });
         print('✅ Loaded ${categories.length} categories');
@@ -387,6 +389,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                           );
                           _selectedCategoryId =
                               selectedCategory.idCertificationCategory;
+                          _selectedCategoryName = selectedCategory.name;
                           print(
                             '🔍 Selected category: $newValue with ID: $_selectedCategoryId',
                           );
@@ -1061,8 +1064,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               Expanded(
                 child: LinkedInButton(
                   onPressed: _sendCertification,
-                  text: l10n.getString('send_certification'),
-                  icon: Icons.send,
+                  text: 'Conferma Certificazione',
+                  icon: Icons.check_circle,
                   variant: LinkedInButtonVariant.primary,
                 ),
               ),
@@ -1136,6 +1139,9 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   }
 
   Widget _buildUsersReviewCard() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 768;
+
     return LinkedInCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1146,9 +1152,9 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               Icon(Icons.people, color: AppTheme.primaryBlue),
               const SizedBox(width: 8),
               Text(
-                'Utenti (1)',
+                'Utenti (${_addedUsers.length})',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: isTablet ? 18 : 16,
                   fontWeight: FontWeight.bold,
                   color: AppTheme.primaryBlack,
                 ),
@@ -1156,69 +1162,120 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             ],
           ),
           const SizedBox(height: 16),
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 20,
-                backgroundImage: NetworkImage('https://via.placeholder.com/40'),
+          if (_addedUsers.isEmpty)
+            Container(
+              padding: EdgeInsets.all(isTablet ? 16 : 12),
+              decoration: BoxDecoration(
+                color: AppTheme.lightGrey.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: AppTheme.textSecondary.withValues(alpha: 0.3),
+                ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Giulia Rossi',
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    color: AppTheme.textSecondary,
+                    size: isTablet ? 20 : 18,
+                  ),
+                  SizedBox(width: isTablet ? 12 : 8),
+                  Expanded(
+                    child: Text(
+                      'Nessun utente aggiunto alla certificazione',
                       style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.primaryBlack,
-                      ),
-                    ),
-                    Text(
-                      'giulia.rossi@example.com',
-                      style: TextStyle(
-                        fontSize: 14,
+                        fontSize: isTablet ? 14 : 12,
                         color: AppTheme.textSecondary,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppTheme.lightGrey,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Column(
-              children: [
-                _buildReviewItem('Risultato', 'Superato'),
-                _buildReviewItem('Punteggio', 'A+'),
-                _buildReviewItem('Valutazione', 'Non valutato'),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Media del Certificatore (2)',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.primaryBlack,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              _buildMediaThumbnail(),
-              const SizedBox(width: 8),
-              _buildMediaThumbnail(),
-            ],
-          ),
+            )
+          else
+            ..._addedUsers
+                .map(
+                  (user) => Padding(
+                    padding: EdgeInsets.only(bottom: isTablet ? 12 : 8),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: isTablet ? 24 : 20,
+                          backgroundColor: AppTheme.primaryBlue.withValues(
+                            alpha: 0.1,
+                          ),
+                          child: Icon(
+                            Icons.person,
+                            color: AppTheme.primaryBlue,
+                            size: isTablet ? 24 : 20,
+                          ),
+                        ),
+                        SizedBox(width: isTablet ? 16 : 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                user.fullName ??
+                                    '${user.firstName ?? ''} ${user.lastName ?? ''}'
+                                        .trim(),
+                                style: TextStyle(
+                                  fontSize: isTablet ? 16 : 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppTheme.primaryBlack,
+                                ),
+                              ),
+                              if (user.email != null) ...[
+                                SizedBox(height: isTablet ? 2 : 1),
+                                Text(
+                                  user.email!,
+                                  style: TextStyle(
+                                    fontSize: isTablet ? 14 : 12,
+                                    color: AppTheme.textSecondary,
+                                  ),
+                                ),
+                              ],
+                              if (user.phone != null) ...[
+                                SizedBox(height: isTablet ? 2 : 1),
+                                Text(
+                                  user.phone!,
+                                  style: TextStyle(
+                                    fontSize: isTablet ? 14 : 12,
+                                    color: AppTheme.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isTablet ? 12 : 8,
+                            vertical: isTablet ? 6 : 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppTheme.successGreen.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: AppTheme.successGreen.withValues(
+                                alpha: 0.3,
+                              ),
+                            ),
+                          ),
+                          child: Text(
+                            'Aggiunto',
+                            style: TextStyle(
+                              fontSize: isTablet ? 12 : 10,
+                              color: AppTheme.successGreen,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+                .toList(),
         ],
       ),
     );
@@ -1314,6 +1371,12 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
 
   Future<void> _createCertification() async {
     print('🚀 Creating certification...');
+
+    // Mostra alert di conferma prima di inviare
+    final shouldProceed = await _showConfirmationDialog();
+    if (!shouldProceed) {
+      return;
+    }
 
     setState(() {
       _isCreating = true;
@@ -1461,7 +1524,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
         }
 
         setState(() {
-          _successMessage = 'Certificazione creata con successo!';
+          _successMessage = 'Certificazione inviata con successo!';
           _isCreating = false;
         });
 
@@ -1477,6 +1540,180 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
         _isCreating = false;
       });
     }
+  }
+
+  /// Mostra dialog di conferma per l'invio della certificazione
+  Future<bool> _showConfirmationDialog() async {
+    final l10n = AppLocalizations.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 768;
+
+    return await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              title: Row(
+                children: [
+                  Icon(
+                    Icons.send_rounded,
+                    color: AppTheme.primaryBlue,
+                    size: isTablet ? 28 : 24,
+                  ),
+                  SizedBox(width: isTablet ? 12 : 8),
+                  Expanded(
+                    child: Text(
+                      'Conferma Invio Certificazione',
+                      style: TextStyle(
+                        fontSize: isTablet ? 20 : 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.primaryBlack,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Sei sicuro di voler inviare questa certificazione?',
+                    style: TextStyle(
+                      fontSize: isTablet ? 16 : 14,
+                      color: AppTheme.primaryBlack,
+                    ),
+                  ),
+                  SizedBox(height: isTablet ? 16 : 12),
+                  Container(
+                    padding: EdgeInsets.all(isTablet ? 16 : 12),
+                    decoration: BoxDecoration(
+                      color: AppTheme.lightGrey.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: AppTheme.primaryBlue.withValues(alpha: 0.2),
+                        width: 1,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Dettagli Certificazione:',
+                          style: TextStyle(
+                            fontSize: isTablet ? 14 : 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.primaryBlack,
+                          ),
+                        ),
+                        SizedBox(height: isTablet ? 8 : 6),
+                        if (_selectedCategoryName != null)
+                          _buildDetailRow(
+                            'Categoria:',
+                            _selectedCategoryName!,
+                            isTablet,
+                          ),
+                        if (_addedUsers.isNotEmpty)
+                          _buildDetailRow(
+                            'Utenti:',
+                            '${_addedUsers.length} utente/i aggiunto/i',
+                            isTablet,
+                          ),
+                        _buildDetailRow(
+                          'Status:',
+                          'Inviata (non più modificabile)',
+                          isTablet,
+                        ),
+                        _buildDetailRow('Data invio:', 'Ora', isTablet),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: isTablet ? 16 : 12),
+                  Text(
+                    '⚠️ Una volta inviata, la certificazione non potrà più essere modificata.',
+                    style: TextStyle(
+                      fontSize: isTablet ? 14 : 12,
+                      color: AppTheme.warningOrange,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: Text(
+                    'Annulla',
+                    style: TextStyle(
+                      color: AppTheme.textSecondary,
+                      fontSize: isTablet ? 16 : 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                SizedBox(width: isTablet ? 8 : 4),
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryBlue,
+                    foregroundColor: AppTheme.pureWhite,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isTablet ? 24 : 20,
+                      vertical: isTablet ? 12 : 10,
+                    ),
+                  ),
+                  child: Text(
+                    'Invia Certificazione',
+                    style: TextStyle(
+                      fontSize: isTablet ? 16 : 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
+  }
+
+  /// Costruisce una riga di dettaglio per il dialog
+  Widget _buildDetailRow(String label, String value, bool isTablet) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: isTablet ? 4 : 2),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: isTablet ? 80 : 70,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: isTablet ? 12 : 11,
+                color: AppTheme.textSecondary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: isTablet ? 12 : 11,
+                color: AppTheme.primaryBlack,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   /// Converte i File in Map per l'API
@@ -1804,9 +2041,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
 
             LinkedInButton(
               onPressed: _isCreating ? null : _createCertification,
-              text: _isCreating
-                  ? 'Creazione in corso...'
-                  : 'Crea Certificazione',
+              text: _isCreating ? 'Invio in corso...' : 'Invia Certificazione',
               variant: LinkedInButtonVariant.primary,
               fullWidth: true,
             ),
