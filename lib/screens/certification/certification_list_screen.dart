@@ -61,14 +61,9 @@ class _CertificationListScreenState extends State<CertificationListScreen>
 
     try {
       // Carica i nomi delle categorie e luoghi in parallelo
-      print('📋 Loading category and location names...');
-      final futures = await Future.wait([
-        CertificationCategoryService.getCategoryNames(),
-        LocationService.getLocationNames(),
-      ]);
-
-      _categoryNames = futures[0] as Map<String, String>;
-      _locationNames = futures[1] as Map<String, String>;
+      print('📋 Loading category names...');
+      _categoryNames = await CertificationCategoryService.getCategoryNames();
+      _locationNames = {}; // Non più necessario
       print(
         '📋 Loaded ${_categoryNames.length} categories and ${_locationNames.length} locations',
       );
