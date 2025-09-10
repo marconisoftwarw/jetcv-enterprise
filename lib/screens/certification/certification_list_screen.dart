@@ -94,7 +94,9 @@ class _CertificationListScreenState extends State<CertificationListScreen>
 
       if (mounted) {
         setState(() {
-          _draftCertifications = List<Map<String, dynamic>>.from(allDraftAndPending);
+          _draftCertifications = List<Map<String, dynamic>>.from(
+            allDraftAndPending,
+          );
           _pendingCertifications = []; // Non più necessario
           _isLoading = false;
         });
@@ -206,9 +208,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
             fontWeight: FontWeight.w600,
             fontSize: isTablet ? 16 : 14,
           ),
-          tabs: [
-            Tab(text: 'Bozze e In corso'),
-          ],
+          tabs: [Tab(text: 'Bozze e In corso')],
         ),
       ),
       body: TabBarView(
@@ -295,34 +295,33 @@ class _CertificationListScreenState extends State<CertificationListScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-            Padding(
-              padding: EdgeInsets.all(isTablet ? 24 : 16),
-              child: Text(
-                'Bozze e In corso (${_draftCertifications.length})',
-                style: TextStyle(
-                  fontSize: isTablet ? 20 : 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.primaryBlack,
-                ),
-              ),
+        Padding(
+          padding: EdgeInsets.all(isTablet ? 24 : 16),
+          child: Text(
+            'Bozze e In corso (${_draftCertifications.length})',
+            style: TextStyle(
+              fontSize: isTablet ? 20 : 18,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.primaryBlack,
             ),
-            Expanded(
-              child: ListView.builder(
-                padding: EdgeInsets.symmetric(horizontal: isTablet ? 24 : 16),
-                itemCount: _draftCertifications.length,
-                itemBuilder: (context, index) {
-                  final cert = _draftCertifications[index];
-                  return Padding(
-                    padding: EdgeInsets.only(bottom: 16),
-                    child: _buildCertificationCard(cert, l10n, isTablet),
-                  );
-                },
-              ),
-            ),
-          ],
-        );
+          ),
+        ),
+        Expanded(
+          child: ListView.builder(
+            padding: EdgeInsets.symmetric(horizontal: isTablet ? 24 : 16),
+            itemCount: _draftCertifications.length,
+            itemBuilder: (context, index) {
+              final cert = _draftCertifications[index];
+              return Padding(
+                padding: EdgeInsets.only(bottom: 16),
+                child: _buildCertificationCard(cert, l10n, isTablet),
+              );
+            },
+          ),
+        ),
+      ],
+    );
   }
-
 
   Widget _buildCertificationCard(
     Map<String, dynamic> cert,
@@ -452,7 +451,11 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                   SizedBox(height: isTablet ? 2 : 1),
                   Row(
                     children: [
-                      Icon(Icons.update, size: 16, color: AppTheme.textSecondary),
+                      Icon(
+                        Icons.update,
+                        size: 16,
+                        color: AppTheme.textSecondary,
+                      ),
                       SizedBox(width: 4),
                       Expanded(
                         child: Text(
@@ -467,10 +470,10 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                     ],
                   ),
                 ],
-            ],
+              ],
+            ),
           ),
         ),
-      ),
       ),
     );
   }
