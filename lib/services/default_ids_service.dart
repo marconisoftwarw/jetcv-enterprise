@@ -231,6 +231,38 @@ class DefaultIdsService {
     }
   }
 
+  /// Ottiene il nome della legal entity
+  static Future<String?> getLegalEntityName(String legalEntityId) async {
+    try {
+      print('🔍 Getting legal entity name for ID: $legalEntityId');
+
+      final response = await http.get(
+        Uri.parse(
+          '$_baseUrl/legal_entity?id_legal_entity=eq.$legalEntityId&select=legal_name&limit=1',
+        ),
+        headers: _headers,
+      );
+
+      print('🔍 Response status: ${response.statusCode}');
+      print('🔍 Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        if (data.isNotEmpty) {
+          final legalName = data[0]['legal_name'] as String?;
+          print('✅ Found legal entity name: $legalName');
+          return legalName;
+        }
+      }
+
+      print('❌ No legal entity found with ID: $legalEntityId');
+      return null;
+    } catch (e) {
+      print('❌ Error getting legal entity name: $e');
+      return null;
+    }
+  }
+
   /// Crea un certifier di default
   static Future<String?> _createDefaultCertifier() async {
     try {

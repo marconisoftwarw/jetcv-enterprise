@@ -53,6 +53,9 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   String? _selectedCategoryId;
   String? _selectedCategoryName;
 
+  // Legal entity information
+  String? _legalEntityName;
+
   // Users management
   List<UserData> _addedUsers = [];
 
@@ -75,6 +78,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     _loadCategories();
     // Carica le informazioni di certificazione
     _loadCertificationFields();
+    // Carica il nome della legal entity
+    _loadLegalEntityName();
   }
 
   Future<void> _loadCategories() async {
@@ -136,6 +141,32 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
       setState(() {
         _isLoadingCertificationFields = false;
       });
+    }
+  }
+
+  Future<void> _loadLegalEntityName() async {
+    try {
+      print('🔍 Loading legal entity name...');
+      // Usa l'ID della legal entity di default
+      final String? legalEntityId =
+          await DefaultIdsService.getDefaultLegalEntityId();
+      if (legalEntityId == null) {
+        print('❌ No legal entity ID available');
+        return;
+      }
+      final String? legalEntityName =
+          await DefaultIdsService.getLegalEntityName(legalEntityId);
+
+      if (legalEntityName != null) {
+        setState(() {
+          _legalEntityName = legalEntityName;
+        });
+        print('✅ Loaded legal entity name: $legalEntityName');
+      } else {
+        print('❌ No legal entity name loaded');
+      }
+    } catch (e) {
+      print('❌ Error loading legal entity name: $e');
     }
   }
 
@@ -346,7 +377,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
 
             LinkedInTextField(
               label: l10n.getString('issuing_organization'),
-              initialValue: l10n.getString('my_legal_entity'),
+              initialValue:
+                  _legalEntityName ?? l10n.getString('my_legal_entity'),
               enabled: false,
             ),
             SizedBox(height: isTablet ? 20 : 16),
@@ -859,6 +891,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   }
 
   Widget _buildUserResultsCard() {
+    final l10n = AppLocalizations.of(context);
     final isTablet = MediaQuery.of(context).size.width > 768;
 
     if (_addedUsers.isEmpty) {
@@ -867,7 +900,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           padding: const EdgeInsets.all(20),
           child: Center(
             child: Text(
-              'Nessun utente aggiunto. Inserisci un codice OTP per aggiungere un utente alla certificazione.',
+              l10n.getString('no_users_added_otp_instruction'),
               style: TextStyle(color: AppTheme.textSecondary, fontSize: 16),
               textAlign: TextAlign.center,
             ),
@@ -896,6 +929,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   }
 
   Widget _buildUserResultSection(UserData user, bool isTablet) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 24),
       child: Column(
@@ -943,7 +977,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           // Campi dinamici per questo utente
           if (_certificationUserFields.isEmpty)
             Text(
-              'Nessun campo di informazione disponibile',
+              l10n.getString('no_information_fields_available'),
               style: TextStyle(color: AppTheme.textSecondary, fontSize: 14),
             )
           else
@@ -1077,6 +1111,10 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   }
 
   Widget _buildReviewCard() {
+    final l10n = AppLocalizations.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 768;
+
     return LinkedInCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1087,9 +1125,9 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               Icon(Icons.info, color: AppTheme.primaryBlue),
               const SizedBox(width: 8),
               Text(
-                'Informazioni Generali',
+                l10n.getString('general_info'),
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: isTablet ? 18 : 16,
                   fontWeight: FontWeight.bold,
                   color: AppTheme.primaryBlack,
                 ),
@@ -1097,11 +1135,17 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             ],
           ),
           const SizedBox(height: 16),
-          _buildReviewItem('Titolo', 'Corso Platform Management in-place'),
-          _buildReviewItem('Organizzazione', 'La mia Legal Entity'),
           _buildReviewItem(
-            'Descrizione',
-            'I partecipanti apprenderanno le modalità specifiche della gestione di una piattaforma in loco.',
+            l10n.getString('title'),
+            _selectedCategoryName ?? l10n.getString('no_category_selected'),
+          ),
+          _buildReviewItem(
+            l10n.getString('organization'),
+            _legalEntityName ?? l10n.getString('loading_organization'),
+          ),
+          _buildReviewItem(
+            l10n.getString('description'),
+            l10n.getString('certification_description'),
           ),
         ],
       ),
@@ -1139,6 +1183,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   }
 
   Widget _buildUsersReviewCard() {
+    final l10n = AppLocalizations.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 768;
 
@@ -1434,6 +1479,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
       print('🔍 Using valid IDs from database:');
       print('  - Certifier ID: $certifierId');
       print('  - Legal Entity ID: $legalEntityId');
+      print('  - Legal Entity Name: $_legalEntityName');
       print('  - Location ID: $locationId');
 
       print('✅ All required IDs available:');
@@ -1566,7 +1612,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                   SizedBox(width: isTablet ? 12 : 8),
                   Expanded(
                     child: Text(
-                      'Conferma Invio Certificazione',
+                      l10n.getString('confirm_certification_send'),
                       style: TextStyle(
                         fontSize: isTablet ? 20 : 18,
                         fontWeight: FontWeight.bold,
@@ -1581,7 +1627,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Sei sicuro di voler inviare questa certificazione?',
+                    l10n.getString('confirm_send_certification_question'),
                     style: TextStyle(
                       fontSize: isTablet ? 16 : 14,
                       color: AppTheme.primaryBlack,
@@ -1602,7 +1648,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Dettagli Certificazione:',
+                          l10n.getString('certification_details'),
                           style: TextStyle(
                             fontSize: isTablet ? 14 : 12,
                             fontWeight: FontWeight.w600,
@@ -1612,28 +1658,32 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                         SizedBox(height: isTablet ? 8 : 6),
                         if (_selectedCategoryName != null)
                           _buildDetailRow(
-                            'Categoria:',
+                            '${l10n.getString('category')}:',
                             _selectedCategoryName!,
                             isTablet,
                           ),
                         if (_addedUsers.isNotEmpty)
                           _buildDetailRow(
-                            'Utenti:',
-                            '${_addedUsers.length} utente/i aggiunto/i',
+                            '${l10n.getString('users')}:',
+                            '${_addedUsers.length} ${l10n.getString('users_added')}',
                             isTablet,
                           ),
                         _buildDetailRow(
-                          'Status:',
-                          'Inviata (non più modificabile)',
+                          '${l10n.getString('status')}:',
+                          l10n.getString('sent_not_modifiable'),
                           isTablet,
                         ),
-                        _buildDetailRow('Data invio:', 'Ora', isTablet),
+                        _buildDetailRow(
+                          '${l10n.getString('send_date')}:',
+                          l10n.getString('now'),
+                          isTablet,
+                        ),
                       ],
                     ),
                   ),
                   SizedBox(height: isTablet ? 16 : 12),
                   Text(
-                    '⚠️ Una volta inviata, la certificazione non potrà più essere modificata.',
+                    '⚠️ ${l10n.getString('certification_send_warning')}',
                     style: TextStyle(
                       fontSize: isTablet ? 14 : 12,
                       color: AppTheme.warningOrange,
@@ -1646,7 +1696,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(false),
                   child: Text(
-                    'Annulla',
+                    l10n.getString('cancel'),
                     style: TextStyle(
                       color: AppTheme.textSecondary,
                       fontSize: isTablet ? 16 : 14,
@@ -1669,7 +1719,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                     ),
                   ),
                   child: Text(
-                    'Invia Certificazione',
+                    l10n.getString('send_certification'),
                     style: TextStyle(
                       fontSize: isTablet ? 16 : 14,
                       fontWeight: FontWeight.w600,
@@ -1973,6 +2023,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   }
 
   void _sendCertification() {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -2041,7 +2092,9 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
 
             LinkedInButton(
               onPressed: _isCreating ? null : _createCertification,
-              text: _isCreating ? 'Invio in corso...' : 'Invia Certificazione',
+              text: _isCreating
+                  ? l10n.getString('sending_in_progress')
+                  : l10n.getString('send_certification'),
               variant: LinkedInButtonVariant.primary,
               fullWidth: true,
             ),
