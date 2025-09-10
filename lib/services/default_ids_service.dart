@@ -4,7 +4,7 @@ import '../config/app_config.dart';
 
 class DefaultIdsService {
   static const String _baseUrl = '${AppConfig.supabaseUrl}/rest/v1';
-  
+
   static Map<String, String> get _headers => {
     'Content-Type': 'application/json',
     'apikey': AppConfig.supabaseAnonKey,
@@ -15,12 +15,17 @@ class DefaultIdsService {
   static Future<String?> getDefaultCertifierId() async {
     try {
       print('🔍 Getting default certifier ID...');
-      
+      print('🔍 URL: $_baseUrl/certifier?limit=1');
+      print('🔍 Headers: $_headers');
+
       // Prima prova a ottenere un certifier esistente
       final response = await http.get(
         Uri.parse('$_baseUrl/certifier?limit=1'),
         headers: _headers,
       );
+
+      print('🔍 Response status: ${response.statusCode}');
+      print('🔍 Response body: ${response.body}');
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
@@ -44,7 +49,7 @@ class DefaultIdsService {
   static Future<String?> getDefaultLegalEntityId() async {
     try {
       print('🔍 Getting default legal entity ID...');
-      
+
       // Prima prova a ottenere una legal entity esistente
       final response = await http.get(
         Uri.parse('$_baseUrl/legal_entity?limit=1'),
@@ -73,7 +78,7 @@ class DefaultIdsService {
   static Future<String?> getDefaultLocationId() async {
     try {
       print('🔍 Getting default location ID...');
-      
+
       // Prima prova a ottenere una location esistente
       final response = await http.get(
         Uri.parse('$_baseUrl/location?limit=1'),
@@ -103,7 +108,9 @@ class DefaultIdsService {
     try {
       final data = {
         'id_certifier_hash': 'default-certifier-hash',
-        'id_legal_entity': await getDefaultLegalEntityId() ?? '550e8400-e29b-41d4-a716-446655440002',
+        'id_legal_entity':
+            await getDefaultLegalEntityId() ??
+            '550e8400-e29b-41d4-a716-446655440002',
         'id_user': null,
         'active': true,
         'role': 'default_certifier',
@@ -121,7 +128,9 @@ class DefaultIdsService {
         print('✅ Created default certifier: $certifierId');
         return certifierId;
       } else {
-        print('❌ Error creating default certifier: ${response.statusCode} - ${response.body}');
+        print(
+          '❌ Error creating default certifier: ${response.statusCode} - ${response.body}',
+        );
         return null;
       }
     } catch (e) {
@@ -168,7 +177,9 @@ class DefaultIdsService {
         print('✅ Created default legal entity: $legalEntityId');
         return legalEntityId;
       } else {
-        print('❌ Error creating default legal entity: ${response.statusCode} - ${response.body}');
+        print(
+          '❌ Error creating default legal entity: ${response.statusCode} - ${response.body}',
+        );
         return null;
       }
     } catch (e) {
@@ -214,7 +225,9 @@ class DefaultIdsService {
         print('✅ Created default location: $locationId');
         return locationId;
       } else {
-        print('❌ Error creating default location: ${response.statusCode} - ${response.body}');
+        print(
+          '❌ Error creating default location: ${response.statusCode} - ${response.body}',
+        );
         return null;
       }
     } catch (e) {
