@@ -28,8 +28,8 @@ class _CertificationListScreenState extends State<CertificationListScreen>
   int _selectedTabIndex = 0;
 
   // Dati delle certificazioni
-  List<Map<String, dynamic>> _issuedCertifications = [];
   List<Map<String, dynamic>> _draftCertifications = [];
+  List<Map<String, dynamic>> _pendingCertifications = [];
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -67,15 +67,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
 
       print('✅ Edge Function connection OK, loading certifications...');
 
-      // Carica certificazioni emesse (status: completed, closed)
-      print('📋 Loading issued certifications...');
-      final issuedResult = await CertificationEdgeService.getCertifications(
-        status: 'sent',
-        limit: 50,
-        offset: 0,
-      );
-
-      // Carica bozze e in corso (status: draft, submitted)
+      // Carica certificazioni in bozza (status: draft)
       print('📝 Loading draft certifications...');
       final draftResult = await CertificationEdgeService.getCertifications(
         status: 'draft',
@@ -83,21 +75,29 @@ class _CertificationListScreenState extends State<CertificationListScreen>
         offset: 0,
       );
 
-      print('📊 Issued certifications: ${issuedResult?['data']?.length ?? 0}');
+      // Carica certificazioni in corso (status: pending)
+      print('⏳ Loading pending certifications...');
+      final pendingResult = await CertificationEdgeService.getCertifications(
+        status: 'pending',
+        limit: 50,
+        offset: 0,
+      );
+
       print('📝 Draft certifications: ${draftResult?['data']?.length ?? 0}');
+      print('⏳ Pending certifications: ${pendingResult?['data']?.length ?? 0}');
 
       if (mounted) {
         setState(() {
-          _issuedCertifications = List<Map<String, dynamic>>.from(
-            issuedResult?['data'] ?? [],
-          );
           _draftCertifications = List<Map<String, dynamic>>.from(
             draftResult?['data'] ?? [],
+          );
+          _pendingCertifications = List<Map<String, dynamic>>.from(
+            pendingResult?['data'] ?? [],
           );
           _isLoading = false;
         });
         print(
-          '✅ State updated with ${_issuedCertifications.length} issued and ${_draftCertifications.length} draft certifications',
+          '✅ State updated with ${_draftCertifications.length} draft and ${_pendingCertifications.length} pending certifications',
         );
       }
     } catch (e) {
@@ -114,52 +114,46 @@ class _CertificationListScreenState extends State<CertificationListScreen>
   void _loadMockData() {
     print('📝 Loading mock data for testing in CertificationListScreen...');
 
-    final mockIssued = [
+    final mockDrafts = [
       {
         'id_certification': 'cert-001',
         'serial_number': 'ABC12-DEF34',
-        'status': 'approved',
-        'created_at': DateTime.now()
-            .subtract(const Duration(days: 5))
-            .toIso8601String(),
-        'updated_t': DateTime.now()
-            .subtract(const Duration(days: 2))
-            .toIso8601String(),
-        'n_users': 3,
-        'id_certification_category': 'tech-skills',
-      },
-      {
-        'id_certification': 'cert-002',
-        'serial_number': 'GHI56-JKL78',
-        'status': 'closed',
-        'created_at': DateTime.now()
-            .subtract(const Duration(days: 10))
-            .toIso8601String(),
-        'updated_t': DateTime.now()
-            .subtract(const Duration(days: 1))
-            .toIso8601String(),
-        'n_users': 2,
-        'id_certification_category': 'design-skills',
-      },
-    ];
-
-    final mockDrafts = [
-      {
-        'id_certification': 'cert-003',
-        'serial_number': 'MNO90-PQR12',
         'status': 'draft',
         'created_at': DateTime.now()
             .subtract(const Duration(days: 1))
             .toIso8601String(),
         'n_users': 1,
+        'id_certification_category': 'tech-skills',
+      },
+      {
+        'id_certification': 'cert-002',
+        'serial_number': 'GHI56-JKL78',
+        'status': 'draft',
+        'created_at': DateTime.now()
+            .subtract(const Duration(days: 2))
+            .toIso8601String(),
+        'n_users': 1,
+        'id_certification_category': 'design-skills',
+      },
+    ];
+
+    final mockPending = [
+      {
+        'id_certification': 'cert-003',
+        'serial_number': 'MNO90-PQR12',
+        'status': 'pending',
+        'created_at': DateTime.now()
+            .subtract(const Duration(hours: 6))
+            .toIso8601String(),
+        'n_users': 2,
         'id_certification_category': 'soft-skills',
       },
     ];
 
     if (mounted) {
       setState(() {
-        _issuedCertifications = mockIssued;
         _draftCertifications = mockDrafts;
+        _pendingCertifications = mockPending;
         _isLoading = false;
         _errorMessage = null;
       });
@@ -208,14 +202,14 @@ class _CertificationListScreenState extends State<CertificationListScreen>
             fontSize: isTablet ? 16 : 14,
           ),
           tabs: [
-            Tab(text: l10n.getString('issued_certifications')),
-            Tab(text: l10n.getString('drafts_in_progress')),
+            Tab(text: 'Bozze'),
+            Tab(text: 'In corso'),
           ],
         ),
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [_buildIssuedCertificationsTab(), _buildDraftsTab()],
+        children: [_buildDraftsTab(), _buildPendingTab()],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
@@ -235,7 +229,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
     );
   }
 
-  Widget _buildIssuedCertificationsTab() {
+  Widget _buildDraftsTab() {
     final l10n = AppLocalizations.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 768;
@@ -269,19 +263,15 @@ class _CertificationListScreenState extends State<CertificationListScreen>
       );
     }
 
-    if (_issuedCertifications.isEmpty) {
+    if (_draftCertifications.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.assignment_outlined,
-              size: 64,
-              color: AppTheme.textSecondary,
-            ),
+            Icon(Icons.edit_outlined, size: 64, color: AppTheme.textSecondary),
             const SizedBox(height: 16),
             Text(
-              'Nessuna certificazione emessa',
+              'Nessuna bozza',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -290,7 +280,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
             ),
             const SizedBox(height: 8),
             Text(
-              'Le certificazioni completate appariranno qui',
+              'Le certificazioni in bozza appariranno qui',
               style: TextStyle(color: AppTheme.textSecondary),
             ),
           ],
@@ -311,9 +301,9 @@ class _CertificationListScreenState extends State<CertificationListScreen>
             crossAxisSpacing: 16,
             mainAxisSpacing: 16,
           ),
-          itemCount: _issuedCertifications.length,
+          itemCount: _draftCertifications.length,
           itemBuilder: (context, index) {
-            final cert = _issuedCertifications[index];
+            final cert = _draftCertifications[index];
             return _buildCertificationCard(cert, l10n, isTablet);
           },
         );
@@ -321,7 +311,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
     );
   }
 
-  Widget _buildDraftsTab() {
+  Widget _buildPendingTab() {
     final l10n = AppLocalizations.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 768;
@@ -354,7 +344,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
       );
     }
 
-    if (_draftCertifications.isEmpty) {
+    if (_pendingCertifications.isEmpty) {
       return Center(
         child: Padding(
           padding: EdgeInsets.all(isTablet ? 32 : 16),
@@ -362,13 +352,13 @@ class _CertificationListScreenState extends State<CertificationListScreen>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                Icons.edit_note,
+                Icons.hourglass_empty,
                 size: isTablet ? 80 : 64,
                 color: AppTheme.textSecondary,
               ),
               SizedBox(height: isTablet ? 24 : 16),
               Text(
-                l10n.getString('no_drafts_available'),
+                'Nessuna certificazione in corso',
                 style: TextStyle(
                   fontSize: isTablet ? 22 : 18,
                   fontWeight: FontWeight.w600,
@@ -378,7 +368,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
               ),
               SizedBox(height: isTablet ? 12 : 8),
               Text(
-                l10n.getString('drafts_will_appear_here'),
+                'Le certificazioni in elaborazione appariranno qui',
                 style: TextStyle(
                   color: AppTheme.textSecondary,
                   fontSize: isTablet ? 16 : 14,
@@ -398,7 +388,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Bozze e In Corso (${_draftCertifications.length})',
+            'In corso (${_pendingCertifications.length})',
             style: TextStyle(
               fontSize: isTablet ? 22 : 20,
               fontWeight: FontWeight.bold,
@@ -406,7 +396,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
             ),
           ),
           SizedBox(height: isTablet ? 16 : 12),
-          ..._draftCertifications.map((cert) {
+          ..._pendingCertifications.map((cert) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 16),
               child: _buildCertificationCard(cert, l10n, isTablet),
@@ -563,6 +553,8 @@ class _CertificationListScreenState extends State<CertificationListScreen>
         return AppTheme.textSecondary;
       case 'draft':
         return AppTheme.warningOrange;
+      case 'pending':
+        return AppTheme.primaryBlue;
       default:
         return AppTheme.textSecondary;
     }
@@ -576,6 +568,8 @@ class _CertificationListScreenState extends State<CertificationListScreen>
         return 'Chiusa';
       case 'draft':
         return 'Bozza';
+      case 'pending':
+        return 'In corso';
       default:
         return 'Sconosciuto';
     }
