@@ -58,7 +58,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
       // Prima testa la connessione alla Edge Function
       print('🧪 Testing Edge Function connection...');
       final connectionOk = await CertificationEdgeService.testConnection();
-      
+
       if (!connectionOk) {
         print('⚠️ Edge Function not available, using mock data for testing');
         _loadMockData();
@@ -70,7 +70,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
       // Carica certificazioni emesse (status: completed, closed)
       print('📋 Loading issued certifications...');
       final issuedResult = await CertificationEdgeService.getCertifications(
-        status: 'completed',
+        status: 'sent',
         limit: 50,
         offset: 0,
       );
@@ -96,7 +96,9 @@ class _CertificationListScreenState extends State<CertificationListScreen>
           );
           _isLoading = false;
         });
-        print('✅ State updated with ${_issuedCertifications.length} issued and ${_draftCertifications.length} draft certifications');
+        print(
+          '✅ State updated with ${_issuedCertifications.length} issued and ${_draftCertifications.length} draft certifications',
+        );
       }
     } catch (e) {
       print('💥 Error loading certifications: $e');
@@ -111,14 +113,18 @@ class _CertificationListScreenState extends State<CertificationListScreen>
 
   void _loadMockData() {
     print('📝 Loading mock data for testing in CertificationListScreen...');
-    
+
     final mockIssued = [
       {
         'id_certification': 'cert-001',
         'serial_number': 'ABC12-DEF34',
         'status': 'approved',
-        'created_at': DateTime.now().subtract(const Duration(days: 5)).toIso8601String(),
-        'updated_t': DateTime.now().subtract(const Duration(days: 2)).toIso8601String(),
+        'created_at': DateTime.now()
+            .subtract(const Duration(days: 5))
+            .toIso8601String(),
+        'updated_t': DateTime.now()
+            .subtract(const Duration(days: 2))
+            .toIso8601String(),
         'n_users': 3,
         'id_certification_category': 'tech-skills',
       },
@@ -126,8 +132,12 @@ class _CertificationListScreenState extends State<CertificationListScreen>
         'id_certification': 'cert-002',
         'serial_number': 'GHI56-JKL78',
         'status': 'closed',
-        'created_at': DateTime.now().subtract(const Duration(days: 10)).toIso8601String(),
-        'updated_t': DateTime.now().subtract(const Duration(days: 1)).toIso8601String(),
+        'created_at': DateTime.now()
+            .subtract(const Duration(days: 10))
+            .toIso8601String(),
+        'updated_t': DateTime.now()
+            .subtract(const Duration(days: 1))
+            .toIso8601String(),
         'n_users': 2,
         'id_certification_category': 'design-skills',
       },
@@ -138,7 +148,9 @@ class _CertificationListScreenState extends State<CertificationListScreen>
         'id_certification': 'cert-003',
         'serial_number': 'MNO90-PQR12',
         'status': 'draft',
-        'created_at': DateTime.now().subtract(const Duration(days: 1)).toIso8601String(),
+        'created_at': DateTime.now()
+            .subtract(const Duration(days: 1))
+            .toIso8601String(),
         'n_users': 1,
         'id_certification_category': 'soft-skills',
       },
@@ -251,33 +263,33 @@ class _CertificationListScreenState extends State<CertificationListScreen>
             ElevatedButton(
               onPressed: _loadCertifications,
               child: const Text('Riprova'),
-                    ),
-                  ],
-                ),
+            ),
+          ],
+        ),
       );
     }
 
     if (_issuedCertifications.isEmpty) {
       return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
               Icons.assignment_outlined,
-                          size: 64,
+              size: 64,
               color: AppTheme.textSecondary,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
+            ),
+            const SizedBox(height: 16),
+            Text(
               'Nessuna certificazione emessa',
-                          style: TextStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                            color: AppTheme.primaryBlack,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
+                color: AppTheme.primaryBlack,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
               'Le certificazioni completate appariranno qui',
               style: TextStyle(color: AppTheme.textSecondary),
             ),
@@ -336,9 +348,9 @@ class _CertificationListScreenState extends State<CertificationListScreen>
             ElevatedButton(
               onPressed: _loadCertifications,
               child: const Text('Riprova'),
-                        ),
-                      ],
-                    ),
+            ),
+          ],
+        ),
       );
     }
 
@@ -413,7 +425,8 @@ class _CertificationListScreenState extends State<CertificationListScreen>
     final status = cert['status'] ?? 'draft';
     final statusColor = _getStatusColor(status);
     final statusText = _getStatusText(status);
-    final createdAt = DateTime.tryParse(cert['created_at'] ?? '') ?? DateTime.now();
+    final createdAt =
+        DateTime.tryParse(cert['created_at'] ?? '') ?? DateTime.now();
     final nUsers = cert['n_users'] ?? 0;
 
     return LinkedInCard(
@@ -422,13 +435,13 @@ class _CertificationListScreenState extends State<CertificationListScreen>
           // TODO: Navigate to certification details
         },
         borderRadius: BorderRadius.circular(12),
-      child: Padding(
+        child: Padding(
           padding: EdgeInsets.all(isTablet ? 16 : 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
                   Container(
                     width: isTablet ? 60 : 50,
                     height: isTablet ? 60 : 50,
@@ -443,18 +456,18 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                     ),
                   ),
                   SizedBox(width: isTablet ? 16 : 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                         Row(
                           children: [
                             Expanded(
                               child: Text(
                                 'Certificazione ${cert['serial_number'] ?? 'N/A'}',
-                        style: TextStyle(
+                                style: TextStyle(
                                   fontSize: isTablet ? 18 : 16,
-                          fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.bold,
                                   color: AppTheme.primaryBlack,
                                 ),
                               ),
@@ -480,7 +493,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                           ],
                         ),
                         SizedBox(height: isTablet ? 6 : 4),
-            Text(
+                        Text(
                           'Categoria: ${cert['id_certification_category'] ?? 'N/A'}',
                           style: TextStyle(
                             fontSize: isTablet ? 14 : 12,
@@ -488,15 +501,15 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                           ),
                         ),
                         SizedBox(height: isTablet ? 8 : 6),
-                Text(
+                        Text(
                           'Utenti: $nUsers',
                           style: TextStyle(
                             fontSize: isTablet ? 14 : 12,
                             color: AppTheme.primaryBlack,
-                  ),
-                ),
-              ],
-            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   Icon(
                     Icons.arrow_forward_ios,
@@ -506,8 +519,8 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                 ],
               ),
               SizedBox(height: isTablet ? 16 : 12),
-            Row(
-              children: [
+              Row(
+                children: [
                   Icon(
                     Icons.calendar_today,
                     size: 16,
@@ -544,15 +557,12 @@ class _CertificationListScreenState extends State<CertificationListScreen>
 
   Color _getStatusColor(String status) {
     switch (status) {
-      case 'completed':
-      case 'closed':
+      case 'sent':
         return AppTheme.successGreen;
-      case 'submitted':
-        return AppTheme.warningOrange;
-      case 'draft':
+      case 'closed':
         return AppTheme.textSecondary;
-      case 'rejected':
-        return AppTheme.errorRed;
+      case 'draft':
+        return AppTheme.warningOrange;
       default:
         return AppTheme.textSecondary;
     }
@@ -560,16 +570,12 @@ class _CertificationListScreenState extends State<CertificationListScreen>
 
   String _getStatusText(String status) {
     switch (status) {
-      case 'completed':
-        return 'Completata';
+      case 'sent':
+        return 'Inviata';
       case 'closed':
         return 'Chiusa';
-      case 'submitted':
-        return 'Inviata';
       case 'draft':
         return 'Bozza';
-      case 'rejected':
-        return 'Rifiutata';
       default:
         return 'Sconosciuto';
     }

@@ -7,6 +7,8 @@ import '../../widgets/linkedin_card.dart';
 import '../../widgets/linkedin_text_field.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/certification_edge_service.dart';
+import '../../services/certification_category_service.dart';
+import '../../services/default_ids_service.dart';
 import '../../config/app_config.dart';
 
 class CreateCertificationScreen extends StatefulWidget {
@@ -50,6 +52,17 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
         _currentStep = _pageController.page?.round() ?? 0;
       });
     });
+
+    // Inizializza le categorie predefinite
+    _initializeCategories();
+  }
+
+  Future<void> _initializeCategories() async {
+    try {
+      await CertificationCategoryService.createDefaultCategories();
+    } catch (e) {
+      print('❌ Error initializing categories: $e');
+    }
   }
 
   @override
@@ -1185,7 +1198,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
 
   Future<void> _createCertification() async {
     print('🚀 Creating certification...');
-    
+
     setState(() {
       _isCreating = true;
       _errorMessage = null;
@@ -1193,13 +1206,38 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     });
 
     try {
+      // Ottieni l'ID della categoria
+      final categoryId = await CertificationCategoryService.getCategoryIdByName(
+        _selectedActivityType,
+      );
+      if (categoryId == null) {
+        setState(() {
+          _isCreating = false;
+          _errorMessage = 'Categoria non trovata: $_selectedActivityType';
+        });
+        return;
+      }
+
+      // Ottieni gli ID di default
+      final certifierId = await DefaultIdsService.getDefaultCertifierId();
+      final legalEntityId = await DefaultIdsService.getDefaultLegalEntityId();
+      final locationId = await DefaultIdsService.getDefaultLocationId();
+
+      if (certifierId == null || legalEntityId == null || locationId == null) {
+        setState(() {
+          _isCreating = false;
+          _errorMessage = 'Errore nel recupero degli ID di default';
+        });
+        return;
+      }
+
       // Prepara i dati della certificazione
       final certificationData = {
-        'id_certifier': 'current-user-id', // TODO: Get from AuthProvider
-        'id_legal_entity': 'current-legal-entity-id', // TODO: Get from context
-        'id_location': 'default-location-id', // TODO: Get from context
+        'id_certifier': certifierId,
+        'id_legal_entity': legalEntityId,
+        'id_location': locationId,
         'n_users': 1, // Default value
-        'id_certification_category': _selectedActivityType.toLowerCase().replaceAll(' ', '-'),
+        'id_certification_category': categoryId,
         'status': 'draft',
         'draft_at': DateTime.now().toIso8601String(),
       };
@@ -1219,7 +1257,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
 
       if (result != null) {
         print('✅ Certification created successfully: $result');
-        
+
         // Se ci sono media files, aggiungili
         if (_mediaFiles.isNotEmpty) {
           await _addMediaToCertification(result['id_certification']);
@@ -1247,15 +1285,26 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   Future<void> _addMediaToCertification(String certificationId) async {
     try {
       print('📸 Adding media to certification: $certificationId');
-      
-      final mediaData = _mediaFiles.map((file) => {
-        'name': file.path.split('/').last,
-        'description': 'Media file for certification',
-        'acquisition_type': 'camera',
-        'captured_at': DateTime.now().toIso8601String(),
-        'file_type': file.path.split('.').last,
-        'id_location': 'default-location-id', // TODO: Get from context
-      }).toList();
+
+      // Ottieni l'ID di location di default
+      final locationId = await DefaultIdsService.getDefaultLocationId();
+      if (locationId == null) {
+        print('❌ Could not get default location ID');
+        return;
+      }
+
+      final mediaData = _mediaFiles
+          .map(
+            (file) => {
+              'name': file.path.split('/').last,
+              'description': 'Media file for certification',
+              'acquisition_type': 'camera',
+              'captured_at': DateTime.now().toIso8601String(),
+              'file_type': file.path.split('.').last,
+              'id_location': locationId,
+            },
+          )
+          .toList();
 
       final result = await CertificationEdgeService.addCertificationMedia(
         certificationId: certificationId,
@@ -1359,7 +1408,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               style: TextStyle(color: AppTheme.textSecondary, fontSize: 14),
             ),
             const SizedBox(height: 24),
-            
+
             // Error message
             if (_errorMessage != null) ...[
               Container(
@@ -1367,16 +1416,25 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 decoration: BoxDecoration(
                   color: AppTheme.errorRed.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppTheme.errorRed.withValues(alpha: 0.3)),
+                  border: Border.all(
+                    color: AppTheme.errorRed.withValues(alpha: 0.3),
+                  ),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.error_outline, color: AppTheme.errorRed, size: 20),
+                    Icon(
+                      Icons.error_outline,
+                      color: AppTheme.errorRed,
+                      size: 20,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         _errorMessage!,
-                        style: TextStyle(color: AppTheme.errorRed, fontSize: 14),
+                        style: TextStyle(
+                          color: AppTheme.errorRed,
+                          fontSize: 14,
+                        ),
                       ),
                     ),
                   ],
@@ -1384,10 +1442,12 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               ),
               const SizedBox(height: 16),
             ],
-            
+
             LinkedInButton(
               onPressed: _isCreating ? null : _createCertification,
-              text: _isCreating ? 'Creazione in corso...' : 'Crea Certificazione',
+              text: _isCreating
+                  ? 'Creazione in corso...'
+                  : 'Crea Certificazione',
               variant: LinkedInButtonVariant.primary,
               fullWidth: true,
             ),

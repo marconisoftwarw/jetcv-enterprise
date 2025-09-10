@@ -61,7 +61,7 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
       // Prima testa la connessione alla Edge Function
       print('🧪 Testing Edge Function connection...');
       final connectionOk = await CertificationEdgeService.testConnection();
-      
+
       if (!connectionOk) {
         print('⚠️ Edge Function not available, using mock data for testing');
         _loadMockData();
@@ -73,7 +73,7 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
       // Carica certificazioni emesse (status: completed, closed)
       print('📋 Loading issued certifications...');
       final issuedResult = await CertificationEdgeService.getCertifications(
-        status: 'completed',
+        status: 'sent',
         limit: 50,
         offset: 0,
       );
@@ -99,7 +99,9 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
           );
           _isLoading = false;
         });
-        print('✅ State updated with ${_issuedCertifications.length} issued and ${_draftCertifications.length} draft certifications');
+        print(
+          '✅ State updated with ${_issuedCertifications.length} issued and ${_draftCertifications.length} draft certifications',
+        );
       }
     } catch (e) {
       print('💥 Error loading certifications: $e');
@@ -114,14 +116,18 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
 
   void _loadMockData() {
     print('📝 Loading mock data for testing...');
-    
+
     final mockIssued = [
       {
         'id_certification': 'cert-001',
         'serial_number': 'ABC12-DEF34',
         'status': 'approved',
-        'created_at': DateTime.now().subtract(const Duration(days: 5)).toIso8601String(),
-        'updated_t': DateTime.now().subtract(const Duration(days: 2)).toIso8601String(),
+        'created_at': DateTime.now()
+            .subtract(const Duration(days: 5))
+            .toIso8601String(),
+        'updated_t': DateTime.now()
+            .subtract(const Duration(days: 2))
+            .toIso8601String(),
         'n_users': 3,
         'id_certification_category': 'tech-skills',
       },
@@ -129,8 +135,12 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
         'id_certification': 'cert-002',
         'serial_number': 'GHI56-JKL78',
         'status': 'closed',
-        'created_at': DateTime.now().subtract(const Duration(days: 10)).toIso8601String(),
-        'updated_t': DateTime.now().subtract(const Duration(days: 1)).toIso8601String(),
+        'created_at': DateTime.now()
+            .subtract(const Duration(days: 10))
+            .toIso8601String(),
+        'updated_t': DateTime.now()
+            .subtract(const Duration(days: 1))
+            .toIso8601String(),
         'n_users': 2,
         'id_certification_category': 'design-skills',
       },
@@ -141,7 +151,9 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
         'id_certification': 'cert-003',
         'serial_number': 'MNO90-PQR12',
         'status': 'draft',
-        'created_at': DateTime.now().subtract(const Duration(days: 1)).toIso8601String(),
+        'created_at': DateTime.now()
+            .subtract(const Duration(days: 1))
+            .toIso8601String(),
         'n_users': 1,
         'id_certification_category': 'soft-skills',
       },
@@ -159,37 +171,42 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
 
   Future<void> _testDirectApiCall() async {
     print('🧪 Testing direct API call...');
-    
+
     try {
-      const String url = '${AppConfig.supabaseUrl}/functions/v1/certification-crud';
+      const String url =
+          '${AppConfig.supabaseUrl}/functions/v1/certification-crud';
       final headers = {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ${AppConfig.supabaseAnonKey}',
         'apikey': AppConfig.supabaseAnonKey,
       };
-      
+
       print('🌐 Direct URL: $url');
       print('🔑 Direct Headers: $headers');
-      
+
       final response = await http.get(Uri.parse(url), headers: headers);
-      
+
       print('📡 Direct Response Status: ${response.statusCode}');
       print('📄 Direct Response Body: ${response.body}');
-      
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         print('✅ Direct API call successful! Data: $data');
-        
+
         if (mounted) {
           setState(() {
-            _issuedCertifications = List<Map<String, dynamic>>.from(data['data'] ?? []);
+            _issuedCertifications = List<Map<String, dynamic>>.from(
+              data['data'] ?? [],
+            );
             _draftCertifications = [];
             _isLoading = false;
             _errorMessage = null;
           });
         }
       } else {
-        print('❌ Direct API call failed: ${response.statusCode} - ${response.body}');
+        print(
+          '❌ Direct API call failed: ${response.statusCode} - ${response.body}',
+        );
       }
     } catch (e) {
       print('💥 Direct API call exception: $e');
@@ -232,50 +249,50 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
         controller: _tabController,
         children: [_buildIssuedCertificationsTab(), _buildDraftsTab()],
       ),
-                  floatingActionButton: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      FloatingActionButton(
-                        onPressed: () {
-                          print('🧪 Direct API test button pressed');
-                          _testDirectApiCall();
-                        },
-                        backgroundColor: AppTheme.errorRed,
-                        foregroundColor: AppTheme.pureWhite,
-                        elevation: 8,
-                        heroTag: "direct",
-                        child: const Icon(Icons.api),
-                      ),
-                      const SizedBox(height: 8),
-                      FloatingActionButton(
-                        onPressed: () {
-                          print('🧪 Manual test button pressed');
-                          _loadCertifications();
-                        },
-                        backgroundColor: AppTheme.warningOrange,
-                        foregroundColor: AppTheme.pureWhite,
-                        elevation: 8,
-                        heroTag: "test",
-                        child: const Icon(Icons.refresh),
-                      ),
-                      const SizedBox(height: 8),
-                      FloatingActionButton.extended(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const CreateCertificationScreen(),
-                            ),
-                          );
-                        },
-                        backgroundColor: AppTheme.primaryBlack,
-                        foregroundColor: AppTheme.pureWhite,
-                        elevation: 8,
-                        icon: const Icon(Icons.add),
-                        label: const Text('Nuova Certificazione'),
-                      ),
-                    ],
-                  ),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            onPressed: () {
+              print('🧪 Direct API test button pressed');
+              _testDirectApiCall();
+            },
+            backgroundColor: AppTheme.errorRed,
+            foregroundColor: AppTheme.pureWhite,
+            elevation: 8,
+            heroTag: "direct",
+            child: const Icon(Icons.api),
+          ),
+          const SizedBox(height: 8),
+          FloatingActionButton(
+            onPressed: () {
+              print('🧪 Manual test button pressed');
+              _loadCertifications();
+            },
+            backgroundColor: AppTheme.warningOrange,
+            foregroundColor: AppTheme.pureWhite,
+            elevation: 8,
+            heroTag: "test",
+            child: const Icon(Icons.refresh),
+          ),
+          const SizedBox(height: 8),
+          FloatingActionButton.extended(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const CreateCertificationScreen(),
+                ),
+              );
+            },
+            backgroundColor: AppTheme.primaryBlack,
+            foregroundColor: AppTheme.pureWhite,
+            elevation: 8,
+            icon: const Icon(Icons.add),
+            label: const Text('Nuova Certificazione'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -686,15 +703,12 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
 
   Color _getStatusColor(String status) {
     switch (status) {
-      case 'completed':
-      case 'closed':
+      case 'sent':
         return AppTheme.successGreen;
-      case 'submitted':
-        return AppTheme.warningOrange;
-      case 'draft':
+      case 'closed':
         return AppTheme.textSecondary;
-      case 'rejected':
-        return AppTheme.errorRed;
+      case 'draft':
+        return AppTheme.warningOrange;
       default:
         return AppTheme.textSecondary;
     }
@@ -702,16 +716,12 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
 
   String _getStatusText(String status) {
     switch (status) {
-      case 'completed':
-        return 'Completata';
+      case 'sent':
+        return 'Inviata';
       case 'closed':
         return 'Chiusa';
-      case 'submitted':
-        return 'Inviata';
       case 'draft':
         return 'Bozza';
-      case 'rejected':
-        return 'Rifiutata';
       default:
         return 'Sconosciuto';
     }

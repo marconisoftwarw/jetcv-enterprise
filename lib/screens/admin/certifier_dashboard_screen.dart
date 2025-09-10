@@ -16,7 +16,8 @@ class AdminCertifierDashboardScreen extends StatefulWidget {
       _AdminCertifierDashboardScreenState();
 }
 
-class _AdminCertifierDashboardScreenState extends State<AdminCertifierDashboardScreen> {
+class _AdminCertifierDashboardScreenState
+    extends State<AdminCertifierDashboardScreen> {
   @override
   void initState() {
     super.initState();
