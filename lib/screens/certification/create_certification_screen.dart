@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../../theme/app_theme.dart';
@@ -13,6 +14,7 @@ import '../../services/certification_information_service.dart';
 import '../../services/otp_verification_service.dart';
 import '../../services/default_ids_service.dart';
 import '../../config/app_config.dart';
+import '../../providers/auth_provider.dart';
 
 class CreateCertificationScreen extends StatefulWidget {
   const CreateCertificationScreen({super.key});
@@ -1329,33 +1331,56 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
         '🔍 Using category ID: $categoryId for activity: $_selectedActivityType',
       );
 
-      // Ottieni gli ID di default
-      print('🔍 Getting default IDs...');
-      final certifierId = await DefaultIdsService.getDefaultCertifierId();
+      // Ottieni l'utente loggato
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final currentUserId = await authProvider.getCurrentUserId();
+      
+      if (currentUserId == null) {
+        setState(() {
+          _isCreating = false;
+          _errorMessage = 'Utente non autenticato';
+        });
+        return;
+      }
+
+      print('🔍 Current user ID: $currentUserId');
+
+      // Ottieni il certifier dell'utente loggato
+      final certifierId = await DefaultIdsService.getCertifierForUser(currentUserId);
       print('🔍 Certifier ID: $certifierId');
 
-      // Usa la legal entity del certificatore
-      final legalEntityId = certifierId != null
-          ? await DefaultIdsService.getLegalEntityIdForCertifier(certifierId)
-          : null;
+      // Ottieni la legal entity dell'utente loggato
+      final legalEntityId = await DefaultIdsService.getLegalEntityForUser(currentUserId);
       print('🔍 Legal Entity ID: $legalEntityId');
 
-      final locationId = await DefaultIdsService.getDefaultLocationId();
+      // Ottieni o crea una location per l'utente loggato
+      final locationId = await DefaultIdsService.getLocationForUser(currentUserId);
       print('🔍 Location ID: $locationId');
 
       if (certifierId == null || legalEntityId == null || locationId == null) {
         print(
           '❌ One or more IDs are null: certifier=$certifierId, legalEntity=$legalEntityId, location=$locationId',
         );
-        print('🔄 Using fallback UUIDs...');
+        
+        // Se l'utente non ha un certifier, non possiamo creare una certificazione
+        if (certifierId == null) {
+          setState(() {
+            _isCreating = false;
+            _errorMessage = 'Utente non autorizzato a creare certificazioni. Contatta l\'amministratore.';
+          });
+          return;
+        }
 
-        // Usa UUID di fallback se il servizio non funziona
-        final fallbackCertifierId =
-            certifierId ?? '550e8400-e29b-41d4-a716-446655440001';
-        final fallbackLegalEntityId =
-            legalEntityId ?? '550e8400-e29b-41d4-a716-446655440002';
-        final fallbackLocationId =
-            locationId ?? '550e8400-e29b-41d4-a716-446655440003';
+        print('🔄 Using fallback for missing IDs...');
+
+        // Usa UUID di fallback per location, ma crea una legal entity valida se manca
+        final fallbackCertifierId = certifierId;
+        final fallbackLegalEntityId = legalEntityId ?? 
+            await DefaultIdsService.getDefaultLegalEntityId() ??
+            await DefaultIdsService.createDefaultLegalEntity();
+        final fallbackLocationId = locationId ?? 
+            await DefaultIdsService.getLocationForUser(currentUserId) ??
+            '550e8400-e29b-41d4-a716-446655440003';
 
         print(
           '🔄 Fallback IDs: certifier=$fallbackCertifierId, legalEntity=$fallbackLegalEntityId, location=$fallbackLocationId',
@@ -1464,10 +1489,17 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     try {
       print('📸 Adding media to certification: $certificationId');
 
-      // Ottieni l'ID di location di default
-      final locationId = await DefaultIdsService.getDefaultLocationId();
+      // Ottieni l'ID di location dell'utente
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final currentUserId = await authProvider.getCurrentUserId();
+      if (currentUserId == null) {
+        print('❌ Could not get current user ID');
+        return;
+      }
+      
+      final locationId = await DefaultIdsService.getLocationForUser(currentUserId);
       if (locationId == null) {
-        print('❌ Could not get default location ID');
+        print('❌ Could not get location ID for user');
         return;
       }
 

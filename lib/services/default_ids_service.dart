@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../config/app_config.dart';
+import 'location_service.dart';
 
 class DefaultIdsService {
   static const String _baseUrl = '${AppConfig.supabaseUrl}/rest/v1';
@@ -67,7 +68,7 @@ class DefaultIdsService {
 
       // Se non ci sono legal entities, crea una di default
       print('📝 No legal entities found, creating default...');
-      return await _createDefaultLegalEntity();
+      return await createDefaultLegalEntity();
     } catch (e) {
       print('❌ Error getting default legal entity ID: $e');
       return null;
@@ -100,6 +101,99 @@ class DefaultIdsService {
       return null;
     } catch (e) {
       print('❌ Exception fetching legal entity for certifier: $e');
+      return null;
+    }
+  }
+
+  /// Ottiene o crea una legal entity valida per il certifier
+  static Future<String?> getValidLegalEntityIdForCertifier(String certifierId) async {
+    try {
+      // Prima prova a ottenere la legal entity del certifier
+      final legalEntityId = await getLegalEntityIdForCertifier(certifierId);
+      if (legalEntityId != null) {
+        // Verifica che la legal entity esista realmente
+        final verifyResponse = await http.get(
+          Uri.parse('$_baseUrl/legal_entity?id_legal_entity=eq.$legalEntityId&limit=1'),
+          headers: _headers,
+        );
+        
+        if (verifyResponse.statusCode == 200) {
+          final List<dynamic> data = json.decode(verifyResponse.body);
+          if (data.isNotEmpty) {
+            print('✅ Legal entity exists and is valid: $legalEntityId');
+            return legalEntityId;
+          }
+        }
+      }
+
+      // Se non esiste o non è valida, crea una nuova legal entity
+      print('📝 Creating new legal entity for certifier...');
+      return await createDefaultLegalEntity();
+    } catch (e) {
+      print('❌ Error getting valid legal entity for certifier: $e');
+      return null;
+    }
+  }
+
+  /// Ottiene il certifier dell'utente loggato
+  static Future<String?> getCertifierForUser(String userId) async {
+    try {
+      print('🔍 Getting certifier for user: $userId');
+      final uri = Uri.parse(
+        '$_baseUrl/certifier?id_user=eq.$userId&select=id_certifier,id_legal_entity&limit=1',
+      );
+      final response = await http.get(uri, headers: _headers);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        if (data.isNotEmpty) {
+          final certifierId = data[0]['id_certifier'] as String?;
+          print('✅ Found certifier for user: $certifierId');
+          return certifierId;
+        }
+      } else {
+        print('❌ Error fetching certifier for user: ${response.statusCode} - ${response.body}');
+      }
+      return null;
+    } catch (e) {
+      print('❌ Exception fetching certifier for user: $e');
+      return null;
+    }
+  }
+
+  /// Ottiene la legal entity dell'utente loggato tramite il suo certifier
+  static Future<String?> getLegalEntityForUser(String userId) async {
+    try {
+      print('🔍 Getting legal entity for user: $userId');
+      final uri = Uri.parse(
+        '$_baseUrl/certifier?id_user=eq.$userId&select=id_legal_entity&limit=1',
+      );
+      final response = await http.get(uri, headers: _headers);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        if (data.isNotEmpty) {
+          final legalEntityId = data[0]['id_legal_entity'] as String?;
+          print('✅ Found legal entity for user: $legalEntityId');
+          return legalEntityId;
+        }
+      } else {
+        print('❌ Error fetching legal entity for user: ${response.statusCode} - ${response.body}');
+      }
+      return null;
+    } catch (e) {
+      print('❌ Exception fetching legal entity for user: $e');
+      return null;
+    }
+  }
+
+  /// Ottiene o crea una location per l'utente loggato
+  static Future<String?> getLocationForUser(String userId) async {
+    try {
+      print('🔍 Getting location for user: $userId');
+      return await LocationService.getOrCreateLocationForUser(userId);
+    } catch (e) {
+      print('❌ Error getting location for user: $e');
       return null;
     }
   }
@@ -170,7 +264,7 @@ class DefaultIdsService {
   }
 
   /// Crea una legal entity di default
-  static Future<String?> _createDefaultLegalEntity() async {
+  static Future<String?> createDefaultLegalEntity() async {
     try {
       final data = {
         'id_legal_entity_hash': 'default-legal-entity-hash',
