@@ -73,7 +73,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
 
   Future<void> _loadCategories() async {
     try {
-        setState(() {
+      setState(() {
         _isLoadingCategories = true;
       });
 
@@ -113,7 +113,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           await CertificationInformationService.getCertificationUserInformations();
 
       if (fields.isNotEmpty) {
-    setState(() {
+        setState(() {
           _certificationUserFields = fields;
           _isLoadingCertificationFields = false;
         });
@@ -126,7 +126,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
       }
     } catch (e) {
       print('❌ Error loading certification fields: $e');
-    setState(() {
+      setState(() {
         _isLoadingCertificationFields = false;
       });
     }
@@ -187,9 +187,9 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             ),
           ),
         ],
-          ),
-        );
-      }
+      ),
+    );
+  }
 
   Widget _buildProgressIndicator() {
     final l10n = AppLocalizations.of(context);
@@ -302,10 +302,10 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
       padding: EdgeInsets.all(isTablet ? 24 : 16),
       child: Form(
         key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
-            children: [
+          children: [
             Text(
               l10n.getString('general_information'),
               style: TextStyle(
@@ -344,13 +344,13 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             ),
             SizedBox(height: isTablet ? 20 : 16),
 
-              DropdownButtonFormField<String>(
+            DropdownButtonFormField<String>(
               value: _selectedActivityType,
-                decoration: InputDecoration(
+              decoration: InputDecoration(
                 labelText: l10n.getString('activity_type'),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
                 contentPadding: EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: isTablet ? 16 : 12,
@@ -364,16 +364,16 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                       ),
                     ]
                   : _categories.map((CertificationCategoryEdge category) {
-                  return DropdownMenuItem<String>(
+                      return DropdownMenuItem<String>(
                         value: category.name,
                         child: Text(category.name),
-                  );
-                }).toList(),
+                      );
+                    }).toList(),
               onChanged: _isLoadingCategories
                   ? null
                   : (String? newValue) {
                       if (newValue != null) {
-                    setState(() {
+                        setState(() {
                           _selectedActivityType = newValue;
                           // Trova l'ID della categoria selezionata
                           final selectedCategory = _categories.firstWhere(
@@ -385,10 +385,10 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                           print(
                             '🔍 Selected category: $newValue with ID: $_selectedCategoryId',
                           );
-                    });
-                  }
-                },
-              ),
+                        });
+                      }
+                    },
+            ),
             SizedBox(height: isTablet ? 20 : 16),
 
             LinkedInTextField(
@@ -450,21 +450,21 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             ],
           ),
           SizedBox(height: isTablet ? 20 : 16),
-              Container(
+          Container(
             height: isTablet ? 140 : 120,
             width: double.infinity,
-                decoration: BoxDecoration(
+            decoration: BoxDecoration(
               color: AppTheme.lightGrey,
-                  borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8),
               border: Border.all(
                 color: AppTheme.borderGrey,
                 style: BorderStyle.solid,
-                ),
+              ),
             ),
             child: _mediaFiles.isEmpty
                 ? Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
+                    children: [
                       Icon(
                         Icons.cloud_upload,
                         size: isTablet ? 56 : 48,
@@ -517,10 +517,10 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                                   color: AppTheme.pureWhite,
                                   size: 16,
                                 ),
-                        ),
-                      ),
-                    ),
-                  ],
+                              ),
+                            ),
+                          ),
+                        ],
                       );
                     },
                   ),
@@ -612,7 +612,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               ),
             ],
           ),
-              const SizedBox(height: 16),
+          const SizedBox(height: 16),
           Row(
             children: [
               Container(height: 1, color: AppTheme.borderGrey, width: 100),
@@ -695,8 +695,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                   ),
                 ),
             ],
-              ),
-              const SizedBox(height: 16),
+          ),
+          const SizedBox(height: 16),
           if (_addedUsers.isEmpty)
             Container(
               padding: const EdgeInsets.all(20),
@@ -718,7 +718,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
-                children: [
+        children: [
           CircleAvatar(
             radius: 20,
             backgroundImage: user.profilePicture != null
@@ -729,7 +729,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 : null,
           ),
           const SizedBox(width: 12),
-                  Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -761,10 +761,10 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                         style: TextStyle(
                           fontSize: 14,
                           color: AppTheme.textSecondary,
-                    ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
                 ],
               ],
             ),
@@ -825,9 +825,9 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           _buildUserResultsCard(),
           const SizedBox(height: 32),
 
-              Row(
-                children: [
-                  Expanded(
+          Row(
+            children: [
+              Expanded(
                 child: LinkedInButton(
                   onPressed: _previousStep,
                   text: l10n.getString('back'),
@@ -835,16 +835,16 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 ),
               ),
               SizedBox(width: isTablet ? 20 : 16),
-                  Expanded(
+              Expanded(
                 child: LinkedInButton(
                   onPressed: _nextStep,
                   text: l10n.getString('continue_to_review'),
                   icon: Icons.arrow_forward,
                   variant: LinkedInButtonVariant.primary,
-                    ),
-                  ),
-                ],
+                ),
               ),
+            ],
+          ),
         ],
       ),
     );
@@ -910,7 +910,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                Text(
+                    Text(
                       user.displayName,
                       style: TextStyle(
                         fontSize: 18,
@@ -918,7 +918,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                         color: AppTheme.primaryBlack,
                       ),
                     ),
-                Text(
+                    Text(
                       user.email,
                       style: TextStyle(
                         fontSize: 14,
@@ -1041,7 +1041,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           _buildUsersReviewCard(),
           const SizedBox(height: 16),
           _buildConfirmationCard(),
-              const SizedBox(height: 32),
+          const SizedBox(height: 32),
 
           Row(
             children: [
@@ -1120,8 +1120,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               ),
             ],
           ),
-                const SizedBox(height: 16),
-                Text(
+          const SizedBox(height: 16),
+          Text(
             'Nessun media generale allegato',
             style: TextStyle(color: AppTheme.textSecondary),
           ),
@@ -1149,8 +1149,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 ),
               ),
             ],
-              ),
-              const SizedBox(height: 16),
+          ),
+          const SizedBox(height: 16),
           Row(
             children: [
               CircleAvatar(
@@ -1197,8 +1197,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               ],
             ),
           ),
-                const SizedBox(height: 16),
-                Text(
+          const SizedBox(height: 16),
+          Text(
             'Media del Certificatore (2)',
             style: TextStyle(
               fontSize: 16,
@@ -1237,8 +1237,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 ),
               ),
             ],
-              ),
-              const SizedBox(height: 16),
+          ),
+          const SizedBox(height: 16),
           Text(
             'Una volta inviata, la certificazione verrà inviata agli utenti destinatari e non sarà più modificabile. Una volta che gli utenti accetteranno la certificazione, questa verrà notarizzata sulla blockchain. Questa azione non può essere annullata.',
             style: TextStyle(color: AppTheme.textSecondary, fontSize: 14),
@@ -1310,7 +1310,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   Future<void> _createCertification() async {
     print('🚀 Creating certification...');
 
-                  setState(() {
+    setState(() {
       _isCreating = true;
       _errorMessage = null;
       _successMessage = null;
@@ -1345,39 +1345,28 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
 
       print('🔍 Current user ID: $currentUserId');
 
-      // Ottieni il certifier dell'utente loggato
-      final certifierId = await DefaultIdsService.getCertifierForUser(
-        currentUserId,
-      );
-      print('🔍 Certifier ID: $certifierId');
-
-      // Ottieni la legal entity dell'utente loggato
-      var legalEntityId = await DefaultIdsService.getLegalEntityForUser(
-        currentUserId,
-      );
-      print('🔍 Legal Entity ID: $legalEntityId');
-
-      // Usa l'ID di location di default specifico
-      final locationId = '912eda0d-1426-4a2f-8215-621b993ddb2d';
-      print('🔍 Location ID: $locationId');
-
-      // Se l'utente non ha un certifier, non possiamo creare una certificazione
-      if (certifierId == null) {
-        print('❌ User has no certifier: $currentUserId');
+      // Ottieni un certifier esistente con legal entity valida
+      final certifierData =
+          await DefaultIdsService.getValidCertifierWithLegalEntity();
+      if (certifierData == null) {
+        print('❌ Could not get valid certifier and legal entity');
         setState(() {
           _isCreating = false;
           _errorMessage =
-              'Utente non autorizzato a creare certificazioni. Contatta l\'amministratore.';
+              'Errore nel recupero dei dati necessari. Riprova più tardi.';
         });
         return;
       }
 
-      // Se manca la legal entity, crea una di fallback
-      if (legalEntityId == null) {
-        print('❌ User has no legal entity, creating fallback...');
-        legalEntityId = await DefaultIdsService.getDefaultLegalEntityId() ??
-            await DefaultIdsService.createDefaultLegalEntity();
-      }
+      final certifierId = certifierData['certifierId']!;
+      final legalEntityId = certifierData['legalEntityId']!;
+      final locationId =
+          '912eda0d-1426-4a2f-8215-621b993ddb2d'; // ID fisso per location
+
+      print('🔍 Using valid IDs from database:');
+      print('  - Certifier ID: $certifierId');
+      print('  - Legal Entity ID: $legalEntityId');
+      print('  - Location ID: $locationId');
 
       print('✅ All required IDs available:');
       print('  - certifierId: $certifierId');
@@ -1453,7 +1442,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     try {
       print('📸 Adding media to certification: $certificationId');
 
-      // Usa l'ID di location di default specifico
+      // Usa l'ID di location fisso
       final locationId = '912eda0d-1426-4a2f-8215-621b993ddb2d';
 
       final mediaData = _mediaFiles
@@ -1487,7 +1476,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         title: Row(
-                children: [
+          children: [
             Icon(Icons.check_circle, color: AppTheme.successGreen),
             const SizedBox(width: 8),
             const Text('Successo'),
@@ -1507,9 +1496,9 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               Navigator.of(context).pop(); // Chiudi screen
             },
             child: const Text('OK'),
-                  ),
-                ],
-              ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1642,15 +1631,15 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
       builder: (context) => AlertDialog(
         content: Column(
           mainAxisSize: MainAxisSize.min,
-      children: [
+          children: [
             Icon(Icons.check_circle, color: AppTheme.successGreen, size: 64),
             const SizedBox(height: 16),
-        Text(
+            Text(
               AppLocalizations.of(context).getString('certification_sent'),
-          style: TextStyle(
+              style: TextStyle(
                 fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: AppTheme.primaryBlack,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.primaryBlack,
               ),
             ),
             const SizedBox(height: 8),
@@ -1695,9 +1684,9 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                           color: AppTheme.errorRed,
                           fontSize: 14,
                         ),
-          ),
-        ),
-      ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 16),
