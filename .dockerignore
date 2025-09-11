@@ -1,0 +1,55 @@
+# Build artifacts
+build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Documentation
+README.md
+*.md
+
+# Test files
+test/
+coverage/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Android
+android/
+ios/
+linux/
+macos/
+windows/
+
+# Web specific
+web/favicon.png
+web/icons/
+web/manifest.json
