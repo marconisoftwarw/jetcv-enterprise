@@ -1,0 +1,17 @@
+{
+  "name": "jetcv-enterprise",
+  "version": "1.0.0",
+  "description": "JetCV Enterprise - Professional certification platform",
+  "scripts": {
+    "build": "flutter build web --release --web-renderer html",
+    "dev": "flutter run -d web-server --web-port 3000",
+    "preview": "flutter run -d web-server --web-port 3000 --release"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@vercel/static-build": "^1.0.0"
+  },
+  "dependencies": {}
+}

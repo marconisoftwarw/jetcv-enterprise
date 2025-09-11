@@ -1,0 +1,64 @@
+# Flutter specific
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+
+# Build artifacts (except web)
+build/android/
+build/ios/
+build/linux/
+build/macos/
+build/windows/
+build/native_assets/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+nginx.conf
+
+# Documentation
+README.md
+*.md
+
+# Test files
+test/
+coverage/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Platform specific
+android/
+ios/
+linux/
+macos/
+windows/
+
+# Supabase functions (if not needed for web)
+supabase/
+
+# Analysis
+analysis_options.yaml
