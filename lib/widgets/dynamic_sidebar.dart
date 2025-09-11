@@ -23,34 +23,82 @@ class DynamicSidebar extends StatelessWidget {
       builder: (context, authProvider, child) {
         final userType = authProvider.userType ?? AppUserType.user;
 
-        return NavigationRail(
-          selectedIndex: selectedIndex,
-          onDestinationSelected: onDestinationSelected,
-          labelType: NavigationRailLabelType.all,
-          destinations: _getDestinationsForUserType(userType, l10n),
-          backgroundColor: Colors.transparent,
-          selectedIconTheme: IconThemeData(
-            color: AppTheme.primaryBlue,
-            size: 24,
-          ),
-          unselectedIconTheme: IconThemeData(
-            color: AppTheme.textGray,
-            size: 24,
-          ),
-          selectedLabelTextStyle: TextStyle(
-            color: AppTheme.primaryBlue,
-            fontWeight: FontWeight.w600,
-            fontSize: 14,
-          ),
-          unselectedLabelTextStyle: TextStyle(
-            color: AppTheme.textGray,
-            fontWeight: FontWeight.w500,
-            fontSize: 14,
-          ),
-          indicatorColor: AppTheme.lightBlue,
-          indicatorShape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+        return Column(
+          children: [
+            // Navigation Rail principale
+            Expanded(
+              child: NavigationRail(
+                selectedIndex: selectedIndex,
+                onDestinationSelected: onDestinationSelected,
+                labelType: NavigationRailLabelType.all,
+                destinations: _getDestinationsForUserType(userType, l10n),
+                backgroundColor: Colors.transparent,
+                selectedIconTheme: IconThemeData(
+                  color: AppTheme.primaryBlue,
+                  size: 24,
+                ),
+                unselectedIconTheme: IconThemeData(
+                  color: AppTheme.textGray,
+                  size: 24,
+                ),
+                selectedLabelTextStyle: TextStyle(
+                  color: AppTheme.primaryBlue,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+                unselectedLabelTextStyle: TextStyle(
+                  color: AppTheme.textGray,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
+                ),
+                indicatorColor: AppTheme.lightBlue,
+                indicatorShape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+
+            // Pulsante di logout in basso
+            Container(
+              margin: const EdgeInsets.all(16),
+              child: InkWell(
+                onTap: () => _showLogoutDialog(context, authProvider),
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppTheme.errorRed.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: AppTheme.errorRed.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.logout_rounded,
+                        color: AppTheme.errorRed,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        l10n.getString('logout'),
+                        style: TextStyle(
+                          color: AppTheme.errorRed,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         );
       },
     );
@@ -80,11 +128,6 @@ class DynamicSidebar extends StatelessWidget {
         label: Text(l10n.getString('dashboard')),
       ),
       NavigationRailDestination(
-        icon: const Icon(Icons.people_rounded),
-        selectedIcon: const Icon(Icons.people_rounded),
-        label: Text(l10n.getString('users')),
-      ),
-      NavigationRailDestination(
         icon: const Icon(Icons.verified_rounded),
         selectedIcon: const Icon(Icons.verified_rounded),
         label: Text(l10n.getString('certifications')),
@@ -93,11 +136,6 @@ class DynamicSidebar extends StatelessWidget {
         icon: const Icon(Icons.business_rounded),
         selectedIcon: const Icon(Icons.business_rounded),
         label: Text(l10n.getString('legal_entities')),
-      ),
-      NavigationRailDestination(
-        icon: const Icon(Icons.analytics_rounded),
-        selectedIcon: const Icon(Icons.analytics_rounded),
-        label: Text(l10n.getString('analytics')),
       ),
       NavigationRailDestination(
         icon: const Icon(Icons.settings_rounded),
@@ -159,5 +197,77 @@ class DynamicSidebar extends StatelessWidget {
         label: Text(l10n.getString('profile')),
       ),
     ];
+  }
+
+  void _showLogoutDialog(BuildContext context, AuthProvider authProvider) {
+    final l10n = AppLocalizations.of(context);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: AppTheme.pureWhite,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Row(
+            children: [
+              Icon(Icons.logout_rounded, color: AppTheme.errorRed, size: 24),
+              const SizedBox(width: 12),
+              Text(
+                l10n.getString('logout'),
+                style: TextStyle(
+                  color: AppTheme.textPrimary,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 18,
+                ),
+              ),
+            ],
+          ),
+          content: Text(
+            l10n.getString('logout_confirmation'),
+            style: TextStyle(color: AppTheme.textSecondary, fontSize: 16),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                l10n.getString('cancel'),
+                style: TextStyle(
+                  color: AppTheme.textGray,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await authProvider.signOut();
+                if (context.mounted) {
+                  Navigator.of(
+                    context,
+                  ).pushNamedAndRemoveUntil('/login', (route) => false);
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.errorRed,
+                foregroundColor: AppTheme.pureWhite,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+              ),
+              child: Text(
+                l10n.getString('logout'),
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 }

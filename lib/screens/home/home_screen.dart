@@ -11,6 +11,7 @@ import '../../l10n/app_localizations.dart';
 import '../certification/create_certification_screen.dart';
 import '../certification/certification_list_screen.dart';
 import '../profile/user_profile_screen.dart';
+import '../admin/legal_entity_management_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -70,23 +71,17 @@ class _HomeScreenState extends State<HomeScreen> {
       case 0: // Dashboard
         // Rimani nella home
         break;
-      case 1: // Users
-        Navigator.pushNamed(context, '/admin');
+      case 1: // Certifications
+        // Rimani nella home
         break;
-      case 2: // Certifications
-        Navigator.pushNamed(context, '/certifications');
+      case 2: // Legal Entities
+        // Rimani nella home
         break;
-      case 3: // Legal Entities
-        Navigator.pushNamed(context, '/legal-entities');
+      case 3: // Settings
+        // Rimani nella home
         break;
-      case 4: // Analytics
-        Navigator.pushNamed(context, '/analytics');
-        break;
-      case 5: // Settings
-        Navigator.pushNamed(context, '/settings');
-        break;
-      case 6: // Profile
-        Navigator.pushNamed(context, '/profile');
+      case 4: // Profile
+        // Rimani nella home
         break;
     }
   }
@@ -97,10 +92,10 @@ class _HomeScreenState extends State<HomeScreen> {
         // Rimani nella home
         break;
       case 1: // My Certifications
-        Navigator.pushNamed(context, '/certifications');
+        // Rimani nella home
         break;
       case 2: // Profile
-        Navigator.pushNamed(context, '/profile');
+        // Rimani nella home
         break;
     }
   }
@@ -108,10 +103,10 @@ class _HomeScreenState extends State<HomeScreen> {
   void _handleCertifierNavigation(int index) {
     switch (index) {
       case 0: // Certifications
-        Navigator.pushNamed(context, '/certifications');
+        // Rimani nella home
         break;
       case 1: // Profile
-        Navigator.pushNamed(context, '/profile');
+        // Rimani nella home
         break;
     }
   }
@@ -119,7 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _handleUserNavigation(int index) {
     switch (index) {
       case 0: // Profile
-        Navigator.pushNamed(context, '/profile');
+        // Rimani nella home
         break;
     }
   }
@@ -191,16 +186,12 @@ class _HomeScreenState extends State<HomeScreen> {
       case 0:
         return const _DashboardContent();
       case 1:
-        return Center(child: Text(l10n.getString('user_management')));
-      case 2:
         return const CertificationListScreen();
+      case 2:
+        return _buildLegalEntitiesManagementContent(l10n);
       case 3:
-        return Center(child: Text(l10n.getString('legal_entities_management')));
+        return _buildSettingsContent(l10n);
       case 4:
-        return Center(child: Text(l10n.getString('analytics')));
-      case 5:
-        return Center(child: Text(l10n.getString('settings')));
-      case 6:
         return const UserProfileScreen();
       default:
         return const _DashboardContent();
@@ -241,6 +232,104 @@ class _HomeScreenState extends State<HomeScreen> {
       default:
         return const UserProfileScreen();
     }
+  }
+
+  Widget _buildLegalEntitiesManagementContent(AppLocalizations l10n) {
+    return const LegalEntityManagementScreen();
+  }
+
+  Widget _buildSettingsContent(AppLocalizations l10n) {
+    return Container(
+      color: AppTheme.offWhite,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header
+            Row(
+              children: [
+                Container(
+                  width: 4,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryBlue,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Text(
+                  l10n.getString('settings'),
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 32),
+
+            // Content
+            EnterpriseCard(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.settings_rounded,
+                          color: AppTheme.primaryBlue,
+                          size: 24,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Impostazioni Sistema',
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: AppTheme.textPrimary,
+                              ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Configura le impostazioni generali del sistema. Funzionalità in sviluppo.',
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: AppTheme.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        NeonButton(
+                          text: 'Impostazioni Generali',
+                          icon: Icons.tune_rounded,
+                          onPressed: () {
+                            // TODO: Implementare impostazioni generali
+                          },
+                        ),
+                        const SizedBox(width: 16),
+                        NeonButton(
+                          text: 'Sicurezza',
+                          icon: Icons.security_rounded,
+                          isOutlined: true,
+                          onPressed: () {
+                            // TODO: Implementare impostazioni sicurezza
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
