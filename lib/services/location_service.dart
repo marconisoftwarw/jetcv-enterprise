@@ -32,14 +32,15 @@ class LocationService {
       }
 
       final url = '${AppConfig.supabaseUrl}/functions/v1/create-location';
-      
+
       // Prepara i dati per la location
       final locationData = {
         'aquired_at': DateTime.now().toIso8601String(),
         'name': name,
         if (street != null) 'street': street,
         if (locality != null) 'locality': locality,
-        if (administrativeArea != null) 'administrative_area': administrativeArea,
+        if (administrativeArea != null)
+          'administrative_area': administrativeArea,
         if (postalCode != null) 'postal_code': postalCode,
         if (country != null) 'country': country,
         if (isoCountryCode != null) 'iso_country_code': isoCountryCode,
@@ -68,10 +69,14 @@ class LocationService {
 
       if (response.statusCode == 201) {
         final responseData = json.decode(response.body);
-        print('✅ Location created successfully: ${responseData['data']['id_location']}');
+        print(
+          '✅ Location created successfully: ${responseData['data']['id_location']}',
+        );
         return responseData['data'];
       } else {
-        print('❌ Failed to create location: ${response.statusCode} - ${response.body}');
+        print(
+          '❌ Failed to create location: ${response.statusCode} - ${response.body}',
+        );
         return null;
       }
     } catch (e) {

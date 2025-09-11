@@ -250,11 +250,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [
-          _buildDraftsTab(),
-          _buildSentTab(),
-          _buildClosedTab(),
-        ],
+        children: [_buildDraftsTab(), _buildSentTab(), _buildClosedTab()],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
@@ -682,7 +678,11 @@ class _CertificationListScreenState extends State<CertificationListScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.check_circle_outline, size: 64, color: AppTheme.textSecondary),
+            Icon(
+              Icons.check_circle_outline,
+              size: 64,
+              color: AppTheme.textSecondary,
+            ),
             const SizedBox(height: 16),
             Text(
               'Nessuna certificazione chiusa',

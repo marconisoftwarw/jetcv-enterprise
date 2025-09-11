@@ -160,57 +160,57 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       // Email Field
                       NeonTextField(
-                  controller: _emailController,
-                  labelText: 'Email',
-                  hintText: 'Enter your email',
-                  keyboardType: TextInputType.emailAddress,
-                  prefixIcon: const Icon(Icons.email_outlined),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Email is required';
-                    }
-                    if (!RegExp(
-                      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                    ).hasMatch(value)) {
-                      return 'Please enter a valid email';
-                    }
-                    return null;
-                  },
-                ),
+                        controller: _emailController,
+                        labelText: 'Email',
+                        hintText: 'Enter your email',
+                        keyboardType: TextInputType.emailAddress,
+                        prefixIcon: const Icon(Icons.email_outlined),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Email is required';
+                          }
+                          if (!RegExp(
+                            r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                          ).hasMatch(value)) {
+                            return 'Please enter a valid email';
+                          }
+                          return null;
+                        },
+                      ),
 
-                const SizedBox(height: 20),
+                      const SizedBox(height: 20),
 
-                // Password Field
-                NeonTextField(
-                  controller: _passwordController,
-                  labelText: 'Password',
-                  hintText: 'Enter password',
-                  obscureText: _obscurePassword,
-                  prefixIcon: const Icon(Icons.lock_outlined),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _obscurePassword = !_obscurePassword;
-                      });
-                    },
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Password is required';
-                    }
-                    if (value.length < AppConfig.minPasswordLength) {
-                      return 'Password must be at least ${AppConfig.minPasswordLength} characters';
-                    }
-                    return null;
-                  },
-                ),
+                      // Password Field
+                      NeonTextField(
+                        controller: _passwordController,
+                        labelText: 'Password',
+                        hintText: 'Enter password',
+                        obscureText: _obscurePassword,
+                        prefixIcon: const Icon(Icons.lock_outlined),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Password is required';
+                          }
+                          if (value.length < AppConfig.minPasswordLength) {
+                            return 'Password must be at least ${AppConfig.minPasswordLength} characters';
+                          }
+                          return null;
+                        },
+                      ),
 
-                const SizedBox(height: 16),
+                      const SizedBox(height: 16),
 
                       // Remember Me & Forgot Password
                       Row(

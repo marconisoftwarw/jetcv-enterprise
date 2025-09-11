@@ -90,7 +90,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
 
   Future<void> _loadCategories() async {
     try {
-        setState(() {
+      setState(() {
         _isLoadingCategories = true;
       });
 
@@ -122,7 +122,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
 
   Future<void> _loadCertificationFields() async {
     try {
-        setState(() {
+      setState(() {
         _isLoadingCertificationFields = true;
       });
 
@@ -164,7 +164,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
 
       if (currentUserId == null) {
         print('❌ No current user ID available');
-    setState(() {
+        setState(() {
           _isLoadingLegalEntities = false;
         });
         return;
@@ -178,7 +178,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
       );
 
       if (legalEntities != null && legalEntities.isNotEmpty) {
-    setState(() {
+        setState(() {
           _legalEntities = legalEntities;
           // Seleziona automaticamente la prima legal entity
           _selectedLegalEntityId =
@@ -258,9 +258,9 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             ),
           ),
         ],
-          ),
-        );
-      }
+      ),
+    );
+  }
 
   Widget _buildProgressIndicator() {
     final l10n = AppLocalizations.of(context);
@@ -373,10 +373,10 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
       padding: EdgeInsets.all(isTablet ? 24 : 16),
       child: Form(
         key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
-            children: [
+          children: [
             Text(
               l10n.getString('general_information'),
               style: TextStyle(
@@ -408,13 +408,13 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             ),
             SizedBox(height: isTablet ? 20 : 16),
 
-              DropdownButtonFormField<String>(
+            DropdownButtonFormField<String>(
               value: _selectedLegalEntityId,
-                decoration: InputDecoration(
+              decoration: InputDecoration(
                 labelText: l10n.getString('issuing_organization'),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
                 contentPadding: EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: isTablet ? 16 : 12,
@@ -428,16 +428,16 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                       ),
                     ]
                   : _legalEntities.map((legalEntity) {
-                  return DropdownMenuItem<String>(
+                      return DropdownMenuItem<String>(
                         value: legalEntity['id_legal_entity'] as String,
                         child: Text(legalEntity['legal_name'] as String),
-                  );
-                }).toList(),
+                      );
+                    }).toList(),
               onChanged: _isLoadingLegalEntities
                   ? null
                   : (String? newValue) {
                       if (newValue != null) {
-                    setState(() {
+                        setState(() {
                           _selectedLegalEntityId = newValue;
                           // Trova il nome della legal entity selezionata
                           final selectedEntity = _legalEntities.firstWhere(
@@ -447,10 +447,10 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                           _legalEntityName =
                               selectedEntity['legal_name'] as String?;
                           print('🔍 Selected legal entity: $_legalEntityName');
-                    });
-                  }
-                },
-              ),
+                        });
+                      }
+                    },
+            ),
             SizedBox(height: isTablet ? 20 : 16),
 
             DropdownButtonFormField<String>(
@@ -506,25 +506,25 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               label: l10n.getString('description'),
               hintText: l10n.getString('description'),
               maxLines: 4,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
+              validator: (value) {
+                if (value == null || value.isEmpty) {
                   return 'Inserisci una descrizione';
-                  }
-                  return null;
-                },
-              ),
+                }
+                return null;
+              },
+            ),
             SizedBox(height: isTablet ? 20 : 16),
 
             LinkedInTextField(
               controller: _locationController,
               label: l10n.getString('location'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
+              validator: (value) {
+                if (value == null || value.isEmpty) {
                   return 'Inserisci il luogo della certificazione';
-                  }
-                  return null;
-                },
-              ),
+                }
+                return null;
+              },
+            ),
             const SizedBox(height: 24),
 
             _buildMediaSection(),
@@ -687,9 +687,9 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           _buildUsersList(),
           const SizedBox(height: 32),
 
-              Row(
-                children: [
-                  Expanded(
+          Row(
+            children: [
+              Expanded(
                 child: LinkedInButton(
                   onPressed: _previousStep,
                   text: 'Indietro',
@@ -697,16 +697,16 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 ),
               ),
               const SizedBox(width: 16),
-                  Expanded(
+              Expanded(
                 child: LinkedInButton(
                   onPressed: _nextStep,
                   text: 'Continua alla Revisione',
                   icon: Icons.arrow_forward,
                   variant: LinkedInButtonVariant.primary,
-                    ),
-                  ),
-                ],
+                ),
               ),
+            ],
+          ),
         ],
       ),
     );
@@ -716,9 +716,9 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     return LinkedInCard(
       child: Column(
         children: [
-              Row(
-                children: [
-                  Expanded(
+          Row(
+            children: [
+              Expanded(
                 child: LinkedInTextField(
                   controller: _otpController,
                   label: 'Inserisci codice OTP utente',
@@ -748,7 +748,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               Expanded(child: Container(height: 1, color: AppTheme.borderGrey)),
             ],
           ),
-                const SizedBox(height: 16),
+          const SizedBox(height: 16),
           Row(
             children: [
               Icon(Icons.qr_code, size: 48, color: AppTheme.primaryBlue),
@@ -817,8 +817,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                   ),
                 ),
             ],
-              ),
-              const SizedBox(height: 16),
+          ),
+          const SizedBox(height: 16),
           if (_addedUsers.isEmpty)
             Container(
               padding: const EdgeInsets.all(20),
@@ -945,7 +945,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           const SizedBox(height: 24),
 
           _buildUserResultsCard(),
-              const SizedBox(height: 32),
+          const SizedBox(height: 32),
 
           Row(
             children: [
@@ -1034,7 +1034,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                Text(
+                    Text(
                       user.displayName,
                       style: TextStyle(
                         fontSize: 18,
@@ -1140,7 +1140,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-                Text(
+          Text(
             l10n.getString('certification_review'),
             style: TextStyle(
               fontSize: isTablet ? 28 : 24,
@@ -1165,7 +1165,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           _buildUsersReviewCard(),
           const SizedBox(height: 16),
           _buildConfirmationCard(),
-              const SizedBox(height: 32),
+          const SizedBox(height: 32),
 
           Row(
             children: [
@@ -1227,14 +1227,14 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           ),
           _buildReviewItem(
             l10n.getString('description'),
-            _descriptionController.text.isNotEmpty 
-                ? _descriptionController.text 
+            _descriptionController.text.isNotEmpty
+                ? _descriptionController.text
                 : l10n.getString('no_description_provided'),
           ),
           _buildReviewItem(
             l10n.getString('location'),
-            _locationController.text.isNotEmpty 
-                ? _locationController.text 
+            _locationController.text.isNotEmpty
+                ? _locationController.text
                 : l10n.getString('no_location_provided'),
           ),
         ],
@@ -1296,7 +1296,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               ),
             ],
           ),
-              const SizedBox(height: 16),
+          const SizedBox(height: 16),
           if (_addedUsers.isEmpty)
             Container(
               padding: EdgeInsets.all(isTablet ? 16 : 12),
@@ -1574,12 +1574,14 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
       final certifierId = certifierData['certifierId']!;
       final legalEntityId =
           _selectedLegalEntityId!; // Usa la legal entity selezionata
-      
+
       // Crea dinamicamente la location dal campo luogo
       String? locationId;
       if (_locationController.text.isNotEmpty) {
         print('🌍 Creating location for: ${_locationController.text}');
-        locationId = await LocationService.createSimpleLocation(_locationController.text);
+        locationId = await LocationService.createSimpleLocation(
+          _locationController.text,
+        );
         if (locationId == null) {
           print('❌ Failed to create location, using fallback');
           locationId = 'a5196c46-3d57-4e8c-b293-f4dff308a1a0'; // Fallback ID
@@ -1679,7 +1681,10 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
 
         // Se ci sono media files, aggiungili
         if (_mediaFiles.isNotEmpty) {
-          await _addMediaToCertification(result['data']['id_certification'], locationId);
+          await _addMediaToCertification(
+            result['data']['id_certification'],
+            locationId,
+          );
         }
 
         setState(() {
@@ -1864,7 +1869,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               ),
             ),
           ),
-                  Expanded(
+          Expanded(
             child: Text(
               value,
               style: TextStyle(
@@ -1872,10 +1877,10 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 color: AppTheme.primaryBlack,
                 fontWeight: FontWeight.w500,
               ),
-                    ),
-                  ),
-                ],
-              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1890,7 +1895,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
         'file_type': file.path.split('.').last.toLowerCase(),
         'name': file.path.split('/').last,
         'description': null,
-        'id_location': 'a5196c46-3d57-4e8c-b293-f4dff308a1a0', // Fallback ID per media
+        'id_location':
+            'a5196c46-3d57-4e8c-b293-f4dff308a1a0', // Fallback ID per media
       };
     }).toList();
   }
@@ -1936,12 +1942,16 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     _usedOtps.clear();
   }
 
-  Future<void> _addMediaToCertification(String certificationId, String? locationId) async {
+  Future<void> _addMediaToCertification(
+    String certificationId,
+    String? locationId,
+  ) async {
     try {
       print('📸 Adding media to certification: $certificationId');
 
       // Usa l'ID di location passato o fallback
-      final mediaLocationId = locationId ?? 'a5196c46-3d57-4e8c-b293-f4dff308a1a0';
+      final mediaLocationId =
+          locationId ?? 'a5196c46-3d57-4e8c-b293-f4dff308a1a0';
 
       final mediaData = _mediaFiles
           .map(
@@ -2010,9 +2020,9 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Row(
-      children: [
+          children: [
             Icon(Icons.error, color: AppTheme.errorRed),
-        const SizedBox(width: 8),
+            const SizedBox(width: 8),
             const Text('Errore'),
           ],
         ),
@@ -2144,12 +2154,12 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           children: [
             Icon(Icons.check_circle, color: AppTheme.successGreen, size: 64),
             const SizedBox(height: 16),
-        Text(
+            Text(
               AppLocalizations.of(context).getString('certification_sent'),
-          style: TextStyle(
+              style: TextStyle(
                 fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: AppTheme.primaryBlack,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.primaryBlack,
               ),
             ),
             const SizedBox(height: 8),
@@ -2194,9 +2204,9 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                           color: AppTheme.errorRed,
                           fontSize: 14,
                         ),
-          ),
-        ),
-      ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 16),
