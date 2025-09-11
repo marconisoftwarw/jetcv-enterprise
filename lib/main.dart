@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
 import 'config/app_config.dart';
@@ -121,8 +122,18 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
           debugShowCheckedModeBanner: AppConfig.enableDebugMode,
           navigatorKey: _navigatorKey,
           locale: localeProvider.locale,
-          supportedLocales: AppLocalizations.supportedLocales,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: const [
+            Locale('it', 'IT'),
+            Locale('en', 'US'),
+            Locale('de', 'DE'),
+            Locale('fr', 'FR'),
+          ],
+          localizationsDelegates: [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+            AppLocalizationsDelegate(),
+          ],
           theme: AppTheme.lightTheme,
           home: FutureBuilder(
             future: _initializationFuture,

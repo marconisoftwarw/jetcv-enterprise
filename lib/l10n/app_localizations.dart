@@ -24,10 +24,51 @@ class AppLocalizations {
     'it': {
       'app_title': 'JetCV Enterprise',
       'welcome': 'Benvenuto',
+      'welcome_back': 'Bentornato',
+      'sign_in_to_account': 'Accedi al tuo account',
       'login': 'Accedi',
       'signup': 'Registrati',
+      'sign_in': 'Accedi',
+      'sign_up': 'Registrati',
       'email': 'Email',
       'password': 'Password',
+      'enter_email': 'Inserisci la tua email',
+      'enter_password': 'Inserisci la password',
+      'remember_me': 'Ricordami',
+      'forgot_password': 'Password dimenticata?',
+      'signing_in': 'Accesso in corso...',
+      'sign_in_with_google': 'Accedi con Google',
+      'dont_have_account': 'Non hai un account? ',
+      'or': 'OPPURE',
+      'email_required': 'Email richiesta',
+      'email_invalid': 'Inserisci un\'email valida',
+      'password_required': 'Password richiesta',
+      'password_min_length': 'La password deve essere di almeno 6 caratteri',
+      'public_cvs': 'CV Pubblici',
+      'professional_certification_platform':
+          'Piattaforma di Certificazione Professionale',
+      'streamline_business_verification':
+          'Semplifica il processo di verifica aziendale con il nostro sistema completo di gestione delle entità legali.',
+      'view_pricing': 'Visualizza Prezzi',
+      'register_company': 'Registra Azienda',
+      'explore_cvs': 'Esplora CV',
+      'create_certification': 'Crea Certificazione',
+      'register_company_short': 'Registra Azienda',
+      'key_features': 'Caratteristiche Principali',
+      'identity_verification': 'Verifica Identità',
+      'secure_reliable_verification':
+          'Verifica identità sicura e affidabile per tutti gli utenti.',
+      'legal_entity_management': 'Gestione Entità Legali',
+      'comprehensive_management':
+          'Gestione completa delle entità legali e conformità.',
+      'secure_platform': 'Piattaforma Sicura',
+      'enterprise_grade_security':
+          'Sicurezza di livello enterprise con integrazione blockchain.',
+      'analytics_reporting': 'Analisi e Reportistica',
+      'advanced_analytics': 'Funzionalità avanzate di analisi e reportistica.',
+      'all_rights_reserved': 'Tutti i diritti riservati.',
+      'professional_certification_platform_footer':
+          'Piattaforma di certificazione e verifica professionale',
       'confirm_password': 'Conferma Password',
       'first_name': 'Nome',
       'last_name': 'Cognome',
@@ -81,7 +122,6 @@ class AppLocalizations {
       'scan_qr_code': 'Scansiona codice QR',
       'scan_qr_from_app': 'Scansiona il QR code dall\'app utente',
       'scan': 'Scansiona',
-      'or': 'oppure',
       'added_users': 'Utenti Aggiunti',
       'remove_all': 'Rimuovi Tutti',
       'user_results': 'Risultati Utenti',
@@ -208,10 +248,51 @@ class AppLocalizations {
     'en': {
       'app_title': 'JetCV Enterprise',
       'welcome': 'Welcome',
+      'welcome_back': 'Welcome Back',
+      'sign_in_to_account': 'Sign in to your account',
       'login': 'Login',
       'signup': 'Sign Up',
+      'sign_in': 'Sign In',
+      'sign_up': 'Sign Up',
       'email': 'Email',
       'password': 'Password',
+      'enter_email': 'Enter your email',
+      'enter_password': 'Enter password',
+      'remember_me': 'Remember me',
+      'forgot_password': 'Forgot Password?',
+      'signing_in': 'Signing In...',
+      'sign_in_with_google': 'Sign In with Google',
+      'dont_have_account': 'Don\'t have an account? ',
+      'or': 'OR',
+      'email_required': 'Email is required',
+      'email_invalid': 'Please enter a valid email',
+      'password_required': 'Password is required',
+      'password_min_length': 'Password must be at least 6 characters',
+      'public_cvs': 'Public CVs',
+      'professional_certification_platform':
+          'Professional Certification Platform',
+      'streamline_business_verification':
+          'Streamline your business verification process with our comprehensive legal entity management system.',
+      'view_pricing': 'View Pricing',
+      'register_company': 'Register Company',
+      'explore_cvs': 'Explore CVs',
+      'create_certification': 'Create Certification',
+      'register_company_short': 'Register Company',
+      'key_features': 'Key Features',
+      'identity_verification': 'Identity Verification',
+      'secure_reliable_verification':
+          'Secure and reliable identity verification for all users.',
+      'legal_entity_management': 'Legal Entity Management',
+      'comprehensive_management':
+          'Comprehensive management of legal entities and compliance.',
+      'secure_platform': 'Secure Platform',
+      'enterprise_grade_security':
+          'Enterprise-grade security with blockchain integration.',
+      'analytics_reporting': 'Analytics & Reporting',
+      'advanced_analytics': 'Advanced analytics and reporting capabilities.',
+      'all_rights_reserved': 'All rights reserved.',
+      'professional_certification_platform_footer':
+          'Professional certification and verification platform',
       'confirm_password': 'Confirm Password',
       'first_name': 'First Name',
       'last_name': 'Last Name',
@@ -321,10 +402,22 @@ class AppLocalizations {
     'de': {
       'app_title': 'JetCV Enterprise',
       'welcome': 'Willkommen',
+      'welcome_back': 'Willkommen zurück',
+      'sign_in_to_account': 'Melden Sie sich in Ihrem Konto an',
       'login': 'Anmelden',
       'signup': 'Registrieren',
+      'sign_in': 'Anmelden',
+      'sign_up': 'Registrieren',
       'email': 'E-Mail',
       'password': 'Passwort',
+      'enter_email': 'Geben Sie Ihre E-Mail ein',
+      'enter_password': 'Passwort eingeben',
+      'remember_me': 'Angemeldet bleiben',
+      'forgot_password': 'Passwort vergessen?',
+      'signing_in': 'Anmeldung läuft...',
+      'sign_in_with_google': 'Mit Google anmelden',
+      'dont_have_account': 'Haben Sie kein Konto? ',
+      'or': 'ODER',
       'confirm_password': 'Passwort bestätigen',
       'first_name': 'Vorname',
       'last_name': 'Nachname',
@@ -434,10 +527,22 @@ class AppLocalizations {
     'fr': {
       'app_title': 'JetCV Enterprise',
       'welcome': 'Bienvenue',
+      'welcome_back': 'Bon retour',
+      'sign_in_to_account': 'Connectez-vous à votre compte',
       'login': 'Connexion',
       'signup': 'Inscription',
+      'sign_in': 'Se connecter',
+      'sign_up': 'S\'inscrire',
       'email': 'E-mail',
       'password': 'Mot de passe',
+      'enter_email': 'Entrez votre e-mail',
+      'enter_password': 'Entrez le mot de passe',
+      'remember_me': 'Se souvenir de moi',
+      'forgot_password': 'Mot de passe oublié ?',
+      'signing_in': 'Connexion en cours...',
+      'sign_in_with_google': 'Se connecter avec Google',
+      'dont_have_account': 'Vous n\'avez pas de compte ? ',
+      'or': 'OU',
       'confirm_password': 'Confirmer le mot de passe',
       'first_name': 'Prénom',
       'last_name': 'Nom de famille',
@@ -549,7 +654,7 @@ class AppLocalizations {
   String getString(String key) {
     final languageCode = locale.languageCode;
     final translations =
-        _localizedValues[languageCode] ?? _localizedValues['en']!;
+        _localizedValues[languageCode] ?? _localizedValues['it']!;
 
     if (key.contains('.')) {
       final keys = key.split('.');
@@ -574,26 +679,6 @@ class AppLocalizations {
     });
     return text;
   }
-
-  static const List<Locale> supportedLocales = [
-    Locale('it', 'IT'),
-    Locale('en', 'US'),
-    Locale('de', 'DE'),
-    Locale('fr', 'FR'),
-  ];
-
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = [
-    GlobalMaterialLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-  ];
-
-  static const List<Locale> supportedLocalesList = [
-    Locale('it', 'IT'),
-    Locale('en', 'US'),
-    Locale('de', 'DE'),
-    Locale('fr', 'FR'),
-  ];
 }
 
 // Delegate per l'internazionalizzazione
