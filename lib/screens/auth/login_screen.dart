@@ -55,9 +55,10 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _forgotPassword() {
+    final l10n = AppLocalizations.of(context);
     if (_emailController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter your email address first')),
+        SnackBar(content: Text(l10n.getString('please_enter_email'))),
       );
       return;
     }
@@ -65,14 +66,14 @@ class _LoginScreenState extends State<LoginScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Reset Password'),
+        title: Text(l10n.getString('reset_password')),
         content: Text(
-          'We will send a password reset link to ${_emailController.text.trim()}',
+          '${l10n.getString('password_reset_sent')} ${_emailController.text.trim()}',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.getString('cancel')),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -82,11 +83,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Password reset email sent!')),
+                  SnackBar(
+                    content: Text(l10n.getString('password_reset_sent')),
+                  ),
                 );
               }
             },
-            child: const Text('Send'),
+            child: Text(l10n.getString('send')),
           ),
         ],
       ),
@@ -243,30 +246,40 @@ class _LoginScreenState extends State<LoginScreen> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Row(
-                                  children: [
-                                    Checkbox(
-                                      value: _rememberMe,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          _rememberMe = value ?? false;
-                                        });
-                                      },
-                                      activeColor: AppTheme.primaryBlue,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(4),
+                                Flexible(
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Checkbox(
+                                        value: _rememberMe,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            _rememberMe = value ?? false;
+                                          });
+                                        },
+                                        activeColor: AppTheme.primaryBlue,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            4,
+                                          ),
+                                        ),
                                       ),
-                                    ),
-                                    Text(
-                                      AppLocalizations.of(
-                                        context,
-                                      ).getString('remember_me'),
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium
-                                          ?.copyWith(color: AppTheme.textGray),
-                                    ),
-                                  ],
+                                      Flexible(
+                                        child: Text(
+                                          AppLocalizations.of(
+                                            context,
+                                          ).getString('remember_me'),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium
+                                              ?.copyWith(
+                                                color: AppTheme.textGray,
+                                              ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                                 TextButton(
                                   onPressed: _forgotPassword,

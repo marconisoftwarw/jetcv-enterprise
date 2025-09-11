@@ -5,6 +5,7 @@ import '../../providers/auth_provider.dart';
 import '../../models/legal_entity.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/glass_card.dart';
+import '../../l10n/app_localizations.dart';
 
 import 'create_legal_entity_screen.dart';
 import 'legal_entity_list_screen.dart';
@@ -78,26 +79,34 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 fontWeight: FontWeight.w600,
               ),
               unselectedLabelTextStyle: TextStyle(color: AppTheme.primaryBlack),
-              destinations: const [
+              destinations: [
                 NavigationRailDestination(
-                  icon: Icon(Icons.dashboard),
-                  label: Text('Dashboard'),
+                  icon: const Icon(Icons.dashboard),
+                  label: Text(
+                    AppLocalizations.of(context).getString('dashboard'),
+                  ),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.business),
-                  label: Text('Legal Entities'),
+                  icon: const Icon(Icons.business),
+                  label: Text(
+                    AppLocalizations.of(context).getString('legal_entities'),
+                  ),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.people),
-                  label: Text('Users'),
+                  icon: const Icon(Icons.people),
+                  label: Text(AppLocalizations.of(context).getString('users')),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.analytics),
-                  label: Text('Analytics'),
+                  icon: const Icon(Icons.analytics),
+                  label: Text(
+                    AppLocalizations.of(context).getString('analytics'),
+                  ),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.settings),
-                  label: Text('Settings'),
+                  icon: const Icon(Icons.settings),
+                  label: Text(
+                    AppLocalizations.of(context).getString('settings'),
+                  ),
                 ),
               ],
             ),
@@ -170,10 +179,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               ),
               onTap: () async {
                 Navigator.pop(context);
-                
+
                 // Carica i dati dell'utente prima di navigare al profilo
                 final authProvider = context.read<AuthProvider>();
-                if (authProvider.isAuthenticated && authProvider.currentUser == null) {
+                if (authProvider.isAuthenticated &&
+                    authProvider.currentUser == null) {
                   // Mostra un indicatore di caricamento
                   showDialog(
                     context: context,
@@ -188,7 +198,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            CircularProgressIndicator(color: AppTheme.primaryBlue),
+                            CircularProgressIndicator(
+                              color: AppTheme.primaryBlue,
+                            ),
                             const SizedBox(height: 16),
                             Text(
                               'Caricamento profilo...',
@@ -199,7 +211,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       ),
                     ),
                   );
-                  
+
                   try {
                     await authProvider.loadUserData();
                     if (mounted) {
@@ -211,7 +223,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       Navigator.pop(context); // Chiudi il dialog di caricamento
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('Errore nel caricamento del profilo: $e'),
+                          content: Text(
+                            'Errore nel caricamento del profilo: $e',
+                          ),
                           backgroundColor: AppTheme.errorRed,
                         ),
                       );

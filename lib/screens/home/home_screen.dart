@@ -4,10 +4,13 @@ import '../../providers/auth_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/enterprise_card.dart';
 import '../../widgets/neon_button.dart';
+import '../../widgets/dynamic_sidebar.dart';
+import '../../services/user_type_service.dart';
+import '../../l10n/app_localizations.dart';
 
 import '../certification/create_certification_screen.dart';
 import '../certification/certification_list_screen.dart';
-import '../admin/legal_entity_management_screen.dart';
+import '../profile/user_profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -34,13 +37,100 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void _onDestinationSelected(int index) {
+    final authProvider = context.read<AuthProvider>();
+    final userType = authProvider.userType;
+
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    // Naviga basandosi sul tipo di utente
+    switch (userType ?? AppUserType.user) {
+      case AppUserType.admin:
+        _handleAdminNavigation(index);
+        break;
+      case AppUserType.legalEntity:
+        _handleLegalEntityNavigation(index);
+        break;
+      case AppUserType.certifier:
+        _handleCertifierNavigation(index);
+        break;
+      case AppUserType.user:
+        _handleUserNavigation(index);
+        break;
+      default:
+        _handleUserNavigation(index);
+        break;
+    }
+  }
+
+  void _handleAdminNavigation(int index) {
+    switch (index) {
+      case 0: // Dashboard
+        // Rimani nella home
+        break;
+      case 1: // Users
+        Navigator.pushNamed(context, '/admin');
+        break;
+      case 2: // Certifications
+        Navigator.pushNamed(context, '/certifications');
+        break;
+      case 3: // Legal Entities
+        Navigator.pushNamed(context, '/legal-entities');
+        break;
+      case 4: // Analytics
+        Navigator.pushNamed(context, '/analytics');
+        break;
+      case 5: // Settings
+        Navigator.pushNamed(context, '/settings');
+        break;
+      case 6: // Profile
+        Navigator.pushNamed(context, '/profile');
+        break;
+    }
+  }
+
+  void _handleLegalEntityNavigation(int index) {
+    switch (index) {
+      case 0: // Dashboard
+        // Rimani nella home
+        break;
+      case 1: // My Certifications
+        Navigator.pushNamed(context, '/certifications');
+        break;
+      case 2: // Profile
+        Navigator.pushNamed(context, '/profile');
+        break;
+    }
+  }
+
+  void _handleCertifierNavigation(int index) {
+    switch (index) {
+      case 0: // Certifications
+        Navigator.pushNamed(context, '/certifications');
+        break;
+      case 1: // Profile
+        Navigator.pushNamed(context, '/profile');
+        break;
+    }
+  }
+
+  void _handleUserNavigation(int index) {
+    switch (index) {
+      case 0: // Profile
+        Navigator.pushNamed(context, '/profile');
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
         // Controllo sicuro per verificare se l'utente è admin basato sul database
-        final user = authProvider.currentUser;
-        final isAdmin = user?.isAdminFromDatabase ?? false;
+        // final user = authProvider.currentUser;
+        // final isAdmin = user?.isAdminFromDatabase ?? false;
 
         return Scaffold(
           body: Row(
@@ -62,43 +152,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ],
                 ),
-                child: NavigationRail(
+                child: DynamicSidebar(
                   selectedIndex: _selectedIndex,
-                  onDestinationSelected: (int index) {
-                    setState(() {
-                      _selectedIndex = index;
-                    });
-                  },
-                  labelType: NavigationRailLabelType.all,
-                  destinations: _buildNavigationDestinations(isAdmin),
-                  backgroundColor: Colors.transparent,
-                  selectedIconTheme: IconThemeData(
-                    color: AppTheme.primaryBlue,
-                    size: 24,
-                  ),
-                  unselectedIconTheme: IconThemeData(
-                    color: AppTheme.textGray,
-                    size: 24,
-                  ),
-                  selectedLabelTextStyle: TextStyle(
-                    color: AppTheme.primaryBlue,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
-                  unselectedLabelTextStyle: TextStyle(
-                    color: AppTheme.textGray,
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14,
-                  ),
-                  indicatorColor: AppTheme.lightBlue,
-                  indicatorShape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  onDestinationSelected: _onDestinationSelected,
                 ),
               ),
 
               // Main Content
-              Expanded(child: _buildContent(isAdmin)),
+              Expanded(
+                child: _buildContent(authProvider.userType ?? AppUserType.user),
+              ),
             ],
           ),
         );
@@ -106,57 +169,77 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  List<NavigationRailDestination> _buildNavigationDestinations(bool isAdmin) {
-    final destinations = [
-      const NavigationRailDestination(
-        icon: Icon(Icons.dashboard),
-        label: Text('Dashboard'),
-      ),
-      const NavigationRailDestination(
-        icon: Icon(Icons.business),
-        label: Text('My Company'),
-      ),
-      const NavigationRailDestination(
-        icon: Icon(Icons.verified_user),
-        label: Text('Certifications'),
-      ),
-      const NavigationRailDestination(
-        icon: Icon(Icons.person),
-        label: Text('Profile'),
-      ),
-      const NavigationRailDestination(
-        icon: Icon(Icons.settings),
-        label: Text('Settings'),
-      ),
-    ];
-
-    destinations.add(
-      const NavigationRailDestination(
-        icon: Icon(Icons.admin_panel_settings),
-        label: Text('Legal Entities'),
-      ),
-    );
-
-    return destinations;
+  Widget _buildContent(AppUserType userType) {
+    // Mostra il contenuto basato sul tipo di utente e sull'indice selezionato
+    switch (userType ?? AppUserType.user) {
+      case AppUserType.admin:
+        return _buildAdminContent();
+      case AppUserType.legalEntity:
+        return _buildLegalEntityContent();
+      case AppUserType.certifier:
+        return _buildCertifierContent();
+      case AppUserType.user:
+        return _buildUserContent();
+      default:
+        return _buildUserContent();
+    }
   }
 
-  Widget _buildContent(bool isAdmin) {
-    // Se l'utente è admin, l'ultimo indice (5) è per il pannello admin
+  Widget _buildAdminContent() {
+    final l10n = AppLocalizations.of(context);
     switch (_selectedIndex) {
       case 0:
         return const _DashboardContent();
       case 1:
-        return const Center(child: Text('My Company'));
+        return Center(child: Text(l10n.getString('user_management')));
       case 2:
         return const CertificationListScreen();
       case 3:
-        return const Center(child: Text('Profilo'));
+        return Center(child: Text(l10n.getString('legal_entities_management')));
       case 4:
-        return const Center(child: Text('Impostazioni'));
+        return Center(child: Text(l10n.getString('analytics')));
       case 5:
-        return const LegalEntityManagementScreen();
+        return Center(child: Text(l10n.getString('settings')));
+      case 6:
+        return const UserProfileScreen();
       default:
         return const _DashboardContent();
+    }
+  }
+
+  Widget _buildLegalEntityContent() {
+    final l10n = AppLocalizations.of(context);
+    switch (_selectedIndex) {
+      case 0:
+        return const _DashboardContent();
+      case 1:
+        return const CertificationListScreen();
+      case 2:
+        return const UserProfileScreen();
+      default:
+        return const _DashboardContent();
+    }
+  }
+
+  Widget _buildCertifierContent() {
+    final l10n = AppLocalizations.of(context);
+    switch (_selectedIndex) {
+      case 0:
+        return const CertificationListScreen();
+      case 1:
+        return const UserProfileScreen();
+      default:
+        return const CertificationListScreen();
+    }
+  }
+
+  Widget _buildUserContent() {
+    final l10n = AppLocalizations.of(context);
+    switch (_selectedIndex) {
+      case 0:
+        return const UserProfileScreen();
+      default:
+        return const UserProfileScreen();
     }
   }
 }

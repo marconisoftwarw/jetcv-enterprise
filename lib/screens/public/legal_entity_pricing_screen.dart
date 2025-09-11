@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import '../../models/pricing.dart';
 import '../../providers/pricing_provider.dart';
 import '../../widgets/custom_button.dart';
-import '../../widgets/custom_text_field.dart';
 
 class LegalEntityPricingScreen extends StatefulWidget {
   const LegalEntityPricingScreen({super.key});

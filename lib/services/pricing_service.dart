@@ -1,5 +1,4 @@
 import '../models/pricing.dart';
-import '../config/app_config.dart';
 
 class PricingService {
   // Per ora restituisce pricing fittizi

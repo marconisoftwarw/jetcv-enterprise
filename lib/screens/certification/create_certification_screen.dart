@@ -10,14 +10,12 @@ import '../../l10n/app_localizations.dart';
 import '../../services/certification_edge_service.dart';
 import '../../services/certification_service_v2.dart';
 import '../../services/otp_service.dart';
-import '../../services/certification_category_service.dart';
 import '../../services/certification_category_edge_service.dart';
 import '../../services/certification_information_service.dart';
 import '../../services/otp_verification_service.dart';
 import '../../services/default_ids_service.dart';
 import '../../services/legal_entity_service.dart';
 import '../../services/location_service.dart';
-import '../../config/app_config.dart';
 import '../../providers/auth_provider.dart';
 
 class CreateCertificationScreen extends StatefulWidget {
@@ -217,7 +215,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     final l10n = AppLocalizations.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 768;
-    final isDesktop = screenWidth > 1024;
+    // final isDesktop = screenWidth > 1024;
 
     return Scaffold(
       backgroundColor: AppTheme.offWhite,
@@ -368,7 +366,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     final l10n = AppLocalizations.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 768;
-    final isDesktop = screenWidth > 1024;
+    // final isDesktop = screenWidth > 1024;
 
     return SingleChildScrollView(
       padding: EdgeInsets.all(isTablet ? 24 : 16),
@@ -425,7 +423,11 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                   ? [
                       DropdownMenuItem<String>(
                         value: null,
-                        child: Text('Caricamento legal entities...'),
+                        child: Text(
+                          AppLocalizations.of(
+                            context,
+                          ).getString('loading_legal_entities'),
+                        ),
                       ),
                     ]
                   : _legalEntities.map((legalEntity) {
@@ -470,7 +472,9 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                   ? [
                       DropdownMenuItem<String>(
                         value: '',
-                        child: Text('Caricamento...'),
+                        child: Text(
+                          AppLocalizations.of(context).getString('loading'),
+                        ),
                       ),
                     ]
                   : _categories.map((CertificationCategoryEdge category) {

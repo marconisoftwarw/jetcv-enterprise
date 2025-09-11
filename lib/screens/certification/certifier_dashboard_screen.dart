@@ -297,7 +297,7 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
   }
 
   Widget _buildIssuedCertificationsTab() {
-    final l10n = AppLocalizations.of(context);
+    // final l10n = AppLocalizations.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 768;
 

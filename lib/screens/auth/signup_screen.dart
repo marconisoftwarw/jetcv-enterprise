@@ -8,6 +8,7 @@ import '../../widgets/neon_text_field.dart';
 import '../../widgets/neon_button.dart';
 import '../../services/veriff_service.dart';
 import '../../services/supabase_service.dart';
+import '../../l10n/app_localizations.dart';
 import 'dart:async';
 
 class SignupScreen extends StatefulWidget {
@@ -99,8 +100,10 @@ class _SignupScreenState extends State<SignupScreen> {
 
     if (!_agreeToTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('You must agree to the terms and conditions'),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context).getString('must_agree_terms'),
+          ),
           backgroundColor: Colors.red,
         ),
       );
@@ -109,8 +112,10 @@ class _SignupScreenState extends State<SignupScreen> {
 
     if (!_agreeToPrivacy) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('You must agree to the privacy policy'),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context).getString('must_agree_privacy'),
+          ),
           backgroundColor: Colors.red,
         ),
       );

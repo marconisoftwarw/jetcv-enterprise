@@ -3,11 +3,11 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../theme/app_theme.dart';
 import '../../config/app_config.dart';
-import '../../models/user.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/veriff_service.dart';
 import '../../widgets/linkedin_card.dart';
 import '../../widgets/linkedin_button.dart';
+import '../../l10n/app_localizations.dart';
 
 class VeriffVerificationScreen extends StatefulWidget {
   const VeriffVerificationScreen({super.key});
@@ -46,7 +46,7 @@ class _VeriffVerificationScreenState extends State<VeriffVerificationScreen> {
       // Verifica che l'utente sia valido
       if (user == null) {
         throw Exception(
-          'Utente non autenticato. Effettua il login per continuare.',
+          AppLocalizations.of(context).getString('user_not_authenticated'),
         );
       }
 

@@ -26,6 +26,7 @@ import 'screens/public/legal_entity_pricing_screen.dart';
 import 'screens/public/legal_entity_public_registration_screen.dart';
 import 'screens/public/legal_entity_invitation_details_screen.dart';
 import 'screens/legal_entity/legal_entity_registration_screen.dart';
+import 'widgets/global_floating_language_button.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -135,6 +136,14 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
             AppLocalizationsDelegate(),
           ],
           theme: AppTheme.lightTheme,
+          builder: (context, child) {
+            return Stack(
+              children: [
+                child ?? const SizedBox(),
+                const GlobalFloatingLanguageButton(),
+              ],
+            );
+          },
           home: FutureBuilder(
             future: _initializationFuture,
             builder: (context, snapshot) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/user.dart';
 import '../services/supabase_service.dart';
+import '../services/user_type_service.dart';
 
 class AuthProvider extends ChangeNotifier {
   final SupabaseService _supabaseService = SupabaseService();
@@ -9,6 +10,7 @@ class AuthProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
   bool _isInitialized = false;
+  AppUserType? _userType;
 
   AppUser? get currentUser => _currentUser;
   bool get isLoading => _isLoading;
@@ -17,6 +19,7 @@ class AuthProvider extends ChangeNotifier {
   bool get isAuthenticated =>
       _supabaseService.isUserAuthenticated && _currentUser != null;
   bool get isUserDataLoaded => _currentUser != null;
+  AppUserType? get userType => _userType;
 
   // Getter per controllare se l'utente corrente è admin
   bool get isCurrentUserAdmin => _currentUser?.isAdminFromDatabase ?? false;
@@ -31,8 +34,38 @@ class AuthProvider extends ChangeNotifier {
       if (_supabaseService.hasValidSession) {
         final supabaseUser = _supabaseService.currentUser;
         if (supabaseUser != null) {
-          // No need to load user data automatically
-          // Just check if session is valid
+          // Crea l'utente direttamente dai dati di Supabase se non esiste
+          if (_currentUser == null) {
+            _currentUser = AppUser(
+              idUser: supabaseUser.id,
+              email: supabaseUser.email ?? '',
+              firstName:
+                  supabaseUser.userMetadata?['full_name']?.split(' ').first ??
+                  '',
+              lastName:
+                  supabaseUser.userMetadata?['full_name']
+                      ?.split(' ')
+                      .skip(1)
+                      .join(' ') ??
+                  '',
+              type: UserType.user, // Default type
+              languageCode: 'it',
+              phone: supabaseUser.phone ?? '',
+              idUserHash: supabaseUser.id, // Usa l'ID come hash
+              createdAt: supabaseUser.createdAt != null
+                  ? DateTime.parse(supabaseUser.createdAt!)
+                  : null,
+              updatedAt: supabaseUser.updatedAt != null
+                  ? DateTime.parse(supabaseUser.updatedAt!)
+                  : null,
+            );
+            notifyListeners();
+          }
+          // Imposta tipo utente di default se non è stato caricato
+          if (_userType == null) {
+            _userType = AppUserType.user;
+            notifyListeners();
+          }
           return true;
         }
         return false;
@@ -180,8 +213,47 @@ class AuthProvider extends ChangeNotifier {
       );
 
       if (response.user != null) {
-        // No need to load user data automatically after sign in
-        // User data will be loaded when explicitly needed
+        // Crea l'utente direttamente dai dati di Supabase
+        _currentUser = AppUser(
+          idUser: response.user!.id,
+          email: response.user!.email ?? '',
+          firstName:
+              response.user!.userMetadata?['full_name']?.split(' ').first ?? '',
+          lastName:
+              response.user!.userMetadata?['full_name']
+                  ?.split(' ')
+                  .skip(1)
+                  .join(' ') ??
+              '',
+          type: UserType.user, // Default type
+          languageCode: 'it',
+          phone: response.user!.phone ?? '',
+          idUserHash: response.user!.id, // Usa l'ID come hash
+          createdAt: response.user!.createdAt != null
+              ? DateTime.parse(response.user!.createdAt!)
+              : null,
+          updatedAt: response.user!.updatedAt != null
+              ? DateTime.parse(response.user!.updatedAt!)
+              : null,
+        );
+
+        print('✅ AuthProvider: User created from Supabase response');
+        print('  ID: ${_currentUser!.idUser}');
+        print('  Email: ${_currentUser!.email}');
+        print('  Name: ${_currentUser!.firstName} ${_currentUser!.lastName}');
+        print('  Phone: ${_currentUser!.phone}');
+        print('  Email Verified: ${response.user!.emailConfirmedAt != null}');
+
+        // Carica il tipo di utente dall'edge function
+        if (_currentUser!.email != null && _currentUser!.email!.isNotEmpty) {
+          print('🔄 Loading user type for: ${_currentUser!.email}');
+          await _loadUserType(_currentUser!.email!);
+        } else {
+          print('⚠️ No user email available for type loading');
+          _userType = AppUserType.user;
+        }
+
+        notifyListeners();
         return true;
       }
 
@@ -313,7 +385,33 @@ class AuthProvider extends ChangeNotifier {
     if (_currentUser == null) return;
 
     try {
-      await _loadUserData(_currentUser!.idUser);
+      final supabaseUser = _supabaseService.currentUser;
+      if (supabaseUser != null) {
+        // Aggiorna l'utente con i dati più recenti da Supabase
+        _currentUser = AppUser(
+          idUser: supabaseUser.id,
+          email: supabaseUser.email ?? '',
+          firstName:
+              supabaseUser.userMetadata?['full_name']?.split(' ').first ?? '',
+          lastName:
+              supabaseUser.userMetadata?['full_name']
+                  ?.split(' ')
+                  .skip(1)
+                  .join(' ') ??
+              '',
+          type: UserType.user, // Default type
+          languageCode: 'it',
+          phone: supabaseUser.phone ?? '',
+          idUserHash: supabaseUser.id, // Usa l'ID come hash
+          createdAt: supabaseUser.createdAt != null
+              ? DateTime.parse(supabaseUser.createdAt!)
+              : null,
+          updatedAt: supabaseUser.updatedAt != null
+              ? DateTime.parse(supabaseUser.updatedAt!)
+              : null,
+        );
+        notifyListeners();
+      }
     } catch (e) {
       _setError('Failed to refresh user data: $e');
     }
@@ -337,50 +435,6 @@ class AuthProvider extends ChangeNotifier {
     }
 
     return null;
-  }
-
-  Future<void> _loadUserData(String userId) async {
-    try {
-      // Prima prova a recuperare l'utente esistente
-      var user = await _supabaseService.getUserById(userId);
-
-      // Se l'utente non esiste, prova a crearlo automaticamente
-      if (user == null) {
-        final supabaseUser = _supabaseService.currentUser;
-        if (supabaseUser != null) {
-          print(
-            'AuthProvider: User not found, attempting to create record automatically',
-          );
-          user = await _supabaseService.ensureUserExists(
-            userId,
-            supabaseUser: supabaseUser,
-          );
-        }
-      }
-
-      if (user != null) {
-        _currentUser = user;
-
-        // Debug info per il controllo admin
-        print('AuthProvider Debug - User loaded:');
-        print('  ID: ${user.idUser}');
-        print('  Type: ${user.type}');
-        print('  Type String: ${user.type?.toString().split('.').last}');
-        print('  Is Admin (method): ${user.isAdmin}');
-        print('  Is Admin (database): ${user.isAdminFromDatabase}');
-        print('  Raw type value: ${user.type?.toString()}');
-
-        notifyListeners();
-      } else {
-        print(
-          'AuthProvider Debug - Failed to load or create user data for ID: $userId',
-        );
-        _setError('User data not found and could not be created');
-      }
-    } catch (e) {
-      print('AuthProvider: Error in _loadUserData: $e');
-      _setError('Failed to load user data: $e');
-    }
   }
 
   String _generateUserHash(String email) {
@@ -410,10 +464,10 @@ class AuthProvider extends ChangeNotifier {
   // Metodo pubblico per caricare i dati dell'utente
   Future<void> loadUserData() async {
     if (_isLoading) return;
-    
+
     try {
       _setLoading(true);
-      
+
       // Verifica se c'è una sessione valida
       if (!_supabaseService.hasValidSession) {
         _setError('No valid session found');
@@ -426,13 +480,94 @@ class AuthProvider extends ChangeNotifier {
         return;
       }
 
-      // Carica i dati dell'utente
-      await _loadUserData(supabaseUser.id);
-      
+      // Crea l'utente direttamente dai dati di Supabase
+      _currentUser = AppUser(
+        idUser: supabaseUser.id,
+        email: supabaseUser.email ?? '',
+        firstName:
+            supabaseUser.userMetadata?['full_name']?.split(' ').first ?? '',
+        lastName:
+            supabaseUser.userMetadata?['full_name']
+                ?.split(' ')
+                .skip(1)
+                .join(' ') ??
+            '',
+        type: UserType.user, // Default type
+        languageCode: 'it',
+        phone: supabaseUser.phone ?? '',
+        idUserHash: supabaseUser.id, // Usa l'ID come hash
+        createdAt: supabaseUser.createdAt != null
+            ? DateTime.parse(supabaseUser.createdAt!)
+            : null,
+        updatedAt: supabaseUser.updatedAt != null
+            ? DateTime.parse(supabaseUser.updatedAt!)
+            : null,
+      );
     } catch (e) {
       _setError('Failed to load user data: $e');
     } finally {
       _setLoading(false);
+    }
+  }
+
+  // Metodo pubblico per caricare il tipo di utente dall'edge function
+  Future<void> loadUserType() async {
+    if (_currentUser?.email == null) {
+      print('No user email available for type loading');
+      return;
+    }
+
+    try {
+      final userTypeString = await UserTypeService.getUserType(
+        _currentUser!.email!,
+      );
+      if (userTypeString != null) {
+        _userType = userTypeString.toUserType;
+        print('✅ User type loaded: $_userType');
+        notifyListeners();
+      } else {
+        print('⚠️ No user type received, using default');
+        _userType = AppUserType.user;
+        notifyListeners();
+      }
+    } catch (e) {
+      print('❌ Error loading user type: $e');
+      print('🔄 Using default user type');
+      _userType = AppUserType.user;
+      notifyListeners();
+    }
+  }
+
+  // Metodo per testare manualmente il tipo utente
+  Future<void> testUserType() async {
+    print('🧪 Testing user type loading...');
+    print('Current user: $_currentUser');
+    print('Current user type: $_userType');
+    if (_currentUser?.email != null) {
+      await loadUserType();
+    } else {
+      print('❌ No user email available for testing');
+    }
+  }
+
+  // Metodo privato per caricare il tipo di utente dall'edge function
+  Future<void> _loadUserType(String email) async {
+    try {
+      final userTypeString = await UserTypeService.getUserType(email);
+      if (userTypeString != null) {
+        _userType = userTypeString.toUserType;
+        print('✅ User type loaded: $_userType');
+        notifyListeners();
+      } else {
+        print('⚠️ No user type received, using default');
+        _userType = AppUserType.user;
+        notifyListeners();
+      }
+    } catch (e) {
+      print('❌ Error loading user type: $e');
+      print('🔄 Using default user type');
+      _userType = AppUserType.user;
+      notifyListeners();
     }
   }
 }

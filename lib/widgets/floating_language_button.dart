@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/locale_provider.dart';
+import '../theme/app_theme.dart';
 
 class FloatingLanguageButton extends StatefulWidget {
   const FloatingLanguageButton({super.key});
@@ -77,15 +78,15 @@ class _FloatingLanguageButtonState extends State<FloatingLanguageButton>
                           _toggleExpanded();
                         },
                         backgroundColor: isSelected
-                            ? Theme.of(context).primaryColor
-                            : Colors.white,
+                            ? AppTheme.primaryBlue
+                            : AppTheme.pureWhite,
                         child: Text(
                           language['flag']!,
                           style: TextStyle(
                             fontSize: 16,
                             color: isSelected
-                                ? Colors.white
-                                : Colors.grey.shade800,
+                                ? AppTheme.pureWhite
+                                : AppTheme.textPrimary,
                           ),
                         ),
                       ),
@@ -99,13 +100,13 @@ class _FloatingLanguageButtonState extends State<FloatingLanguageButton>
               FloatingActionButton(
                 heroTag: "main_lang_button",
                 onPressed: _toggleExpanded,
-                backgroundColor: Theme.of(context).primaryColor,
+                backgroundColor: AppTheme.primaryBlue,
                 child: AnimatedRotation(
                   turns: _isExpanded ? 0.5 : 0.0,
                   duration: const Duration(milliseconds: 200),
                   child: Icon(
                     _isExpanded ? Icons.close : Icons.language,
-                    color: Colors.white,
+                    color: AppTheme.pureWhite,
                     size: 20,
                   ),
                 ),

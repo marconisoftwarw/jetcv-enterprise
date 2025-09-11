@@ -59,7 +59,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     print('City: ${user.city}');
     print('Type: ${user.type}');
     print('Profile Complete: ${user.isProfileComplete}');
-    
+
     _currentUser = user;
     _firstNameController.text = user.firstName ?? '';
     _lastNameController.text = user.lastName ?? '';
@@ -69,7 +69,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     _addressController.text = user.address ?? '';
     _cityController.text = user.city ?? '';
     _zipCodeController.text = user.postalCode ?? 'Non specificato';
-    
+
     // Forza il rebuild del widget
     if (mounted) {
       setState(() {});
@@ -94,7 +94,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     final l10n = AppLocalizations.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 768;
-    final isDesktop = screenWidth > 1200;
+    // final isDesktop = screenWidth > 1200;
 
     return Scaffold(
       backgroundColor: AppTheme.offWhite,
@@ -139,7 +139,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       body: Consumer<AuthProvider>(
         builder: (context, authProvider, child) {
           // Carica i dati dell'utente se non sono disponibili
-          if (authProvider.isAuthenticated && authProvider.currentUser == null) {
+          if (authProvider.isAuthenticated &&
+              authProvider.currentUser == null) {
             WidgetsBinding.instance.addPostFrameCallback((_) async {
               await authProvider.loadUserData();
             });
@@ -167,7 +168,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     ),
                   const SizedBox(height: 16),
                   Text(
-                    authProvider.isLoading 
+                    authProvider.isLoading
                         ? l10n.getString('loading_profile')
                         : l10n.getString('no_user_data'),
                     style: Theme.of(
@@ -234,7 +235,11 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     );
   }
 
-  Widget _buildProfileHeader(AppUser user, AppLocalizations l10n, bool isTablet) {
+  Widget _buildProfileHeader(
+    AppUser user,
+    AppLocalizations l10n,
+    bool isTablet,
+  ) {
     return EnterpriseCard(
       child: Column(
         children: [
@@ -273,10 +278,13 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                               child: Center(
                                 child: Text(
                                   user.initials,
-                                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                    color: AppTheme.pureWhite,
-                                    fontWeight: FontWeight.w700,
-                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineMedium
+                                      ?.copyWith(
+                                        color: AppTheme.pureWhite,
+                                        fontWeight: FontWeight.w700,
+                                      ),
                                 ),
                               ),
                             );
@@ -285,10 +293,11 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                       : Center(
                           child: Text(
                             user.initials,
-                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                              color: AppTheme.pureWhite,
-                              fontWeight: FontWeight.w700,
-                            ),
+                            style: Theme.of(context).textTheme.headlineMedium
+                                ?.copyWith(
+                                  color: AppTheme.pureWhite,
+                                  fontWeight: FontWeight.w700,
+                                ),
                           ),
                         ),
                 ),
@@ -303,10 +312,11 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   children: [
                     Text(
                       user.displayName,
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: AppTheme.textPrimary,
-                      ),
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.textPrimary,
+                          ),
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -319,9 +329,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     const SizedBox(height: 4),
                     Text(
                       user.email ?? l10n.getString('no_email'),
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: AppTheme.textGray,
-                      ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodyLarge?.copyWith(color: AppTheme.textGray),
                     ),
                     const SizedBox(height: 16),
 
@@ -341,7 +351,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                             border: Border.all(
                               color: user.isProfileComplete
                                   ? AppTheme.successGreen.withValues(alpha: 0.3)
-                                  : AppTheme.warningOrange.withValues(alpha: 0.3),
+                                  : AppTheme.warningOrange.withValues(
+                                      alpha: 0.3,
+                                    ),
                               width: 1,
                             ),
                           ),
@@ -362,12 +374,13 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                                 user.isProfileComplete
                                     ? l10n.getString('profile_complete')
                                     : l10n.getString('profile_incomplete'),
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: user.isProfileComplete
-                                      ? AppTheme.successGreen
-                                      : AppTheme.warningOrange,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      color: user.isProfileComplete
+                                          ? AppTheme.successGreen
+                                          : AppTheme.warningOrange,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                               ),
                             ],
                           ),
@@ -382,16 +395,24 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                             color: AppTheme.primaryBlue.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: AppTheme.primaryBlue.withValues(alpha: 0.3),
+                              color: AppTheme.primaryBlue.withValues(
+                                alpha: 0.3,
+                              ),
                               width: 1,
                             ),
                           ),
                           child: Text(
-                            user.type?.toString().split('.').last.toUpperCase() ?? 'USER',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppTheme.primaryBlue,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            user.type
+                                    ?.toString()
+                                    .split('.')
+                                    .last
+                                    .toUpperCase() ??
+                                'USER',
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: AppTheme.primaryBlue,
+                                  fontWeight: FontWeight.w600,
+                                ),
                           ),
                         ),
                       ],
@@ -586,7 +607,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                         label: l10n.getString('language'),
                         enabled: false,
                         controller: TextEditingController(
-                          text: _currentUser?.languageCode ?? l10n.getString('not_specified'),
+                          text:
+                              _currentUser?.languageCode ??
+                              l10n.getString('not_specified'),
                         ),
                         prefixIcon: const Icon(Icons.language_rounded),
                       ),
@@ -601,7 +624,11 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     );
   }
 
-  Widget _buildCompanyInfoSection(AppUser user, AppLocalizations l10n, bool isTablet) {
+  Widget _buildCompanyInfoSection(
+    AppUser user,
+    AppLocalizations l10n,
+    bool isTablet,
+  ) {
     return EnterpriseCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -682,10 +709,11 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     children: [
                       Text(
                         l10n.getString('legal_entity_associated'),
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: AppTheme.textPrimary,
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.textPrimary,
+                            ),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -710,7 +738,11 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     );
   }
 
-  Widget _buildStatsSection(AppUser user, AppLocalizations l10n, bool isTablet) {
+  Widget _buildStatsSection(
+    AppUser user,
+    AppLocalizations l10n,
+    bool isTablet,
+  ) {
     return EnterpriseCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -823,16 +855,15 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   color: iconColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  icon,
-                  color: iconColor,
-                  size: 20,
-                ),
+                child: Icon(icon, color: iconColor, size: 20),
               ),
               const Spacer(),
               if (change != null)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: isPositive == true
                         ? AppTheme.successGreen.withValues(alpha: 0.1)
@@ -870,9 +901,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           const SizedBox(height: 2),
           Text(
             subtitle,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppTheme.textGray,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: AppTheme.textGray),
           ),
         ],
       ),
@@ -881,10 +912,10 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
   String _formatLastAccess(DateTime? lastAccess) {
     if (lastAccess == null) return 'Mai';
-    
+
     final now = DateTime.now();
     final difference = now.difference(lastAccess);
-    
+
     if (difference.inDays > 0) {
       return '${difference.inDays}g fa';
     } else if (difference.inHours > 0) {
@@ -899,16 +930,18 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   int _calculateProfileCompletion(AppUser user) {
     int completedFields = 0;
     int totalFields = 8;
-    
+
     if (user.firstName != null && user.firstName!.isNotEmpty) completedFields++;
     if (user.lastName != null && user.lastName!.isNotEmpty) completedFields++;
     if (user.phone != null && user.phone!.isNotEmpty) completedFields++;
     if (user.address != null && user.address!.isNotEmpty) completedFields++;
     if (user.city != null && user.city!.isNotEmpty) completedFields++;
     if (user.state != null && user.state!.isNotEmpty) completedFields++;
-    if (user.postalCode != null && user.postalCode!.isNotEmpty) completedFields++;
-    if (user.countryCode != null && user.countryCode!.isNotEmpty) completedFields++;
-    
+    if (user.postalCode != null && user.postalCode!.isNotEmpty)
+      completedFields++;
+    if (user.countryCode != null && user.countryCode!.isNotEmpty)
+      completedFields++;
+
     return ((completedFields / totalFields) * 100).round();
   }
 
@@ -1016,11 +1049,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 color: iconColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(
-                icon,
-                color: iconColor,
-                size: 24,
-              ),
+              child: Icon(icon, color: iconColor, size: 24),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -1038,9 +1067,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   const SizedBox(height: 4),
                   Text(
                     description,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppTheme.textGray,
-                    ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.copyWith(color: AppTheme.textGray),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -1139,11 +1168,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 color: iconColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(
-                icon,
-                color: iconColor,
-                size: 20,
-              ),
+              child: Icon(icon, color: iconColor, size: 20),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -1160,9 +1185,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   const SizedBox(height: 2),
                   Text(
                     description,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppTheme.textGray,
-                    ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.copyWith(color: AppTheme.textGray),
                   ),
                 ],
               ),
@@ -1202,7 +1227,11 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               children: [
                 Icon(Icons.check_circle, color: AppTheme.pureWhite),
                 const SizedBox(width: 8),
-                Text(AppLocalizations.of(context).getString('profile_updated_successfully')),
+                Text(
+                  AppLocalizations.of(
+                    context,
+                  ).getString('profile_updated_successfully'),
+                ),
               ],
             ),
             backgroundColor: AppTheme.successGreen,
@@ -1225,7 +1254,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               children: [
                 Icon(Icons.error, color: AppTheme.pureWhite),
                 const SizedBox(width: 8),
-                Text('${AppLocalizations.of(context).getString('error_saving')}: $e'),
+                Text(
+                  '${AppLocalizations.of(context).getString('error_saving')}: $e',
+                ),
               ],
             ),
             backgroundColor: AppTheme.errorRed,
@@ -1241,32 +1272,44 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
   void _uploadProfilePicture() {
     // TODO: Implementare upload foto profilo con Supabase Storage
-    _showFeatureInDevelopment(AppLocalizations.of(context).getString('upload_profile_picture'));
+    _showFeatureInDevelopment(
+      AppLocalizations.of(context).getString('upload_profile_picture'),
+    );
   }
 
   void _removeProfilePicture() {
     // TODO: Implementare rimozione foto profilo
-    _showFeatureInDevelopment(AppLocalizations.of(context).getString('remove_profile_picture'));
+    _showFeatureInDevelopment(
+      AppLocalizations.of(context).getString('remove_profile_picture'),
+    );
   }
 
   void _changePassword() {
     // TODO: Implementare cambio password con Supabase Auth
-    _showFeatureInDevelopment(AppLocalizations.of(context).getString('change_password'));
+    _showFeatureInDevelopment(
+      AppLocalizations.of(context).getString('change_password'),
+    );
   }
 
   void _openNotificationSettings() {
     // TODO: Implementare impostazioni notifiche
-    _showFeatureInDevelopment(AppLocalizations.of(context).getString('notification_settings'));
+    _showFeatureInDevelopment(
+      AppLocalizations.of(context).getString('notification_settings'),
+    );
   }
 
   void _exportData() {
     // TODO: Implementare esportazione dati GDPR
-    _showFeatureInDevelopment(AppLocalizations.of(context).getString('export_data'));
+    _showFeatureInDevelopment(
+      AppLocalizations.of(context).getString('export_data'),
+    );
   }
 
   void _deleteAccount() {
     // TODO: Implementare eliminazione account con conferma
-    _showFeatureInDevelopment(AppLocalizations.of(context).getString('delete_account'));
+    _showFeatureInDevelopment(
+      AppLocalizations.of(context).getString('delete_account'),
+    );
   }
 
   void _showFeatureInDevelopment(String feature) {
@@ -1276,14 +1319,14 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           children: [
             Icon(Icons.construction, color: AppTheme.pureWhite),
             const SizedBox(width: 8),
-            Text('$feature - ${AppLocalizations.of(context).getString('feature_in_development')}'),
+            Text(
+              '$feature - ${AppLocalizations.of(context).getString('feature_in_development')}',
+            ),
           ],
         ),
         backgroundColor: AppTheme.warningOrange,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }

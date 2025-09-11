@@ -1,4 +1,3 @@
-import 'dart:convert';
 import '../models/user.dart' as app_models;
 import 'supabase_service.dart';
 

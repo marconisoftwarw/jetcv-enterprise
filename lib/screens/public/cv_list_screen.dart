@@ -24,7 +24,7 @@ class _CVListScreenState extends State<CVListScreen> {
   bool _showVerifiedOnly = false;
   Map<String, dynamic> _stats = {};
 
-  String _selectedLocation = '';
+  // String _selectedLocation = '';
   String _selectedSortBy = 'recent';
 
   @override
