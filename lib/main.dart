@@ -91,6 +91,13 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
     try {
       print('🚀 Initializing app...');
       final authProvider = context.read<AuthProvider>();
+      final localeProvider = context.read<LocaleProvider>();
+
+      print('🌍 Initializing LocaleProvider...');
+      await localeProvider.loadSavedLocale();
+      print(
+        '✅ LocaleProvider initialized with locale: ${localeProvider.locale}',
+      );
 
       print('🔐 Initializing AuthProvider...');
       await authProvider.initialize();
