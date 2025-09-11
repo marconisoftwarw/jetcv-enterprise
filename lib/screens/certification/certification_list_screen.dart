@@ -10,9 +10,8 @@ import '../../services/certification_category_service.dart';
 import '../../services/location_service.dart';
 import '../../providers/auth_provider.dart';
 import '../../l10n/app_localizations.dart';
-import '../../widgets/linkedin_button.dart';
-import '../../widgets/linkedin_card.dart';
-import '../../widgets/linkedin_text_field.dart';
+import '../../widgets/enterprise_card.dart';
+import '../../widgets/neon_button.dart';
 import '../../theme/app_theme.dart';
 import '../../config/app_config.dart';
 import 'create_certification_screen.dart';
@@ -43,7 +42,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
   void initState() {
     super.initState();
     print('🏁 CertificationListScreen initState called');
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(() {
       setState(() {
         _selectedTabIndex = _tabController.index;
@@ -215,44 +214,51 @@ class _CertificationListScreenState extends State<CertificationListScreen>
     final isDesktop = screenWidth > 1024;
 
     return Scaffold(
-      backgroundColor: AppTheme.backgroundGrey,
+      backgroundColor: AppTheme.offWhite,
       appBar: AppBar(
         backgroundColor: AppTheme.pureWhite,
-        foregroundColor: AppTheme.primaryBlack,
+        foregroundColor: AppTheme.textPrimary,
         elevation: 0,
+        surfaceTintColor: Colors.transparent,
         title: Text(
           l10n.getString('certifier_dashboard'),
-          style: TextStyle(
-            color: AppTheme.primaryBlack,
-            fontSize: isTablet ? 24 : 20,
-            fontWeight: FontWeight.bold,
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+            color: AppTheme.textPrimary,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.2,
           ),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppTheme.primaryBlack),
+          icon: Icon(Icons.arrow_back, color: AppTheme.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: AppTheme.primaryBlack,
-          labelColor: AppTheme.primaryBlack,
-          unselectedLabelColor: AppTheme.textSecondary,
-          labelStyle: TextStyle(
+          indicatorColor: AppTheme.primaryBlue,
+          labelColor: AppTheme.primaryBlue,
+          unselectedLabelColor: AppTheme.textGray,
+          labelStyle: const TextStyle(
             fontWeight: FontWeight.w600,
-            fontSize: isTablet ? 16 : 14,
+            fontSize: 14,
           ),
+          unselectedLabelStyle: const TextStyle(
+            fontWeight: FontWeight.w500,
+            fontSize: 14,
+          ),
+          indicatorSize: TabBarIndicatorSize.tab,
+          indicatorWeight: 3,
           tabs: [
             Tab(text: 'Bozze e In corso'),
-            Tab(text: 'Inviate'),
-            Tab(text: 'Chiuse'),
+            Tab(text: 'Emesse'),
           ],
         ),
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [_buildDraftsTab(), _buildSentTab(), _buildClosedTab()],
+        children: [_buildDraftsTab(), _buildSentTab()],
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: NeonButton(
+        text: l10n.getString('new_certification'),
         onPressed: () {
           Navigator.push(
             context,
@@ -261,11 +267,9 @@ class _CertificationListScreenState extends State<CertificationListScreen>
             ),
           );
         },
-        backgroundColor: AppTheme.primaryBlack,
-        foregroundColor: AppTheme.pureWhite,
-        elevation: 8,
-        icon: const Icon(Icons.add),
-        label: Text(l10n.getString('new_certification')),
+        icon: Icons.add,
+        neonColor: AppTheme.successGreen,
+        height: 56,
       ),
     );
   }
@@ -277,54 +281,111 @@ class _CertificationListScreenState extends State<CertificationListScreen>
     final isDesktop = screenWidth > 1024;
 
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (_errorMessage != null) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 64, color: AppTheme.errorRed),
+            CircularProgressIndicator(color: AppTheme.primaryBlue),
             const SizedBox(height: 16),
-            Text('Errore nel caricamento', style: AppTheme.title2),
-            const SizedBox(height: 8),
             Text(
-              _errorMessage!,
-              style: AppTheme.body2,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _loadCertifications,
-              child: const Text('Riprova'),
+              'Caricamento certificazioni...',
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(color: AppTheme.textGray),
             ),
           ],
         ),
       );
     }
 
+    if (_errorMessage != null) {
+      return Center(
+        child: EnterpriseCard(
+          margin: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.error_outline, size: 64, color: AppTheme.errorRed),
+              const SizedBox(height: 16),
+              Text(
+                'Errore nel caricamento',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: AppTheme.textPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                _errorMessage!,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: AppTheme.textGray),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              NeonButton(
+                text: 'Riprova',
+                onPressed: _loadCertifications,
+                neonColor: AppTheme.primaryBlue,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     if (_draftCertifications.isEmpty) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.edit_outlined, size: 64, color: AppTheme.textSecondary),
-            const SizedBox(height: 16),
-            Text(
-              'Nessuna certificazione',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.primaryBlack,
+        child: EnterpriseCard(
+          margin: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: AppTheme.lightBlue,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Icon(
+                  Icons.edit_outlined,
+                  size: 40,
+                  color: AppTheme.primaryBlue,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Le certificazioni in bozza e in corso appariranno qui',
-              style: TextStyle(color: AppTheme.textSecondary),
-            ),
-          ],
+              const SizedBox(height: 20),
+              Text(
+                'Nessuna certificazione',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: AppTheme.textPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Le certificazioni in bozza e in corso appariranno qui',
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: AppTheme.textGray),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              NeonButton(
+                text: 'Crea Certificazione',
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const CreateCertificationScreen(),
+                    ),
+                  );
+                },
+                neonColor: AppTheme.successGreen,
+                isOutlined: true,
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -333,24 +394,37 @@ class _CertificationListScreenState extends State<CertificationListScreen>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.all(isTablet ? 24 : 16),
-          child: Text(
-            'Bozze e In corso (${_draftCertifications.length})',
-            style: TextStyle(
-              fontSize: isTablet ? 20 : 18,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.primaryBlack,
-            ),
+          padding: const EdgeInsets.all(32),
+          child: Row(
+            children: [
+              Container(
+                width: 4,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryBlue,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'Bozze e In corso (${_draftCertifications.length})',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.textPrimary,
+                  letterSpacing: -0.2,
+                ),
+              ),
+            ],
           ),
         ),
         Expanded(
           child: ListView.builder(
-            padding: EdgeInsets.symmetric(horizontal: isTablet ? 24 : 16),
+            padding: const EdgeInsets.symmetric(horizontal: 32),
             itemCount: _draftCertifications.length,
             itemBuilder: (context, index) {
               final cert = _draftCertifications[index];
               return Padding(
-                padding: EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.only(bottom: 20),
                 child: _buildCertificationCard(cert, l10n, isTablet),
               );
             },
@@ -380,141 +454,152 @@ class _CertificationListScreenState extends State<CertificationListScreen>
     final categoryName = _categoryNames[categoryId] ?? 'Categoria sconosciuta';
     final locationName = _locationNames[locationId] ?? 'Luogo sconosciuto';
 
-    return LinkedInCard(
-      child: InkWell(
-        onTap: () {
-          // TODO: Navigate to certification details
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: ClipRect(
-          child: Padding(
-            padding: EdgeInsets.all(isTablet ? 12 : 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: isTablet ? 50 : 40,
-                      height: isTablet ? 50 : 40,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        color: AppTheme.primaryBlue.withValues(alpha: 0.1),
-                      ),
-                      child: Icon(
-                        Icons.workspace_premium,
-                        color: AppTheme.primaryBlue,
-                        size: isTablet ? 24 : 20,
-                      ),
+    return EnterpriseCard(
+      isHoverable: true,
+      onTap: () {
+        // TODO: Navigate to certification details
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  gradient: AppTheme.primaryGradient,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.primaryBlue.withValues(alpha: 0.2),
+                      blurRadius: 8,
+                      spreadRadius: 0,
+                      offset: const Offset(0, 2),
                     ),
-                    SizedBox(width: isTablet ? 12 : 8),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  '$categoryName - $serialNumber',
-                                  style: TextStyle(
-                                    fontSize: isTablet ? 16 : 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppTheme.primaryBlack,
-                                  ),
+                  ],
+                ),
+                child: Icon(
+                  Icons.workspace_premium,
+                  color: AppTheme.pureWhite,
+                  size: 28,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            '$categoryName - $serialNumber',
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: AppTheme.textPrimary,
                                 ),
+                          ),
+                        ),
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: statusColor.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: statusColor.withValues(alpha: 0.3),
+                                width: 1,
                               ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: statusColor.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  statusText,
-                                  style: TextStyle(
+                            ),
+                            child: Text(
+                              statusText,
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(
                                     color: statusColor,
-                                    fontSize: 12,
                                     fontWeight: FontWeight.w600,
                                   ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: isTablet ? 2 : 1),
-                          Text(
-                            'Utenti: $nUsers • Luogo: $locationName',
-                            style: TextStyle(
-                              fontSize: isTablet ? 12 : 10,
-                              color: AppTheme.textSecondary,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          SizedBox(height: isTablet ? 2 : 1),
-                          Text(
-                            'Status: $statusText',
-                            style: TextStyle(
-                              fontSize: isTablet ? 12 : 10,
-                              color: AppTheme.primaryBlack,
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                    Icon(
-                      Icons.arrow_forward_ios,
-                      color: AppTheme.textSecondary,
-                      size: 16,
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(Icons.people, size: 16, color: AppTheme.textGray),
+                        const SizedBox(width: 4),
+                        Flexible(
+                          child: Text(
+                            '$nUsers utenti',
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: AppTheme.textGray),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Icon(
+                          Icons.location_on,
+                          size: 16,
+                          color: AppTheme.textGray,
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            locationName,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: AppTheme.textGray),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-                SizedBox(height: isTablet ? 8 : 6),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.calendar_today,
-                      size: 16,
-                      color: AppTheme.textSecondary,
-                    ),
-                    SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        'Creata: ${createdAt.day}/${createdAt.month}/${createdAt.year}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: AppTheme.textSecondary,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
+              ),
+              Icon(Icons.arrow_forward_ios, color: AppTheme.textGray, size: 16),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppTheme.offWhite,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppTheme.borderGray, width: 1),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.calendar_today, size: 16, color: AppTheme.textGray),
+                const SizedBox(width: 8),
+                Text(
+                  'Creata: ${createdAt.day}/${createdAt.month}/${createdAt.year}',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppTheme.textGray,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
                 if (sentAt != null) ...[
-                  SizedBox(height: isTablet ? 2 : 1),
-                  Row(
-                    children: [
-                      Icon(Icons.send, size: 16, color: AppTheme.textSecondary),
-                      SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          'Inviata: ${sentAt.day}/${sentAt.month}/${sentAt.year}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: AppTheme.textSecondary,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
+                  const SizedBox(width: 16),
+                  Icon(Icons.send, size: 16, color: AppTheme.textGray),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Inviata: ${sentAt.day}/${sentAt.month}/${sentAt.year}',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppTheme.textGray,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ],
               ],
             ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -556,54 +641,115 @@ class _CertificationListScreenState extends State<CertificationListScreen>
     final isDesktop = screenWidth > 1024;
 
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (_errorMessage != null) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 64, color: AppTheme.errorRed),
+            CircularProgressIndicator(color: AppTheme.successGreen),
             const SizedBox(height: 16),
-            Text('Errore nel caricamento', style: AppTheme.title2),
-            const SizedBox(height: 8),
             Text(
-              _errorMessage!,
-              style: AppTheme.body2,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _loadCertifications,
-              child: const Text('Riprova'),
+              'Caricamento certificazioni emesse...',
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(color: AppTheme.textGray),
             ),
           ],
+        ),
+      );
+    }
+
+    if (_errorMessage != null) {
+      return Center(
+        child: EnterpriseCard(
+          margin: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.error_outline, size: 64, color: AppTheme.errorRed),
+              const SizedBox(height: 16),
+              Text(
+                'Errore nel caricamento',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: AppTheme.textPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                _errorMessage!,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: AppTheme.textGray),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              NeonButton(
+                text: 'Riprova',
+                onPressed: _loadCertifications,
+                neonColor: AppTheme.primaryBlue,
+              ),
+            ],
+          ),
         ),
       );
     }
 
     if (_sentCertifications.isEmpty) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.send_outlined, size: 64, color: AppTheme.textSecondary),
-            const SizedBox(height: 16),
-            Text(
-              'Nessuna certificazione inviata',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.primaryBlack,
+        child: EnterpriseCard(
+          margin: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: AppTheme.successGreen.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: AppTheme.successGreen.withValues(alpha: 0.3),
+                    width: 2,
+                  ),
+                ),
+                child: Icon(
+                  Icons.check_circle_outline,
+                  size: 40,
+                  color: AppTheme.successGreen,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Le certificazioni inviate appariranno qui',
-              style: TextStyle(color: AppTheme.textSecondary),
-            ),
-          ],
+              const SizedBox(height: 20),
+              Text(
+                'Nessuna certificazione emessa',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: AppTheme.textPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Le certificazioni emesse appariranno qui',
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: AppTheme.textGray),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              NeonButton(
+                text: 'Crea Certificazione',
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const CreateCertificationScreen(),
+                    ),
+                  );
+                },
+                neonColor: AppTheme.successGreen,
+                isOutlined: true,
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -612,118 +758,69 @@ class _CertificationListScreenState extends State<CertificationListScreen>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.all(isTablet ? 24 : 16),
-          child: Text(
-            'Certificazioni Inviate (${_sentCertifications.length})',
-            style: TextStyle(
-              fontSize: isTablet ? 24 : 20,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.primaryBlack,
-            ),
+          padding: const EdgeInsets.all(32),
+          child: Row(
+            children: [
+              Container(
+                width: 4,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: AppTheme.successGreen,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'Emesse (${_sentCertifications.length})',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.textPrimary,
+                  letterSpacing: -0.2,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppTheme.successGreen.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppTheme.successGreen.withValues(alpha: 0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.check_circle,
+                      size: 16,
+                      color: AppTheme.successGreen,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'EMESSE',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppTheme.successGreen,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 10,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
         Expanded(
           child: ListView.builder(
-            padding: EdgeInsets.symmetric(horizontal: isTablet ? 24 : 16),
+            padding: const EdgeInsets.symmetric(horizontal: 32),
             itemCount: _sentCertifications.length,
             itemBuilder: (context, index) {
               final certification = _sentCertifications[index];
               return Padding(
-                padding: EdgeInsets.only(bottom: 16),
-                child: _buildCertificationCard(certification, l10n, isTablet),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildClosedTab() {
-    final l10n = AppLocalizations.of(context);
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isTablet = screenWidth > 768;
-    final isDesktop = screenWidth > 1024;
-
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (_errorMessage != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, size: 64, color: AppTheme.errorRed),
-            const SizedBox(height: 16),
-            Text('Errore nel caricamento', style: AppTheme.title2),
-            const SizedBox(height: 8),
-            Text(
-              _errorMessage!,
-              style: AppTheme.body2,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _loadCertifications,
-              child: const Text('Riprova'),
-            ),
-          ],
-        ),
-      );
-    }
-
-    if (_closedCertifications.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.check_circle_outline,
-              size: 64,
-              color: AppTheme.textSecondary,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Nessuna certificazione chiusa',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.primaryBlack,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Le certificazioni chiuse appariranno qui',
-              style: TextStyle(color: AppTheme.textSecondary),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: EdgeInsets.all(isTablet ? 24 : 16),
-          child: Text(
-            'Certificazioni Chiuse (${_closedCertifications.length})',
-            style: TextStyle(
-              fontSize: isTablet ? 24 : 20,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.primaryBlack,
-            ),
-          ),
-        ),
-        Expanded(
-          child: ListView.builder(
-            padding: EdgeInsets.symmetric(horizontal: isTablet ? 24 : 16),
-            itemCount: _closedCertifications.length,
-            itemBuilder: (context, index) {
-              final certification = _closedCertifications[index];
-              return Padding(
-                padding: EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.only(bottom: 20),
                 child: _buildCertificationCard(certification, l10n, isTablet),
               );
             },

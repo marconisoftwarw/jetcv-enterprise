@@ -3,9 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../../theme/app_theme.dart';
-import '../../widgets/linkedin_button.dart';
-import '../../widgets/linkedin_card.dart';
-import '../../widgets/linkedin_text_field.dart';
+import '../../widgets/enterprise_card.dart';
+import '../../widgets/neon_button.dart';
+import '../../widgets/enterprise_text_field.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/certification_edge_service.dart';
 import '../../services/certification_service_v2.dart';
@@ -220,21 +220,22 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     final isDesktop = screenWidth > 1024;
 
     return Scaffold(
-      backgroundColor: AppTheme.backgroundGrey,
+      backgroundColor: AppTheme.offWhite,
       appBar: AppBar(
         backgroundColor: AppTheme.pureWhite,
-        foregroundColor: AppTheme.primaryBlack,
+        foregroundColor: AppTheme.textPrimary,
         elevation: 0,
+        surfaceTintColor: Colors.transparent,
         title: Text(
           l10n.getString('new_certification'),
-          style: TextStyle(
-            color: AppTheme.primaryBlack,
-            fontSize: isTablet ? 24 : 20,
-            fontWeight: FontWeight.bold,
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+            color: AppTheme.textPrimary,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.2,
           ),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppTheme.primaryBlack),
+          icon: Icon(Icons.arrow_back, color: AppTheme.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -395,10 +396,10 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             ),
             const SizedBox(height: 24),
 
-            LinkedInTextField(
+            EnterpriseTextField(
               controller: _titleController,
               label: l10n.getString('certification_title'),
-              hintText: l10n.getString('certification_title'),
+              hint: l10n.getString('certification_title'),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Inserisci il titolo della certificazione';
@@ -501,10 +502,10 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             ),
             SizedBox(height: isTablet ? 20 : 16),
 
-            LinkedInTextField(
+            EnterpriseTextField(
               controller: _descriptionController,
               label: l10n.getString('description'),
-              hintText: l10n.getString('description'),
+              hint: l10n.getString('description'),
               maxLines: 4,
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -515,7 +516,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             ),
             SizedBox(height: isTablet ? 20 : 16),
 
-            LinkedInTextField(
+            EnterpriseTextField(
               controller: _locationController,
               label: l10n.getString('location'),
               validator: (value) {
@@ -530,12 +531,10 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             _buildMediaSection(),
             SizedBox(height: isTablet ? 40 : 32),
 
-            LinkedInButton(
+            NeonButton(
               onPressed: _nextStep,
               text: l10n.getString('continue'),
               icon: Icons.arrow_forward,
-              variant: LinkedInButtonVariant.primary,
-              fullWidth: true,
             ),
           ],
         ),
@@ -548,7 +547,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 768;
 
-    return LinkedInCard(
+    return EnterpriseCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -564,10 +563,9 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                   color: AppTheme.primaryBlack,
                 ),
               ),
-              LinkedInButton(
+              NeonButton(
                 onPressed: _addMedia,
                 text: '+ ${l10n.getString('add')}',
-                variant: LinkedInButtonVariant.outline,
               ),
             ],
           ),
@@ -690,19 +688,14 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           Row(
             children: [
               Expanded(
-                child: LinkedInButton(
-                  onPressed: _previousStep,
-                  text: 'Indietro',
-                  variant: LinkedInButtonVariant.outline,
-                ),
+                child: NeonButton(onPressed: _previousStep, text: 'Indietro'),
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: LinkedInButton(
+                child: NeonButton(
                   onPressed: _nextStep,
                   text: 'Continua alla Revisione',
                   icon: Icons.arrow_forward,
-                  variant: LinkedInButtonVariant.primary,
                 ),
               ),
             ],
@@ -713,24 +706,23 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   }
 
   Widget _buildAddUserSection() {
-    return LinkedInCard(
+    return EnterpriseCard(
       child: Column(
         children: [
           Row(
             children: [
               Expanded(
-                child: LinkedInTextField(
+                child: EnterpriseTextField(
                   controller: _otpController,
                   label: 'Inserisci codice OTP utente',
-                  hintText: 'Inserisci codice OTP...',
+                  hint: 'Inserisci codice OTP...',
                   prefixIcon: Icon(Icons.numbers),
                 ),
               ),
               const SizedBox(width: 12),
-              LinkedInButton(
+              NeonButton(
                 onPressed: _isVerifyingOtp ? null : _addUserByOTP,
                 text: _isVerifyingOtp ? 'Verificando...' : 'Aggiungi',
-                variant: LinkedInButtonVariant.primary,
               ),
             ],
           ),
@@ -775,11 +767,10 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                   ],
                 ),
               ),
-              LinkedInButton(
+              NeonButton(
                 onPressed: _scanQRCode,
                 text: 'Scansiona',
                 icon: Icons.qr_code_scanner,
-                variant: LinkedInButtonVariant.primary,
               ),
             ],
           ),
@@ -791,7 +782,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   Widget _buildUsersList() {
     final isTablet = MediaQuery.of(context).size.width > 768;
 
-    return LinkedInCard(
+    return EnterpriseCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -950,19 +941,17 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           Row(
             children: [
               Expanded(
-                child: LinkedInButton(
+                child: NeonButton(
                   onPressed: _previousStep,
                   text: l10n.getString('back'),
-                  variant: LinkedInButtonVariant.outline,
                 ),
               ),
               SizedBox(width: isTablet ? 20 : 16),
               Expanded(
-                child: LinkedInButton(
+                child: NeonButton(
                   onPressed: _nextStep,
                   text: l10n.getString('continue_to_review'),
                   icon: Icons.arrow_forward,
-                  variant: LinkedInButtonVariant.primary,
                 ),
               ),
             ],
@@ -977,7 +966,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     final isTablet = MediaQuery.of(context).size.width > 768;
 
     if (_addedUsers.isEmpty) {
-      return LinkedInCard(
+      return EnterpriseCard(
         child: Container(
           padding: const EdgeInsets.all(20),
           child: Center(
@@ -991,7 +980,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
       );
     }
 
-    return LinkedInCard(
+    return EnterpriseCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -1077,12 +1066,13 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     bool isTablet,
   ) {
     final currentValue = _userFieldValues[user.idUser]?[field.name] ?? '';
+    final controller = TextEditingController(text: currentValue);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
-      child: LinkedInTextField(
+      child: EnterpriseTextField(
         label: field.label,
-        initialValue: currentValue,
+        controller: controller,
         onChanged: (value) {
           setState(() {
             if (_userFieldValues[user.idUser] == null) {
@@ -1170,19 +1160,17 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           Row(
             children: [
               Expanded(
-                child: LinkedInButton(
+                child: NeonButton(
                   onPressed: _previousStep,
                   text: l10n.getString('back'),
-                  variant: LinkedInButtonVariant.outline,
                 ),
               ),
               SizedBox(width: isTablet ? 20 : 16),
               Expanded(
-                child: LinkedInButton(
+                child: NeonButton(
                   onPressed: _sendCertification,
                   text: 'Conferma Certificazione',
                   icon: Icons.check_circle,
-                  variant: LinkedInButtonVariant.primary,
                 ),
               ),
             ],
@@ -1197,7 +1185,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 768;
 
-    return LinkedInCard(
+    return EnterpriseCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -1243,7 +1231,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   }
 
   Widget _buildMediaReviewCard() {
-    return LinkedInCard(
+    return EnterpriseCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -1277,7 +1265,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 768;
 
-    return LinkedInCard(
+    return EnterpriseCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -1417,7 +1405,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   }
 
   Widget _buildConfirmationCard() {
-    return LinkedInCard(
+    return EnterpriseCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -2212,13 +2200,11 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               const SizedBox(height: 16),
             ],
 
-            LinkedInButton(
+            NeonButton(
               onPressed: _isCreating ? null : _createCertification,
               text: _isCreating
                   ? l10n.getString('sending_in_progress')
                   : l10n.getString('send_certification'),
-              variant: LinkedInButtonVariant.primary,
-              fullWidth: true,
             ),
           ],
         ),

@@ -119,7 +119,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      SizedBox(height: isTablet ? 60 : 40),
+                      SizedBox(height: isTablet ? 40 : 20),
 
                       // Logo and Title
                       Center(
@@ -175,11 +175,11 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
 
-                      const SizedBox(height: 48),
+                      const SizedBox(height: 32),
 
                       // Login Form Container
                       EnterpriseCard(
-                        padding: const EdgeInsets.all(32),
+                        padding: const EdgeInsets.all(24),
                         child: Column(
                           children: [
                             // Email Field
@@ -210,7 +210,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               },
                             ),
 
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 20),
 
                             // Password Field
                             EnterprisePasswordField(
@@ -237,7 +237,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               },
                             ),
 
-                            const SizedBox(height: 20),
+                            const SizedBox(height: 16),
 
                             // Remember Me & Forgot Password
                             Row(
@@ -286,7 +286,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ],
                             ),
 
-                            const SizedBox(height: 32),
+                            const SizedBox(height: 24),
 
                             // Sign In Button
                             Consumer<AuthProvider>(
@@ -309,7 +309,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               },
                             ),
 
-                            const SizedBox(height: 32),
+                            const SizedBox(height: 24),
 
                             // Divider
                             Row(
@@ -340,7 +340,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ],
                             ),
 
-                            const SizedBox(height: 32),
+                            const SizedBox(height: 24),
 
                             // Google Sign In Button
                             Consumer<AuthProvider>(
@@ -364,7 +364,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
 
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 24),
 
                       // Sign Up Link
                       Row(
@@ -442,6 +442,11 @@ class _LoginScreenState extends State<LoginScreen> {
                           }
                           return const SizedBox.shrink();
                         },
+                      ),
+
+                      // Bottom padding to prevent overflow
+                      SizedBox(
+                        height: MediaQuery.of(context).viewInsets.bottom + 20,
                       ),
                     ],
                   ),

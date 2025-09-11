@@ -3,9 +3,10 @@ import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 import '../../models/user.dart';
 import '../../providers/auth_provider.dart';
-import '../../widgets/linkedin_card.dart';
-import '../../widgets/linkedin_button.dart';
-import '../../widgets/linkedin_text_field.dart';
+import '../../widgets/enterprise_card.dart';
+import '../../widgets/neon_button.dart';
+import '../../widgets/enterprise_text_field.dart';
+import '../../l10n/app_localizations.dart';
 
 class UserProfileScreen extends StatefulWidget {
   const UserProfileScreen({super.key});
@@ -36,17 +37,42 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   }
 
   void _initializeControllers() {
-    final user = context.read<AuthProvider>().currentUser;
-    if (user != null) {
-      _currentUser = user;
-      _firstNameController = TextEditingController(text: user.firstName ?? '');
-      _lastNameController = TextEditingController(text: user.lastName ?? '');
-      _phoneController = TextEditingController(text: user.phone ?? '');
-      _jobTitleController = TextEditingController(text: 'Non specificato');
-      _departmentController = TextEditingController(text: 'Non specificato');
-      _addressController = TextEditingController(text: user.address ?? '');
-      _cityController = TextEditingController(text: user.city ?? '');
-      _zipCodeController = TextEditingController(text: 'Non specificato');
+    // Inizializza i controller con valori vuoti
+    _firstNameController = TextEditingController();
+    _lastNameController = TextEditingController();
+    _phoneController = TextEditingController();
+    _jobTitleController = TextEditingController();
+    _departmentController = TextEditingController();
+    _addressController = TextEditingController();
+    _cityController = TextEditingController();
+    _zipCodeController = TextEditingController();
+  }
+
+  void _updateControllersWithUserData(AppUser user) {
+    print('Profile Screen: Updating controllers with user data');
+    print('User: ${user.displayName}');
+    print('Email: ${user.email}');
+    print('First Name: ${user.firstName}');
+    print('Last Name: ${user.lastName}');
+    print('Phone: ${user.phone}');
+    print('Address: ${user.address}');
+    print('City: ${user.city}');
+    print('Type: ${user.type}');
+    print('Profile Complete: ${user.isProfileComplete}');
+    
+    _currentUser = user;
+    _firstNameController.text = user.firstName ?? '';
+    _lastNameController.text = user.lastName ?? '';
+    _phoneController.text = user.phone ?? '';
+    _jobTitleController.text = 'Non specificato';
+    _departmentController.text = 'Non specificato';
+    _addressController.text = user.address ?? '';
+    _cityController.text = user.city ?? '';
+    _zipCodeController.text = user.postalCode ?? 'Non specificato';
+    
+    // Forza il rebuild del widget
+    if (mounted) {
+      setState(() {});
     }
   }
 
@@ -65,69 +91,141 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 768;
+    final isDesktop = screenWidth > 1200;
+
     return Scaffold(
+      backgroundColor: AppTheme.offWhite,
       appBar: AppBar(
         title: Text(
-          'Profilo Utente',
-          style: AppTheme.title1.copyWith(color: AppTheme.white),
+          l10n.getString('user_profile'),
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: AppTheme.textPrimary,
+          ),
         ),
-        backgroundColor: AppTheme.primaryBlue,
-        foregroundColor: AppTheme.white,
+        backgroundColor: AppTheme.pureWhite,
+        foregroundColor: AppTheme.textPrimary,
         elevation: 0,
+        surfaceTintColor: AppTheme.pureWhite,
         actions: [
           if (_isEditing)
             IconButton(
               onPressed: _saveProfile,
-              icon: const Icon(Icons.save),
-              tooltip: 'Salva modifiche',
+              icon: Icon(Icons.save_rounded, color: AppTheme.successGreen),
+              tooltip: l10n.getString('save_changes'),
             ),
           IconButton(
             onPressed: () {
               setState(() {
                 _isEditing = !_isEditing;
                 if (!_isEditing) {
-                  _initializeControllers(); // Reset to original values
+                  _initializeControllers();
                 }
               });
             },
-            icon: Icon(_isEditing ? Icons.close : Icons.edit),
-            tooltip: _isEditing ? 'Annulla' : 'Modifica',
+            icon: Icon(
+              _isEditing ? Icons.close_rounded : Icons.edit_rounded,
+              color: _isEditing ? AppTheme.errorRed : AppTheme.primaryBlue,
+            ),
+            tooltip: _isEditing
+                ? l10n.getString('cancel')
+                : l10n.getString('edit'),
           ),
         ],
       ),
       body: Consumer<AuthProvider>(
         builder: (context, authProvider, child) {
+          // Carica i dati dell'utente se non sono disponibili
+          if (authProvider.isAuthenticated && authProvider.currentUser == null) {
+            WidgetsBinding.instance.addPostFrameCallback((_) async {
+              await authProvider.loadUserData();
+            });
+          }
+
+          // Aggiorna i controller quando l'utente è disponibile
+          if (authProvider.currentUser != null && _currentUser == null) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _updateControllersWithUserData(authProvider.currentUser!);
+            });
+          }
+
           if (authProvider.currentUser == null) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (authProvider.isLoading)
+                    CircularProgressIndicator(color: AppTheme.primaryBlue)
+                  else
+                    Icon(
+                      Icons.person_off_rounded,
+                      size: 64,
+                      color: AppTheme.textGray,
+                    ),
+                  const SizedBox(height: 16),
+                  Text(
+                    authProvider.isLoading 
+                        ? l10n.getString('loading_profile')
+                        : l10n.getString('no_user_data'),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyLarge?.copyWith(color: AppTheme.textGray),
+                  ),
+                  if (!authProvider.isLoading) ...[
+                    const SizedBox(height: 16),
+                    NeonButton(
+                      onPressed: () async {
+                        await authProvider.loadUserData();
+                      },
+                      text: l10n.getString('retry'),
+                      isOutlined: true,
+                      neonColor: AppTheme.primaryBlue,
+                    ),
+                  ],
+                ],
+              ),
+            );
           }
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
+            padding: EdgeInsets.all(isTablet ? 32 : 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Header con foto profilo e informazioni principali
-                _buildProfileHeader(authProvider.currentUser!),
+                _buildProfileHeader(authProvider.currentUser!, l10n, isTablet),
+
+                const SizedBox(height: 32),
+
+                // Statistiche e metriche
+                _buildStatsSection(authProvider.currentUser!, l10n, isTablet),
 
                 const SizedBox(height: 32),
 
                 // Form per le informazioni personali
-                _buildPersonalInfoForm(),
+                _buildPersonalInfoForm(l10n, isTablet),
 
                 const SizedBox(height: 32),
 
                 // Informazioni aziendali
-                _buildCompanyInfoSection(authProvider.currentUser!),
-
-                const SizedBox(height: 32),
-
-                // Statistiche e attività
-                _buildStatsSection(authProvider.currentUser!),
+                _buildCompanyInfoSection(
+                  authProvider.currentUser!,
+                  l10n,
+                  isTablet,
+                ),
 
                 const SizedBox(height: 32),
 
                 // Azioni rapide
-                _buildQuickActions(),
+                _buildQuickActions(l10n, isTablet),
+
+                const SizedBox(height: 32),
+
+                // Impostazioni avanzate
+                _buildAdvancedSettings(l10n, isTablet),
               ],
             ),
           );
@@ -136,27 +234,64 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     );
   }
 
-  Widget _buildProfileHeader(AppUser user) {
-    return LinkedInCard(
+  Widget _buildProfileHeader(AppUser user, AppLocalizations l10n, bool isTablet) {
+    return EnterpriseCard(
       child: Column(
         children: [
           Row(
             children: [
-              // Foto profilo
-              CircleAvatar(
-                radius: 50,
-                backgroundColor: AppTheme.lightBlue,
-                backgroundImage: user.profilePicture != null
-                    ? NetworkImage(user.profilePicture!)
-                    : null,
-                child: user.profilePicture == null
-                    ? Text(
-                        user.initials,
-                        style: AppTheme.headline2.copyWith(
-                          color: AppTheme.primaryBlue,
+              // Foto profilo con gradiente
+              Container(
+                width: isTablet ? 100 : 80,
+                height: isTablet ? 100 : 80,
+                decoration: BoxDecoration(
+                  gradient: user.profilePicture != null
+                      ? null
+                      : AppTheme.primaryGradient,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.primaryBlue.withValues(alpha: 0.2),
+                      blurRadius: 12,
+                      spreadRadius: 0,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: user.profilePicture != null
+                      ? Image.network(
+                          user.profilePicture!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              decoration: BoxDecoration(
+                                gradient: AppTheme.primaryGradient,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  user.initials,
+                                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                    color: AppTheme.pureWhite,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        )
+                      : Center(
+                          child: Text(
+                            user.initials,
+                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                              color: AppTheme.pureWhite,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                         ),
-                      )
-                    : null,
+                ),
               ),
 
               const SizedBox(width: 24),
@@ -166,55 +301,100 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(user.displayName, style: AppTheme.headline2),
+                    Text(
+                      user.displayName,
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: AppTheme.textPrimary,
+                      ),
+                    ),
                     const SizedBox(height: 8),
                     Text(
-                      'Non specificato',
-                      style: TextStyle(
-                        fontSize: 18,
+                      user.roleDisplayName,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: AppTheme.primaryBlack,
+                        color: AppTheme.primaryBlue,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Non specificato',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: AppTheme.primaryBlack,
+                      user.email ?? l10n.getString('no_email'),
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: AppTheme.textGray,
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      user.email ?? 'Non specificato',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: AppTheme.primaryBlack,
-                      ).copyWith(color: AppTheme.primaryBlue),
                     ),
                     const SizedBox(height: 16),
 
-                    // Badge ruolo
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppTheme.primaryBlue.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: AppTheme.primaryBlue.withValues(alpha: 0.3),
-                          width: 1,
+                    // Badge stato profilo
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: user.isProfileComplete
+                                ? AppTheme.successGreen.withValues(alpha: 0.1)
+                                : AppTheme.warningOrange.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: user.isProfileComplete
+                                  ? AppTheme.successGreen.withValues(alpha: 0.3)
+                                  : AppTheme.warningOrange.withValues(alpha: 0.3),
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                user.isProfileComplete
+                                    ? Icons.check_circle
+                                    : Icons.warning,
+                                size: 16,
+                                color: user.isProfileComplete
+                                    ? AppTheme.successGreen
+                                    : AppTheme.warningOrange,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                user.isProfileComplete
+                                    ? l10n.getString('profile_complete')
+                                    : l10n.getString('profile_incomplete'),
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: user.isProfileComplete
+                                      ? AppTheme.successGreen
+                                      : AppTheme.warningOrange,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      child: Text(
-                        'Utente',
-                        style: AppTheme.caption.copyWith(
-                          color: AppTheme.primaryBlue,
-                          fontWeight: FontWeight.w600,
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: AppTheme.primaryBlue.withValues(alpha: 0.3),
+                              width: 1,
+                            ),
+                          ),
+                          child: Text(
+                            user.type?.toString().split('.').last.toUpperCase() ?? 'USER',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AppTheme.primaryBlue,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                   ],
                 ),
@@ -224,24 +404,30 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
           if (_isEditing) ...[
             const SizedBox(height: 24),
-            const Divider(),
+            Divider(color: AppTheme.borderGray),
             const SizedBox(height: 24),
 
             // Upload foto profilo
             Row(
               children: [
-                LinkedInButton(
-                  onPressed: _uploadProfilePicture,
-                  text: 'Cambia Foto Profilo',
-                  icon: Icons.camera_alt,
-                  variant: LinkedInButtonVariant.outline,
+                Expanded(
+                  child: NeonButton(
+                    onPressed: _uploadProfilePicture,
+                    text: l10n.getString('change_profile_picture'),
+                    icon: Icons.camera_alt_rounded,
+                    isOutlined: true,
+                    neonColor: AppTheme.primaryBlue,
+                  ),
                 ),
                 const SizedBox(width: 16),
-                LinkedInButton(
-                  onPressed: _removeProfilePicture,
-                  text: 'Rimuovi Foto',
-                  icon: Icons.delete,
-                  variant: LinkedInButtonVariant.danger,
+                Expanded(
+                  child: NeonButton(
+                    onPressed: _removeProfilePicture,
+                    text: l10n.getString('remove_picture'),
+                    icon: Icons.delete_rounded,
+                    isOutlined: true,
+                    neonColor: AppTheme.errorRed,
+                  ),
                 ),
               ],
             ),
@@ -251,12 +437,31 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     );
   }
 
-  Widget _buildPersonalInfoForm() {
-    return LinkedInCard(
+  Widget _buildPersonalInfoForm(AppLocalizations l10n, bool isTablet) {
+    return EnterpriseCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Informazioni Personali', style: AppTheme.title1),
+          Row(
+            children: [
+              Container(
+                width: 4,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryBlue,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                l10n.getString('personal_information'),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 24),
 
           Form(
@@ -266,13 +471,13 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 Row(
                   children: [
                     Expanded(
-                      child: LinkedInTextField(
-                        label: 'Nome',
+                      child: EnterpriseTextField(
+                        label: l10n.getString('first_name'),
                         controller: _firstNameController,
                         enabled: _isEditing,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Il nome è obbligatorio';
+                            return l10n.getString('first_name_required');
                           }
                           return null;
                         },
@@ -280,13 +485,13 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: LinkedInTextField(
-                        label: 'Cognome',
+                      child: EnterpriseTextField(
+                        label: l10n.getString('last_name'),
                         controller: _lastNameController,
                         enabled: _isEditing,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Il cognome è obbligatorio';
+                            return l10n.getString('last_name_required');
                           }
                           return null;
                         },
@@ -295,65 +500,95 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   ],
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
 
                 Row(
                   children: [
                     Expanded(
-                      child: LinkedInTextField(
-                        label: 'Telefono',
+                      child: EnterpriseTextField(
+                        label: l10n.getString('phone'),
                         controller: _phoneController,
                         enabled: _isEditing,
                         keyboardType: TextInputType.phone,
+                        prefixIcon: const Icon(Icons.phone_rounded),
                       ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: LinkedInTextField(
-                        label: 'Data di Nascita',
+                      child: EnterpriseTextField(
+                        label: l10n.getString('date_of_birth'),
                         enabled: false,
-                        initialValue:
-                            _currentUser?.dateOfBirth?.toString() ??
-                            'Non specificata',
-                        suffixIcon: const Icon(Icons.calendar_today),
+                        controller: TextEditingController(
+                          text: _currentUser?.dateOfBirth != null
+                              ? '${_currentUser!.dateOfBirth!.day}/${_currentUser!.dateOfBirth!.month}/${_currentUser!.dateOfBirth!.year}'
+                              : l10n.getString('not_specified'),
+                        ),
+                        prefixIcon: const Icon(Icons.calendar_today_rounded),
                       ),
                     ),
                   ],
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
 
-                Row(
-                  children: [
-                    Expanded(
-                      child: LinkedInTextField(
-                        label: 'Indirizzo',
-                        controller: _addressController,
-                        enabled: _isEditing,
-                        maxLines: 2,
-                      ),
-                    ),
-                  ],
+                EnterpriseTextField(
+                  label: l10n.getString('address'),
+                  controller: _addressController,
+                  enabled: _isEditing,
+                  maxLines: 2,
+                  prefixIcon: const Icon(Icons.location_on_rounded),
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
 
                 Row(
                   children: [
                     Expanded(
-                      child: LinkedInTextField(
-                        label: 'Città',
+                      child: EnterpriseTextField(
+                        label: l10n.getString('city'),
                         controller: _cityController,
                         enabled: _isEditing,
+                        prefixIcon: const Icon(Icons.location_city_rounded),
                       ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: LinkedInTextField(
-                        label: 'CAP',
+                      child: EnterpriseTextField(
+                        label: l10n.getString('postal_code'),
                         controller: _zipCodeController,
                         enabled: _isEditing,
                         keyboardType: TextInputType.number,
+                        prefixIcon: const Icon(Icons.local_post_office_rounded),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 20),
+
+                Row(
+                  children: [
+                    Expanded(
+                      child: EnterpriseTextField(
+                        label: l10n.getString('gender'),
+                        enabled: false,
+                        controller: TextEditingController(
+                          text: _currentUser?.gender != null
+                              ? _currentUser!.gender.toString().split('.').last
+                              : l10n.getString('not_specified'),
+                        ),
+                        prefixIcon: const Icon(Icons.person_rounded),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: EnterpriseTextField(
+                        label: l10n.getString('language'),
+                        enabled: false,
+                        controller: TextEditingController(
+                          text: _currentUser?.languageCode ?? l10n.getString('not_specified'),
+                        ),
+                        prefixIcon: const Icon(Icons.language_rounded),
                       ),
                     ),
                   ],
@@ -366,69 +601,106 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     );
   }
 
-  Widget _buildCompanyInfoSection(AppUser user) {
-    return LinkedInCard(
+  Widget _buildCompanyInfoSection(AppUser user, AppLocalizations l10n, bool isTablet) {
+    return EnterpriseCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Informazioni Aziendali', style: AppTheme.title1),
+          Row(
+            children: [
+              Container(
+                width: 4,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryBlue,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                l10n.getString('company_information'),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 24),
 
           Row(
             children: [
               Expanded(
-                child: LinkedInTextField(
-                  label: 'Ruolo Aziendale',
+                child: EnterpriseTextField(
+                  label: l10n.getString('job_title'),
                   controller: _jobTitleController,
                   enabled: _isEditing,
+                  prefixIcon: const Icon(Icons.work_rounded),
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: LinkedInTextField(
-                  label: 'Dipartimento',
+                child: EnterpriseTextField(
+                  label: l10n.getString('department'),
                   controller: _departmentController,
                   enabled: _isEditing,
+                  prefixIcon: const Icon(Icons.business_rounded),
                 ),
               ),
             ],
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
 
           // Informazioni sull'entità legale
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: AppTheme.lightGrey,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppTheme.borderGrey),
+              color: AppTheme.lightBlue.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppTheme.borderGray, width: 1),
             ),
             child: Row(
               children: [
-                Icon(Icons.business, color: AppTheme.primaryBlue, size: 24),
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.business_rounded,
+                    color: AppTheme.primaryBlue,
+                    size: 24,
+                  ),
+                ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Entità Legale Associata',
-                        style: AppTheme.body2.copyWith(
+                        l10n.getString('legal_entity_associated'),
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: AppTheme.primaryBlack,
+                          color: AppTheme.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'ID: Non specificato',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: AppTheme.primaryBlack,
+                        '${l10n.getString('id')}: ${l10n.getString('not_specified')}',
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: AppTheme.textGray,
                         ),
                       ),
                     ],
                   ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  color: AppTheme.textGray,
+                  size: 16,
                 ),
               ],
             ),
@@ -438,101 +710,470 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     );
   }
 
-  Widget _buildStatsSection(AppUser user) {
-    return Row(
-      children: [
-        Expanded(
-          child: LinkedInMetricCard(
-            title: 'Certificazioni',
-            value: '0',
-            icon: Icons.verified,
-            iconColor: AppTheme.successGreen,
-            change: '+0',
-            isPositive: true,
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: LinkedInMetricCard(
-            title: 'Ultimo Accesso',
-            value: 'Mai',
-            icon: Icons.access_time,
-            iconColor: AppTheme.primaryBlue,
-            subtitle: 'Ultima attività',
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: LinkedInMetricCard(
-            title: 'Stato Account',
-            value: 'Attivo',
-            icon: Icons.check_circle,
-            iconColor: AppTheme.successGreen,
-            subtitle: 'Non verificato',
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildQuickActions() {
-    return LinkedInCard(
+  Widget _buildStatsSection(AppUser user, AppLocalizations l10n, bool isTablet) {
+    return EnterpriseCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Azioni Rapide', style: AppTheme.title1),
-          const SizedBox(height: 24),
-
           Row(
             children: [
-              Expanded(
-                child: LinkedInActionCard(
-                  title: 'Cambia Password',
-                  description: 'Aggiorna la password del tuo account',
-                  icon: Icons.lock,
-                  iconColor: AppTheme.warningOrange,
-                  onTap: _changePassword,
+              Container(
+                width: 4,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryBlue,
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: LinkedInActionCard(
-                  title: 'Impostazioni Notifiche',
-                  description: 'Gestisci le preferenze di notifica',
-                  icon: Icons.notifications,
-                  iconColor: AppTheme.accentBlue,
-                  onTap: _openNotificationSettings,
+              const SizedBox(width: 12),
+              Text(
+                l10n.getString('profile_statistics'),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.textPrimary,
                 ),
               ),
             ],
           ),
-
-          const SizedBox(height: 16),
-
-          Row(
+          const SizedBox(height: 24),
+          GridView.count(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisCount: isTablet ? 4 : 2,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            childAspectRatio: isTablet ? 1.2 : 1.1,
             children: [
-              Expanded(
-                child: LinkedInActionCard(
-                  title: 'Esporta Dati',
-                  description: 'Scarica i tuoi dati personali',
-                  icon: Icons.download,
-                  iconColor: AppTheme.secondaryBlue,
-                  onTap: _exportData,
-                ),
+              _buildStatCard(
+                l10n.getString('certifications'),
+                '0',
+                Icons.verified_rounded,
+                AppTheme.successGreen,
+                l10n.getString('total_certifications'),
+                '+0',
+                true,
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: LinkedInActionCard(
-                  title: 'Elimina Account',
-                  description: 'Rimuovi definitivamente il tuo account',
-                  icon: Icons.delete_forever,
-                  iconColor: AppTheme.errorRed,
-                  onTap: _deleteAccount,
-                ),
+              _buildStatCard(
+                l10n.getString('last_access'),
+                _formatLastAccess(user.updatedAt),
+                Icons.access_time_rounded,
+                AppTheme.primaryBlue,
+                l10n.getString('last_activity'),
+                null,
+                null,
+              ),
+              _buildStatCard(
+                l10n.getString('account_status'),
+                l10n.getString('active'),
+                Icons.check_circle_rounded,
+                AppTheme.successGreen,
+                l10n.getString('verified'),
+                null,
+                null,
+              ),
+              _buildStatCard(
+                l10n.getString('profile_completion'),
+                '${_calculateProfileCompletion(user)}%',
+                Icons.person_rounded,
+                AppTheme.warningOrange,
+                l10n.getString('completion_rate'),
+                null,
+                null,
               ),
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildStatCard(
+    String title,
+    String value,
+    IconData icon,
+    Color iconColor,
+    String subtitle,
+    String? change,
+    bool? isPositive,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppTheme.pureWhite,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.borderGray, width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.textPrimary.withValues(alpha: 0.05),
+            blurRadius: 8,
+            spreadRadius: 0,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: iconColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  icon,
+                  color: iconColor,
+                  size: 20,
+                ),
+              ),
+              const Spacer(),
+              if (change != null)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: isPositive == true
+                        ? AppTheme.successGreen.withValues(alpha: 0.1)
+                        : AppTheme.errorRed.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    change,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: isPositive == true
+                          ? AppTheme.successGreen
+                          : AppTheme.errorRed,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            title,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppTheme.textGray,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            subtitle,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppTheme.textGray,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatLastAccess(DateTime? lastAccess) {
+    if (lastAccess == null) return 'Mai';
+    
+    final now = DateTime.now();
+    final difference = now.difference(lastAccess);
+    
+    if (difference.inDays > 0) {
+      return '${difference.inDays}g fa';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours}h fa';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes}m fa';
+    } else {
+      return 'Ora';
+    }
+  }
+
+  int _calculateProfileCompletion(AppUser user) {
+    int completedFields = 0;
+    int totalFields = 8;
+    
+    if (user.firstName != null && user.firstName!.isNotEmpty) completedFields++;
+    if (user.lastName != null && user.lastName!.isNotEmpty) completedFields++;
+    if (user.phone != null && user.phone!.isNotEmpty) completedFields++;
+    if (user.address != null && user.address!.isNotEmpty) completedFields++;
+    if (user.city != null && user.city!.isNotEmpty) completedFields++;
+    if (user.state != null && user.state!.isNotEmpty) completedFields++;
+    if (user.postalCode != null && user.postalCode!.isNotEmpty) completedFields++;
+    if (user.countryCode != null && user.countryCode!.isNotEmpty) completedFields++;
+    
+    return ((completedFields / totalFields) * 100).round();
+  }
+
+  Widget _buildQuickActions(AppLocalizations l10n, bool isTablet) {
+    return EnterpriseCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 4,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryBlue,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                l10n.getString('quick_actions'),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+
+          GridView.count(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisCount: isTablet ? 2 : 1,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            childAspectRatio: isTablet ? 2.5 : 3.5,
+            children: [
+              _buildActionCard(
+                l10n.getString('change_password'),
+                l10n.getString('update_password_description'),
+                Icons.lock_rounded,
+                AppTheme.warningOrange,
+                _changePassword,
+              ),
+              _buildActionCard(
+                l10n.getString('notification_settings'),
+                l10n.getString('manage_notification_preferences'),
+                Icons.notifications_rounded,
+                AppTheme.primaryBlue,
+                _openNotificationSettings,
+              ),
+              _buildActionCard(
+                l10n.getString('export_data'),
+                l10n.getString('download_personal_data'),
+                Icons.download_rounded,
+                AppTheme.successGreen,
+                _exportData,
+              ),
+              _buildActionCard(
+                l10n.getString('delete_account'),
+                l10n.getString('permanently_remove_account'),
+                Icons.delete_forever_rounded,
+                AppTheme.errorRed,
+                _deleteAccount,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionCard(
+    String title,
+    String description,
+    IconData icon,
+    Color iconColor,
+    VoidCallback onTap,
+  ) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: AppTheme.pureWhite,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppTheme.borderGray, width: 1),
+          boxShadow: [
+            BoxShadow(
+              color: AppTheme.textPrimary.withValues(alpha: 0.05),
+              blurRadius: 8,
+              spreadRadius: 0,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: iconColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                icon,
+                color: iconColor,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    description,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppTheme.textGray,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              color: AppTheme.textGray,
+              size: 16,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAdvancedSettings(AppLocalizations l10n, bool isTablet) {
+    return EnterpriseCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 4,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryBlue,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                l10n.getString('advanced_settings'),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+
+          _buildSettingItem(
+            l10n.getString('privacy_settings'),
+            l10n.getString('manage_privacy_options'),
+            Icons.privacy_tip_rounded,
+            AppTheme.primaryBlue,
+            () {},
+          ),
+          _buildSettingItem(
+            l10n.getString('security_settings'),
+            l10n.getString('manage_security_options'),
+            Icons.security_rounded,
+            AppTheme.warningOrange,
+            () {},
+          ),
+          _buildSettingItem(
+            l10n.getString('data_management'),
+            l10n.getString('manage_data_storage'),
+            Icons.storage_rounded,
+            AppTheme.successGreen,
+            () {},
+          ),
+          _buildSettingItem(
+            l10n.getString('account_preferences'),
+            l10n.getString('customize_account_settings'),
+            Icons.tune_rounded,
+            AppTheme.textSecondary,
+            () {},
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSettingItem(
+    String title,
+    String description,
+    IconData icon,
+    Color iconColor,
+    VoidCallback onTap,
+  ) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: iconColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                icon,
+                color: iconColor,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    description,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppTheme.textGray,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              color: AppTheme.textGray,
+              size: 16,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -546,7 +1187,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     });
 
     try {
-      // TODO: Implementare il salvataggio del profilo
+      // TODO: Implementare il salvataggio del profilo con Supabase
       await Future.delayed(const Duration(seconds: 1)); // Simulazione
 
       setState(() {
@@ -554,65 +1195,96 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         _isLoading = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Profilo aggiornato con successo!'),
-          backgroundColor: AppTheme.successGreen,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.check_circle, color: AppTheme.pureWhite),
+                const SizedBox(width: 8),
+                Text(AppLocalizations.of(context).getString('profile_updated_successfully')),
+              ],
+            ),
+            backgroundColor: AppTheme.successGreen,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      }
     } catch (e) {
       setState(() {
         _isLoading = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Errore durante il salvataggio: $e'),
-          backgroundColor: AppTheme.errorRed,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.error, color: AppTheme.pureWhite),
+                const SizedBox(width: 8),
+                Text('${AppLocalizations.of(context).getString('error_saving')}: $e'),
+              ],
+            ),
+            backgroundColor: AppTheme.errorRed,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      }
     }
   }
 
   void _uploadProfilePicture() {
-    // TODO: Implementare upload foto profilo
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Funzionalità in sviluppo')));
+    // TODO: Implementare upload foto profilo con Supabase Storage
+    _showFeatureInDevelopment(AppLocalizations.of(context).getString('upload_profile_picture'));
   }
 
   void _removeProfilePicture() {
     // TODO: Implementare rimozione foto profilo
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Funzionalità in sviluppo')));
+    _showFeatureInDevelopment(AppLocalizations.of(context).getString('remove_profile_picture'));
   }
 
   void _changePassword() {
-    // TODO: Implementare cambio password
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Funzionalità in sviluppo')));
+    // TODO: Implementare cambio password con Supabase Auth
+    _showFeatureInDevelopment(AppLocalizations.of(context).getString('change_password'));
   }
 
   void _openNotificationSettings() {
     // TODO: Implementare impostazioni notifiche
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Funzionalità in sviluppo')));
+    _showFeatureInDevelopment(AppLocalizations.of(context).getString('notification_settings'));
   }
 
   void _exportData() {
-    // TODO: Implementare esportazione dati
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Funzionalità in sviluppo')));
+    // TODO: Implementare esportazione dati GDPR
+    _showFeatureInDevelopment(AppLocalizations.of(context).getString('export_data'));
   }
 
   void _deleteAccount() {
-    // TODO: Implementare eliminazione account
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Funzionalità in sviluppo')));
+    // TODO: Implementare eliminazione account con conferma
+    _showFeatureInDevelopment(AppLocalizations.of(context).getString('delete_account'));
+  }
+
+  void _showFeatureInDevelopment(String feature) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(Icons.construction, color: AppTheme.pureWhite),
+            const SizedBox(width: 8),
+            Text('$feature - ${AppLocalizations.of(context).getString('feature_in_development')}'),
+          ],
+        ),
+        backgroundColor: AppTheme.warningOrange,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+    );
   }
 }

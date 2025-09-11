@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../theme/app_theme.dart';
-import '../../widgets/glass_card.dart';
+import '../../widgets/enterprise_card.dart';
+import '../../widgets/neon_button.dart';
 
 import '../certification/create_certification_screen.dart';
 import '../certification/certification_list_screen.dart';
@@ -46,11 +47,20 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               // Navigation Rail
               Container(
+                width: 280,
                 decoration: BoxDecoration(
                   color: AppTheme.pureWhite,
                   border: Border(
-                    right: BorderSide(color: AppTheme.borderGrey, width: 1),
+                    right: BorderSide(color: AppTheme.borderGray, width: 1),
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.textPrimary.withValues(alpha: 0.05),
+                      blurRadius: 8,
+                      spreadRadius: 0,
+                      offset: const Offset(2, 0),
+                    ),
+                  ],
                 ),
                 child: NavigationRail(
                   selectedIndex: _selectedIndex,
@@ -63,17 +73,26 @@ class _HomeScreenState extends State<HomeScreen> {
                   destinations: _buildNavigationDestinations(isAdmin),
                   backgroundColor: Colors.transparent,
                   selectedIconTheme: IconThemeData(
-                    color: AppTheme.primaryBlack,
+                    color: AppTheme.primaryBlue,
+                    size: 24,
                   ),
                   unselectedIconTheme: IconThemeData(
-                    color: AppTheme.textSecondary,
+                    color: AppTheme.textGray,
+                    size: 24,
                   ),
                   selectedLabelTextStyle: TextStyle(
-                    color: AppTheme.primaryBlack,
+                    color: AppTheme.primaryBlue,
                     fontWeight: FontWeight.w600,
+                    fontSize: 14,
                   ),
                   unselectedLabelTextStyle: TextStyle(
-                    color: AppTheme.textSecondary,
+                    color: AppTheme.textGray,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14,
+                  ),
+                  indicatorColor: AppTheme.lightBlue,
+                  indicatorShape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
               ),
@@ -152,37 +171,99 @@ class _DashboardContent extends StatelessWidget {
         final user = authProvider.currentUser;
         if (user == null) return const SizedBox();
 
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Welcome message
-              Text(
-                'Benvenuto, ${user.firstName}!',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.primaryBlack,
+        return Container(
+          color: AppTheme.offWhite,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Welcome message
+                EnterpriseCard(
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          gradient: AppTheme.primaryGradient,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppTheme.primaryBlue.withValues(
+                                alpha: 0.2,
+                              ),
+                              blurRadius: 12,
+                              spreadRadius: 0,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          Icons.person,
+                          size: 40,
+                          color: AppTheme.pureWhite,
+                        ),
+                      ),
+                      const SizedBox(width: 24),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Benvenuto, ${user.firstName}!',
+                              style: Theme.of(context).textTheme.headlineLarge
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    color: AppTheme.textPrimary,
+                                    letterSpacing: -0.3,
+                                  ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Gestisci le tue certificazioni e la tua azienda',
+                              style: Theme.of(context).textTheme.bodyLarge
+                                  ?.copyWith(
+                                    color: AppTheme.textGray,
+                                    fontSize: 16,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 32),
 
-              // Quick actions
-              _buildQuickActionsGrid(context),
+                const SizedBox(height: 32),
 
-              const SizedBox(height: 32),
-
-              // Recent activity
-              Text(
-                'Attività Recente',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: AppTheme.primaryBlack,
+                // Quick actions
+                Text(
+                  'Azioni Rapide',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.textPrimary,
+                    letterSpacing: -0.2,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              _buildRecentActivityList(),
-            ],
+                const SizedBox(height: 20),
+                _buildQuickActionsGrid(context),
+
+                const SizedBox(height: 40),
+
+                // Recent activity
+                Text(
+                  'Attività Recente',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.textPrimary,
+                    letterSpacing: -0.2,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                _buildRecentActivityList(context),
+              ],
+            ),
           ),
         );
       },
@@ -194,14 +275,16 @@ class _DashboardContent extends StatelessWidget {
       crossAxisCount: 3,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
+      crossAxisSpacing: 20,
+      mainAxisSpacing: 20,
+      childAspectRatio: 1.1,
       children: [
         _buildQuickActionCard(
           context,
           'Complete Profile',
           'Fill in missing information',
           Icons.person_add,
+          AppTheme.successGreen,
           () {
             // Navigate to profile completion
           },
@@ -211,6 +294,7 @@ class _DashboardContent extends StatelessWidget {
           'Company Setup',
           'Configure your business',
           Icons.business,
+          AppTheme.primaryBlue,
           () {
             // Navigate to company setup
           },
@@ -220,6 +304,7 @@ class _DashboardContent extends StatelessWidget {
           'Get Certified',
           'Start certification process',
           Icons.verified_user,
+          AppTheme.purple,
           () {
             // Navigate to certification creation
             Navigator.push(
@@ -239,71 +324,108 @@ class _DashboardContent extends StatelessWidget {
     String title,
     String subtitle,
     IconData icon,
+    Color accentColor,
     VoidCallback onTap,
   ) {
-    return GlassCard(
+    return EnterpriseCard(
       isHoverable: true,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  gradient: AppTheme.primaryGradient,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(icon, size: 32, color: AppTheme.pureWhite),
+      onTap: onTap,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: accentColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: accentColor.withValues(alpha: 0.2),
+                width: 1,
               ),
-              const SizedBox(height: 12),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.primaryBlack,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                subtitle,
-                style: TextStyle(fontSize: 12, color: AppTheme.primaryBlack),
-                textAlign: TextAlign.center,
-              ),
-            ],
+            ),
+            child: Icon(icon, size: 32, color: accentColor),
           ),
-        ),
+          const SizedBox(height: 16),
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: AppTheme.textPrimary,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            subtitle,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppTheme.textGray,
+              height: 1.4,
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildRecentActivityList() {
-    return GlassCard(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Icon(Icons.history, color: AppTheme.primaryBlack),
-                const SizedBox(width: 12),
-                Text(
-                  'Nessuna attività recente',
-                  style: TextStyle(color: AppTheme.primaryBlack, fontSize: 16),
+  Widget _buildRecentActivityList(BuildContext context) {
+    return EnterpriseCard(
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: AppTheme.lightBlue,
+                  borderRadius: BorderRadius.circular(12),
                 ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'La tua attività apparirà qui una volta che inizierai a usare la piattaforma.',
-              style: TextStyle(color: AppTheme.primaryBlack, fontSize: 14),
-            ),
-          ],
-        ),
+                child: Icon(
+                  Icons.history,
+                  color: AppTheme.primaryBlue,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Nessuna attività recente',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'La tua attività apparirà qui una volta che inizierai a usare la piattaforma.',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppTheme.textGray,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          NeonButton(
+            text: 'Esplora Certificazioni',
+            onPressed: () {
+              // Navigate to certifications
+            },
+            isOutlined: true,
+            neonColor: AppTheme.primaryBlue,
+            height: 44,
+          ),
+        ],
       ),
     );
   }

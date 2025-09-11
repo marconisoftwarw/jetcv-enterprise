@@ -168,9 +168,59 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 'Profilo',
                 style: TextStyle(color: AppTheme.primaryBlack),
               ),
-              onTap: () {
+              onTap: () async {
                 Navigator.pop(context);
-                Navigator.pushNamed(context, '/profile');
+                
+                // Carica i dati dell'utente prima di navigare al profilo
+                final authProvider = context.read<AuthProvider>();
+                if (authProvider.isAuthenticated && authProvider.currentUser == null) {
+                  // Mostra un indicatore di caricamento
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (context) => Center(
+                      child: Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: AppTheme.pureWhite,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            CircularProgressIndicator(color: AppTheme.primaryBlue),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Caricamento profilo...',
+                              style: TextStyle(color: AppTheme.textPrimary),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                  
+                  try {
+                    await authProvider.loadUserData();
+                    if (mounted) {
+                      Navigator.pop(context); // Chiudi il dialog di caricamento
+                      Navigator.pushNamed(context, '/profile');
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      Navigator.pop(context); // Chiudi il dialog di caricamento
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Errore nel caricamento del profilo: $e'),
+                          backgroundColor: AppTheme.errorRed,
+                        ),
+                      );
+                    }
+                  }
+                } else {
+                  // I dati sono già caricati, naviga direttamente
+                  Navigator.pushNamed(context, '/profile');
+                }
               },
             ),
             ListTile(

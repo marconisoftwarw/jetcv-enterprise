@@ -406,4 +406,33 @@ class AuthProvider extends ChangeNotifier {
   void clearError() {
     _clearError();
   }
+
+  // Metodo pubblico per caricare i dati dell'utente
+  Future<void> loadUserData() async {
+    if (_isLoading) return;
+    
+    try {
+      _setLoading(true);
+      
+      // Verifica se c'è una sessione valida
+      if (!_supabaseService.hasValidSession) {
+        _setError('No valid session found');
+        return;
+      }
+
+      final supabaseUser = _supabaseService.currentUser;
+      if (supabaseUser == null) {
+        _setError('No authenticated user found');
+        return;
+      }
+
+      // Carica i dati dell'utente
+      await _loadUserData(supabaseUser.id);
+      
+    } catch (e) {
+      _setError('Failed to load user data: $e');
+    } finally {
+      _setLoading(false);
+    }
+  }
 }
