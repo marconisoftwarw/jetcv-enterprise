@@ -92,6 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey.shade50,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -141,8 +142,24 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const SizedBox(height: 48),
 
-                // Email Field
-                NeonTextField(
+                // Login Form Container
+                Container(
+                  padding: const EdgeInsets.all(32),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      // Email Field
+                      NeonTextField(
                   controller: _emailController,
                   labelText: 'Email',
                   hintText: 'Enter your email',
@@ -195,90 +212,104 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const SizedBox(height: 16),
 
-                // Remember Me & Forgot Password
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Checkbox(
-                          value: _rememberMe,
-                          onChanged: (value) {
-                            setState(() {
-                              _rememberMe = value ?? false;
-                            });
-                          },
-                        ),
-                        Text(
-                          'Remember me',
-                          style: TextStyle(color: AppTheme.primaryBlack),
-                        ),
-                      ],
-                    ),
-                    TextButton(
-                      onPressed: _forgotPassword,
-                      child: Text(
-                        'Forgot Password?',
-                        style: TextStyle(color: AppTheme.accentBlue),
+                      // Remember Me & Forgot Password
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Checkbox(
+                                value: _rememberMe,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _rememberMe = value ?? false;
+                                  });
+                                },
+                                activeColor: AppTheme.accentBlue,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
+                              Text(
+                                'Remember me',
+                                style: TextStyle(
+                                  color: Colors.grey.shade700,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                          TextButton(
+                            onPressed: _forgotPassword,
+                            child: Text(
+                              'Forgot Password?',
+                              style: TextStyle(
+                                color: AppTheme.accentBlue,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
 
-                const SizedBox(height: 24),
+                      const SizedBox(height: 24),
 
-                // Sign In Button
-                Consumer<AuthProvider>(
-                  builder: (context, authProvider, child) {
-                    return NeonButton(
-                      onPressed: authProvider.isLoading
-                          ? null
-                          : _signInWithEmail,
-                      text: authProvider.isLoading
-                          ? 'Signing In...'
-                          : 'Sign In',
-                      isLoading: authProvider.isLoading,
-                      neonColor: AppTheme.accentGreen,
-                    );
-                  },
-                ),
-
-                const SizedBox(height: 24),
-
-                // Divider
-                Row(
-                  children: [
-                    Expanded(child: Divider(color: AppTheme.primaryBlack)),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        'OR',
-                        style: TextStyle(
-                          color: AppTheme.primaryBlack,
-                          fontWeight: FontWeight.w500,
-                        ),
+                      // Sign In Button
+                      Consumer<AuthProvider>(
+                        builder: (context, authProvider, child) {
+                          return NeonButton(
+                            onPressed: authProvider.isLoading
+                                ? null
+                                : _signInWithEmail,
+                            text: authProvider.isLoading
+                                ? 'Signing In...'
+                                : 'Sign In',
+                            isLoading: authProvider.isLoading,
+                            neonColor: AppTheme.accentGreen,
+                          );
+                        },
                       ),
-                    ),
-                    Expanded(child: Divider(color: AppTheme.primaryBlack)),
-                  ],
-                ),
 
-                const SizedBox(height: 24),
+                      const SizedBox(height: 24),
 
-                // Google Sign In Button
-                Consumer<AuthProvider>(
-                  builder: (context, authProvider, child) {
-                    return NeonButton(
-                      onPressed: authProvider.isLoading
-                          ? null
-                          : _signInWithGoogle,
-                      text: 'Sign In with Google',
-                      icon: Icons.g_mobiledata,
-                      isLoading: authProvider.isLoading,
-                      isOutlined: true,
-                      neonColor: AppTheme.accentBlue,
-                    );
-                  },
+                      // Divider
+                      Row(
+                        children: [
+                          Expanded(child: Divider(color: Colors.grey.shade300)),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Text(
+                              'OR',
+                              style: TextStyle(
+                                color: Colors.grey.shade600,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          Expanded(child: Divider(color: Colors.grey.shade300)),
+                        ],
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // Google Sign In Button
+                      Consumer<AuthProvider>(
+                        builder: (context, authProvider, child) {
+                          return NeonButton(
+                            onPressed: authProvider.isLoading
+                                ? null
+                                : _signInWithGoogle,
+                            text: 'Sign In with Google',
+                            icon: Icons.g_mobiledata,
+                            isLoading: authProvider.isLoading,
+                            isOutlined: true,
+                            neonColor: AppTheme.accentBlue,
+                          );
+                        },
+                      ),
+                    ],
+                  ),
                 ),
 
                 const SizedBox(height: 32),
@@ -289,13 +320,20 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     Text(
                       "Don't have an account? ",
-                      style: TextStyle(color: AppTheme.primaryBlack),
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontSize: 14,
+                      ),
                     ),
                     TextButton(
                       onPressed: () => Navigator.pushNamed(context, '/signup'),
                       child: Text(
                         'Sign Up',
-                        style: TextStyle(color: AppTheme.accentGreen),
+                        style: TextStyle(
+                          color: AppTheme.accentGreen,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
                       ),
                     ),
                   ],
@@ -308,31 +346,35 @@ class _LoginScreenState extends State<LoginScreen> {
                       return Padding(
                         padding: const EdgeInsets.only(top: 16),
                         child: Container(
-                          padding: const EdgeInsets.all(12),
+                          padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: AppTheme.accentOrange.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: AppTheme.accentOrange),
+                            color: Colors.red.shade50,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.red.shade200),
                           ),
                           child: Row(
                             children: [
                               Icon(
                                 Icons.error_outline,
-                                color: AppTheme.accentOrange,
+                                color: Colors.red.shade600,
+                                size: 20,
                               ),
-                              const SizedBox(width: 8),
+                              const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
                                   authProvider.errorMessage!,
                                   style: TextStyle(
-                                    color: AppTheme.accentOrange,
+                                    color: Colors.red.shade700,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
                               ),
                               IconButton(
                                 icon: Icon(
                                   Icons.close,
-                                  color: AppTheme.accentOrange,
+                                  color: Colors.red.shade600,
+                                  size: 20,
                                 ),
                                 onPressed: authProvider.clearError,
                                 iconSize: 20,

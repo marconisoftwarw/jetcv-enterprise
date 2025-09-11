@@ -173,7 +173,7 @@ class _NeonTextFieldState extends State<NeonTextField>
                       )
                     : null,
                 filled: true,
-                fillColor: AppTheme.glassLight,
+                fillColor: Colors.white,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
@@ -181,7 +181,7 @@ class _NeonTextFieldState extends State<NeonTextField>
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
-                    color: AppTheme.primaryBlack.withValues(alpha: 0.3),
+                    color: Colors.grey.shade300,
                     width: 1,
                   ),
                 ),
@@ -202,12 +202,12 @@ class _NeonTextFieldState extends State<NeonTextField>
                       ? neonColor
                       : _hasError
                       ? errorColor
-                      : AppTheme.lightGray,
+                      : Colors.grey.shade600,
                   fontSize: 14,
-                  fontWeight: FontWeight.w400,
+                  fontWeight: FontWeight.w500,
                 ),
                 hintStyle: TextStyle(
-                  color: AppTheme.primaryBlack,
+                  color: Colors.grey.shade500,
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
                 ),

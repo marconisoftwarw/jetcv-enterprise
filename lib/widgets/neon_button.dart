@@ -143,7 +143,7 @@ class _NeonButtonState extends State<NeonButton>
                                     ? accentColor
                                     : AppTheme.pureWhite,
                                 fontSize: 14,
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.w700,
                                 letterSpacing: 0.3,
                               ),
                             ),

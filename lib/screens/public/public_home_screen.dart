@@ -214,10 +214,6 @@ class PublicHomeScreen extends StatelessWidget {
                     title: 'Identity Verification',
                     description:
                         'Secure and reliable identity verification for all users.',
-                    actionText: 'Learn More',
-                    onAction: () {
-                      // Navigate to identity verification
-                    },
                   ),
                   const SizedBox(height: 16),
 
@@ -226,10 +222,6 @@ class PublicHomeScreen extends StatelessWidget {
                     title: 'Legal Entity Management',
                     description:
                         'Comprehensive management of legal entities and compliance.',
-                    actionText: 'View Pricing',
-                    onAction: () {
-                      Navigator.pushNamed(context, '/legal-entity/pricing');
-                    },
                   ),
                   const SizedBox(height: 16),
 
@@ -238,10 +230,6 @@ class PublicHomeScreen extends StatelessWidget {
                     title: 'Secure Platform',
                     description:
                         'Enterprise-grade security with blockchain integration.',
-                    actionText: 'Learn More',
-                    onAction: () {
-                      // Navigate to security info
-                    },
                   ),
                   const SizedBox(height: 16),
 
@@ -250,10 +238,6 @@ class PublicHomeScreen extends StatelessWidget {
                     title: 'Analytics & Reporting',
                     description:
                         'Advanced analytics and reporting capabilities.',
-                    actionText: 'View Demo',
-                    onAction: () {
-                      // Navigate to analytics demo
-                    },
                   ),
                 ],
               ),
@@ -264,7 +248,7 @@ class PublicHomeScreen extends StatelessWidget {
           SliverToBoxAdapter(
             child: Container(
               padding: const EdgeInsets.all(24),
-              color: AppTheme.darkCharcoal,
+              color: Colors.white,
               child: Column(
                 children: [
                   Text(

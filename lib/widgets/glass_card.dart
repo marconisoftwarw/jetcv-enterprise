@@ -84,7 +84,7 @@ class _GlassCardState extends State<GlassCard>
               padding: widget.padding,
               decoration: BoxDecoration(
                 borderRadius: widget.borderRadius ?? BorderRadius.circular(12),
-                color: AppTheme.glassMedium,
+                color: Colors.white,
                 border: Border.all(
                   color: borderColor.withValues(alpha: _isHovered ? 0.4 : 0.1),
                   width: borderWidth,
