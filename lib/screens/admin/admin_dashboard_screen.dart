@@ -41,7 +41,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        backgroundColor: AppTheme.darkCharcoal,
+        backgroundColor: AppTheme.darkGray,
         foregroundColor: AppTheme.offWhite,
         elevation: 0,
         actions: [
@@ -857,7 +857,7 @@ class _DashboardContent extends StatelessWidget {
         physics: const NeverScrollableScrollPhysics(),
         itemCount: recentEntities.length,
         separatorBuilder: (context, index) =>
-            Divider(color: AppTheme.mediumCharcoal),
+            Divider(color: AppTheme.mediumGray),
         itemBuilder: (context, index) {
           final entity = recentEntities[index];
           return ListTile(

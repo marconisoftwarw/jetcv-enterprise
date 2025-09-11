@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../config/app_config.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/neon_button.dart';
-import '../../widgets/glass_card.dart';
+import '../../widgets/enterprise_card.dart';
 import '../../widgets/page_with_floating_language.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -17,35 +17,79 @@ class PublicHomeScreen extends StatelessWidget {
           slivers: [
             // App Bar
             SliverAppBar(
-              expandedHeight: 200,
+              expandedHeight: 240,
               floating: false,
               pinned: true,
+              elevation: 0,
+              backgroundColor: AppTheme.pureWhite,
               flexibleSpace: FlexibleSpaceBar(
                 title: Text(
                   AppConfig.appName,
-                  style: TextStyle(
-                    color: AppTheme.primaryBlack,
-                    fontWeight: FontWeight.bold,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: AppTheme.textPrimary,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.1,
                   ),
                 ),
                 background: Container(
-                  decoration: BoxDecoration(gradient: AppTheme.primaryGradient),
+                  decoration: BoxDecoration(
+                    gradient: AppTheme.primaryGradient,
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(24),
+                      bottomRight: Radius.circular(24),
+                    ),
+                  ),
                   child: Center(
-                    child: Icon(
-                      Icons.verified_user,
-                      size: 80,
-                      color: AppTheme.pureWhite,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 100,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            color: AppTheme.pureWhite.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppTheme.pureWhite.withValues(
+                                  alpha: 0.3,
+                                ),
+                                blurRadius: 20,
+                                spreadRadius: 0,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            Icons.verified_user,
+                            size: 50,
+                            color: AppTheme.pureWhite,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Enterprise Certification Platform',
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(
+                                color: AppTheme.pureWhite,
+                                fontWeight: FontWeight.w500,
+                              ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
               ),
               actions: [
-                const SizedBox(width: 4),
+                const SizedBox(width: 8),
                 TextButton(
                   onPressed: () => Navigator.pushNamed(context, '/cv-list'),
                   child: Text(
                     AppLocalizations.of(context).getString('public_cvs'),
-                    style: const TextStyle(color: Colors.white),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppTheme.pureWhite,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
                 TextButton(
@@ -53,95 +97,116 @@ class PublicHomeScreen extends StatelessWidget {
                       Navigator.pushNamed(context, '/legal-entity/pricing'),
                   child: Text(
                     AppLocalizations.of(context).getString('pricing'),
-                    style: const TextStyle(color: Colors.white),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppTheme.pureWhite,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
                 TextButton(
                   onPressed: () => Navigator.pushNamed(context, '/login'),
                   child: Text(
                     AppLocalizations.of(context).getString('login'),
-                    style: const TextStyle(color: Colors.white),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppTheme.pureWhite,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
+                const SizedBox(width: 16),
               ],
             ),
 
             // Hero Section
             SliverToBoxAdapter(
               child: Container(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.all(32),
                 child: Column(
                   children: [
+                    // Main heading
                     Text(
-                      AppLocalizations.of(context)
-                          .getString('professional_certification_platform'),
-                      style:
-                          Theme.of(context).textTheme.displayMedium?.copyWith(
-                                color: AppTheme.primaryBlack,
-                                fontWeight: FontWeight.bold,
-                              ),
+                      AppLocalizations.of(
+                        context,
+                      ).getString('professional_certification_platform'),
+                      style: Theme.of(context).textTheme.displayMedium
+                          ?.copyWith(
+                            color: AppTheme.textPrimary,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.5,
+                          ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      AppLocalizations.of(context)
-                          .getString('streamline_business_verification'),
+                      AppLocalizations.of(
+                        context,
+                      ).getString('streamline_business_verification'),
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: AppTheme.primaryBlack,
-                          ),
+                        color: AppTheme.textGray,
+                        fontSize: 18,
+                      ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 48),
 
-                    // CTA Buttons
+                    // Main CTA Buttons
                     Row(
                       children: [
                         Expanded(
                           child: NeonButton(
-                            text: AppLocalizations.of(context)
-                                .getString('view_pricing'),
+                            text: AppLocalizations.of(
+                              context,
+                            ).getString('view_pricing'),
                             onPressed: () => Navigator.pushNamed(
                               context,
                               '/legal-entity/pricing',
                             ),
-                            neonColor: AppTheme.accentGreen,
+                            neonColor: AppTheme.successGreen,
+                            height: 56,
                           ),
                         ),
-                        const SizedBox(width: 16),
+                        const SizedBox(width: 20),
                         Expanded(
                           child: NeonButton(
-                            text: AppLocalizations.of(context)
-                                .getString('register_company'),
+                            text: AppLocalizations.of(
+                              context,
+                            ).getString('register_company'),
                             onPressed: () => Navigator.pushNamed(
                               context,
                               '/legal-entity/register',
                             ),
                             isOutlined: true,
-                            neonColor: AppTheme.accentBlue,
+                            neonColor: AppTheme.primaryBlue,
+                            height: 56,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 24),
+
+                    // Secondary actions
                     Row(
                       children: [
                         Expanded(
                           child: NeonButton(
-                            text: AppLocalizations.of(context)
-                                .getString('explore_cvs'),
+                            text: AppLocalizations.of(
+                              context,
+                            ).getString('explore_cvs'),
                             onPressed: () {
                               Navigator.pushNamed(context, '/cv-list');
                             },
                             icon: Icons.description,
                             isOutlined: true,
-                            neonColor: AppTheme.accentPurple,
+                            neonColor: AppTheme.purple,
+                            height: 48,
                           ),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
                           child: NeonButton(
-                            text: AppLocalizations.of(context)
-                                .getString('pricing'),
+                            text: AppLocalizations.of(
+                              context,
+                            ).getString('pricing'),
                             onPressed: () {
                               Navigator.pushNamed(
                                 context,
@@ -150,14 +215,16 @@ class PublicHomeScreen extends StatelessWidget {
                             },
                             icon: Icons.price_check,
                             isOutlined: true,
-                            neonColor: AppTheme.accentOrange,
+                            neonColor: AppTheme.warningOrange,
+                            height: 48,
                           ),
                         ),
                       ],
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
 
+                    // Additional actions
                     Row(
                       children: [
                         Expanded(
@@ -170,16 +237,17 @@ class PublicHomeScreen extends StatelessWidget {
                                   content: Text(
                                     'Please login to create certifications',
                                     style: TextStyle(
-                                      color: AppTheme.primaryBlack,
+                                      color: AppTheme.textPrimary,
                                     ),
                                   ),
-                                  backgroundColor: AppTheme.glassDark,
+                                  backgroundColor: AppTheme.pureWhite,
                                 ),
                               );
                             },
                             icon: Icons.verified_user,
                             isOutlined: true,
-                            neonColor: AppTheme.accentPurple,
+                            neonColor: AppTheme.purple,
+                            height: 48,
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -194,7 +262,8 @@ class PublicHomeScreen extends StatelessWidget {
                             },
                             icon: Icons.business,
                             isOutlined: true,
-                            neonColor: AppTheme.accentBlue,
+                            neonColor: AppTheme.primaryBlue,
+                            height: 48,
                           ),
                         ),
                       ],
@@ -207,53 +276,62 @@ class PublicHomeScreen extends StatelessWidget {
             // Features Section
             SliverToBoxAdapter(
               child: Container(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.all(32),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       AppLocalizations.of(context).getString('key_features'),
-                      style:
-                          Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                color: AppTheme.primaryBlack,
-                                fontWeight: FontWeight.bold,
-                              ),
+                      style: Theme.of(context).textTheme.headlineLarge
+                          ?.copyWith(
+                            color: AppTheme.textPrimary,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.3,
+                          ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
 
                     _buildFeatureCard(
                       icon: Icons.verified_user,
-                      title: AppLocalizations.of(context)
-                          .getString('identity_verification'),
-                      description: AppLocalizations.of(context)
-                          .getString('secure_reliable_verification'),
+                      title: AppLocalizations.of(
+                        context,
+                      ).getString('identity_verification'),
+                      description: AppLocalizations.of(
+                        context,
+                      ).getString('secure_reliable_verification'),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
 
                     _buildFeatureCard(
                       icon: Icons.business,
-                      title: AppLocalizations.of(context)
-                          .getString('legal_entity_management'),
-                      description: AppLocalizations.of(context)
-                          .getString('comprehensive_management'),
+                      title: AppLocalizations.of(
+                        context,
+                      ).getString('legal_entity_management'),
+                      description: AppLocalizations.of(
+                        context,
+                      ).getString('comprehensive_management'),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
 
                     _buildFeatureCard(
                       icon: Icons.security,
-                      title: AppLocalizations.of(context)
-                          .getString('secure_platform'),
-                      description: AppLocalizations.of(context)
-                          .getString('enterprise_grade_security'),
+                      title: AppLocalizations.of(
+                        context,
+                      ).getString('secure_platform'),
+                      description: AppLocalizations.of(
+                        context,
+                      ).getString('enterprise_grade_security'),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
 
                     _buildFeatureCard(
                       icon: Icons.analytics,
-                      title: AppLocalizations.of(context)
-                          .getString('analytics_reporting'),
-                      description: AppLocalizations.of(context)
-                          .getString('advanced_analytics'),
+                      title: AppLocalizations.of(
+                        context,
+                      ).getString('analytics_reporting'),
+                      description: AppLocalizations.of(
+                        context,
+                      ).getString('advanced_analytics'),
                     ),
                   ],
                 ),
@@ -263,26 +341,29 @@ class PublicHomeScreen extends StatelessWidget {
             // Footer
             SliverToBoxAdapter(
               child: Container(
-                padding: const EdgeInsets.all(24),
-                color: Colors.white,
+                padding: const EdgeInsets.all(32),
+                decoration: BoxDecoration(
+                  color: AppTheme.pureWhite,
+                  border: Border(
+                    top: BorderSide(color: AppTheme.borderGray, width: 1),
+                  ),
+                ),
                 child: Column(
                   children: [
                     Text(
                       '© 2024 ${AppConfig.appName}. ${AppLocalizations.of(context).getString('all_rights_reserved')}',
-                      style: TextStyle(
-                        color: AppTheme.primaryBlack,
-                        fontSize: 14,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppTheme.textGray,
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      AppLocalizations.of(context).getString(
-                        'professional_certification_platform_footer',
-                      ),
-                      style: TextStyle(
-                        color: AppTheme.primaryBlack,
-                        fontSize: 12,
-                      ),
+                      AppLocalizations.of(
+                        context,
+                      ).getString('professional_certification_platform_footer'),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: AppTheme.textGray),
                     ),
                   ],
                 ),
@@ -303,48 +384,56 @@ class PublicHomeScreen extends StatelessWidget {
   }) {
     return Builder(
       builder: (context) {
-        return GlassCard(
+        return EnterpriseCard(
           isHoverable: true,
           child: Row(
             children: [
               Container(
-                width: 60,
-                height: 60,
+                width: 64,
+                height: 64,
                 decoration: BoxDecoration(
                   gradient: AppTheme.primaryGradient,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.primaryBlue.withValues(alpha: 0.2),
+                      blurRadius: 8,
+                      spreadRadius: 0,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-                child: Icon(icon, color: AppTheme.pureWhite, size: 30),
+                child: Icon(icon, color: AppTheme.pureWhite, size: 32),
               ),
-              const SizedBox(width: 20),
+              const SizedBox(width: 24),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       title,
-                      style:
-                          Theme.of(context).textTheme.titleLarge?.copyWith(
-                                color: AppTheme.primaryBlack,
-                                fontWeight: FontWeight.bold,
-                              ),
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: AppTheme.textPrimary,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: -0.1,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       description,
-                      style:
-                          Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: AppTheme.primaryBlack,
-                              ),
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: AppTheme.textGray,
+                        height: 1.5,
+                      ),
                     ),
                     if (actionText != null && onAction != null) ...[
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
                       NeonButton(
                         text: actionText,
                         onPressed: onAction,
                         isOutlined: true,
-                        neonColor: AppTheme.accentBlue,
-                        height: 36,
+                        neonColor: AppTheme.primaryBlue,
+                        height: 40,
                       ),
                     ],
                   ],

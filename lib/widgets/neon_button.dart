@@ -32,7 +32,6 @@ class NeonButton extends StatefulWidget {
 class _NeonButtonState extends State<NeonButton>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
-  late Animation<double> _glowAnimation;
   bool _isHovered = false;
 
   @override
@@ -41,9 +40,6 @@ class _NeonButtonState extends State<NeonButton>
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
-    );
-    _glowAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
     _animationController.repeat(reverse: true);
   }
@@ -56,7 +52,7 @@ class _NeonButtonState extends State<NeonButton>
 
   @override
   Widget build(BuildContext context) {
-    final accentColor = widget.neonColor ?? AppTheme.accentBlue;
+    final accentColor = widget.neonColor ?? AppTheme.primaryBlue;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
@@ -66,37 +62,37 @@ class _NeonButtonState extends State<NeonButton>
         width: widget.width,
         height: widget.height ?? 48,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           boxShadow: [
-            BoxShadow(
-              color: accentColor.withValues(
-                alpha: (_isHovered ? 0.3 : 0.1) * _glowAnimation.value,
-              ),
-              blurRadius: _isHovered ? 12 : 8,
-              spreadRadius: _isHovered ? 1 : 0,
-            ),
             if (_isHovered)
               BoxShadow(
-                color: accentColor.withValues(alpha: 0.2),
-                blurRadius: 16,
-                spreadRadius: 2,
+                color: accentColor.withValues(alpha: 0.15),
+                blurRadius: 12,
+                spreadRadius: 0,
+                offset: const Offset(0, 4),
               ),
+            BoxShadow(
+              color: AppTheme.textPrimary.withValues(alpha: 0.08),
+              blurRadius: 8,
+              spreadRadius: 0,
+              offset: const Offset(0, 2),
+            ),
           ],
         ),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
             onTap: widget.onPressed,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
             child: Container(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(12),
                 gradient: widget.isOutlined
                     ? null
                     : LinearGradient(
                         colors: [
                           accentColor,
-                          accentColor.withValues(alpha: 0.8),
+                          accentColor.withValues(alpha: 0.9),
                         ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
@@ -104,11 +100,12 @@ class _NeonButtonState extends State<NeonButton>
                 border: widget.isOutlined
                     ? Border.all(color: accentColor, width: 1.5)
                     : null,
+                color: widget.isOutlined ? AppTheme.pureWhite : null,
               ),
               child: Padding(
                 padding:
                     widget.padding ??
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 child: Center(
                   child: widget.isLoading
                       ? SizedBox(
@@ -143,8 +140,8 @@ class _NeonButtonState extends State<NeonButton>
                                     ? accentColor
                                     : AppTheme.pureWhite,
                                 fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.3,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.2,
                               ),
                             ),
                           ],

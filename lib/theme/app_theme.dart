@@ -1,156 +1,188 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  // Colori base enterprise eleganti
-  static const Color _primaryBlack = Color(0xFF0A0A0A); // Nero molto scuro
-  static const Color _darkCharcoal = Color(0xFF1A1A1A); // Grigio carbone scuro
-  static const Color _charcoal = Color(0xFF2A2A2A); // Grigio carbone medio
-  static const Color _mediumCharcoal = Color(
-    0xFF3A3A3A,
-  ); // Grigio carbone chiaro
-  static const Color _lightCharcoal = Color(
-    0xFF4A4A4A,
-  ); // Grigio carbone molto chiaro
+  // Modern Enterprise 2025 Color Palette - Light & Professional
+  static const Color _primaryBlue = Color(0xFF0066CC); // Professional blue
+  static const Color _secondaryBlue = Color(
+    0xFF004499,
+  ); // Darker blue for accents
+  static const Color _lightBlue = Color(
+    0xFFE6F3FF,
+  ); // Very light blue background
+  static const Color _accentBlue = Color(0xFF0080FF); // Bright accent blue
 
-  // Accenti professionali (più sottili)
-  static const Color _accentBlue = Color(0xFF2563EB); // Blu professionale
-  static const Color _accentGreen = Color(0xFF059669); // Verde professionale
-  static const Color _accentPurple = Color(0xFF7C3AED); // Viola professionale
-  static const Color _accentOrange = Color(
-    0xFFEA580C,
-  ); // Arancione professionale
+  // Success, Warning, Error colors
+  static const Color _successGreen = Color(0xFF00A86B); // Professional green
+  static const Color _warningOrange = Color(0xFFFF8C00); // Professional orange
+  static const Color _errorRed = Color(0xFFE53E3E); // Professional red
+  static const Color _infoBlue = Color(0xFF3182CE); // Info blue
 
-  // Tipografia enterprise
+  // Neutral grays - light and professional
   static const Color _pureWhite = Color(0xFFFFFFFF);
-  static const Color _offWhite = Color(0xFFF8FAFC);
-  static const Color _lightGray = Color(0xFFE2E8F0);
-  static const Color _mediumGray = Color(0xFF94A3B8);
-  static const Color _darkGray = Color(0xFF475569);
+  static const Color _offWhite = Color(0xFFFAFBFC);
+  static const Color _lightGray = Color(0xFFF1F5F9);
+  static const Color _mediumGray = Color(0xFFE2E8F0);
+  static const Color _borderGray = Color(0xFFCBD5E1);
+  static const Color _textGray = Color(0xFF64748B);
+  static const Color _darkGray = Color(0xFF334155);
+  static const Color _textPrimary = Color(0xFF1E293B);
 
-  // Sfumature per glassmorphism
-  static const Color _glassDark = Color(0xFF1E293B);
-  static const Color _glassMedium = Color(0xFF334155);
-  static const Color _glassLight = Color(0xFF475569);
+  // Additional professional colors
+  static const Color _purple = Color(0xFF7C3AED);
+  static const Color _teal = Color(0xFF0891B2);
+  static const Color _indigo = Color(0xFF4F46E5);
 
-  // Gradienti professionali
+  // Modern gradients for 2025
   static const LinearGradient _primaryGradient = LinearGradient(
-    colors: [_accentBlue, _accentPurple],
+    colors: [_primaryBlue, _accentBlue],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const LinearGradient _accentGradient = LinearGradient(
-    colors: [_accentGreen, _accentBlue],
+    colors: [_successGreen, _primaryBlue],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const LinearGradient _subtleGradient = LinearGradient(
-    colors: [_charcoal, _mediumCharcoal],
+    colors: [_lightGray, _mediumGray],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
-  // Getters per i colori
-  static Color get primaryBlack => _primaryBlack;
-  static Color get darkCharcoal => _darkCharcoal;
-  static Color get charcoal => _charcoal;
-  static Color get mediumCharcoal => _mediumCharcoal;
-  static Color get lightCharcoal => _lightCharcoal;
+  static const LinearGradient _cardGradient = LinearGradient(
+    colors: [_pureWhite, _offWhite],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+  );
 
-  // Colori aggiuntivi per compatibilità
+  // Color getters for the new professional palette
+  static Color get primaryBlue => _primaryBlue;
+  static Color get secondaryBlue => _secondaryBlue;
+  static Color get lightBlue => _lightBlue;
+  static Color get accentBlue => _accentBlue;
+
+  static Color get successGreen => _successGreen;
+  static Color get warningOrange => _warningOrange;
+  static Color get errorRed => _errorRed;
+  static Color get infoBlue => _infoBlue;
+
   static Color get white => _pureWhite;
-  static Color get primaryBlue => _accentBlue;
-  static Color get successGreen => _accentGreen;
-  static Color get errorRed => const Color(0xFFDC2626);
-  static Color get warningOrange => _accentOrange;
-  static Color get lightBlue => const Color(0xFF3B82F6);
-  static Color get lightGrey => _lightGray;
-  static Color get borderGrey => _lightGray;
-  static Color get neutralGrey => _mediumGray;
-  static Color get textTertiary => _mediumGray;
-  static Color get textSecondary => _darkGray;
-  static Color get secondaryBlue => const Color(0xFF1E40AF);
-  static Color get infoBlue => const Color(0xFF0EA5E9);
-  static Color get cardShadow => _primaryBlack.withValues(alpha: 0.1);
+  static Color get offWhite => _offWhite;
+  static Color get lightGray => _lightGray;
+  static Color get mediumGray => _mediumGray;
+  static Color get borderGray => _borderGray;
+  static Color get textGray => _textGray;
+  static Color get darkGray => _darkGray;
+  static Color get textPrimary => _textPrimary;
 
-  // Stili di testo per compatibilità
+  static Color get purple => _purple;
+  static Color get teal => _teal;
+  static Color get indigo => _indigo;
+
+  // Legacy compatibility
+  static Color get primaryBlack => _textPrimary;
+  static Color get lightGrey => _lightGray;
+  static Color get borderGrey => _borderGray;
+  static Color get neutralGrey => _textGray;
+  static Color get textTertiary => _textGray;
+  static Color get textSecondary => _darkGray;
+  static Color get cardShadow => _textPrimary.withValues(alpha: 0.08);
+
+  // Modern text styles for 2025
   static TextStyle get title1 => TextStyle(
     fontSize: 24,
     fontWeight: FontWeight.w600,
-    color: _primaryBlack,
+    color: _textPrimary,
+    letterSpacing: -0.5,
   );
   static TextStyle get title2 => TextStyle(
     fontSize: 20,
     fontWeight: FontWeight.w600,
-    color: _primaryBlack,
+    color: _textPrimary,
+    letterSpacing: -0.3,
   );
   static TextStyle get title3 => TextStyle(
     fontSize: 18,
     fontWeight: FontWeight.w500,
-    color: _primaryBlack,
+    color: _textPrimary,
+    letterSpacing: -0.2,
   );
   static TextStyle get headline2 => TextStyle(
     fontSize: 22,
     fontWeight: FontWeight.w600,
-    color: _primaryBlack,
+    color: _textPrimary,
+    letterSpacing: -0.3,
   );
   static TextStyle get headline3 => TextStyle(
     fontSize: 18,
     fontWeight: FontWeight.w600,
-    color: _primaryBlack,
+    color: _textPrimary,
+    letterSpacing: -0.2,
   );
-  static TextStyle get body1 => TextStyle(fontSize: 16, color: _primaryBlack);
-  static TextStyle get body2 => TextStyle(fontSize: 14, color: _primaryBlack);
-  static TextStyle get caption => TextStyle(fontSize: 12, color: _primaryBlack);
-  static TextStyle get button => TextStyle(
+  static TextStyle get body1 => TextStyle(
     fontSize: 16,
-    fontWeight: FontWeight.w500,
-    color: _primaryBlack,
+    color: _textPrimary,
+    fontWeight: FontWeight.w400,
+    letterSpacing: 0,
+  );
+  static TextStyle get body2 => TextStyle(
+    fontSize: 14,
+    color: _textPrimary,
+    fontWeight: FontWeight.w400,
+    letterSpacing: 0,
+  );
+  static TextStyle get caption => TextStyle(
+    fontSize: 12,
+    color: _textGray,
+    fontWeight: FontWeight.w400,
+    letterSpacing: 0.1,
+  );
+  static TextStyle get button => TextStyle(
+    fontSize: 14,
+    fontWeight: FontWeight.w600,
+    color: _pureWhite,
+    letterSpacing: 0.2,
   );
 
-  static Color get accentBlue => _accentBlue;
-  static Color get accentGreen => _accentGreen;
-  static Color get accentPurple => _accentPurple;
-  static Color get accentOrange => _accentOrange;
+  // Legacy color compatibility
+  static Color get accentGreen => _successGreen;
+  static Color get accentPurple => _purple;
+  static Color get accentOrange => _warningOrange;
 
   static Color get pureWhite => _pureWhite;
-  static Color get offWhite => _offWhite;
-  static Color get lightGray => _lightGray;
-  static Color get mediumGray => _mediumGray;
-  static Color get darkGray => _darkGray;
   static Color get backgroundGrey => _offWhite;
 
-  static Color get glassDark => _glassDark;
-  static Color get glassMedium => _glassMedium;
-  static Color get glassLight => _glassLight;
-
+  // Gradient getters
   static LinearGradient get primaryGradient => _primaryGradient;
   static LinearGradient get accentGradient => _accentGradient;
   static LinearGradient get subtleGradient => _subtleGradient;
+  static LinearGradient get cardGradient => _cardGradient;
 
-  // Tema principale enterprise - Light Theme
+  // Modern Enterprise 2025 Theme
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-
+      fontFamily: 'Inter', // Modern font
       // Color Scheme
       colorScheme: const ColorScheme.light(
-        primary: _accentBlue,
-        secondary: _accentGreen,
-        tertiary: _accentPurple,
+        primary: _primaryBlue,
+        secondary: _successGreen,
+        tertiary: _purple,
         surface: _pureWhite,
-        background: _offWhite,
+        surfaceContainerHighest: _lightGray,
 
         onPrimary: _pureWhite,
         onSecondary: _pureWhite,
         onTertiary: _pureWhite,
-        onSurface: _primaryBlack,
-        onBackground: _primaryBlack,
+        onSurface: _textPrimary,
         surfaceTint: _pureWhite,
-        error: _accentOrange,
+        error: _errorRed,
         onError: _pureWhite,
+        outline: _borderGray,
+        outlineVariant: _mediumGray,
       ),
 
       // Scaffold
@@ -159,42 +191,47 @@ class AppTheme {
       // App Bar
       appBarTheme: const AppBarTheme(
         backgroundColor: _pureWhite,
-        foregroundColor: _primaryBlack,
+        foregroundColor: _textPrimary,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
+        shadowColor: Colors.transparent,
         titleTextStyle: TextStyle(
-          color: _primaryBlack,
+          color: _textPrimary,
           fontSize: 20,
           fontWeight: FontWeight.w600,
-          letterSpacing: 0.5,
+          letterSpacing: -0.3,
         ),
-        iconTheme: IconThemeData(color: _primaryBlack),
+        iconTheme: IconThemeData(color: _textPrimary, size: 24),
+        actionsIconTheme: IconThemeData(color: _textPrimary, size: 24),
       ),
 
       // Card
       cardTheme: CardThemeData(
         color: _pureWhite,
-        elevation: 2,
-        shadowColor: _primaryBlack.withValues(alpha: 0.1),
+        elevation: 0,
+        shadowColor: _textPrimary.withValues(alpha: 0.08),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: _lightGray, width: 1),
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: _borderGray, width: 1),
         ),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       ),
 
       // Elevated Button
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: _accentBlue,
+          backgroundColor: _primaryBlue,
           foregroundColor: _pureWhite,
-          elevation: 4,
-          shadowColor: _accentBlue.withValues(alpha: 0.2),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          textStyle: TextStyle(
+          elevation: 0,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          textStyle: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            letterSpacing: 0.3,
+            letterSpacing: 0.2,
           ),
         ),
       ),
@@ -202,14 +239,16 @@ class AppTheme {
       // Outlined Button
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: _accentBlue,
-          side: const BorderSide(color: _accentBlue, width: 1.5),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          textStyle: TextStyle(
+          foregroundColor: _primaryBlue,
+          side: const BorderSide(color: _primaryBlue, width: 1.5),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          textStyle: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            letterSpacing: 0.3,
+            letterSpacing: 0.2,
           ),
         ),
       ),
@@ -217,13 +256,13 @@ class AppTheme {
       // Text Button
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: _accentBlue,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          textStyle: TextStyle(
+          foregroundColor: _primaryBlue,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          textStyle: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w500,
-            letterSpacing: 0.2,
+            letterSpacing: 0.1,
           ),
         ),
       ),
@@ -233,34 +272,34 @@ class AppTheme {
         filled: true,
         fillColor: _pureWhite,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: _lightGray, width: 1),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: _borderGray, width: 1),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: _lightGray, width: 1),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: _borderGray, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: _accentBlue, width: 2),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: _primaryBlue, width: 2),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: _accentOrange, width: 1.5),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: _errorRed, width: 1.5),
         ),
-        labelStyle: TextStyle(
-          color: _darkGray,
+        labelStyle: const TextStyle(
+          color: _textGray,
           fontSize: 14,
           fontWeight: FontWeight.w400,
         ),
-        hintStyle: TextStyle(
-          color: _mediumGray,
+        hintStyle: const TextStyle(
+          color: _textGray,
           fontSize: 14,
           fontWeight: FontWeight.w400,
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
-          vertical: 12,
+          vertical: 16,
         ),
       ),
 
@@ -268,92 +307,102 @@ class AppTheme {
       textTheme: const TextTheme(
         displayLarge: TextStyle(
           fontSize: 32,
-          fontWeight: FontWeight.bold,
-          color: _primaryBlack,
+          fontWeight: FontWeight.w700,
+          color: _textPrimary,
           letterSpacing: -0.5,
         ),
         displayMedium: TextStyle(
           fontSize: 28,
-          fontWeight: FontWeight.bold,
-          color: _primaryBlack,
+          fontWeight: FontWeight.w700,
+          color: _textPrimary,
           letterSpacing: -0.3,
         ),
         displaySmall: TextStyle(
           fontSize: 24,
-          fontWeight: FontWeight.bold,
-          color: _primaryBlack,
+          fontWeight: FontWeight.w700,
+          color: _textPrimary,
           letterSpacing: -0.2,
         ),
         headlineLarge: TextStyle(
           fontSize: 22,
           fontWeight: FontWeight.w600,
-          color: _primaryBlack,
-          letterSpacing: -0.1,
+          color: _textPrimary,
+          letterSpacing: -0.3,
         ),
         headlineMedium: TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w600,
-          color: _primaryBlack,
-          letterSpacing: -0.1,
+          color: _textPrimary,
+          letterSpacing: -0.2,
         ),
         headlineSmall: TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.w600,
-          color: _primaryBlack,
+          color: _textPrimary,
+          letterSpacing: -0.1,
         ),
         titleLarge: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w600,
-          color: _primaryBlack,
+          color: _textPrimary,
+          letterSpacing: -0.1,
         ),
         titleMedium: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w600,
-          color: _primaryBlack,
+          color: _textPrimary,
+          letterSpacing: 0,
         ),
         titleSmall: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w600,
-          color: _primaryBlack,
+          color: _textPrimary,
+          letterSpacing: 0.1,
         ),
         bodyLarge: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w400,
-          color: _primaryBlack,
+          color: _textPrimary,
+          letterSpacing: 0,
         ),
         bodyMedium: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w400,
-          color: _primaryBlack,
+          color: _textPrimary,
+          letterSpacing: 0,
         ),
         bodySmall: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w400,
-          color: _darkGray,
+          color: _textGray,
+          letterSpacing: 0.1,
         ),
         labelLarge: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w500,
-          color: _primaryBlack,
+          color: _textPrimary,
+          letterSpacing: 0,
         ),
         labelMedium: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w500,
-          color: _primaryBlack,
+          color: _textPrimary,
+          letterSpacing: 0.1,
         ),
         labelSmall: TextStyle(
           fontSize: 10,
           fontWeight: FontWeight.w500,
-          color: _darkGray,
+          color: _textGray,
+          letterSpacing: 0.2,
         ),
       ),
 
       // Icon Theme
-      iconTheme: IconThemeData(color: _primaryBlack, size: 24),
+      iconTheme: const IconThemeData(color: _textPrimary, size: 24),
 
       // Divider
       dividerTheme: const DividerThemeData(
-        color: _lightGray,
+        color: _borderGray,
         thickness: 1,
         space: 1,
       ),
@@ -361,17 +410,17 @@ class AppTheme {
       // Bottom Navigation Bar
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: _pureWhite,
-        selectedItemColor: _accentBlue,
-        unselectedItemColor: _darkGray,
+        selectedItemColor: _primaryBlue,
+        unselectedItemColor: _textGray,
         type: BottomNavigationBarType.fixed,
-        elevation: 8,
+        elevation: 0,
       ),
 
       // Floating Action Button
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: _accentBlue,
+        backgroundColor: _primaryBlue,
         foregroundColor: _pureWhite,
-        elevation: 6,
+        elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(16)),
         ),
@@ -379,51 +428,51 @@ class AppTheme {
 
       // Chip
       chipTheme: ChipThemeData(
-        backgroundColor: _lightGray,
-        selectedColor: _accentBlue.withValues(alpha: 0.1),
+        backgroundColor: _lightBlue,
+        selectedColor: _primaryBlue.withValues(alpha: 0.1),
         disabledColor: _lightGray,
-        labelStyle: TextStyle(
-          color: _primaryBlack,
+        labelStyle: const TextStyle(
+          color: _textPrimary,
           fontSize: 12,
           fontWeight: FontWeight.w500,
         ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: BorderSide(color: _lightGray, width: 1),
+          side: const BorderSide(color: _borderGray, width: 1),
         ),
       ),
 
       // Switch
       switchTheme: SwitchThemeData(
-        thumbColor: WidgetStateProperty.all(_accentBlue),
+        thumbColor: WidgetStateProperty.all(_primaryBlue),
         trackColor: WidgetStateProperty.all(_lightGray),
-        trackOutlineColor: WidgetStateProperty.all(_lightGray),
+        trackOutlineColor: WidgetStateProperty.all(_borderGray),
       ),
 
       // Checkbox
       checkboxTheme: CheckboxThemeData(
-        fillColor: WidgetStateProperty.all(_accentBlue),
+        fillColor: WidgetStateProperty.all(_primaryBlue),
         checkColor: WidgetStateProperty.all(_pureWhite),
-        side: const BorderSide(color: _lightGray, width: 1.5),
+        side: const BorderSide(color: _borderGray, width: 1.5),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
       ),
 
       // Radio
       radioTheme: RadioThemeData(
-        fillColor: WidgetStateProperty.all(_accentBlue),
+        fillColor: WidgetStateProperty.all(_primaryBlue),
         overlayColor: WidgetStateProperty.all(
-          _accentBlue.withValues(alpha: 0.1),
+          _primaryBlue.withValues(alpha: 0.1),
         ),
       ),
 
       // Slider
       sliderTheme: SliderThemeData(
-        activeTrackColor: _accentBlue,
+        activeTrackColor: _primaryBlue,
         inactiveTrackColor: _lightGray,
-        thumbColor: _accentBlue,
-        overlayColor: _accentBlue.withValues(alpha: 0.1),
-        valueIndicatorColor: _accentBlue,
-        valueIndicatorTextStyle: TextStyle(
+        thumbColor: _primaryBlue,
+        overlayColor: _primaryBlue.withValues(alpha: 0.1),
+        valueIndicatorColor: _primaryBlue,
+        valueIndicatorTextStyle: const TextStyle(
           color: _pureWhite,
           fontSize: 12,
           fontWeight: FontWeight.w500,
@@ -432,7 +481,7 @@ class AppTheme {
 
       // Progress Indicator
       progressIndicatorTheme: const ProgressIndicatorThemeData(
-        color: _accentBlue,
+        color: _primaryBlue,
         linearTrackColor: _lightGray,
         circularTrackColor: _lightGray,
       ),
@@ -441,24 +490,24 @@ class AppTheme {
       dialogTheme: DialogThemeData(
         backgroundColor: _pureWhite,
         surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        titleTextStyle: TextStyle(
-          color: _primaryBlack,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        titleTextStyle: const TextStyle(
+          color: _textPrimary,
           fontSize: 18,
           fontWeight: FontWeight.w600,
         ),
-        contentTextStyle: TextStyle(color: _primaryBlack, fontSize: 14),
+        contentTextStyle: const TextStyle(color: _textPrimary, fontSize: 14),
       ),
 
       // SnackBar
       snackBarTheme: SnackBarThemeData(
         backgroundColor: _pureWhite,
-        contentTextStyle: TextStyle(
-          color: _primaryBlack,
+        contentTextStyle: const TextStyle(
+          color: _textPrimary,
           fontSize: 14,
           fontWeight: FontWeight.w400,
         ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         behavior: SnackBarBehavior.floating,
       ),
 
@@ -474,11 +523,11 @@ class AppTheme {
       // Navigation Rail
       navigationRailTheme: const NavigationRailThemeData(
         backgroundColor: _pureWhite,
-        selectedIconTheme: IconThemeData(color: _accentBlue),
-        unselectedIconTheme: IconThemeData(color: _darkGray),
-        selectedLabelTextStyle: TextStyle(color: _accentBlue),
-        unselectedLabelTextStyle: TextStyle(color: _darkGray),
-        indicatorColor: _accentBlue,
+        selectedIconTheme: IconThemeData(color: _primaryBlue),
+        unselectedIconTheme: IconThemeData(color: _textGray),
+        selectedLabelTextStyle: TextStyle(color: _primaryBlue),
+        unselectedLabelTextStyle: TextStyle(color: _textGray),
+        indicatorColor: _primaryBlue,
       ),
     );
   }

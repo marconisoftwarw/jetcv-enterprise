@@ -31,7 +31,6 @@ class _GlassCardState extends State<GlassCard>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
-  late Animation<double> _glowAnimation;
   bool _isHovered = false;
 
   @override
@@ -42,9 +41,6 @@ class _GlassCardState extends State<GlassCard>
       vsync: this,
     );
     _scaleAnimation = Tween<double>(begin: 1.0, end: 1.02).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
-    );
-    _glowAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
   }
@@ -68,7 +64,7 @@ class _GlassCardState extends State<GlassCard>
 
   @override
   Widget build(BuildContext context) {
-    final borderColor = widget.borderColor ?? AppTheme.accentBlue;
+    final borderColor = widget.borderColor ?? AppTheme.primaryBlue;
     final borderWidth = widget.borderWidth ?? 1.0;
 
     return MouseRegion(
@@ -81,23 +77,30 @@ class _GlassCardState extends State<GlassCard>
             scale: _scaleAnimation.value,
             child: Container(
               margin: widget.margin,
-              padding: widget.padding,
+              padding: widget.padding ?? const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                borderRadius: widget.borderRadius ?? BorderRadius.circular(12),
-                color: Colors.white,
+                borderRadius: widget.borderRadius ?? BorderRadius.circular(16),
+                gradient: AppTheme.cardGradient,
                 border: Border.all(
-                  color: borderColor.withValues(alpha: _isHovered ? 0.4 : 0.1),
+                  color: _isHovered
+                      ? borderColor.withValues(alpha: 0.3)
+                      : AppTheme.borderGray,
                   width: borderWidth,
                 ),
                 boxShadow: [
                   ...widget.boxShadow ?? [],
+                  BoxShadow(
+                    color: AppTheme.textPrimary.withValues(alpha: 0.08),
+                    blurRadius: 8,
+                    spreadRadius: 0,
+                    offset: const Offset(0, 2),
+                  ),
                   if (_isHovered)
                     BoxShadow(
-                      color: borderColor.withValues(
-                        alpha: 0.2 * _glowAnimation.value,
-                      ),
-                      blurRadius: 12,
-                      spreadRadius: 1,
+                      color: borderColor.withValues(alpha: 0.15),
+                      blurRadius: 16,
+                      spreadRadius: 0,
+                      offset: const Offset(0, 4),
                     ),
                 ],
               ),

@@ -4,8 +4,9 @@ import '../../config/app_config.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/locale_provider.dart';
 import '../../theme/app_theme.dart';
-import '../../widgets/neon_text_field.dart';
+import '../../widgets/enterprise_text_field.dart';
 import '../../widgets/neon_button.dart';
+import '../../widgets/enterprise_card.dart';
 import '../../widgets/page_with_floating_language.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -100,7 +101,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return PageWithFloatingLanguage(
       child: Scaffold(
-        backgroundColor: Colors.grey.shade50,
+        backgroundColor: AppTheme.offWhite,
         body: SafeArea(
           child: Center(
             child: ConstrainedBox(
@@ -125,36 +126,50 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Column(
                           children: [
                             Container(
-                              width: 80,
-                              height: 80,
+                              width: 100,
+                              height: 100,
                               decoration: BoxDecoration(
                                 gradient: AppTheme.primaryGradient,
-                                borderRadius: BorderRadius.circular(20),
+                                borderRadius: BorderRadius.circular(24),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppTheme.primaryBlue.withValues(
+                                      alpha: 0.2,
+                                    ),
+                                    blurRadius: 20,
+                                    spreadRadius: 0,
+                                    offset: const Offset(0, 8),
+                                  ),
+                                ],
                               ),
                               child: Icon(
                                 Icons.verified_user,
-                                size: 40,
+                                size: 50,
                                 color: AppTheme.pureWhite,
                               ),
                             ),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 32),
                             Text(
                               AppLocalizations.of(
                                 context,
                               ).getString('welcome_back'),
-                              style: Theme.of(context).textTheme.headlineMedium
+                              style: Theme.of(context).textTheme.displaySmall
                                   ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: AppTheme.primaryBlack,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppTheme.textPrimary,
+                                    letterSpacing: -0.2,
                                   ),
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 12),
                             Text(
                               AppLocalizations.of(
                                 context,
                               ).getString('sign_in_to_account'),
                               style: Theme.of(context).textTheme.bodyLarge
-                                  ?.copyWith(color: AppTheme.primaryBlack),
+                                  ?.copyWith(
+                                    color: AppTheme.textGray,
+                                    fontSize: 16,
+                                  ),
                             ),
                           ],
                         ),
@@ -163,28 +178,17 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 48),
 
                       // Login Form Container
-                      Container(
+                      EnterpriseCard(
                         padding: const EdgeInsets.all(32),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.05),
-                              blurRadius: 20,
-                              offset: const Offset(0, 10),
-                            ),
-                          ],
-                        ),
                         child: Column(
                           children: [
                             // Email Field
-                            NeonTextField(
+                            EnterpriseTextField(
                               controller: _emailController,
-                              labelText: AppLocalizations.of(
+                              label: AppLocalizations.of(
                                 context,
                               ).getString('email'),
-                              hintText: AppLocalizations.of(
+                              hint: AppLocalizations.of(
                                 context,
                               ).getString('enter_email'),
                               keyboardType: TextInputType.emailAddress,
@@ -206,31 +210,17 @@ class _LoginScreenState extends State<LoginScreen> {
                               },
                             ),
 
-                            const SizedBox(height: 20),
+                            const SizedBox(height: 24),
 
                             // Password Field
-                            NeonTextField(
+                            EnterprisePasswordField(
                               controller: _passwordController,
-                              labelText: AppLocalizations.of(
+                              label: AppLocalizations.of(
                                 context,
                               ).getString('password'),
-                              hintText: AppLocalizations.of(
+                              hint: AppLocalizations.of(
                                 context,
                               ).getString('enter_password'),
-                              obscureText: _obscurePassword,
-                              prefixIcon: const Icon(Icons.lock_outlined),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _obscurePassword
-                                      ? Icons.visibility
-                                      : Icons.visibility_off,
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    _obscurePassword = !_obscurePassword;
-                                  });
-                                },
-                              ),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return AppLocalizations.of(
@@ -247,7 +237,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               },
                             ),
 
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 20),
 
                             // Remember Me & Forgot Password
                             Row(
@@ -262,7 +252,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                           _rememberMe = value ?? false;
                                         });
                                       },
-                                      activeColor: AppTheme.accentBlue,
+                                      activeColor: AppTheme.primaryBlue,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(4),
                                       ),
@@ -271,10 +261,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                       AppLocalizations.of(
                                         context,
                                       ).getString('remember_me'),
-                                      style: TextStyle(
-                                        color: Colors.grey.shade700,
-                                        fontSize: 14,
-                                      ),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(color: AppTheme.textGray),
                                     ),
                                   ],
                                 ),
@@ -284,17 +274,19 @@ class _LoginScreenState extends State<LoginScreen> {
                                     AppLocalizations.of(
                                       context,
                                     ).getString('forgot_password'),
-                                    style: TextStyle(
-                                      color: AppTheme.accentBlue,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 14,
-                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                          color: AppTheme.primaryBlue,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                   ),
                                 ),
                               ],
                             ),
 
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 32),
 
                             // Sign In Button
                             Consumer<AuthProvider>(
@@ -311,18 +303,19 @@ class _LoginScreenState extends State<LoginScreen> {
                                           context,
                                         ).getString('sign_in'),
                                   isLoading: authProvider.isLoading,
-                                  neonColor: AppTheme.accentGreen,
+                                  neonColor: AppTheme.successGreen,
+                                  height: 56,
                                 );
                               },
                             ),
 
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 32),
 
                             // Divider
                             Row(
                               children: [
                                 Expanded(
-                                  child: Divider(color: Colors.grey.shade300),
+                                  child: Divider(color: AppTheme.borderGray),
                                 ),
                                 Padding(
                                   padding: const EdgeInsets.symmetric(
@@ -332,19 +325,22 @@ class _LoginScreenState extends State<LoginScreen> {
                                     AppLocalizations.of(
                                       context,
                                     ).getString('or'),
-                                    style: TextStyle(
-                                      color: Colors.grey.shade600,
-                                      fontWeight: FontWeight.w500,
-                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                          color: AppTheme.textGray,
+                                          fontWeight: FontWeight.w500,
+                                        ),
                                   ),
                                 ),
                                 Expanded(
-                                  child: Divider(color: Colors.grey.shade300),
+                                  child: Divider(color: AppTheme.borderGray),
                                 ),
                               ],
                             ),
 
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 32),
 
                             // Google Sign In Button
                             Consumer<AuthProvider>(
@@ -359,7 +355,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                   icon: Icons.g_mobiledata,
                                   isLoading: authProvider.isLoading,
                                   isOutlined: true,
-                                  neonColor: AppTheme.accentBlue,
+                                  neonColor: AppTheme.primaryBlue,
+                                  height: 56,
                                 );
                               },
                             ),
@@ -377,21 +374,19 @@ class _LoginScreenState extends State<LoginScreen> {
                             AppLocalizations.of(
                               context,
                             ).getString('dont_have_account'),
-                            style: TextStyle(
-                              color: Colors.grey.shade600,
-                              fontSize: 14,
-                            ),
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(color: AppTheme.textGray),
                           ),
                           TextButton(
                             onPressed: () =>
                                 Navigator.pushNamed(context, '/signup'),
                             child: Text(
                               AppLocalizations.of(context).getString('sign_up'),
-                              style: TextStyle(
-                                color: AppTheme.accentGreen,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
-                              ),
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    color: AppTheme.successGreen,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                             ),
                           ),
                         ],
@@ -402,38 +397,39 @@ class _LoginScreenState extends State<LoginScreen> {
                         builder: (context, authProvider, child) {
                           if (authProvider.errorMessage != null) {
                             return Padding(
-                              padding: const EdgeInsets.only(top: 16),
-                              child: Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: Colors.red.shade50,
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: Colors.red.shade200,
-                                  ),
+                              padding: const EdgeInsets.only(top: 20),
+                              child: EnterpriseCard(
+                                backgroundColor: AppTheme.errorRed.withValues(
+                                  alpha: 0.05,
                                 ),
+                                borderColor: AppTheme.errorRed.withValues(
+                                  alpha: 0.2,
+                                ),
+                                padding: const EdgeInsets.all(16),
                                 child: Row(
                                   children: [
                                     Icon(
                                       Icons.error_outline,
-                                      color: Colors.red.shade600,
+                                      color: AppTheme.errorRed,
                                       size: 20,
                                     ),
                                     const SizedBox(width: 12),
                                     Expanded(
                                       child: Text(
                                         authProvider.errorMessage!,
-                                        style: TextStyle(
-                                          color: Colors.red.shade700,
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w500,
-                                        ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(
+                                              color: AppTheme.errorRed,
+                                              fontWeight: FontWeight.w500,
+                                            ),
                                       ),
                                     ),
                                     IconButton(
                                       icon: Icon(
                                         Icons.close,
-                                        color: Colors.red.shade600,
+                                        color: AppTheme.errorRed,
                                         size: 20,
                                       ),
                                       onPressed: authProvider.clearError,
