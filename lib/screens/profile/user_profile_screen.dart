@@ -6,10 +6,13 @@ import '../../providers/auth_provider.dart';
 import '../../widgets/enterprise_card.dart';
 import '../../widgets/neon_button.dart';
 import '../../widgets/enterprise_text_field.dart';
+import '../../widgets/global_hamburger_menu.dart';
 import '../../l10n/app_localizations.dart';
 
 class UserProfileScreen extends StatefulWidget {
-  const UserProfileScreen({super.key});
+  final bool hideMenu;
+  
+  const UserProfileScreen({super.key, this.hideMenu = false});
 
   @override
   State<UserProfileScreen> createState() => _UserProfileScreenState();
@@ -29,6 +32,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   bool _isEditing = false;
   bool _isLoading = false;
   AppUser? _currentUser;
+  bool _isMenuExpanded = false;
 
   @override
   void initState() {
@@ -96,47 +100,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     final isTablet = screenWidth > 768;
     // final isDesktop = screenWidth > 1200;
 
-    return Scaffold(
-      backgroundColor: AppTheme.offWhite,
-      appBar: AppBar(
-        title: Text(
-          l10n.getString('user_profile'),
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w700,
-            color: AppTheme.textPrimary,
-          ),
-        ),
-        backgroundColor: AppTheme.pureWhite,
-        foregroundColor: AppTheme.textPrimary,
-        elevation: 0,
-        surfaceTintColor: AppTheme.pureWhite,
-        actions: [
-          if (_isEditing)
-            IconButton(
-              onPressed: _saveProfile,
-              icon: Icon(Icons.save_rounded, color: AppTheme.successGreen),
-              tooltip: l10n.getString('save_changes'),
-            ),
-          IconButton(
-            onPressed: () {
-              setState(() {
-                _isEditing = !_isEditing;
-                if (!_isEditing) {
-                  _initializeControllers();
-                }
-              });
-            },
-            icon: Icon(
-              _isEditing ? Icons.close_rounded : Icons.edit_rounded,
-              color: _isEditing ? AppTheme.errorRed : AppTheme.primaryBlue,
-            ),
-            tooltip: _isEditing
-                ? l10n.getString('cancel')
-                : l10n.getString('edit'),
-          ),
-        ],
-      ),
-      body: Consumer<AuthProvider>(
+    // Se hideMenu è true, restituisci solo il contenuto senza il menu
+    if (widget.hideMenu) {
+      return Consumer<AuthProvider>(
         builder: (context, authProvider, child) {
           // Carica i dati dell'utente se non sono disponibili
           if (authProvider.isAuthenticated &&
@@ -147,9 +113,12 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           }
 
           // Aggiorna i controller quando l'utente è disponibile
-          if (authProvider.currentUser != null && _currentUser == null) {
+          if (authProvider.currentUser != null &&
+              _currentUser == null) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              _updateControllersWithUserData(authProvider.currentUser!);
+              _updateControllersWithUserData(
+                authProvider.currentUser!,
+              );
             });
           }
 
@@ -159,7 +128,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   if (authProvider.isLoading)
-                    CircularProgressIndicator(color: AppTheme.primaryBlue)
+                    CircularProgressIndicator(
+                      color: AppTheme.primaryBlue,
+                    )
                   else
                     Icon(
                       Icons.person_off_rounded,
@@ -171,9 +142,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     authProvider.isLoading
                         ? l10n.getString('loading_profile')
                         : l10n.getString('no_user_data'),
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodyLarge?.copyWith(color: AppTheme.textGray),
+                    style: Theme.of(context).textTheme.bodyLarge
+                        ?.copyWith(color: AppTheme.textGray),
                   ),
                   if (!authProvider.isLoading) ...[
                     const SizedBox(height: 16),
@@ -197,12 +167,20 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Header con foto profilo e informazioni principali
-                _buildProfileHeader(authProvider.currentUser!, l10n, isTablet),
+                _buildProfileHeader(
+                  authProvider.currentUser!,
+                  l10n,
+                  isTablet,
+                ),
 
                 const SizedBox(height: 32),
 
                 // Statistiche e metriche
-                _buildStatsSection(authProvider.currentUser!, l10n, isTablet),
+                _buildStatsSection(
+                  authProvider.currentUser!,
+                  l10n,
+                  isTablet,
+                ),
 
                 const SizedBox(height: 32),
 
@@ -212,6 +190,250 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             ),
           );
         },
+      );
+    }
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: MediaQuery.of(context).size.width <= 768
+          ? AppBar(
+              backgroundColor: Colors.white,
+              elevation: 0,
+              leading: IconButton(
+                icon: Icon(Icons.menu, color: Colors.black),
+                onPressed: () {
+                  setState(() {
+                    _isMenuExpanded = !_isMenuExpanded;
+                  });
+                },
+              ),
+              title: Text(
+                l10n.getString('user_profile'),
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              actions: [
+                if (_isEditing)
+                  IconButton(
+                    onPressed: _saveProfile,
+                    icon: Icon(
+                      Icons.save_rounded,
+                      color: AppTheme.successGreen,
+                    ),
+                    tooltip: l10n.getString('save'),
+                  ),
+                IconButton(
+                  onPressed: _toggleEdit,
+                  icon: Icon(
+                    _isEditing ? Icons.close_rounded : Icons.edit_rounded,
+                    color: _isEditing
+                        ? AppTheme.errorRed
+                        : AppTheme.primaryBlue,
+                  ),
+                  tooltip: _isEditing
+                      ? l10n.getString('cancel')
+                      : l10n.getString('edit'),
+                ),
+              ],
+            )
+          : AppBar(
+              title: Text(
+                l10n.getString('user_profile'),
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black,
+                ),
+              ),
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.black,
+              elevation: 0,
+              surfaceTintColor: Colors.white,
+              actions: [
+                if (_isEditing)
+                  IconButton(
+                    onPressed: _saveProfile,
+                    icon: Icon(
+                      Icons.save_rounded,
+                      color: AppTheme.successGreen,
+                    ),
+                    tooltip: l10n.getString('save_changes'),
+                  ),
+                IconButton(
+                  onPressed: () {
+                    setState(() {
+                      _isEditing = !_isEditing;
+                      if (!_isEditing) {
+                        _initializeControllers();
+                      }
+                    });
+                  },
+                  icon: Icon(
+                    _isEditing ? Icons.close_rounded : Icons.edit_rounded,
+                    color: _isEditing
+                        ? AppTheme.errorRed
+                        : AppTheme.primaryBlue,
+                  ),
+                  tooltip: _isEditing
+                      ? l10n.getString('cancel')
+                      : l10n.getString('edit'),
+                ),
+              ],
+            ),
+      body: Stack(
+        children: [
+          Row(
+            children: [
+              // Navigation Rail - Solo su desktop o quando espanso su mobile
+              if (MediaQuery.of(context).size.width > 768 || _isMenuExpanded)
+                Container(
+                  width: MediaQuery.of(context).size.width > 768 ? 280 : 260,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border(
+                      right: BorderSide(color: Colors.grey[200]!, width: 1),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 8,
+                        spreadRadius: 0,
+                        offset: const Offset(2, 0),
+                      ),
+                    ],
+                  ),
+                  child: Consumer<AuthProvider>(
+                    builder: (context, authProvider, child) {
+                      return GlobalHamburgerMenu(
+                        selectedIndex: 3, // Profilo
+                        onDestinationSelected: (index) {
+                          setState(() {
+                            _isMenuExpanded = false;
+                          });
+                          _handleNavigation(index);
+                        },
+                        isExpanded: _isMenuExpanded,
+                        onExpansionChanged: (expanded) {
+                          setState(() {
+                            _isMenuExpanded = expanded;
+                          });
+                        },
+                        context: context,
+                        userType: authProvider.userType,
+                      );
+                    },
+                  ),
+                ),
+
+              // Main Content
+              Expanded(
+                child: Consumer<AuthProvider>(
+                  builder: (context, authProvider, child) {
+                    // Carica i dati dell'utente se non sono disponibili
+                    if (authProvider.isAuthenticated &&
+                        authProvider.currentUser == null) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) async {
+                        await authProvider.loadUserData();
+                      });
+                    }
+
+                    // Aggiorna i controller quando l'utente è disponibile
+                    if (authProvider.currentUser != null &&
+                        _currentUser == null) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        _updateControllersWithUserData(
+                          authProvider.currentUser!,
+                        );
+                      });
+                    }
+
+                    if (authProvider.currentUser == null) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            if (authProvider.isLoading)
+                              CircularProgressIndicator(
+                                color: AppTheme.primaryBlue,
+                              )
+                            else
+                              Icon(
+                                Icons.person_off_rounded,
+                                size: 64,
+                                color: AppTheme.textGray,
+                              ),
+                            const SizedBox(height: 16),
+                            Text(
+                              authProvider.isLoading
+                                  ? l10n.getString('loading_profile')
+                                  : l10n.getString('no_user_data'),
+                              style: Theme.of(context).textTheme.bodyLarge
+                                  ?.copyWith(color: AppTheme.textGray),
+                            ),
+                            if (!authProvider.isLoading) ...[
+                              const SizedBox(height: 16),
+                              NeonButton(
+                                onPressed: () async {
+                                  await authProvider.loadUserData();
+                                },
+                                text: l10n.getString('retry'),
+                                isOutlined: true,
+                                neonColor: AppTheme.primaryBlue,
+                              ),
+                            ],
+                          ],
+                        ),
+                      );
+                    }
+
+                    return SingleChildScrollView(
+                      padding: EdgeInsets.all(isTablet ? 32 : 24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Header con foto profilo e informazioni principali
+                          _buildProfileHeader(
+                            authProvider.currentUser!,
+                            l10n,
+                            isTablet,
+                          ),
+
+                          const SizedBox(height: 32),
+
+                          // Statistiche e metriche
+                          _buildStatsSection(
+                            authProvider.currentUser!,
+                            l10n,
+                            isTablet,
+                          ),
+
+                          const SizedBox(height: 32),
+
+                          // Form per le informazioni personali
+                          _buildPersonalInfoForm(l10n, isTablet),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+
+          // Overlay scuro su mobile quando il menu è aperto
+          if (MediaQuery.of(context).size.width <= 768 && _isMenuExpanded)
+            Positioned.fill(
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _isMenuExpanded = false;
+                  });
+                },
+                child: Container(color: Colors.black.withOpacity(0.5)),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -1086,5 +1308,109 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
+  }
+
+  Widget _buildAirbnbHeader(AppLocalizations l10n, bool isTablet) {
+    return SliverAppBar(
+      expandedHeight: 200,
+      floating: false,
+      pinned: false,
+      backgroundColor: Colors.white,
+      elevation: 0,
+      flexibleSpace: FlexibleSpaceBar(
+        background: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [const Color(0xFF2563EB), const Color(0xFF1D4ED8)],
+            ),
+          ),
+          child: SafeArea(
+            child: Center(
+              child: Consumer<AuthProvider>(
+                builder: (context, authProvider, child) {
+                  final user = authProvider.currentUser;
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 20,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          Icons.person,
+                          size: 40,
+                          color: const Color(0xFF2563EB),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        user?.firstName != null && user?.lastName != null
+                            ? '${user!.firstName} ${user.lastName}'
+                            : l10n.getString('user_profile'),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 28,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        l10n.getString('manage_your_profile'),
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.9),
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _toggleEdit() {
+    setState(() {
+      _isEditing = !_isEditing;
+      if (!_isEditing) {
+        // Reset dei controller ai valori originali
+        _initializeControllers();
+      }
+    });
+  }
+
+  void _handleNavigation(int index) {
+    switch (index) {
+      case 0: // Dashboard
+        Navigator.pushReplacementNamed(context, '/home');
+        break;
+      case 1: // Certificazioni
+        Navigator.pushReplacementNamed(context, '/home');
+        break;
+      case 2: // Entità Legali
+        Navigator.pushReplacementNamed(context, '/home');
+        break;
+      case 3: // Profilo
+        // Rimani nella schermata corrente
+        break;
+      case 4: // Impostazioni
+        Navigator.pushReplacementNamed(context, '/home');
+        break;
+    }
   }
 }

@@ -21,12 +21,12 @@ class PublicHomeScreen extends StatelessWidget {
               floating: false,
               pinned: true,
               elevation: 0,
-              backgroundColor: AppTheme.pureWhite,
+              backgroundColor: Colors.white,
               flexibleSpace: FlexibleSpaceBar(
                 title: Text(
                   AppConfig.appName,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: AppTheme.textPrimary,
+                    color: Colors.white,
                     fontWeight: FontWeight.w700,
                     letterSpacing: -0.1,
                   ),

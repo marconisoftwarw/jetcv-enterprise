@@ -309,7 +309,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return PageWithFloatingLanguage(
       child: Scaffold(
-        backgroundColor: AppTheme.offWhite,
+        backgroundColor: Colors.white,
         body: SafeArea(
           child: Center(
             child: ConstrainedBox(
@@ -674,6 +674,356 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildAirbnbHeader(AppLocalizations l10n, bool isTablet) {
+    return SliverAppBar(
+      expandedHeight: 200,
+      floating: false,
+      pinned: false,
+      backgroundColor: Colors.white,
+      elevation: 0,
+      flexibleSpace: FlexibleSpaceBar(
+        background: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [const Color(0xFF2563EB), const Color(0xFF1D4ED8)],
+            ),
+          ),
+          child: SafeArea(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      Icons.verified_user,
+                      size: 40,
+                      color: const Color(0xFF2563EB),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    l10n.getString('welcome_back'),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 28,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.getString('sign_in_to_account'),
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.9),
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoginCard(AppLocalizations l10n) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.grey[200]!),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Email Field
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.grey[50],
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey[200]!),
+            ),
+            child: TextFormField(
+              controller: _emailController,
+              keyboardType: TextInputType.emailAddress,
+              decoration: InputDecoration(
+                labelText: l10n.getString('email'),
+                hintText: l10n.getString('enter_email'),
+                prefixIcon: Icon(Icons.email_outlined, color: Colors.grey[600]),
+                border: InputBorder.none,
+                labelStyle: TextStyle(color: Colors.grey[600]),
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return l10n.getString('email_required');
+                }
+                if (!RegExp(
+                  r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                ).hasMatch(value)) {
+                  return l10n.getString('email_invalid');
+                }
+                return null;
+              },
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Password Field
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.grey[50],
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey[200]!),
+            ),
+            child: TextFormField(
+              controller: _passwordController,
+              obscureText: _obscurePassword,
+              decoration: InputDecoration(
+                labelText: l10n.getString('password'),
+                hintText: l10n.getString('enter_password'),
+                prefixIcon: Icon(Icons.lock_outline, color: Colors.grey[600]),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscurePassword
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined,
+                    color: Colors.grey[600],
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscurePassword = !_obscurePassword;
+                    });
+                  },
+                ),
+                border: InputBorder.none,
+                labelStyle: TextStyle(color: Colors.grey[600]),
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return l10n.getString('password_required');
+                }
+                if (value.length < AppConfig.minPasswordLength) {
+                  return l10n.getString('password_min_length');
+                }
+                return null;
+              },
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Remember Me & Forgot Password
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Checkbox(
+                    value: _rememberMe,
+                    onChanged: (value) {
+                      setState(() {
+                        _rememberMe = value ?? false;
+                      });
+                    },
+                    activeColor: const Color(0xFF2563EB),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  Text(
+                    l10n.getString('remember_me'),
+                    style: TextStyle(color: Colors.grey[600]),
+                  ),
+                ],
+              ),
+              TextButton(
+                onPressed: _forgotPassword,
+                child: Text(
+                  l10n.getString('forgot_password'),
+                  style: TextStyle(
+                    color: const Color(0xFF2563EB),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSignInButton(AppLocalizations l10n, AuthProvider authProvider) {
+    return Container(
+      width: double.infinity,
+      height: 50,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [const Color(0xFF2563EB), const Color(0xFF1D4ED8)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(25),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF2563EB).withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        onPressed: authProvider.isLoading ? null : _signInWithEmail,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(25),
+          ),
+        ),
+        child: authProvider.isLoading
+            ? SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              )
+            : Text(
+                l10n.getString('sign_in'),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+      ),
+    );
+  }
+
+  Widget _buildDivider(AppLocalizations l10n) {
+    return Row(
+      children: [
+        Expanded(child: Divider(color: Colors.grey[300], thickness: 1)),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            l10n.getString('or'),
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        Expanded(child: Divider(color: Colors.grey[300], thickness: 1)),
+      ],
+    );
+  }
+
+  Widget _buildGoogleButton(AppLocalizations l10n, AuthProvider authProvider) {
+    return Container(
+      width: double.infinity,
+      height: 50,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(25),
+        border: Border.all(color: Colors.grey[300]!),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        onPressed: authProvider.isLoading ? null : _signInWithGoogle,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.white,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(25),
+          ),
+        ),
+        child: authProvider.isLoading
+            ? SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.grey[600]!),
+                ),
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.g_mobiledata, color: Colors.red[600], size: 24),
+                  const SizedBox(width: 12),
+                  Text(
+                    l10n.getString('continue_with_google'),
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
+
+  Widget _buildSignUpLink(AppLocalizations l10n) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          l10n.getString('dont_have_account'),
+          style: TextStyle(color: Colors.grey[600]),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.pushNamed(context, '/register');
+          },
+          child: Text(
+            l10n.getString('sign_up'),
+            style: TextStyle(
+              color: const Color(0xFF2563EB),
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

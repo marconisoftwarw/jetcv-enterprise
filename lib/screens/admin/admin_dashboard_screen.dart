@@ -5,6 +5,7 @@ import '../../providers/auth_provider.dart';
 import '../../models/legal_entity.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/glass_card.dart';
+import '../../widgets/global_hamburger_menu.dart';
 import '../../l10n/app_localizations.dart';
 
 import 'create_legal_entity_screen.dart';
@@ -22,6 +23,7 @@ class AdminDashboardScreen extends StatefulWidget {
 
 class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   int _selectedIndex = 0;
+  bool _isMenuExpanded = false;
 
   @override
   void initState() {
@@ -34,87 +36,119 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Admin Dashboard',
-          style: TextStyle(
-            color: AppTheme.primaryBlack,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: AppTheme.darkGray,
-        foregroundColor: AppTheme.offWhite,
-        elevation: 0,
-        actions: [
-          IconButton(
-            onPressed: () => _showProfileMenu(context),
-            icon: const Icon(Icons.account_circle),
-            tooltip: 'Profile Menu',
-          ),
-        ],
-      ),
-      body: Row(
-        children: [
-          // Sidebar Navigation
-          Container(
-            decoration: BoxDecoration(
-              color: AppTheme.pureWhite,
-              border: Border(
-                right: BorderSide(color: AppTheme.borderGrey, width: 1),
+      appBar: MediaQuery.of(context).size.width <= 768
+          ? AppBar(
+              backgroundColor: Colors.white,
+              elevation: 0,
+              leading: IconButton(
+                icon: Icon(Icons.menu, color: Colors.black),
+                onPressed: () {
+                  setState(() {
+                    _isMenuExpanded = !_isMenuExpanded;
+                  });
+                },
               ),
-            ),
-            child: NavigationRail(
-              selectedIndex: _selectedIndex,
-              onDestinationSelected: (int index) {
-                setState(() {
-                  _selectedIndex = index;
-                });
-              },
-              labelType: NavigationRailLabelType.all,
-              backgroundColor: AppTheme.pureWhite,
-              selectedIconTheme: IconThemeData(color: AppTheme.accentGreen),
-              unselectedIconTheme: IconThemeData(color: AppTheme.primaryBlack),
-              selectedLabelTextStyle: TextStyle(
-                color: AppTheme.accentGreen,
-                fontWeight: FontWeight.w600,
+              title: Text(
+                'Admin Dashboard',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              unselectedLabelTextStyle: TextStyle(color: AppTheme.primaryBlack),
-              destinations: [
-                NavigationRailDestination(
-                  icon: const Icon(Icons.dashboard),
-                  label: Text(
-                    AppLocalizations.of(context).getString('dashboard'),
-                  ),
+              actions: [
+                IconButton(
+                  onPressed: () => _showProfileMenu(context),
+                  icon: const Icon(Icons.account_circle),
+                  tooltip: 'Profile Menu',
                 ),
-                NavigationRailDestination(
-                  icon: const Icon(Icons.business),
-                  label: Text(
-                    AppLocalizations.of(context).getString('legal_entities'),
-                  ),
+              ],
+            )
+          : AppBar(
+              title: Text(
+                'Admin Dashboard',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
                 ),
-                NavigationRailDestination(
-                  icon: const Icon(Icons.people),
-                  label: Text(AppLocalizations.of(context).getString('users')),
-                ),
-                NavigationRailDestination(
-                  icon: const Icon(Icons.analytics),
-                  label: Text(
-                    AppLocalizations.of(context).getString('analytics'),
-                  ),
-                ),
-                NavigationRailDestination(
-                  icon: const Icon(Icons.settings),
-                  label: Text(
-                    AppLocalizations.of(context).getString('settings'),
-                  ),
+              ),
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.black,
+              elevation: 0,
+              actions: [
+                IconButton(
+                  onPressed: () => _showProfileMenu(context),
+                  icon: const Icon(Icons.account_circle),
+                  tooltip: 'Profile Menu',
                 ),
               ],
             ),
+      body: Stack(
+        children: [
+          Row(
+            children: [
+              // Navigation Rail - Solo su desktop o quando espanso su mobile
+              if (MediaQuery.of(context).size.width > 768 || _isMenuExpanded)
+                Container(
+                  width: MediaQuery.of(context).size.width > 768 ? 280 : 260,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border(
+                      right: BorderSide(color: Colors.grey[200]!, width: 1),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 8,
+                        spreadRadius: 0,
+                        offset: const Offset(2, 0),
+                      ),
+                    ],
+                  ),
+                  child: Consumer<AuthProvider>(
+                    builder: (context, authProvider, child) {
+                      return GlobalHamburgerMenu(
+                        selectedIndex: _selectedIndex == 0
+                            ? 0
+                            : (_selectedIndex == 1
+                                  ? 2
+                                  : 4), // Dashboard, Entità Legali, o Impostazioni
+                        onDestinationSelected: (index) {
+                          setState(() {
+                            _isMenuExpanded = false;
+                          });
+                          _handleNavigation(index);
+                        },
+                        isExpanded: _isMenuExpanded,
+                        onExpansionChanged: (expanded) {
+                          setState(() {
+                            _isMenuExpanded = expanded;
+                          });
+                        },
+                        context: context,
+                        userType: authProvider.userType,
+                      );
+                    },
+                  ),
+                ),
+
+              // Main Content
+              Expanded(child: _buildContent()),
+            ],
           ),
 
-          // Main Content
-          Expanded(child: _buildContent()),
+          // Overlay scuro su mobile quando il menu è aperto
+          if (MediaQuery.of(context).size.width <= 768 && _isMenuExpanded)
+            Positioned.fill(
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _isMenuExpanded = false;
+                  });
+                },
+                child: Container(color: Colors.black.withOpacity(0.5)),
+              ),
+            ),
         ],
       ),
       floatingActionButton: _selectedIndex == 1
@@ -154,7 +188,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   void _showProfileMenu(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppTheme.darkGray,
+      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -268,6 +302,26 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         ),
       ),
     );
+  }
+
+  void _handleNavigation(int index) {
+    switch (index) {
+      case 0: // Dashboard
+        Navigator.pushReplacementNamed(context, '/home');
+        break;
+      case 1: // Certificazioni
+        Navigator.pushReplacementNamed(context, '/home');
+        break;
+      case 2: // Entità Legali
+        Navigator.pushReplacementNamed(context, '/home');
+        break;
+      case 3: // Profilo
+        Navigator.pushReplacementNamed(context, '/home');
+        break;
+      case 4: // Impostazioni
+        Navigator.pushReplacementNamed(context, '/home');
+        break;
+    }
   }
 }
 

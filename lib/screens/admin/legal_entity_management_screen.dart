@@ -6,9 +6,12 @@ import '../../providers/legal_entity_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text_field.dart';
+import '../../widgets/global_hamburger_menu.dart';
 
 class LegalEntityManagementScreen extends StatefulWidget {
-  const LegalEntityManagementScreen({super.key});
+  final bool hideMenu;
+
+  const LegalEntityManagementScreen({super.key, this.hideMenu = false});
 
   @override
   State<LegalEntityManagementScreen> createState() =>
@@ -20,6 +23,7 @@ class _LegalEntityManagementScreenState
   final TextEditingController _searchController = TextEditingController();
   String? _selectedStatus;
   List<LegalEntity> _filteredEntities = [];
+  bool _isMenuExpanded = false;
 
   @override
   void initState() {
@@ -85,38 +89,727 @@ class _LegalEntityManagementScreenState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Gestione Entità Legali'),
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.black,
-      ),
-      body: Consumer<LegalEntityProvider>(
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 768;
+
+    // Se hideMenu è true, restituisci solo il contenuto senza il menu
+    if (widget.hideMenu) {
+      return Consumer<LegalEntityProvider>(
         builder: (context, provider, child) {
-          if (provider.isLoading && provider.legalEntities.isEmpty) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          return Column(
-            children: [
-              // Header con statistiche e filtri
-              _buildHeader(provider),
-
-              // Lista delle entità
-              Expanded(child: _buildEntityList(provider)),
-            ],
-          );
+          return _buildMainContent(provider, isTablet);
         },
-      ),
+      );
+    }
 
-      // Floating Action Button per creare nuova entità
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showCreateEntityDialog(context),
-        backgroundColor: const Color(0xFF2563EB),
-        child: const Icon(Icons.add, color: Colors.white),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: MediaQuery.of(context).size.width <= 768
+          ? AppBar(
+              backgroundColor: Colors.white,
+              elevation: 0,
+              leading: IconButton(
+                icon: Icon(Icons.menu, color: Colors.black),
+                onPressed: () {
+                  setState(() {
+                    _isMenuExpanded = !_isMenuExpanded;
+                  });
+                },
+              ),
+              title: Text(
+                'Gestione Entità Legali',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            )
+          : null,
+      body: Stack(
+        children: [
+          Row(
+            children: [
+              // Navigation Rail - Solo su desktop o quando espanso su mobile
+              if (MediaQuery.of(context).size.width > 768 || _isMenuExpanded)
+                Container(
+                  width: MediaQuery.of(context).size.width > 768 ? 280 : 260,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border(
+                      right: BorderSide(color: Colors.grey[200]!, width: 1),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 8,
+                        spreadRadius: 0,
+                        offset: const Offset(2, 0),
+                      ),
+                    ],
+                  ),
+                  child: Consumer<AuthProvider>(
+                    builder: (context, authProvider, child) {
+                      return GlobalHamburgerMenu(
+                        selectedIndex: 2, // Entità Legali
+                        onDestinationSelected: (index) {
+                          setState(() {
+                            _isMenuExpanded = false;
+                          });
+                          _handleNavigation(index);
+                        },
+                        isExpanded: _isMenuExpanded,
+                        onExpansionChanged: (expanded) {
+                          setState(() {
+                            _isMenuExpanded = expanded;
+                          });
+                        },
+                        context: context,
+                        userType: authProvider.userType,
+                      );
+                    },
+                  ),
+                ),
+
+              // Main Content
+              Expanded(
+                child: Consumer<LegalEntityProvider>(
+                  builder: (context, provider, child) {
+                    if (provider.isLoading && provider.legalEntities.isEmpty) {
+                      return _buildLoadingState();
+                    }
+
+                    return CustomScrollView(
+                      slivers: [
+                        // Header stile Airbnb (solo su desktop)
+                        if (MediaQuery.of(context).size.width > 768)
+                          _buildAirbnbHeader(isTablet),
+
+                        // Filtri e statistiche
+                        _buildFilterSection(provider, isTablet),
+
+                        // Lista delle entità
+                        _buildEntityGrid(provider, isTablet),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+
+          // Overlay scuro su mobile quando il menu è aperto
+          if (MediaQuery.of(context).size.width <= 768 && _isMenuExpanded)
+            Positioned.fill(
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _isMenuExpanded = false;
+                  });
+                },
+                child: Container(color: Colors.black.withOpacity(0.5)),
+              ),
+            ),
+        ],
       ),
     );
+  }
+
+  Widget _buildMainContent(LegalEntityProvider provider, bool isTablet) {
+    if (provider.isLoading && provider.legalEntities.isEmpty) {
+      return _buildLoadingState();
+    }
+
+    return CustomScrollView(
+      slivers: [
+        // Header stile Airbnb (solo su desktop)
+        if (MediaQuery.of(context).size.width > 768)
+          _buildAirbnbHeader(isTablet),
+
+        // Filtri e statistiche
+        _buildFilterSection(provider, isTablet),
+
+        // Lista delle entità
+        _buildEntityGrid(provider, isTablet),
+      ],
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(color: const Color(0xFF2563EB)),
+          const SizedBox(height: 16),
+          Text(
+            'Caricamento entità legali...',
+            style: TextStyle(color: Colors.grey[600], fontSize: 16),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAirbnbHeader(bool isTablet) {
+    return SliverAppBar(
+      expandedHeight: 120,
+      floating: false,
+      pinned: true,
+      backgroundColor: Colors.white,
+      elevation: 0,
+      flexibleSpace: FlexibleSpaceBar(
+        titlePadding: EdgeInsets.only(
+          left: isTablet ? 120 : 80,
+          right: isTablet ? 120 : 80,
+          bottom: 16,
+        ),
+        title: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Gestione Entità Legali',
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.w700,
+                fontSize: 22,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Gestisci e monitora le entità registrate',
+              style: TextStyle(color: Colors.grey[600], fontSize: 14),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        Container(
+          margin: const EdgeInsets.only(right: 16, top: 8, bottom: 8),
+          child: Consumer<AuthProvider>(
+            builder: (context, authProvider, child) {
+              final user = authProvider.currentUser;
+              return CircleAvatar(
+                radius: 20,
+                backgroundColor: const Color(0xFF2563EB),
+                child: Text(
+                  user?.initials ?? 'A',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFilterSection(LegalEntityProvider provider, bool isTablet) {
+    return SliverToBoxAdapter(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        child: Column(
+          children: [
+            // Statistiche
+            _buildStatsRow(provider, isTablet),
+            const SizedBox(height: 20),
+
+            // Filtri
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[50],
+                      borderRadius: BorderRadius.circular(25),
+                      border: Border.all(color: Colors.grey[200]!),
+                    ),
+                    child: TextField(
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        hintText: 'Cerca per nome, email o codice...',
+                        hintStyle: TextStyle(color: Colors.grey[500]),
+                        prefixIcon: Icon(
+                          Icons.search,
+                          color: Colors.grey[500],
+                          size: 20,
+                        ),
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+
+                // Filtro stato
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[50],
+                    borderRadius: BorderRadius.circular(25),
+                    border: Border.all(color: Colors.grey[200]!),
+                  ),
+                  child: DropdownButton<String?>(
+                    value: _selectedStatus,
+                    hint: Text(
+                      'Tutti gli Stati',
+                      style: TextStyle(color: Colors.grey[500]),
+                    ),
+                    underline: const SizedBox(),
+                    items: [
+                      DropdownMenuItem(
+                        value: null,
+                        child: Text('Tutti gli Stati'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'pending',
+                        child: Text('In Attesa'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'approved',
+                        child: Text('Approvate'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'rejected',
+                        child: Text('Rifiutate'),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedStatus = value;
+                      });
+                      _filterEntities();
+                    },
+                  ),
+                ),
+
+                const SizedBox(width: 12),
+
+                // Pulsante Nuova Entità
+                GestureDetector(
+                  onTap: () => _showCreateEntityDialog(context),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          const Color(0xFF2563EB),
+                          const Color(0xFF1D4ED8),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(25),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF2563EB).withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.add, color: Colors.white, size: 20),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Nuova',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatsRow(LegalEntityProvider provider, bool isTablet) {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildStatCard(
+            'Totale',
+            provider.totalCount,
+            const Color(0xFF2563EB),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildStatCard(
+            'In Attesa',
+            provider.pendingCount,
+            Colors.orange,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildStatCard(
+            'Approvate',
+            provider.approvedCount,
+            Colors.green,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildStatCard(
+            'Rifiutate',
+            provider.rejectedCount,
+            Colors.red,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatCard(String label, int value, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withOpacity(0.2)),
+      ),
+      child: Column(
+        children: [
+          Text(
+            value.toString(),
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: color.withOpacity(0.8),
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEntityGrid(LegalEntityProvider provider, bool isTablet) {
+    if (_filteredEntities.isEmpty) {
+      return SliverFillRemaining(child: _buildEmptyState());
+    }
+
+    final crossAxisCount = isTablet ? 2 : 1;
+
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      sliver: SliverGrid(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: crossAxisCount,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+          childAspectRatio: isTablet ? 1.1 : 1.0,
+        ),
+        delegate: SliverChildBuilderDelegate((context, index) {
+          final entity = _filteredEntities[index];
+          return _buildAirbnbEntityCard(entity, provider);
+        }, childCount: _filteredEntities.length),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.all(32),
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.grey[200]!),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: const Color(0xFF2563EB).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Icon(
+                Icons.business_outlined,
+                size: 40,
+                color: const Color(0xFF2563EB),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Nessuna entità legale',
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.w600,
+                fontSize: 18,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              _searchController.text.isNotEmpty || _selectedStatus != null
+                  ? 'Prova a modificare i filtri di ricerca'
+                  : 'Crea la tua prima entità legale',
+              style: TextStyle(color: Colors.grey[600], fontSize: 14),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            GestureDetector(
+              onTap: () => _showCreateEntityDialog(context),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [const Color(0xFF2563EB), const Color(0xFF1D4ED8)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                child: Text(
+                  'Crea Entità',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAirbnbEntityCard(
+    LegalEntity entity,
+    LegalEntityProvider provider,
+  ) {
+    final statusColor = _getStatusColor(entity.status);
+
+    return GestureDetector(
+      onTap: () => _showEntityDetails(entity),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey[200]!),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header con status
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: statusColor.withOpacity(0.1),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  topRight: Radius.circular(16),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: statusColor,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      entity.statusDisplayName,
+                      style: TextStyle(
+                        color: statusColor,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                  PopupMenuButton<LegalEntityStatus>(
+                    icon: Icon(
+                      Icons.more_vert,
+                      color: Colors.grey[600],
+                      size: 20,
+                    ),
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: LegalEntityStatus.pending,
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.schedule,
+                              color: _getStatusColor(LegalEntityStatus.pending),
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            const Text('In Attesa'),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: LegalEntityStatus.approved,
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.check_circle,
+                              color: _getStatusColor(
+                                LegalEntityStatus.approved,
+                              ),
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            const Text('Approvata'),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: LegalEntityStatus.rejected,
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.cancel,
+                              color: _getStatusColor(
+                                LegalEntityStatus.rejected,
+                              ),
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            const Text('Rifiutata'),
+                          ],
+                        ),
+                      ),
+                    ],
+                    onSelected: (newStatus) =>
+                        _changeEntityStatus(entity, newStatus),
+                  ),
+                ],
+              ),
+            ),
+
+            // Contenuto principale
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      entity.legalName ?? 'Nome non specificato',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      entity.identifierCode ?? 'Codice non specificato',
+                      style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                    ),
+                    const SizedBox(height: 4),
+                    if (entity.email != null)
+                      Text(
+                        entity.email!,
+                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    const Spacer(),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.access_time,
+                          color: Colors.grey[500],
+                          size: 14,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          _formatDate(entity.createdAt),
+                          style: TextStyle(
+                            color: Colors.grey[500],
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inDays == 0) {
+      return 'Oggi';
+    } else if (difference.inDays == 1) {
+      return 'Ieri';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays} giorni fa';
+    } else {
+      return '${date.day}/${date.month}/${date.year}';
+    }
   }
 
   Widget _buildHeader(LegalEntityProvider provider) {
@@ -215,36 +908,6 @@ class _LegalEntityManagementScreenState
             ],
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildStatCard(String label, int value, Color color) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: color.withOpacity(0.2)),
-        ),
-        child: Column(
-          children: [
-            Text(
-              value.toString(),
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
-            ),
-            Text(
-              label,
-              style: TextStyle(fontSize: 12, color: color.withOpacity(0.8)),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -490,13 +1153,6 @@ class _LegalEntityManagementScreenState
                   icon: const Icon(Icons.email),
                   label: const Text('Invia Invito'),
                   style: TextButton.styleFrom(foregroundColor: Colors.blue),
-                ),
-
-                TextButton.icon(
-                  onPressed: () => _showInvitationHistoryDialog(entity),
-                  icon: const Icon(Icons.history),
-                  label: const Text('Cronologia'),
-                  style: TextButton.styleFrom(foregroundColor: Colors.purple),
                 ),
 
                 PopupMenuButton<LegalEntityStatus>(
@@ -1018,226 +1674,6 @@ class _LegalEntityManagementScreenState
     }
   }
 
-  void _showInvitationHistoryDialog(LegalEntity entity) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            const Icon(Icons.history, color: Colors.purple),
-            const SizedBox(width: 8),
-            const Text('Cronologia Inviti'),
-          ],
-        ),
-        content: SizedBox(
-          width: double.maxFinite,
-          height: 400,
-          child: FutureBuilder<List<LegalEntityInvitation>>(
-            future: context.read<LegalEntityProvider>().getEntityInvitations(
-              entity.idLegalEntity,
-            ),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
-
-              if (snapshot.hasError) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.error, size: 48, color: Colors.red[300]),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Errore nel caricamento degli inviti',
-                        style: TextStyle(color: Colors.red[600]),
-                      ),
-                    ],
-                  ),
-                );
-              }
-
-              final invitations = snapshot.data ?? [];
-
-              if (invitations.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.email_outlined,
-                        size: 48,
-                        color: Colors.grey[300],
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Nessun invito trovato',
-                        style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Invia il primo invito per iniziare',
-                        style: TextStyle(fontSize: 14, color: Colors.grey[500]),
-                      ),
-                    ],
-                  ),
-                );
-              }
-
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Inviti per: ${entity.legalName ?? 'Entità senza nome'}',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                  const SizedBox(height: 16),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: invitations.length,
-                      itemBuilder: (context, index) {
-                        final invitation = invitations[index];
-                        return Card(
-                          margin: const EdgeInsets.only(bottom: 8),
-                          child: ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor: _getInvitationStatusColor(
-                                invitation.status,
-                              ),
-                              child: Icon(
-                                _getInvitationStatusIcon(invitation.status),
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                            ),
-                            title: Text(invitation.email),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(invitation.statusDisplayName),
-                                Text(
-                                  'Inviato: ${_formatDate(invitation.sentAt)}',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                                if (invitation.expiresAt != null)
-                                  Text(
-                                    'Scade: ${_formatDate(invitation.expiresAt!)}',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
-                              ],
-                            ),
-                            trailing: PopupMenuButton<String>(
-                              itemBuilder: (context) => [
-                                if (invitation.isActive)
-                                  const PopupMenuItem(
-                                    value: 'resend',
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.refresh, size: 16),
-                                        SizedBox(width: 8),
-                                        Text('Rinvia'),
-                                      ],
-                                    ),
-                                  ),
-                                const PopupMenuItem(
-                                  value: 'copy_link',
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.copy, size: 16),
-                                      SizedBox(width: 8),
-                                      Text('Copia Link'),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                              onSelected: (value) {
-                                switch (value) {
-                                  case 'resend':
-                                    // TODO: Implementare rinvia invito
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Funzionalità in sviluppo',
-                                        ),
-                                      ),
-                                    );
-                                    break;
-                                  case 'copy_link':
-                                    // TODO: Implementare copia link
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Link copiato negli appunti',
-                                        ),
-                                      ),
-                                    );
-                                    break;
-                                }
-                              },
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Chiudi'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _showSendInvitationDialog(entity);
-            },
-            child: const Text('Nuovo Invito'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Color _getInvitationStatusColor(InvitationStatus status) {
-    switch (status) {
-      case InvitationStatus.pending:
-        return Colors.orange;
-      case InvitationStatus.accepted:
-        return Colors.green;
-      case InvitationStatus.rejected:
-        return Colors.red;
-      case InvitationStatus.expired:
-        return Colors.grey;
-    }
-  }
-
-  IconData _getInvitationStatusIcon(InvitationStatus status) {
-    switch (status) {
-      case InvitationStatus.pending:
-        return Icons.schedule;
-      case InvitationStatus.accepted:
-        return Icons.check;
-      case InvitationStatus.rejected:
-        return Icons.close;
-      case InvitationStatus.expired:
-        return Icons.timer_off;
-    }
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
-  }
-
   void _showSendInvitationDialog(LegalEntity entity) {
     final TextEditingController emailController = TextEditingController();
     final TextEditingController messageController = TextEditingController();
@@ -1436,6 +1872,26 @@ class _LegalEntityManagementScreenState
         ],
       ),
     );
+  }
+
+  void _handleNavigation(int index) {
+    switch (index) {
+      case 0: // Dashboard
+        Navigator.pushReplacementNamed(context, '/home');
+        break;
+      case 1: // Certificazioni
+        Navigator.pushReplacementNamed(context, '/home');
+        break;
+      case 2: // Entità Legali
+        // Rimani nella schermata corrente
+        break;
+      case 3: // Profilo
+        Navigator.pushReplacementNamed(context, '/home');
+        break;
+      case 4: // Impostazioni
+        Navigator.pushReplacementNamed(context, '/home');
+        break;
+    }
   }
 }
 

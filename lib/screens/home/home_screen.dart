@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:fl_chart/fl_chart.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/locale_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/enterprise_card.dart';
 import '../../widgets/neon_button.dart';
-import '../../widgets/dynamic_sidebar.dart';
+import '../../widgets/global_hamburger_menu.dart';
 import '../../services/user_type_service.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -25,6 +26,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
+  bool _isMenuExpanded = false;
 
   @override
   void didChangeDependencies() {
@@ -45,6 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final authProvider = context.read<AuthProvider>();
     final userType = authProvider.userType;
 
+    // Aggiorna l'indice selezionato per mostrare il contenuto nella UI di destra
     setState(() {
       _selectedIndex = index;
     });
@@ -140,35 +143,87 @@ class _HomeScreenState extends State<HomeScreen> {
         // final isAdmin = user?.isAdminFromDatabase ?? false;
 
         return Scaffold(
-          body: Row(
-            children: [
-              // Navigation Rail
-              Container(
-                width: 280,
-                decoration: BoxDecoration(
-                  color: AppTheme.pureWhite,
-                  border: Border(
-                    right: BorderSide(color: AppTheme.borderGray, width: 1),
+          appBar: MediaQuery.of(context).size.width <= 768
+              ? AppBar(
+                  backgroundColor: Colors.white,
+                  elevation: 0,
+                  leading: IconButton(
+                    icon: Icon(Icons.menu, color: Colors.black),
+                    onPressed: () {
+                      setState(() {
+                        _isMenuExpanded = !_isMenuExpanded;
+                      });
+                    },
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppTheme.textPrimary.withValues(alpha: 0.05),
-                      blurRadius: 8,
-                      spreadRadius: 0,
-                      offset: const Offset(2, 0),
+                  title: Text(
+                    'JetCV',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
                     ),
-                  ],
-                ),
-                child: DynamicSidebar(
-                  selectedIndex: _selectedIndex,
-                  onDestinationSelected: _onDestinationSelected,
-                ),
+                  ),
+                )
+              : null,
+          body: Stack(
+            children: [
+              Row(
+                children: [
+                  // Navigation Rail - Solo su desktop o quando espanso su mobile
+                  if (MediaQuery.of(context).size.width > 768 ||
+                      _isMenuExpanded)
+                    Container(
+                      width: MediaQuery.of(context).size.width > 768
+                          ? 280
+                          : 260,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border(
+                          right: BorderSide(color: Colors.grey[200]!, width: 1),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 8,
+                            spreadRadius: 0,
+                            offset: const Offset(2, 0),
+                          ),
+                        ],
+                      ),
+                      child: GlobalHamburgerMenu(
+                        selectedIndex: _selectedIndex,
+                        onDestinationSelected: _onDestinationSelected,
+                        isExpanded: _isMenuExpanded,
+                        onExpansionChanged: (expanded) {
+                          setState(() {
+                            _isMenuExpanded = expanded;
+                          });
+                        },
+                        context: context,
+                        userType: authProvider.userType,
+                      ),
+                    ),
+
+                  // Main Content
+                  Expanded(
+                    child: _buildContent(
+                      authProvider.userType ?? AppUserType.user,
+                    ),
+                  ),
+                ],
               ),
 
-              // Main Content
-              Expanded(
-                child: _buildContent(authProvider.userType ?? AppUserType.user),
-              ),
+              // Overlay scuro su mobile quando il menu è aperto
+              if (MediaQuery.of(context).size.width <= 768 && _isMenuExpanded)
+                Positioned.fill(
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _isMenuExpanded = false;
+                      });
+                    },
+                    child: Container(color: Colors.black.withOpacity(0.5)),
+                  ),
+                ),
             ],
           ),
         );
@@ -196,17 +251,17 @@ class _HomeScreenState extends State<HomeScreen> {
     final l10n = AppLocalizations.of(context);
     switch (_selectedIndex) {
       case 0:
-        return const _DashboardContent();
+        return _DashboardContent(l10n: l10n);
       case 1:
         return const CertificationListScreen();
       case 2:
         return _buildLegalEntitiesManagementContent(l10n);
       case 3:
-        return _buildSettingsContent(l10n);
+        return const UserSettingsScreen(hideMenu: true);
       case 4:
-        return const UserProfileScreen();
+        return const UserProfileScreen(hideMenu: true);
       default:
-        return const _DashboardContent();
+        return _DashboardContent(l10n: l10n);
     }
   }
 
@@ -214,15 +269,15 @@ class _HomeScreenState extends State<HomeScreen> {
     final l10n = AppLocalizations.of(context);
     switch (_selectedIndex) {
       case 0:
-        return const _DashboardContent();
+        return _DashboardContent(l10n: l10n);
       case 1:
         return const CertificationListScreen();
       case 2:
-        return const UserSettingsContent();
+        return const UserSettingsScreen(hideMenu: true);
       case 3:
-        return const UserProfileScreen();
+        return const UserProfileScreen(hideMenu: true);
       default:
-        return const _DashboardContent();
+        return _DashboardContent(l10n: l10n);
     }
   }
 
@@ -232,9 +287,9 @@ class _HomeScreenState extends State<HomeScreen> {
       case 0:
         return const CertificationListScreen();
       case 1:
-        return const UserSettingsContent();
+        return const UserSettingsScreen(hideMenu: true);
       case 2:
-        return const UserProfileScreen();
+        return const UserProfileScreen(hideMenu: true);
       default:
         return const CertificationListScreen();
     }
@@ -244,25 +299,27 @@ class _HomeScreenState extends State<HomeScreen> {
     final l10n = AppLocalizations.of(context);
     switch (_selectedIndex) {
       case 0:
-        return const UserProfileScreen();
+        return const UserProfileScreen(hideMenu: true);
       case 1:
-        return const UserSettingsContent();
+        return const UserSettingsScreen(hideMenu: true);
       default:
-        return const UserProfileScreen();
+        return const UserProfileScreen(hideMenu: true);
     }
   }
 
   Widget _buildLegalEntitiesManagementContent(AppLocalizations l10n) {
-    return const LegalEntityManagementScreen();
+    return const LegalEntityManagementScreen(hideMenu: true);
   }
 
   Widget _buildSettingsContent(AppLocalizations l10n) {
-    return const UserSettingsContent();
+    return const UserSettingsScreen(hideMenu: true);
   }
 }
 
 class _DashboardContent extends StatelessWidget {
-  const _DashboardContent();
+  final AppLocalizations l10n;
+  
+  const _DashboardContent({required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -337,9 +394,9 @@ class _DashboardContent extends StatelessWidget {
 
                 const SizedBox(height: 32),
 
-                // Quick actions
+                // Grafico delle certificazioni emesse
                 Text(
-                  'Azioni Rapide',
+                  l10n.getString('certifications_trend'),
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                     color: AppTheme.textPrimary,
@@ -347,13 +404,13 @@ class _DashboardContent extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 20),
-                _buildQuickActionsGrid(context),
+                _buildCertificationsChart(context, l10n),
 
                 const SizedBox(height: 40),
 
                 // Recent activity
                 Text(
-                  'Attività Recente',
+                  l10n.getString('recent_activity'),
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                     color: AppTheme.textPrimary,
@@ -370,101 +427,283 @@ class _DashboardContent extends StatelessWidget {
     );
   }
 
-  Widget _buildQuickActionsGrid(BuildContext context) {
-    return GridView.count(
-      crossAxisCount: 3,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: 20,
-      mainAxisSpacing: 20,
-      childAspectRatio: 1.1,
-      children: [
-        _buildQuickActionCard(
-          context,
-          'Complete Profile',
-          'Fill in missing information',
-          Icons.person_add,
-          AppTheme.successGreen,
-          () {
-            // Navigate to profile completion
-          },
-        ),
-        _buildQuickActionCard(
-          context,
-          'Company Setup',
-          'Configure your business',
-          Icons.business,
-          AppTheme.primaryBlue,
-          () {
-            // Navigate to company setup
-          },
-        ),
-        _buildQuickActionCard(
-          context,
-          'Get Certified',
-          'Start certification process',
-          Icons.verified_user,
-          AppTheme.purple,
-          () {
-            // Navigate to certification creation
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const CreateCertificationScreen(),
+  Widget _buildCertificationsChart(BuildContext context, AppLocalizations l10n) {
+    // Dati di esempio per il grafico (negli ultimi 6 mesi)
+    final List<FlSpot> spots = [
+      const FlSpot(0, 5), // Gennaio
+      const FlSpot(1, 8), // Febbraio
+      const FlSpot(2, 12), // Marzo
+      const FlSpot(3, 15), // Aprile
+      const FlSpot(4, 18), // Maggio
+      const FlSpot(5, 22), // Giugno
+    ];
+
+    return EnterpriseCard(
+      child: Column(
+        children: [
+          // Header del grafico
+          Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  gradient: AppTheme.primaryGradient,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.trending_up,
+                  color: AppTheme.pureWhite,
+                  size: 24,
+                ),
               ),
-            );
-          },
-        ),
-      ],
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.getString('issued_certifications'),
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: AppTheme.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      l10n.getString('last_6_months'),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppTheme.textGray,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Statistiche rapide
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '22',
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.primaryBlue,
+                    ),
+                  ),
+                  Text(
+                    l10n.getString('this_month'),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: AppTheme.textGray),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+
+          // Grafico
+          SizedBox(
+            height: 300,
+            child: LineChart(
+              LineChartData(
+                gridData: FlGridData(
+                  show: true,
+                  drawVerticalLine: true,
+                  horizontalInterval: 5,
+                  verticalInterval: 1,
+                  getDrawingHorizontalLine: (value) {
+                    return FlLine(color: AppTheme.lightGray, strokeWidth: 1);
+                  },
+                  getDrawingVerticalLine: (value) {
+                    return FlLine(color: AppTheme.lightGray, strokeWidth: 1);
+                  },
+                ),
+                titlesData: FlTitlesData(
+                  show: true,
+                  rightTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  topTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 30,
+                      interval: 1,
+                      getTitlesWidget: (double value, TitleMeta meta) {
+                        final style = TextStyle(
+                          color: AppTheme.textGray,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 12,
+                        );
+                        Widget text;
+                        switch (value.toInt()) {
+                          case 0:
+                            text = Text('Gen', style: style);
+                            break;
+                          case 1:
+                            text = Text('Feb', style: style);
+                            break;
+                          case 2:
+                            text = Text('Mar', style: style);
+                            break;
+                          case 3:
+                            text = Text('Apr', style: style);
+                            break;
+                          case 4:
+                            text = Text('Mag', style: style);
+                            break;
+                          case 5:
+                            text = Text('Giu', style: style);
+                            break;
+                          default:
+                            text = Text('', style: style);
+                            break;
+                        }
+                        return SideTitleWidget(
+                          axisSide: meta.axisSide,
+                          child: text,
+                        );
+                      },
+                    ),
+                  ),
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      interval: 5,
+                      getTitlesWidget: (double value, TitleMeta meta) {
+                        return Text(
+                          value.toInt().toString(),
+                          style: TextStyle(
+                            color: AppTheme.textGray,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 12,
+                          ),
+                        );
+                      },
+                      reservedSize: 42,
+                    ),
+                  ),
+                ),
+                borderData: FlBorderData(
+                  show: true,
+                  border: Border.all(color: AppTheme.lightGray),
+                ),
+                minX: 0,
+                maxX: 5,
+                minY: 0,
+                maxY: 25,
+                lineBarsData: [
+                  LineChartBarData(
+                    spots: spots,
+                    isCurved: true,
+                    gradient: AppTheme.primaryGradient,
+                    barWidth: 4,
+                    isStrokeCapRound: true,
+                    dotData: FlDotData(
+                      show: true,
+                      getDotPainter: (spot, percent, barData, index) {
+                        return FlDotCirclePainter(
+                          radius: 6,
+                          color: AppTheme.primaryBlue,
+                          strokeWidth: 2,
+                          strokeColor: AppTheme.pureWhite,
+                        );
+                      },
+                    ),
+                    belowBarData: BarAreaData(
+                      show: true,
+                      gradient: LinearGradient(
+                        colors: [
+                          AppTheme.primaryBlue.withValues(alpha: 0.3),
+                          AppTheme.primaryBlue.withValues(alpha: 0.0),
+                        ],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          // Legenda e statistiche aggiuntive
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatCard(
+                  context,
+                  l10n.getString('total'),
+                  '80',
+                  Icons.verified,
+                  AppTheme.successGreen,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildStatCard(
+                  context,
+                  l10n.getString('monthly_average'),
+                  '13.3',
+                  Icons.trending_up,
+                  AppTheme.primaryBlue,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildStatCard(
+                  context,
+                  l10n.getString('growth'),
+                  '+340%',
+                  Icons.show_chart,
+                  AppTheme.purple,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildQuickActionCard(
+  Widget _buildStatCard(
     BuildContext context,
-    String title,
-    String subtitle,
+    String label,
+    String value,
     IconData icon,
-    Color accentColor,
-    VoidCallback onTap,
+    Color color,
   ) {
-    return EnterpriseCard(
-      isHoverable: true,
-      onTap: onTap,
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.2), width: 1),
+      ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              color: accentColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: accentColor.withValues(alpha: 0.2),
-                width: 1,
-              ),
-            ),
-            child: Icon(icon, size: 32, color: accentColor),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            title,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: AppTheme.textPrimary,
-            ),
-            textAlign: TextAlign.center,
-          ),
+          Icon(icon, color: color, size: 20),
           const SizedBox(height: 8),
           Text(
-            subtitle,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            value,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: color,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: AppTheme.textGray,
-              height: 1.4,
+              fontWeight: FontWeight.w500,
             ),
             textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),

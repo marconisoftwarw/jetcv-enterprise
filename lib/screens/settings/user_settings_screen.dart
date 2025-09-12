@@ -6,16 +6,20 @@ import '../../providers/theme_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/enterprise_card.dart';
 import '../../widgets/neon_button.dart';
+import '../../widgets/global_hamburger_menu.dart';
 import '../../l10n/app_localizations.dart';
 
 class UserSettingsScreen extends StatefulWidget {
-  const UserSettingsScreen({super.key});
+  final bool hideMenu;
+
+  const UserSettingsScreen({super.key, this.hideMenu = false});
 
   @override
   State<UserSettingsScreen> createState() => _UserSettingsScreenState();
 }
 
 class _UserSettingsScreenState extends State<UserSettingsScreen> {
+  bool _isMenuExpanded = false;
   bool _emailNotifications = true;
   bool _pushNotifications = true;
   bool _smsNotifications = false;
@@ -30,29 +34,9 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 768;
 
-    return Scaffold(
-      backgroundColor: AppTheme.offWhite,
-      appBar: AppBar(
-        title: Text(
-          l10n.getString('settings'),
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w700,
-            color: AppTheme.textPrimary,
-          ),
-        ),
-        backgroundColor: AppTheme.pureWhite,
-        foregroundColor: AppTheme.textPrimary,
-        elevation: 0,
-        surfaceTintColor: AppTheme.pureWhite,
-        actions: [
-          IconButton(
-            onPressed: _saveSettings,
-            icon: Icon(Icons.save_rounded, color: AppTheme.successGreen),
-            tooltip: l10n.getString('save_settings'),
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
+    // Se hideMenu è true, restituisci solo il contenuto senza il menu
+    if (widget.hideMenu) {
+      return SingleChildScrollView(
         padding: EdgeInsets.all(isTablet ? 32 : 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -77,16 +61,6 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
 
             const SizedBox(height: 24),
 
-            // Sezione Lingua e Regione
-            _buildLanguageRegionSection(l10n, isTablet),
-
-            const SizedBox(height: 24),
-
-            // Sezione Avanzate
-            _buildAdvancedSection(l10n, isTablet),
-
-            const SizedBox(height: 24),
-
             // Sezione Supporto
             _buildSupportSection(l10n, isTablet),
 
@@ -96,6 +70,139 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
             _buildAccountSection(l10n, isTablet),
           ],
         ),
+      );
+    }
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: MediaQuery.of(context).size.width <= 768
+          ? AppBar(
+              backgroundColor: Colors.white,
+              elevation: 0,
+              leading: IconButton(
+                icon: Icon(Icons.menu, color: Colors.black),
+                onPressed: () {
+                  setState(() {
+                    _isMenuExpanded = !_isMenuExpanded;
+                  });
+                },
+              ),
+              title: Text(
+                l10n.getString('settings'),
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              actions: [
+                IconButton(
+                  icon: Icon(Icons.save, color: AppTheme.primaryBlue),
+                  onPressed: _saveSettings,
+                  tooltip: l10n.getString('save_settings'),
+                ),
+              ],
+            )
+          : null,
+      body: Stack(
+        children: [
+          Row(
+            children: [
+              // Navigation Rail - Solo su desktop o quando espanso su mobile
+              if (MediaQuery.of(context).size.width > 768 || _isMenuExpanded)
+                Container(
+                  width: MediaQuery.of(context).size.width > 768 ? 280 : 260,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border(
+                      right: BorderSide(color: Colors.grey[200]!, width: 1),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 8,
+                        spreadRadius: 0,
+                        offset: const Offset(2, 0),
+                      ),
+                    ],
+                  ),
+                  child: Consumer<AuthProvider>(
+                    builder: (context, authProvider, child) {
+                      return GlobalHamburgerMenu(
+                        selectedIndex: 4, // Impostazioni
+                        onDestinationSelected: (index) {
+                          setState(() {
+                            _isMenuExpanded = false;
+                          });
+                          _handleNavigation(index);
+                        },
+                        isExpanded: _isMenuExpanded,
+                        onExpansionChanged: (expanded) {
+                          setState(() {
+                            _isMenuExpanded = expanded;
+                          });
+                        },
+                        context: context,
+                        userType: authProvider.userType,
+                      );
+                    },
+                  ),
+                ),
+
+              // Main Content
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.all(isTablet ? 32 : 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Header con informazioni utente
+                      _buildUserHeader(l10n, isTablet),
+
+            const SizedBox(height: 32),
+
+                      // Sezione Aspetto
+                      _buildAppearanceSection(l10n, isTablet),
+
+                      const SizedBox(height: 24),
+
+                      // Sezione Notifiche
+                      _buildNotificationsSection(l10n, isTablet),
+
+                      const SizedBox(height: 24),
+
+                      // Sezione Privacy e Sicurezza
+                      _buildPrivacySecuritySection(l10n, isTablet),
+
+                      const SizedBox(height: 24),
+
+                      // Sezione Supporto
+                      _buildSupportSection(l10n, isTablet),
+
+            const SizedBox(height: 32),
+
+                      // Sezione Account
+                      _buildAccountSection(l10n, isTablet),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          // Overlay scuro su mobile quando il menu è aperto
+          if (MediaQuery.of(context).size.width <= 768 && _isMenuExpanded)
+            Positioned.fill(
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _isMenuExpanded = false;
+                  });
+                },
+                child: Container(color: Colors.black.withOpacity(0.5)),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -140,18 +247,19 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      user?.displayName ?? l10n.getString('user'),
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: AppTheme.textPrimary,
-                      ),
+                      user?.fullName ?? 'Utente',
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.textPrimary,
+                          ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      user?.email ?? l10n.getString('no_email'),
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppTheme.textGray,
-                      ),
+                      user?.email ?? 'email@example.com',
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
                     ),
                     const SizedBox(height: 8),
                     Container(
@@ -162,13 +270,10 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
                       decoration: BoxDecoration(
                         color: AppTheme.primaryBlue.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: AppTheme.primaryBlue.withValues(alpha: 0.3),
-                        ),
                       ),
                       child: Text(
-                        user?.roleDisplayName ?? l10n.getString('user'),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        user?.type?.name.toUpperCase() ?? 'USER',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           color: AppTheme.primaryBlue,
                           fontWeight: FontWeight.w600,
                         ),
@@ -191,14 +296,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
         children: [
           Row(
             children: [
-              Container(
-                width: 4,
-                height: 24,
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryBlue,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
+              Icon(Icons.palette, color: AppTheme.primaryBlue, size: 24),
               const SizedBox(width: 12),
               Text(
                 l10n.getString('appearance'),
@@ -212,91 +310,42 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
           const SizedBox(height: 20),
           Consumer<ThemeProvider>(
             builder: (context, themeProvider, child) {
-              return Column(
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildThemeSelector(
-                    l10n,
-                    themeProvider,
-                    ThemeMode.light,
-                    Icons.light_mode_rounded,
-                    l10n.getString('light_mode'),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.getString('dark_mode'),
+                          style: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(fontWeight: FontWeight.w600),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          l10n.getString('dark_mode_description'),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: Colors.grey[600]),
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 12),
-                  _buildThemeSelector(
-                    l10n,
-                    themeProvider,
-                    ThemeMode.dark,
-                    Icons.dark_mode_rounded,
-                    l10n.getString('dark_mode'),
-                  ),
-                  const SizedBox(height: 12),
-                  _buildThemeSelector(
-                    l10n,
-                    themeProvider,
-                    ThemeMode.system,
-                    Icons.brightness_auto_rounded,
-                    l10n.getString('system_theme'),
+                  Switch(
+                    value: themeProvider.isDarkMode,
+            onChanged: (value) {
+                      themeProvider.toggleTheme();
+                    },
+                    activeColor: AppTheme.primaryBlue,
+                    activeTrackColor: AppTheme.primaryBlue.withValues(
+                      alpha: 0.3,
+                    ),
                   ),
                 ],
               );
             },
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildThemeSelector(
-    AppLocalizations l10n,
-    ThemeProvider themeProvider,
-    ThemeMode mode,
-    IconData icon,
-    String title,
-  ) {
-    final isSelected = themeProvider.themeMode == mode;
-
-    return InkWell(
-      onTap: () => themeProvider.setThemeMode(mode),
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppTheme.primaryBlue.withValues(alpha: 0.1)
-              : AppTheme.pureWhite,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? AppTheme.primaryBlue : AppTheme.borderGray,
-            width: isSelected ? 2 : 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: isSelected ? AppTheme.primaryBlue : AppTheme.textGray,
-              size: 24,
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Text(
-                title,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: isSelected
-                      ? AppTheme.primaryBlue
-                      : AppTheme.textPrimary,
-                ),
-              ),
-            ),
-            if (isSelected)
-              Icon(
-                Icons.check_circle_rounded,
-                color: AppTheme.primaryBlue,
-                size: 24,
-              ),
-          ],
-        ),
       ),
     );
   }
@@ -308,14 +357,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
         children: [
           Row(
             children: [
-              Container(
-                width: 4,
-                height: 24,
-                decoration: BoxDecoration(
-                  color: AppTheme.successGreen,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
+              Icon(Icons.notifications, color: AppTheme.primaryBlue, size: 24),
               const SizedBox(width: 12),
               Text(
                 l10n.getString('notifications'),
@@ -327,35 +369,31 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
             ],
           ),
           const SizedBox(height: 20),
-          _buildSwitchTile(
+          _buildNotificationToggle(
             l10n.getString('email_notifications'),
-            l10n.getString('email_notifications_desc'),
+            l10n.getString('email_notifications_description'),
             _emailNotifications,
-            Icons.email_outlined,
             (value) => setState(() => _emailNotifications = value),
           ),
-          const SizedBox(height: 12),
-          _buildSwitchTile(
+          const SizedBox(height: 16),
+          _buildNotificationToggle(
             l10n.getString('push_notifications'),
-            l10n.getString('push_notifications_desc'),
+            l10n.getString('push_notifications_description'),
             _pushNotifications,
-            Icons.notifications_outlined,
             (value) => setState(() => _pushNotifications = value),
           ),
-          const SizedBox(height: 12),
-          _buildSwitchTile(
+          const SizedBox(height: 16),
+          _buildNotificationToggle(
             l10n.getString('sms_notifications'),
-            l10n.getString('sms_notifications_desc'),
+            l10n.getString('sms_notifications_description'),
             _smsNotifications,
-            Icons.sms_outlined,
             (value) => setState(() => _smsNotifications = value),
           ),
-          const SizedBox(height: 12),
-          _buildSwitchTile(
+          const SizedBox(height: 16),
+          _buildNotificationToggle(
             l10n.getString('marketing_emails'),
-            l10n.getString('marketing_emails_desc'),
+            l10n.getString('marketing_emails_description'),
             _marketingEmails,
-            Icons.campaign_outlined,
             (value) => setState(() => _marketingEmails = value),
           ),
         ],
@@ -363,53 +401,42 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
     );
   }
 
-  Widget _buildSwitchTile(
+  Widget _buildNotificationToggle(
     String title,
-    String subtitle,
+    String description,
     bool value,
-    IconData icon,
-    ValueChanged<bool> onChanged,
+    Function(bool) onChanged,
   ) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppTheme.pureWhite,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.borderGray),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: AppTheme.primaryBlue, size: 24),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(color: AppTheme.textGray),
-                ),
-              ],
-            ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                description,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+              ),
+            ],
           ),
-          Switch(
-            value: value,
-            onChanged: onChanged,
-            activeColor: AppTheme.primaryBlue,
-            activeTrackColor: AppTheme.primaryBlue.withValues(alpha: 0.3),
-          ),
-        ],
-      ),
+        ),
+        Switch(
+          value: value,
+          onChanged: onChanged,
+          activeColor: AppTheme.primaryBlue,
+          activeTrackColor: AppTheme.primaryBlue.withValues(alpha: 0.3),
+        ),
+      ],
     );
   }
 
@@ -420,14 +447,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
         children: [
           Row(
             children: [
-              Container(
-                width: 4,
-                height: 24,
-                decoration: BoxDecoration(
-                  color: AppTheme.errorRed,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
+              Icon(Icons.security, color: AppTheme.primaryBlue, size: 24),
               const SizedBox(width: 12),
               Text(
                 l10n.getString('privacy_security'),
@@ -439,216 +459,67 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
             ],
           ),
           const SizedBox(height: 20),
-          _buildActionTile(
-            l10n.getString('change_password'),
-            l10n.getString('change_password_desc'),
-            Icons.lock_outline,
-            AppTheme.primaryBlue,
-            _changePassword,
-          ),
-          const SizedBox(height: 12),
-          _buildActionTile(
-            l10n.getString('two_factor_auth'),
-            l10n.getString('two_factor_auth_desc'),
-            Icons.security_outlined,
-            AppTheme.successGreen,
-            _setupTwoFactorAuth,
-          ),
-          const SizedBox(height: 12),
-          _buildActionTile(
-            l10n.getString('active_sessions'),
-            l10n.getString('active_sessions_desc'),
-            Icons.devices_outlined,
-            AppTheme.warningOrange,
-            _manageActiveSessions,
-          ),
-          const SizedBox(height: 12),
-          _buildActionTile(
-            l10n.getString('privacy_policy'),
-            l10n.getString('privacy_policy_desc'),
-            Icons.privacy_tip_outlined,
-            AppTheme.textGray,
-            _viewPrivacyPolicy,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActionTile(
-    String title,
-    String subtitle,
-    IconData icon,
-    Color iconColor,
-    VoidCallback onTap,
-  ) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppTheme.pureWhite,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppTheme.borderGray),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, color: iconColor, size: 24),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: AppTheme.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodySmall?.copyWith(color: AppTheme.textGray),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              Icons.arrow_forward_ios_rounded,
-              color: AppTheme.textGray,
-              size: 16,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLanguageRegionSection(AppLocalizations l10n, bool isTablet) {
-    return EnterpriseCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 4,
-                height: 24,
-                decoration: BoxDecoration(
-                  color: AppTheme.warningOrange,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                l10n.getString('language_region'),
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: AppTheme.textPrimary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          _buildActionTile(
-            l10n.getString('language'),
-            l10n.getString('language_desc'),
-            Icons.language_outlined,
-            AppTheme.primaryBlue,
-            _showLanguageSelector,
-          ),
-          const SizedBox(height: 12),
-          _buildActionTile(
-            l10n.getString('timezone'),
-            l10n.getString('timezone_desc'),
-            Icons.access_time_outlined,
-            AppTheme.successGreen,
-            _changeTimeZone,
-          ),
-          const SizedBox(height: 12),
-          _buildActionTile(
-            l10n.getString('date_format'),
-            l10n.getString('date_format_desc'),
-            Icons.calendar_today_outlined,
-            AppTheme.warningOrange,
-            _changeDateFormat,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAdvancedSection(AppLocalizations l10n, bool isTablet) {
-    return EnterpriseCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 4,
-                height: 24,
-                decoration: BoxDecoration(
-                  color: AppTheme.textGray,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                l10n.getString('advanced'),
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: AppTheme.textPrimary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          _buildSwitchTile(
+          _buildPrivacyToggle(
             l10n.getString('auto_sync'),
-            l10n.getString('auto_sync_desc'),
+            l10n.getString('auto_sync_description'),
             _autoSync,
-            Icons.sync_outlined,
             (value) => setState(() => _autoSync = value),
           ),
-          const SizedBox(height: 12),
-          _buildSwitchTile(
+          const SizedBox(height: 16),
+          _buildPrivacyToggle(
             l10n.getString('location_services'),
-            l10n.getString('location_services_desc'),
+            l10n.getString('location_services_description'),
             _locationServices,
-            Icons.location_on_outlined,
             (value) => setState(() => _locationServices = value),
           ),
-          const SizedBox(height: 12),
-          _buildSwitchTile(
+          const SizedBox(height: 16),
+          _buildPrivacyToggle(
             l10n.getString('analytics'),
-            l10n.getString('analytics_desc'),
+            l10n.getString('analytics_description'),
             _analytics,
-            Icons.analytics_outlined,
             (value) => setState(() => _analytics = value),
-          ),
-          const SizedBox(height: 12),
-          _buildActionTile(
-            l10n.getString('cache_storage'),
-            l10n.getString('cache_storage_desc'),
-            Icons.storage_outlined,
-            AppTheme.primaryBlue,
-            _manageCacheStorage,
-          ),
-          const SizedBox(height: 12),
-          _buildActionTile(
-            l10n.getString('backup_restore'),
-            l10n.getString('backup_restore_desc'),
-            Icons.backup_outlined,
-            AppTheme.successGreen,
-            _manageBackupRestore,
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildPrivacyToggle(
+    String title,
+    String description,
+    bool value,
+    Function(bool) onChanged,
+  ) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                description,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+              ),
+            ],
+          ),
+        ),
+        Switch(
+          value: value,
+          onChanged: onChanged,
+          activeColor: AppTheme.primaryBlue,
+          activeTrackColor: AppTheme.primaryBlue.withValues(alpha: 0.3),
+        ),
+      ],
     );
   }
 
@@ -659,14 +530,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
         children: [
           Row(
             children: [
-              Container(
-                width: 4,
-                height: 24,
-                decoration: BoxDecoration(
-                  color: AppTheme.successGreen,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
+              Icon(Icons.help_center, color: AppTheme.primaryBlue, size: 24),
               const SizedBox(width: 12),
               Text(
                 l10n.getString('support'),
@@ -678,38 +542,59 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
             ],
           ),
           const SizedBox(height: 20),
-          _buildActionTile(
+          _buildSupportButton(
             l10n.getString('help_center'),
-            l10n.getString('help_center_desc'),
             Icons.help_outline,
-            AppTheme.primaryBlue,
-            _openHelpCenter,
+            _helpCenter,
           ),
           const SizedBox(height: 12),
-          _buildActionTile(
+          _buildSupportButton(
             l10n.getString('contact_support'),
-            l10n.getString('contact_support_desc'),
-            Icons.support_agent_outlined,
-            AppTheme.successGreen,
+            Icons.support_agent,
             _contactSupport,
           ),
           const SizedBox(height: 12),
-          _buildActionTile(
+          _buildSupportButton(
             l10n.getString('report_bug'),
-            l10n.getString('report_bug_desc'),
-            Icons.bug_report_outlined,
-            AppTheme.warningOrange,
+            Icons.bug_report,
             _reportBug,
           ),
           const SizedBox(height: 12),
-          _buildActionTile(
+          _buildSupportButton(
             l10n.getString('rate_app'),
-            l10n.getString('rate_app_desc'),
-            Icons.star_outline,
-            AppTheme.warningOrange,
+            Icons.star_rate,
             _rateApp,
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSupportButton(String title, IconData icon, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.grey[50],
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey[200]!),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: AppTheme.primaryBlue, size: 20),
+            const SizedBox(width: 12),
+            Text(
+              title,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+            ),
+            const Spacer(),
+            Icon(Icons.arrow_forward_ios, color: Colors.grey[400], size: 16),
+          ],
+        ),
       ),
     );
   }
@@ -721,14 +606,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
         children: [
           Row(
             children: [
-              Container(
-                width: 4,
-                height: 24,
-                decoration: BoxDecoration(
-                  color: AppTheme.errorRed,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
+              Icon(Icons.account_circle, color: AppTheme.primaryBlue, size: 24),
               const SizedBox(width: 12),
               Text(
                 l10n.getString('account'),
@@ -740,46 +618,76 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
             ],
           ),
           const SizedBox(height: 20),
-          _buildActionTile(
+          _buildAccountButton(
             l10n.getString('export_data'),
-            l10n.getString('export_data_desc'),
-            Icons.download_outlined,
-            AppTheme.primaryBlue,
+            Icons.download,
             _exportData,
           ),
           const SizedBox(height: 12),
-          _buildActionTile(
+          _buildAccountButton(
             l10n.getString('delete_account'),
-            l10n.getString('delete_account_desc'),
-            Icons.delete_forever_outlined,
-            AppTheme.errorRed,
+            Icons.delete_forever,
             _deleteAccount,
+            isDestructive: true,
           ),
           const SizedBox(height: 20),
-          NeonButton(
-            onPressed: _signOut,
-            text: l10n.getString('sign_out'),
-            icon: Icons.logout_rounded,
-            isOutlined: true,
-            neonColor: AppTheme.errorRed,
+          Divider(color: Colors.grey[200]),
+          const SizedBox(height: 20),
+          _buildAccountButton(
+            l10n.getString('sign_out'),
+            Icons.logout,
+            _signOut,
+            isDestructive: true,
           ),
         ],
       ),
     );
   }
 
-  // Metodi per le azioni
-  void _saveSettings() {
-    final l10n = AppLocalizations.of(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
+  Widget _buildAccountButton(
+    String title,
+    IconData icon,
+    VoidCallback onTap, {
+    bool isDestructive = false,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.grey[50],
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey[200]!),
+        ),
+        child: Row(
           children: [
-            Icon(Icons.check_circle, color: AppTheme.pureWhite),
-            const SizedBox(width: 8),
-            Text(l10n.getString('settings_saved')),
+            Icon(
+              icon,
+              color: isDestructive ? AppTheme.errorRed : AppTheme.primaryBlue,
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              title,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: isDestructive ? AppTheme.errorRed : null,
+              ),
+            ),
+            const Spacer(),
+            Icon(Icons.arrow_forward_ios, color: Colors.grey[400], size: 16),
           ],
         ),
+      ),
+    );
+  }
+
+  void _saveSettings() {
+    // Implementa il salvataggio delle impostazioni
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(AppLocalizations.of(context).getString('settings_saved')),
         backgroundColor: AppTheme.successGreen,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -787,86 +695,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
     );
   }
 
-  void _changePassword() {
-    // TODO: Implementare cambio password con Supabase
-    _showFeatureInDevelopment(
-      AppLocalizations.of(context).getString('change_password'),
-    );
-  }
-
-  void _setupTwoFactorAuth() {
-    _showFeatureInDevelopment(
-      AppLocalizations.of(context).getString('two_factor_auth'),
-    );
-  }
-
-  void _manageActiveSessions() {
-    _showFeatureInDevelopment(
-      AppLocalizations.of(context).getString('active_sessions'),
-    );
-  }
-
-  void _viewPrivacyPolicy() {
-    _showFeatureInDevelopment(
-      AppLocalizations.of(context).getString('privacy_policy'),
-    );
-  }
-
-  void _showLanguageSelector() {
-    final l10n = AppLocalizations.of(context);
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.getString('select_language')),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildLanguageOption('🇮🇹', 'Italiano', const Locale('it', 'IT')),
-            _buildLanguageOption('🇬🇧', 'English', const Locale('en', 'US')),
-            _buildLanguageOption('🇩🇪', 'Deutsch', const Locale('de', 'DE')),
-            _buildLanguageOption('🇫🇷', 'Français', const Locale('fr', 'FR')),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLanguageOption(String flag, String name, Locale locale) {
-    return ListTile(
-      leading: Text(flag, style: const TextStyle(fontSize: 24)),
-      title: Text(name),
-      onTap: () {
-        context.read<LocaleProvider>().setLocale(locale);
-        Navigator.pop(context);
-      },
-    );
-  }
-
-  void _changeTimeZone() {
-    _showFeatureInDevelopment(
-      AppLocalizations.of(context).getString('timezone'),
-    );
-  }
-
-  void _changeDateFormat() {
-    _showFeatureInDevelopment(
-      AppLocalizations.of(context).getString('date_format'),
-    );
-  }
-
-  void _manageCacheStorage() {
-    _showFeatureInDevelopment(
-      AppLocalizations.of(context).getString('cache_storage'),
-    );
-  }
-
-  void _manageBackupRestore() {
-    _showFeatureInDevelopment(
-      AppLocalizations.of(context).getString('backup_restore'),
-    );
-  }
-
-  void _openHelpCenter() {
+  void _helpCenter() {
     _showFeatureInDevelopment(
       AppLocalizations.of(context).getString('help_center'),
     );
@@ -916,7 +745,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
           ),
           TextButton(
             onPressed: () async {
-              Navigator.pop(context);
+                Navigator.pop(context);
               await context.read<AuthProvider>().signOut();
               if (mounted) {
                 Navigator.pushReplacementNamed(context, '/login');
@@ -946,5 +775,25 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
+  }
+
+  void _handleNavigation(int index) {
+    switch (index) {
+      case 0: // Dashboard
+        Navigator.pushReplacementNamed(context, '/home');
+        break;
+      case 1: // Certificazioni
+        Navigator.pushReplacementNamed(context, '/home');
+        break;
+      case 2: // Entità Legali
+        Navigator.pushReplacementNamed(context, '/home');
+        break;
+      case 3: // Profilo
+        Navigator.pushReplacementNamed(context, '/home');
+        break;
+      case 4: // Impostazioni
+        // Rimani nella schermata corrente
+        break;
+    }
   }
 }
