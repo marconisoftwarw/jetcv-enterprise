@@ -102,12 +102,25 @@ class GlobalHamburgerMenu extends StatelessWidget {
                           ),
                         ],
                       )
-                    : Center(
-                        child: Icon(
-                          Icons.verified_user,
-                          color: Colors.white,
-                          size: 24,
-                        ),
+                    : Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          IconButton(
+                            icon: Icon(
+                              Icons.menu,
+                              color: Colors.white,
+                              size: 24,
+                            ),
+                            onPressed: () => onExpansionChanged(true),
+                            tooltip: l10n.getString('open_menu'),
+                          ),
+                          const SizedBox(height: 4),
+                          Icon(
+                            Icons.verified_user,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ],
                       ),
               ),
             ),
@@ -147,7 +160,7 @@ class GlobalHamburgerMenu extends StatelessWidget {
           ),
           _buildMenuItem(
             icon: Icons.business_outlined,
-            title: l10n.getString('legal_entities_management'),
+            title: l10n.getString('legal_entity'),
             index: 2,
             isExpanded: isExpanded,
           ),
@@ -175,7 +188,7 @@ class GlobalHamburgerMenu extends StatelessWidget {
           ),
           _buildMenuItem(
             icon: Icons.business_outlined,
-            title: l10n.getString('legal_entities_management'),
+            title: l10n.getString('legal_entity'),
             index: 1,
             isExpanded: isExpanded,
           ),
@@ -350,7 +363,7 @@ class GlobalHamburgerMenu extends StatelessWidget {
                   Navigator.of(context).pop(); // Chiudi loading
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Errore durante il logout: $e'),
+                      content: Text('${l10n.getString('logout_error')}: $e'),
                       backgroundColor: Colors.red,
                     ),
                   );

@@ -544,22 +544,40 @@ class _DashboardContent extends StatelessWidget {
                         Widget text;
                         switch (value.toInt()) {
                           case 0:
-                            text = Text('Gen', style: style);
+                            text = Text(
+                              l10n.getString('month_jan'),
+                              style: style,
+                            );
                             break;
                           case 1:
-                            text = Text('Feb', style: style);
+                            text = Text(
+                              l10n.getString('month_feb'),
+                              style: style,
+                            );
                             break;
                           case 2:
-                            text = Text('Mar', style: style);
+                            text = Text(
+                              l10n.getString('month_mar'),
+                              style: style,
+                            );
                             break;
                           case 3:
-                            text = Text('Apr', style: style);
+                            text = Text(
+                              l10n.getString('month_apr'),
+                              style: style,
+                            );
                             break;
                           case 4:
-                            text = Text('Mag', style: style);
+                            text = Text(
+                              l10n.getString('month_may'),
+                              style: style,
+                            );
                             break;
                           case 5:
-                            text = Text('Giu', style: style);
+                            text = Text(
+                              l10n.getString('month_jun'),
+                              style: style,
+                            );
                             break;
                           default:
                             text = Text('', style: style);
