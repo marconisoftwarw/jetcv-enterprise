@@ -12,6 +12,7 @@ import '../../services/image_upload_service.dart';
 import '../../providers/pricing_provider.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text_field.dart';
+import '../../l10n/app_localizations.dart';
 
 class LegalEntityPublicRegistrationScreen extends StatefulWidget {
   const LegalEntityPublicRegistrationScreen({super.key});
@@ -118,9 +119,10 @@ class _LegalEntityPublicRegistrationScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Registrazione Entità Legale'),
+        title: Text(l10n.getString('legal_entity_registration')),
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
       ),
@@ -136,7 +138,7 @@ class _LegalEntityPublicRegistrationScreenState
               child: IndexedStack(
                 index: _currentStep,
                 children: [
-                  _buildPricingStep(),
+                  _buildPricingStep(l10n),
                   _buildPersonalInfoStep(),
                   _buildLegalEntityStep(),
                 ],
@@ -144,7 +146,7 @@ class _LegalEntityPublicRegistrationScreenState
             ),
 
             // Navigation buttons
-            _buildNavigationButtons(),
+            _buildNavigationButtons(l10n),
           ],
         ),
       ),
@@ -205,7 +207,7 @@ class _LegalEntityPublicRegistrationScreenState
     );
   }
 
-  Widget _buildPricingStep() {
+  Widget _buildPricingStep(AppLocalizations l10n) {
     return Consumer<PricingProvider>(
       builder: (context, pricingProvider, child) {
         if (pricingProvider.isLoading) {
@@ -227,7 +229,7 @@ class _LegalEntityPublicRegistrationScreenState
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () => pricingProvider.loadPricings(),
-                  child: const Text('Riprova'),
+                  child: Text(l10n.getString('retry')),
                 ),
               ],
             ),
@@ -239,9 +241,9 @@ class _LegalEntityPublicRegistrationScreenState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Seleziona il Piano',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              Text(
+                l10n.getString('select_plan'),
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               const Text(
@@ -741,7 +743,7 @@ class _LegalEntityPublicRegistrationScreenState
     );
   }
 
-  Widget _buildNavigationButtons() {
+  Widget _buildNavigationButtons(AppLocalizations l10n) {
     return Container(
       padding: const EdgeInsets.all(16),
       child: Row(
@@ -750,17 +752,17 @@ class _LegalEntityPublicRegistrationScreenState
             Expanded(
               child: CustomButton(
                 onPressed: _previousStep,
-                text: 'Indietro',
+                text: l10n.getString('back'),
                 backgroundColor: Colors.grey,
               ),
             ),
           if (_currentStep > 0) const SizedBox(width: 16),
           Expanded(
             child: CustomButton(
-              onPressed: _isLoading ? null : _nextStep,
+              onPressed: _isLoading ? null : () => _nextStep(l10n),
               text: _currentStep == _totalSteps - 1
-                  ? 'Completa Registrazione'
-                  : 'Avanti',
+                  ? l10n.getString('complete_registration')
+                  : l10n.getString('next'),
               backgroundColor: _currentStep == _totalSteps - 1
                   ? Colors.green
                   : Colors.blue,
@@ -779,9 +781,9 @@ class _LegalEntityPublicRegistrationScreenState
     }
   }
 
-  void _nextStep() async {
+  void _nextStep(AppLocalizations l10n) async {
     if (_currentStep == _totalSteps - 1) {
-      await _completeRegistration();
+      await _completeRegistration(l10n);
     } else {
       if (_validateCurrentStep()) {
         setState(() {
@@ -813,7 +815,7 @@ class _LegalEntityPublicRegistrationScreenState
     return true;
   }
 
-  Future<void> _completeRegistration() async {
+  Future<void> _completeRegistration(AppLocalizations l10n) async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() {
@@ -914,8 +916,8 @@ class _LegalEntityPublicRegistrationScreenState
       // 6. Show success message
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Registrazione completata con successo!'),
+          SnackBar(
+            content: Text(l10n.getString('registration_completed_successfully')),
             backgroundColor: Colors.green,
           ),
         );
