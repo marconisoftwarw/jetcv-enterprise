@@ -214,62 +214,206 @@ class _CertificationListScreenState extends State<CertificationListScreen>
     final isDesktop = screenWidth > 1024;
 
     return Scaffold(
-      backgroundColor: AppTheme.offWhite,
-      appBar: AppBar(
-        backgroundColor: AppTheme.pureWhite,
-        foregroundColor: AppTheme.textPrimary,
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        title: Text(
-          l10n.getString('certifier_dashboard'),
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-            color: AppTheme.textPrimary,
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.2,
-          ),
+      backgroundColor: AppTheme.pureWhite,
+      body: CustomScrollView(
+        slivers: [
+          // Header stile Airbnb
+          _buildAirbnbHeader(l10n, isTablet),
+
+          // Filtri/Tabs
+          _buildFilterTabs(l10n),
+
+          // Contenuto principale
+          _buildMainContent(l10n, isTablet),
+        ],
+      ),
+      drawer: _buildDrawer(),
+    );
+  }
+
+  Widget _buildAirbnbHeader(AppLocalizations l10n, bool isTablet) {
+    return SliverAppBar(
+      expandedHeight: 120,
+      floating: false,
+      pinned: true,
+      backgroundColor: AppTheme.pureWhite,
+      elevation: 0,
+      leading: Builder(
+        builder: (context) => IconButton(
+          icon: Icon(Icons.menu, color: AppTheme.textPrimary),
+          onPressed: () => Scaffold.of(context).openDrawer(),
         ),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppTheme.textPrimary),
-          onPressed: () => Navigator.pop(context),
+      ),
+      flexibleSpace: FlexibleSpaceBar(
+        titlePadding: EdgeInsets.only(
+          left: isTablet ? 120 : 80,
+          right: isTablet ? 120 : 80,
+          bottom: 16,
         ),
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: AppTheme.primaryBlue,
-          labelColor: AppTheme.primaryBlue,
-          unselectedLabelColor: AppTheme.textGray,
-          labelStyle: const TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 14,
-          ),
-          unselectedLabelStyle: const TextStyle(
-            fontWeight: FontWeight.w500,
-            fontSize: 14,
-          ),
-          indicatorSize: TabBarIndicatorSize.tab,
-          indicatorWeight: 3,
-          tabs: [
-            Tab(text: 'Bozze e In corso'),
-            Tab(text: 'Emesse'),
+        title: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Le tue certificazioni',
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                color: AppTheme.textPrimary,
+                fontWeight: FontWeight.w700,
+                fontSize: 22,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Gestisci e crea nuove certificazioni',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppTheme.textGray,
+                fontSize: 14,
+              ),
+            ),
           ],
         ),
       ),
-      body: TabBarView(
+      actions: [
+        Container(
+          margin: const EdgeInsets.only(right: 16, top: 8, bottom: 8),
+          child: Consumer<AuthProvider>(
+            builder: (context, authProvider, child) {
+              final user = authProvider.currentUser;
+              return CircleAvatar(
+                radius: 20,
+                backgroundColor: AppTheme.primaryBlue,
+                child: Text(
+                  user?.initials ?? 'U',
+                  style: const TextStyle(
+                    color: AppTheme.pureWhite,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFilterTabs(AppLocalizations l10n) {
+    return SliverToBoxAdapter(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        child: Row(
+          children: [
+            Expanded(
+              child: _buildTabButton(
+                'Bozze e In corso',
+                _tabController.index == 0,
+                () => _tabController.animateTo(0),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildTabButton(
+                'Emesse',
+                _tabController.index == 1,
+                () => _tabController.animateTo(1),
+              ),
+            ),
+            const SizedBox(width: 16),
+            // Pulsante Nuova Certificazione
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CreateCertificationScreen(),
+                  ),
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      AppTheme.successGreen,
+                      AppTheme.successGreen.withValues(alpha: 0.8),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(25),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.successGreen.withValues(alpha: 0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.add, color: AppTheme.pureWhite, size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Nuova',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: AppTheme.pureWhite,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabButton(String title, bool isSelected, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+        decoration: BoxDecoration(
+          color: isSelected ? AppTheme.primaryBlue : AppTheme.pureWhite,
+          borderRadius: BorderRadius.circular(25),
+          border: Border.all(
+            color: isSelected ? AppTheme.primaryBlue : AppTheme.borderGray,
+            width: 1.5,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppTheme.primaryBlue.withValues(alpha: 0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        child: Text(
+          title,
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            color: isSelected ? AppTheme.pureWhite : AppTheme.textPrimary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMainContent(AppLocalizations l10n, bool isTablet) {
+    return SliverFillRemaining(
+      child: TabBarView(
         controller: _tabController,
         children: [_buildDraftsTab(), _buildSentTab()],
-      ),
-      floatingActionButton: NeonButton(
-        text: l10n.getString('new_certification'),
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const CreateCertificationScreen(),
-            ),
-          );
-        },
-        icon: Icons.add,
-        neonColor: AppTheme.successGreen,
-        height: 56,
       ),
     );
   }
@@ -827,6 +971,532 @@ class _CertificationListScreenState extends State<CertificationListScreen>
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(color: AppTheme.primaryBlue),
+          const SizedBox(height: 16),
+          Text(
+            'Caricamento certificazioni...',
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(color: AppTheme.textGray),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState() {
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.all(32),
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: AppTheme.pureWhite,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppTheme.borderGray),
+          boxShadow: [
+            BoxShadow(
+              color: AppTheme.textPrimary.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.error_outline, size: 64, color: AppTheme.errorRed),
+            const SizedBox(height: 16),
+            Text(
+              'Errore nel caricamento',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: AppTheme.textPrimary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              _errorMessage!,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppTheme.textGray),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            GestureDetector(
+              onTap: _loadCertifications,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryBlue,
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                child: Text(
+                  'Riprova',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: AppTheme.pureWhite,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.all(32),
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: AppTheme.pureWhite,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppTheme.borderGray),
+          boxShadow: [
+            BoxShadow(
+              color: AppTheme.textPrimary.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: AppTheme.lightBlue,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Icon(
+                Icons.edit_outlined,
+                size: 40,
+                color: AppTheme.primaryBlue,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Nessuna certificazione',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: AppTheme.textPrimary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Le certificazioni in bozza e in corso appariranno qui',
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppTheme.textGray),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CreateCertificationScreen(),
+                  ),
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      AppTheme.successGreen,
+                      AppTheme.successGreen.withValues(alpha: 0.8),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                child: Text(
+                  'Crea Certificazione',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: AppTheme.pureWhite,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCertificationsGrid(
+    List<Map<String, dynamic>> certifications,
+    bool isTablet,
+  ) {
+    final crossAxisCount = isTablet ? 2 : 1;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: crossAxisCount,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+          childAspectRatio: isTablet ? 1.2 : 1.0,
+        ),
+        itemCount: certifications.length,
+        itemBuilder: (context, index) {
+          final certification = certifications[index];
+          return _buildAirbnbCard(certification);
+        },
+      ),
+    );
+  }
+
+  Widget _buildAirbnbCard(Map<String, dynamic> cert) {
+    final status = cert['status'] ?? 'draft';
+    final statusColor = _getStatusColor(status);
+    final statusText = _getStatusText(status);
+    final createdAt =
+        DateTime.tryParse(cert['created_at'] ?? '') ?? DateTime.now();
+    final nUsers = cert['n_users'] ?? 0;
+    final serialNumber = cert['serial_number'] ?? 'N/A';
+    final categoryId = cert['id_certification_category'] ?? '';
+    final categoryName = _categoryNames[categoryId] ?? 'Categoria sconosciuta';
+
+    return GestureDetector(
+      onTap: () {
+        // TODO: Navigate to certification details
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppTheme.pureWhite,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppTheme.borderGray),
+          boxShadow: [
+            BoxShadow(
+              color: AppTheme.textPrimary.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header con status
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: statusColor.withValues(alpha: 0.1),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  topRight: Radius.circular(16),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: statusColor,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      statusText,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: statusColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  Icon(Icons.more_vert, color: AppTheme.textGray, size: 20),
+                ],
+              ),
+            ),
+
+            // Contenuto principale
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      categoryName,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: AppTheme.textPrimary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Serie: $serialNumber',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppTheme.textGray,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${nUsers} partecipanti',
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: AppTheme.textGray),
+                    ),
+                    const Spacer(),
+                    Text(
+                      _formatDate(createdAt),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: AppTheme.textGray),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inDays == 0) {
+      return 'Oggi';
+    } else if (difference.inDays == 1) {
+      return 'Ieri';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays} giorni fa';
+    } else {
+      return '${date.day}/${date.month}/${date.year}';
+    }
+  }
+
+  Widget _buildDrawer() {
+    final l10n = AppLocalizations.of(context);
+
+    return Drawer(
+      backgroundColor: AppTheme.pureWhite,
+      child: Column(
+        children: [
+          // Header del drawer
+          Container(
+            height: 200,
+            decoration: BoxDecoration(
+              gradient: AppTheme.primaryGradient,
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(20),
+                bottomRight: Radius.circular(20),
+              ),
+            ),
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Icon(
+                          Icons.verified_user_rounded,
+                          color: AppTheme.pureWhite,
+                          size: 32,
+                        ),
+                        IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: Icon(Icons.close, color: AppTheme.pureWhite),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      l10n.getString('certifier_dashboard'),
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(
+                            color: AppTheme.pureWhite,
+                            fontWeight: FontWeight.w700,
+                          ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Gestisci le tue certificazioni',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppTheme.pureWhite.withValues(alpha: 0.8),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Menu items
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              children: [
+                _buildDrawerItem(
+                  icon: Icons.dashboard_outlined,
+                  title: 'Dashboard',
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.pushReplacementNamed(context, '/home');
+                  },
+                ),
+                _buildDrawerItem(
+                  icon: Icons.verified_user_outlined,
+                  title: 'Certificazioni',
+                  onTap: () {
+                    Navigator.pop(context);
+                    // Rimani nella schermata corrente
+                  },
+                  isSelected: true,
+                ),
+                _buildDrawerItem(
+                  icon: Icons.person_outline,
+                  title: 'Profilo',
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '/profile');
+                  },
+                ),
+                _buildDrawerItem(
+                  icon: Icons.settings_outlined,
+                  title: 'Impostazioni',
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '/settings');
+                  },
+                ),
+                const Divider(height: 32),
+                _buildDrawerItem(
+                  icon: Icons.logout,
+                  title: 'Esci',
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showLogoutDialog();
+                  },
+                  iconColor: AppTheme.errorRed,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDrawerItem({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+    bool isSelected = false,
+    Color? iconColor,
+  }) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      decoration: BoxDecoration(
+        color: isSelected
+            ? AppTheme.primaryBlue.withValues(alpha: 0.1)
+            : Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: ListTile(
+        leading: Icon(
+          icon,
+          color:
+              iconColor ??
+              (isSelected ? AppTheme.primaryBlue : AppTheme.textGray),
+        ),
+        title: Text(
+          title,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            color: isSelected ? AppTheme.primaryBlue : AppTheme.textPrimary,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+          ),
+        ),
+        onTap: onTap,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+  }
+
+  void _showLogoutDialog() {
+    final l10n = AppLocalizations.of(context);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.getString('sign_out')),
+        content: Text(l10n.getString('sign_out_confirmation')),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.getString('cancel')),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+
+              // Mostra loading
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) =>
+                    const Center(child: CircularProgressIndicator()),
+              );
+
+              try {
+                // Chiama il logout del provider
+                await context.read<AuthProvider>().signOut();
+
+                if (mounted) {
+                  Navigator.of(context).pop(); // Chiudi loading
+                  Navigator.pushReplacementNamed(context, '/login');
+                }
+              } catch (e) {
+                if (mounted) {
+                  Navigator.of(context).pop(); // Chiudi loading
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Errore durante il logout: $e'),
+                      backgroundColor: AppTheme.errorRed,
+                    ),
+                  );
+                }
+              }
+            },
+            style: TextButton.styleFrom(foregroundColor: AppTheme.errorRed),
+            child: Text(l10n.getString('sign_out')),
+          ),
+        ],
+      ),
     );
   }
 }

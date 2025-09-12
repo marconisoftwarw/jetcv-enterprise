@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
-
 import '../../providers/locale_provider.dart';
-import '../../widgets/linkedin_card.dart';
+import '../../providers/theme_provider.dart';
+import '../../providers/auth_provider.dart';
+import '../../widgets/enterprise_card.dart';
+import '../../widgets/neon_button.dart';
+import '../../l10n/app_localizations.dart';
 
 class UserSettingsScreen extends StatefulWidget {
   const UserSettingsScreen({super.key});
@@ -17,418 +20,162 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
   bool _pushNotifications = true;
   bool _smsNotifications = false;
   bool _marketingEmails = false;
-  bool _darkMode = false;
   bool _autoSync = true;
   bool _locationServices = true;
   bool _analytics = true;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 768;
+
     return Scaffold(
+      backgroundColor: AppTheme.offWhite,
       appBar: AppBar(
         title: Text(
-          'Impostazioni',
-          style: AppTheme.title1.copyWith(color: AppTheme.white),
+          l10n.getString('settings'),
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: AppTheme.textPrimary,
+          ),
         ),
-        backgroundColor: AppTheme.primaryBlue,
-        foregroundColor: AppTheme.white,
+        backgroundColor: AppTheme.pureWhite,
+        foregroundColor: AppTheme.textPrimary,
         elevation: 0,
+        surfaceTintColor: AppTheme.pureWhite,
         actions: [
           IconButton(
             onPressed: _saveSettings,
-            icon: const Icon(Icons.save),
-            tooltip: 'Salva impostazioni',
+            icon: Icon(Icons.save_rounded, color: AppTheme.successGreen),
+            tooltip: l10n.getString('save_settings'),
           ),
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.all(isTablet ? 32 : 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Header con informazioni utente
+            _buildUserHeader(l10n, isTablet),
+
+            const SizedBox(height: 32),
+
+            // Sezione Aspetto
+            _buildAppearanceSection(l10n, isTablet),
+
+            const SizedBox(height: 24),
+
             // Sezione Notifiche
-            _buildNotificationsSection(),
+            _buildNotificationsSection(l10n, isTablet),
 
-            const SizedBox(height: 32),
-
-            // Sezione Preferenze App
-            _buildAppPreferencesSection(),
-
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
 
             // Sezione Privacy e Sicurezza
-            _buildPrivacySecuritySection(),
+            _buildPrivacySecuritySection(l10n, isTablet),
 
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
 
             // Sezione Lingua e Regione
-            _buildLanguageRegionSection(),
+            _buildLanguageRegionSection(l10n, isTablet),
 
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
 
             // Sezione Avanzate
-            _buildAdvancedSection(),
+            _buildAdvancedSection(l10n, isTablet),
+
+            const SizedBox(height: 24),
+
+            // Sezione Supporto
+            _buildSupportSection(l10n, isTablet),
 
             const SizedBox(height: 32),
 
-            // Sezione Supporto
-            _buildSupportSection(),
+            // Sezione Account
+            _buildAccountSection(l10n, isTablet),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildNotificationsSection() {
-    return LinkedInCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+  Widget _buildUserHeader(AppLocalizations l10n, bool isTablet) {
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, child) {
+        final user = authProvider.currentUser;
+        return EnterpriseCard(
+          child: Row(
             children: [
-              Icon(Icons.notifications, color: AppTheme.primaryBlue, size: 24),
-              const SizedBox(width: 16),
-              Text('Notifiche', style: AppTheme.title1),
-            ],
-          ),
-          const SizedBox(height: 24),
-
-          // Email Notifications
-          SwitchListTile(
-            title: Text(
-              'Notifiche Email',
-              style: AppTheme.body1.copyWith(fontWeight: FontWeight.w500),
-            ),
-            subtitle: Text(
-              'Ricevi notifiche via email per attività importanti',
-              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
-            ),
-            value: _emailNotifications,
-            onChanged: (value) {
-              setState(() {
-                _emailNotifications = value;
-              });
-            },
-            activeThumbColor: AppTheme.primaryBlue,
-          ),
-
-          const Divider(),
-
-          // Push Notifications
-          SwitchListTile(
-            title: Text(
-              'Notifiche Push',
-              style: AppTheme.body1.copyWith(fontWeight: FontWeight.w500),
-            ),
-            subtitle: Text(
-              'Ricevi notifiche push sull\'app',
-              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
-            ),
-            value: _pushNotifications,
-            onChanged: (value) {
-              setState(() {
-                _pushNotifications = value;
-              });
-            },
-            activeThumbColor: AppTheme.primaryBlue,
-          ),
-
-          const Divider(),
-
-          // SMS Notifications
-          SwitchListTile(
-            title: Text(
-              'Notifiche SMS',
-              style: AppTheme.body1.copyWith(fontWeight: FontWeight.w500),
-            ),
-            subtitle: Text(
-              'Ricevi notifiche via SMS per eventi critici',
-              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
-            ),
-            value: _smsNotifications,
-            onChanged: (value) {
-              setState(() {
-                _smsNotifications = value;
-              });
-            },
-            activeThumbColor: AppTheme.primaryBlue,
-          ),
-
-          const Divider(),
-
-          // Marketing Emails
-          SwitchListTile(
-            title: Text(
-              'Email Marketing',
-              style: AppTheme.body1.copyWith(fontWeight: FontWeight.w500),
-            ),
-            subtitle: Text(
-              'Ricevi aggiornamenti su nuovi prodotti e servizi',
-              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
-            ),
-            value: _marketingEmails,
-            onChanged: (value) {
-              setState(() {
-                _marketingEmails = value;
-              });
-            },
-            activeThumbColor: AppTheme.primaryBlue,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAppPreferencesSection() {
-    return LinkedInCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.settings, color: AppTheme.primaryBlue, size: 24),
-              const SizedBox(width: 16),
-              Text('Preferenze App', style: AppTheme.title1),
-            ],
-          ),
-          const SizedBox(height: 24),
-
-          // Dark Mode
-          SwitchListTile(
-            title: Text(
-              'Modalità Scura',
-              style: AppTheme.body1.copyWith(fontWeight: FontWeight.w500),
-            ),
-            subtitle: Text(
-              'Attiva il tema scuro per l\'interfaccia',
-              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
-            ),
-            value: _darkMode,
-            onChanged: (value) {
-              setState(() {
-                _darkMode = value;
-              });
-            },
-            activeThumbColor: AppTheme.primaryBlue,
-          ),
-
-          const Divider(),
-
-          // Auto Sync
-          SwitchListTile(
-            title: Text(
-              'Sincronizzazione Automatica',
-              style: AppTheme.body1.copyWith(fontWeight: FontWeight.w500),
-            ),
-            subtitle: Text(
-              'Sincronizza automaticamente i dati in background',
-              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
-            ),
-            value: _autoSync,
-            onChanged: (value) {
-              setState(() {
-                _autoSync = value;
-              });
-            },
-            activeThumbColor: AppTheme.primaryBlue,
-          ),
-
-          const Divider(),
-
-          // Location Services
-          SwitchListTile(
-            title: Text(
-              'Servizi di Localizzazione',
-              style: AppTheme.body1.copyWith(fontWeight: FontWeight.w500),
-            ),
-            subtitle: Text(
-              'Consenti l\'accesso alla posizione per le certificazioni',
-              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
-            ),
-            value: _locationServices,
-            onChanged: (value) {
-              setState(() {
-                _locationServices = value;
-              });
-            },
-            activeThumbColor: AppTheme.primaryBlue,
-          ),
-
-          const Divider(),
-
-          // Analytics
-          SwitchListTile(
-            title: Text(
-              'Analytics e Statistiche',
-              style: AppTheme.body1.copyWith(fontWeight: FontWeight.w500),
-            ),
-            subtitle: Text(
-              'Condividi dati anonimi per migliorare l\'app',
-              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
-            ),
-            value: _analytics,
-            onChanged: (value) {
-              setState(() {
-                _analytics = value;
-              });
-            },
-            activeThumbColor: AppTheme.primaryBlue,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPrivacySecuritySection() {
-    return LinkedInCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.security, color: AppTheme.primaryBlue, size: 24),
-              const SizedBox(width: 16),
-              Text('Privacy e Sicurezza', style: AppTheme.title1),
-            ],
-          ),
-          const SizedBox(height: 24),
-
-          // Cambia Password
-          ListTile(
-            leading: Icon(Icons.lock, color: AppTheme.warningOrange),
-            title: Text(
-              'Cambia Password',
-              style: AppTheme.body1.copyWith(fontWeight: FontWeight.w500),
-            ),
-            subtitle: Text(
-              'Aggiorna la password del tuo account',
-              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: _changePassword,
-          ),
-
-          const Divider(),
-
-          // Autenticazione a due fattori
-          ListTile(
-            leading: Icon(Icons.verified_user, color: AppTheme.successGreen),
-            title: Text(
-              'Autenticazione a Due Fattori',
-              style: AppTheme.body1.copyWith(fontWeight: FontWeight.w500),
-            ),
-            subtitle: Text(
-              'Aggiungi un livello extra di sicurezza',
-              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: _setupTwoFactorAuth,
-          ),
-
-          const Divider(),
-
-          // Sessione attiva
-          ListTile(
-            leading: Icon(Icons.devices, color: AppTheme.accentBlue),
-            title: Text(
-              'Sessioni Attive',
-              style: AppTheme.body1.copyWith(fontWeight: FontWeight.w500),
-            ),
-            subtitle: Text(
-              'Gestisci i dispositivi connessi',
-              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: _manageActiveSessions,
-          ),
-
-          const Divider(),
-
-          // Privacy Policy
-          ListTile(
-            leading: Icon(Icons.privacy_tip, color: AppTheme.secondaryBlue),
-            title: Text(
-              'Informativa Privacy',
-              style: AppTheme.body1.copyWith(fontWeight: FontWeight.w500),
-            ),
-            subtitle: Text(
-              'Leggi la nostra politica sulla privacy',
-              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: _viewPrivacyPolicy,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLanguageRegionSection() {
-    return Consumer<LocaleProvider>(
-      builder: (context, localeProvider, child) {
-        return LinkedInCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(Icons.language, color: AppTheme.primaryBlue, size: 24),
-                  const SizedBox(width: 16),
-                  Text('Lingua e Regione', style: AppTheme.title1),
-                ],
+              // Avatar
+              Container(
+                width: isTablet ? 80 : 60,
+                height: isTablet ? 80 : 60,
+                decoration: BoxDecoration(
+                  gradient: AppTheme.primaryGradient,
+                  borderRadius: BorderRadius.circular(isTablet ? 20 : 16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.primaryBlue.withValues(alpha: 0.2),
+                      blurRadius: 12,
+                      spreadRadius: 0,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: Text(
+                    user?.initials ?? 'U',
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      color: AppTheme.pureWhite,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
               ),
-              const SizedBox(height: 24),
-
-              // Selezione Lingua
-              ListTile(
-                leading: Icon(Icons.translate, color: AppTheme.accentBlue),
-                title: Text(
-                  'Lingua',
-                  style: AppTheme.body1.copyWith(fontWeight: FontWeight.w500),
+              const SizedBox(width: 20),
+              // User info
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      user?.displayName ?? l10n.getString('user'),
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: AppTheme.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      user?.email ?? l10n.getString('no_email'),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppTheme.textGray,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: AppTheme.primaryBlue.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: Text(
+                        user?.roleDisplayName ?? l10n.getString('user'),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppTheme.primaryBlue,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                subtitle: Text(
-                  _getLanguageDisplayName(localeProvider.locale),
-                  style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
-                ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: _showLanguageSelector,
-              ),
-
-              const Divider(),
-
-              // Fuso Orario
-              ListTile(
-                leading: Icon(Icons.access_time, color: AppTheme.warningOrange),
-                title: Text(
-                  'Fuso Orario',
-                  style: AppTheme.body1.copyWith(fontWeight: FontWeight.w500),
-                ),
-                subtitle: Text(
-                  'Europa/Roma (UTC+1)',
-                  style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
-                ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: _changeTimeZone,
-              ),
-
-              const Divider(),
-
-              // Formato Data
-              ListTile(
-                leading: Icon(
-                  Icons.calendar_today,
-                  color: AppTheme.successGreen,
-                ),
-                title: Text(
-                  'Formato Data',
-                  style: AppTheme.body1.copyWith(fontWeight: FontWeight.w500),
-                ),
-                subtitle: Text(
-                  'DD/MM/YYYY',
-                  style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
-                ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: _changeDateFormat,
               ),
             ],
           ),
@@ -437,259 +184,343 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
     );
   }
 
-  Widget _buildAdvancedSection() {
-    return LinkedInCard(
+  Widget _buildAppearanceSection(AppLocalizations l10n, bool isTablet) {
+    return EnterpriseCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.tune, color: AppTheme.primaryBlue, size: 24),
-              const SizedBox(width: 16),
-              Text('Impostazioni Avanzate', style: AppTheme.title1),
+              Container(
+                width: 4,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryBlue,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                l10n.getString('appearance'),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 24),
-
-          // Cache e Storage
-          ListTile(
-            leading: Icon(Icons.storage, color: AppTheme.warningOrange),
-            title: Text(
-              'Cache e Storage',
-              style: AppTheme.body1.copyWith(fontWeight: FontWeight.w500),
-            ),
-            subtitle: Text(
-              'Gestisci lo spazio di archiviazione',
-              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: _manageCacheStorage,
-          ),
-
-          const Divider(),
-
-          // Backup e Ripristino
-          ListTile(
-            leading: Icon(Icons.backup, color: AppTheme.successGreen),
-            title: Text(
-              'Backup e Ripristino',
-              style: AppTheme.body1.copyWith(fontWeight: FontWeight.w500),
-            ),
-            subtitle: Text(
-              'Salva e ripristina i tuoi dati',
-              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: _manageBackupRestore,
-          ),
-
-          const Divider(),
-
-          // Debug e Log
-          ListTile(
-            leading: Icon(Icons.bug_report, color: AppTheme.errorRed),
-            title: Text(
-              'Debug e Log',
-              style: AppTheme.body1.copyWith(fontWeight: FontWeight.w500),
-            ),
-            subtitle: Text(
-              'Informazioni tecniche per il supporto',
-              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: _viewDebugLogs,
+          const SizedBox(height: 20),
+          Consumer<ThemeProvider>(
+            builder: (context, themeProvider, child) {
+              return Column(
+                children: [
+                  _buildThemeSelector(
+                    l10n,
+                    themeProvider,
+                    ThemeMode.light,
+                    Icons.light_mode_rounded,
+                    l10n.getString('light_mode'),
+                  ),
+                  const SizedBox(height: 12),
+                  _buildThemeSelector(
+                    l10n,
+                    themeProvider,
+                    ThemeMode.dark,
+                    Icons.dark_mode_rounded,
+                    l10n.getString('dark_mode'),
+                  ),
+                  const SizedBox(height: 12),
+                  _buildThemeSelector(
+                    l10n,
+                    themeProvider,
+                    ThemeMode.system,
+                    Icons.brightness_auto_rounded,
+                    l10n.getString('system_theme'),
+                  ),
+                ],
+              );
+            },
           ),
         ],
       ),
     );
   }
 
-  Widget _buildSupportSection() {
-    return LinkedInCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.help, color: AppTheme.primaryBlue, size: 24),
-              const SizedBox(width: 16),
-              Text('Supporto e Aiuto', style: AppTheme.title1),
-            ],
+  Widget _buildThemeSelector(
+    AppLocalizations l10n,
+    ThemeProvider themeProvider,
+    ThemeMode mode,
+    IconData icon,
+    String title,
+  ) {
+    final isSelected = themeProvider.themeMode == mode;
+
+    return InkWell(
+      onTap: () => themeProvider.setThemeMode(mode),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppTheme.primaryBlue.withValues(alpha: 0.1)
+              : AppTheme.pureWhite,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? AppTheme.primaryBlue : AppTheme.borderGray,
+            width: isSelected ? 2 : 1,
           ),
-          const SizedBox(height: 24),
-
-          // Centro Aiuto
-          ListTile(
-            leading: Icon(Icons.help_center, color: AppTheme.accentBlue),
-            title: Text(
-              'Centro Aiuto',
-              style: AppTheme.body1.copyWith(fontWeight: FontWeight.w500),
-            ),
-            subtitle: Text(
-              'Trova risposte alle domande frequenti',
-              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: _openHelpCenter,
-          ),
-
-          const Divider(),
-
-          // Contatta Supporto
-          ListTile(
-            leading: Icon(Icons.support_agent, color: AppTheme.successGreen),
-            title: Text(
-              'Contatta Supporto',
-              style: AppTheme.body1.copyWith(fontWeight: FontWeight.w500),
-            ),
-            subtitle: Text(
-              'Richiedi assistenza dal nostro team',
-              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: _contactSupport,
-          ),
-
-          const Divider(),
-
-          // Segnala Bug
-          ListTile(
-            leading: Icon(Icons.report_problem, color: AppTheme.warningOrange),
-            title: Text(
-              'Segnala Bug',
-              style: AppTheme.body1.copyWith(fontWeight: FontWeight.w500),
-            ),
-            subtitle: Text(
-              'Aiutaci a migliorare l\'app',
-              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: _reportBug,
-          ),
-
-          const Divider(),
-
-          // Valuta App
-          ListTile(
-            leading: Icon(Icons.star, color: AppTheme.warningOrange),
-            title: Text(
-              'Valuta l\'App',
-              style: AppTheme.body1.copyWith(fontWeight: FontWeight.w500),
-            ),
-            subtitle: Text(
-              'Dai la tua opinione sull\'app store',
-              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: _rateApp,
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Metodi helper
-  String _getLanguageDisplayName(Locale? locale) {
-    switch (locale?.languageCode) {
-      case 'it':
-        return 'Italiano';
-      case 'en':
-        return 'English';
-      case 'de':
-        return 'Deutsch';
-      case 'fr':
-        return 'Français';
-      default:
-        return 'Italiano';
-    }
-  }
-
-  // Metodi per le azioni
-  void _saveSettings() {
-    // TODO: Implementare il salvataggio delle impostazioni
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Impostazioni salvate con successo!'),
-        backgroundColor: AppTheme.successGreen,
-      ),
-    );
-  }
-
-  void _changePassword() {
-    // TODO: Implementare cambio password
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Funzionalità in sviluppo')));
-  }
-
-  void _setupTwoFactorAuth() {
-    // TODO: Implementare 2FA
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Funzionalità in sviluppo')));
-  }
-
-  void _manageActiveSessions() {
-    // TODO: Implementare gestione sessioni
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Funzionalità in sviluppo')));
-  }
-
-  void _viewPrivacyPolicy() {
-    // TODO: Implementare visualizzazione privacy policy
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Funzionalità in sviluppo')));
-  }
-
-  void _showLanguageSelector() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Seleziona Lingua'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
+        ),
+        child: Row(
           children: [
-            ListTile(
-              title: const Text('Italiano'),
-              leading: const Text('🇮🇹'),
-              onTap: () {
-                context.read<LocaleProvider>().setLocale(
-                  const Locale('it', 'IT'),
-                );
-                Navigator.pop(context);
-              },
+            Icon(
+              icon,
+              color: isSelected ? AppTheme.primaryBlue : AppTheme.textGray,
+              size: 24,
             ),
-            ListTile(
-              title: const Text('English'),
-              leading: const Text('🇬🇧'),
-              onTap: () {
-                context.read<LocaleProvider>().setLocale(
-                  const Locale('en', 'US'),
-                );
-                Navigator.pop(context);
-              },
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                title,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: isSelected
+                      ? AppTheme.primaryBlue
+                      : AppTheme.textPrimary,
+                ),
+              ),
             ),
-            ListTile(
-              title: const Text('Deutsch'),
-              leading: const Text('🇩🇪'),
-              onTap: () {
-                context.read<LocaleProvider>().setLocale(
-                  const Locale('de', 'DE'),
-                );
-                Navigator.pop(context);
-              },
+            if (isSelected)
+              Icon(
+                Icons.check_circle_rounded,
+                color: AppTheme.primaryBlue,
+                size: 24,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNotificationsSection(AppLocalizations l10n, bool isTablet) {
+    return EnterpriseCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 4,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: AppTheme.successGreen,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                l10n.getString('notifications'),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          _buildSwitchTile(
+            l10n.getString('email_notifications'),
+            l10n.getString('email_notifications_desc'),
+            _emailNotifications,
+            Icons.email_outlined,
+            (value) => setState(() => _emailNotifications = value),
+          ),
+          const SizedBox(height: 12),
+          _buildSwitchTile(
+            l10n.getString('push_notifications'),
+            l10n.getString('push_notifications_desc'),
+            _pushNotifications,
+            Icons.notifications_outlined,
+            (value) => setState(() => _pushNotifications = value),
+          ),
+          const SizedBox(height: 12),
+          _buildSwitchTile(
+            l10n.getString('sms_notifications'),
+            l10n.getString('sms_notifications_desc'),
+            _smsNotifications,
+            Icons.sms_outlined,
+            (value) => setState(() => _smsNotifications = value),
+          ),
+          const SizedBox(height: 12),
+          _buildSwitchTile(
+            l10n.getString('marketing_emails'),
+            l10n.getString('marketing_emails_desc'),
+            _marketingEmails,
+            Icons.campaign_outlined,
+            (value) => setState(() => _marketingEmails = value),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSwitchTile(
+    String title,
+    String subtitle,
+    bool value,
+    IconData icon,
+    ValueChanged<bool> onChanged,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.pureWhite,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppTheme.borderGray),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: AppTheme.primaryBlue, size: 24),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: AppTheme.textGray),
+                ),
+              ],
             ),
-            ListTile(
-              title: const Text('Français'),
-              leading: const Text('🇫🇷'),
-              onTap: () {
-                context.read<LocaleProvider>().setLocale(
-                  const Locale('fr', 'FR'),
-                );
-                Navigator.pop(context);
-              },
+          ),
+          Switch(
+            value: value,
+            onChanged: onChanged,
+            activeColor: AppTheme.primaryBlue,
+            activeTrackColor: AppTheme.primaryBlue.withValues(alpha: 0.3),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPrivacySecuritySection(AppLocalizations l10n, bool isTablet) {
+    return EnterpriseCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 4,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: AppTheme.errorRed,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                l10n.getString('privacy_security'),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          _buildActionTile(
+            l10n.getString('change_password'),
+            l10n.getString('change_password_desc'),
+            Icons.lock_outline,
+            AppTheme.primaryBlue,
+            _changePassword,
+          ),
+          const SizedBox(height: 12),
+          _buildActionTile(
+            l10n.getString('two_factor_auth'),
+            l10n.getString('two_factor_auth_desc'),
+            Icons.security_outlined,
+            AppTheme.successGreen,
+            _setupTwoFactorAuth,
+          ),
+          const SizedBox(height: 12),
+          _buildActionTile(
+            l10n.getString('active_sessions'),
+            l10n.getString('active_sessions_desc'),
+            Icons.devices_outlined,
+            AppTheme.warningOrange,
+            _manageActiveSessions,
+          ),
+          const SizedBox(height: 12),
+          _buildActionTile(
+            l10n.getString('privacy_policy'),
+            l10n.getString('privacy_policy_desc'),
+            Icons.privacy_tip_outlined,
+            AppTheme.textGray,
+            _viewPrivacyPolicy,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionTile(
+    String title,
+    String subtitle,
+    IconData icon,
+    Color iconColor,
+    VoidCallback onTap,
+  ) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppTheme.pureWhite,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppTheme.borderGray),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: iconColor, size: 24),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: AppTheme.textGray),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              color: AppTheme.textGray,
+              size: 16,
             ),
           ],
         ),
@@ -697,66 +528,423 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
     );
   }
 
+  Widget _buildLanguageRegionSection(AppLocalizations l10n, bool isTablet) {
+    return EnterpriseCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 4,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: AppTheme.warningOrange,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                l10n.getString('language_region'),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          _buildActionTile(
+            l10n.getString('language'),
+            l10n.getString('language_desc'),
+            Icons.language_outlined,
+            AppTheme.primaryBlue,
+            _showLanguageSelector,
+          ),
+          const SizedBox(height: 12),
+          _buildActionTile(
+            l10n.getString('timezone'),
+            l10n.getString('timezone_desc'),
+            Icons.access_time_outlined,
+            AppTheme.successGreen,
+            _changeTimeZone,
+          ),
+          const SizedBox(height: 12),
+          _buildActionTile(
+            l10n.getString('date_format'),
+            l10n.getString('date_format_desc'),
+            Icons.calendar_today_outlined,
+            AppTheme.warningOrange,
+            _changeDateFormat,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAdvancedSection(AppLocalizations l10n, bool isTablet) {
+    return EnterpriseCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 4,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: AppTheme.textGray,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                l10n.getString('advanced'),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          _buildSwitchTile(
+            l10n.getString('auto_sync'),
+            l10n.getString('auto_sync_desc'),
+            _autoSync,
+            Icons.sync_outlined,
+            (value) => setState(() => _autoSync = value),
+          ),
+          const SizedBox(height: 12),
+          _buildSwitchTile(
+            l10n.getString('location_services'),
+            l10n.getString('location_services_desc'),
+            _locationServices,
+            Icons.location_on_outlined,
+            (value) => setState(() => _locationServices = value),
+          ),
+          const SizedBox(height: 12),
+          _buildSwitchTile(
+            l10n.getString('analytics'),
+            l10n.getString('analytics_desc'),
+            _analytics,
+            Icons.analytics_outlined,
+            (value) => setState(() => _analytics = value),
+          ),
+          const SizedBox(height: 12),
+          _buildActionTile(
+            l10n.getString('cache_storage'),
+            l10n.getString('cache_storage_desc'),
+            Icons.storage_outlined,
+            AppTheme.primaryBlue,
+            _manageCacheStorage,
+          ),
+          const SizedBox(height: 12),
+          _buildActionTile(
+            l10n.getString('backup_restore'),
+            l10n.getString('backup_restore_desc'),
+            Icons.backup_outlined,
+            AppTheme.successGreen,
+            _manageBackupRestore,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSupportSection(AppLocalizations l10n, bool isTablet) {
+    return EnterpriseCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 4,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: AppTheme.successGreen,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                l10n.getString('support'),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          _buildActionTile(
+            l10n.getString('help_center'),
+            l10n.getString('help_center_desc'),
+            Icons.help_outline,
+            AppTheme.primaryBlue,
+            _openHelpCenter,
+          ),
+          const SizedBox(height: 12),
+          _buildActionTile(
+            l10n.getString('contact_support'),
+            l10n.getString('contact_support_desc'),
+            Icons.support_agent_outlined,
+            AppTheme.successGreen,
+            _contactSupport,
+          ),
+          const SizedBox(height: 12),
+          _buildActionTile(
+            l10n.getString('report_bug'),
+            l10n.getString('report_bug_desc'),
+            Icons.bug_report_outlined,
+            AppTheme.warningOrange,
+            _reportBug,
+          ),
+          const SizedBox(height: 12),
+          _buildActionTile(
+            l10n.getString('rate_app'),
+            l10n.getString('rate_app_desc'),
+            Icons.star_outline,
+            AppTheme.warningOrange,
+            _rateApp,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAccountSection(AppLocalizations l10n, bool isTablet) {
+    return EnterpriseCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 4,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: AppTheme.errorRed,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                l10n.getString('account'),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          _buildActionTile(
+            l10n.getString('export_data'),
+            l10n.getString('export_data_desc'),
+            Icons.download_outlined,
+            AppTheme.primaryBlue,
+            _exportData,
+          ),
+          const SizedBox(height: 12),
+          _buildActionTile(
+            l10n.getString('delete_account'),
+            l10n.getString('delete_account_desc'),
+            Icons.delete_forever_outlined,
+            AppTheme.errorRed,
+            _deleteAccount,
+          ),
+          const SizedBox(height: 20),
+          NeonButton(
+            onPressed: _signOut,
+            text: l10n.getString('sign_out'),
+            icon: Icons.logout_rounded,
+            isOutlined: true,
+            neonColor: AppTheme.errorRed,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Metodi per le azioni
+  void _saveSettings() {
+    final l10n = AppLocalizations.of(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(Icons.check_circle, color: AppTheme.pureWhite),
+            const SizedBox(width: 8),
+            Text(l10n.getString('settings_saved')),
+          ],
+        ),
+        backgroundColor: AppTheme.successGreen,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+  }
+
+  void _changePassword() {
+    // TODO: Implementare cambio password con Supabase
+    _showFeatureInDevelopment(
+      AppLocalizations.of(context).getString('change_password'),
+    );
+  }
+
+  void _setupTwoFactorAuth() {
+    _showFeatureInDevelopment(
+      AppLocalizations.of(context).getString('two_factor_auth'),
+    );
+  }
+
+  void _manageActiveSessions() {
+    _showFeatureInDevelopment(
+      AppLocalizations.of(context).getString('active_sessions'),
+    );
+  }
+
+  void _viewPrivacyPolicy() {
+    _showFeatureInDevelopment(
+      AppLocalizations.of(context).getString('privacy_policy'),
+    );
+  }
+
+  void _showLanguageSelector() {
+    final l10n = AppLocalizations.of(context);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.getString('select_language')),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildLanguageOption('🇮🇹', 'Italiano', const Locale('it', 'IT')),
+            _buildLanguageOption('🇬🇧', 'English', const Locale('en', 'US')),
+            _buildLanguageOption('🇩🇪', 'Deutsch', const Locale('de', 'DE')),
+            _buildLanguageOption('🇫🇷', 'Français', const Locale('fr', 'FR')),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLanguageOption(String flag, String name, Locale locale) {
+    return ListTile(
+      leading: Text(flag, style: const TextStyle(fontSize: 24)),
+      title: Text(name),
+      onTap: () {
+        context.read<LocaleProvider>().setLocale(locale);
+        Navigator.pop(context);
+      },
+    );
+  }
+
   void _changeTimeZone() {
-    // TODO: Implementare cambio fuso orario
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Funzionalità in sviluppo')));
+    _showFeatureInDevelopment(
+      AppLocalizations.of(context).getString('timezone'),
+    );
   }
 
   void _changeDateFormat() {
-    // TODO: Implementare cambio formato data
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Funzionalità in sviluppo')));
+    _showFeatureInDevelopment(
+      AppLocalizations.of(context).getString('date_format'),
+    );
   }
 
   void _manageCacheStorage() {
-    // TODO: Implementare gestione cache
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Funzionalità in sviluppo')));
+    _showFeatureInDevelopment(
+      AppLocalizations.of(context).getString('cache_storage'),
+    );
   }
 
   void _manageBackupRestore() {
-    // TODO: Implementare backup e ripristino
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Funzionalità in sviluppo')));
-  }
-
-  void _viewDebugLogs() {
-    // TODO: Implementare visualizzazione log debug
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Funzionalità in sviluppo')));
+    _showFeatureInDevelopment(
+      AppLocalizations.of(context).getString('backup_restore'),
+    );
   }
 
   void _openHelpCenter() {
-    // TODO: Implementare centro aiuto
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Funzionalità in sviluppo')));
+    _showFeatureInDevelopment(
+      AppLocalizations.of(context).getString('help_center'),
+    );
   }
 
   void _contactSupport() {
-    // TODO: Implementare contatto supporto
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Funzionalità in sviluppo')));
+    _showFeatureInDevelopment(
+      AppLocalizations.of(context).getString('contact_support'),
+    );
   }
 
   void _reportBug() {
-    // TODO: Implementare segnalazione bug
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Funzionalità in sviluppo')));
+    _showFeatureInDevelopment(
+      AppLocalizations.of(context).getString('report_bug'),
+    );
   }
 
   void _rateApp() {
-    // TODO: Implementare valutazione app
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Funzionalità in sviluppo')));
+    _showFeatureInDevelopment(
+      AppLocalizations.of(context).getString('rate_app'),
+    );
+  }
+
+  void _exportData() {
+    _showFeatureInDevelopment(
+      AppLocalizations.of(context).getString('export_data'),
+    );
+  }
+
+  void _deleteAccount() {
+    _showFeatureInDevelopment(
+      AppLocalizations.of(context).getString('delete_account'),
+    );
+  }
+
+  void _signOut() {
+    final l10n = AppLocalizations.of(context);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.getString('sign_out')),
+        content: Text(l10n.getString('sign_out_confirmation')),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.getString('cancel')),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await context.read<AuthProvider>().signOut();
+              if (mounted) {
+                Navigator.pushReplacementNamed(context, '/login');
+              }
+            },
+            style: TextButton.styleFrom(foregroundColor: AppTheme.errorRed),
+            child: Text(l10n.getString('sign_out')),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showFeatureInDevelopment(String feature) {
+    final l10n = AppLocalizations.of(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(Icons.construction, color: AppTheme.pureWhite),
+            const SizedBox(width: 8),
+            Text('$feature - ${l10n.getString('feature_in_development')}'),
+          ],
+        ),
+        backgroundColor: AppTheme.warningOrange,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
   }
 }

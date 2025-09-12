@@ -92,7 +92,7 @@ class AppLocalizations {
       'certifier_dashboard': 'Dashboard Certificatori',
       'issued_certifications': 'Certificazioni Emesse',
       'drafts_in_progress': 'Bozze e In Corso',
-      'new_certification': 'Nuova Certificazione',
+      'new_certification': 'Nuova',
       'general_info': 'Info Generali',
       'users': 'Utenti',
       'my_certifications': 'Le Mie Certificazioni',

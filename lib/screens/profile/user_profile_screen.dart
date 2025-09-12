@@ -641,12 +641,15 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               final crossAxisCount = isTablet ? 4 : 2;
               final itemCount = 4; // Number of stat cards
               final rowCount = (itemCount / crossAxisCount).ceil();
-              
+
               // Calculate the height needed for the GridView
-              final childHeight = isTablet ? 120 : 140; // Approximate height per card
+              final childHeight = isTablet
+                  ? 120
+                  : 140; // Approximate height per card
               final mainAxisSpacing = 16.0;
-              final totalHeight = (rowCount * childHeight) + ((rowCount - 1) * mainAxisSpacing);
-              
+              final totalHeight =
+                  (rowCount * childHeight) + ((rowCount - 1) * mainAxisSpacing);
+
               return SizedBox(
                 height: totalHeight,
                 child: GridView.count(

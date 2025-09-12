@@ -9,6 +9,7 @@ import 'providers/legal_entity_provider.dart';
 import 'providers/locale_provider.dart';
 import 'providers/certifier_provider.dart';
 import 'providers/pricing_provider.dart';
+import 'providers/theme_provider.dart';
 import 'models/user.dart';
 import 'l10n/app_localizations.dart';
 import 'screens/splash_screen.dart';
@@ -46,6 +47,7 @@ class JetCVEnterpriseApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => LocaleProvider()),
         ChangeNotifierProvider(create: (_) => CertifierProvider()),
         ChangeNotifierProvider(create: (_) => PricingProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
       child: const AppContent(),
     );
@@ -123,8 +125,14 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<AuthProvider, LocaleProvider>(
-      builder: (context, authProvider, localeProvider, child) {
+    return Consumer3<AuthProvider, LocaleProvider, ThemeProvider>(
+      builder: (context, authProvider, localeProvider, themeProvider, child) {
+        // Update theme provider with system brightness
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          final brightness = MediaQuery.of(context).platformBrightness;
+          themeProvider.updateSystemTheme(brightness);
+        });
+
         return MaterialApp(
           title: AppConfig.appName,
           debugShowCheckedModeBanner: AppConfig.enableDebugMode,
@@ -143,6 +151,8 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
             AppLocalizationsDelegate(),
           ],
           theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: themeProvider.themeMode,
           builder: (context, child) {
             return Stack(
               children: [

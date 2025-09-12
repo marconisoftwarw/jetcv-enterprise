@@ -11,6 +11,7 @@ import 'create_legal_entity_screen.dart';
 import 'legal_entity_list_screen.dart';
 import '../certification/certifier_dashboard_screen.dart';
 import 'certifier_dashboard_screen.dart';
+import '../settings/user_settings_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -1120,61 +1121,6 @@ class _SettingsContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Platform Settings',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.primaryBlack,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Configure platform settings and preferences.',
-            style: TextStyle(color: AppTheme.primaryBlack, fontSize: 16),
-          ),
-          const SizedBox(height: 32),
-          GlassCard(
-            child: Padding(
-              padding: const EdgeInsets.all(40),
-              child: Center(
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.settings,
-                      size: 64,
-                      color: AppTheme.primaryBlack,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Settings Coming Soon',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.primaryBlack,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Advanced platform configuration options will be available in the next update.',
-                      style: TextStyle(
-                        color: AppTheme.primaryBlack,
-                        fontSize: 14,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+    return const UserSettingsScreen();
   }
 }

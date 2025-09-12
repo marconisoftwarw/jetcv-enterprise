@@ -56,19 +56,62 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _forgotPassword() {
     final l10n = AppLocalizations.of(context);
+
+    // Se non c'è email, mostra un dialog per inserirla
     if (_emailController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.getString('please_enter_email'))),
-      );
+      _showForgotPasswordDialog();
       return;
     }
+
+    // Se c'è già un'email, procedi direttamente
+    _sendPasswordReset(_emailController.text.trim());
+  }
+
+  void _showForgotPasswordDialog() {
+    final l10n = AppLocalizations.of(context);
+    final emailController = TextEditingController();
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(l10n.getString('reset_password')),
-        content: Text(
-          '${l10n.getString('password_reset_sent')} ${_emailController.text.trim()}',
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(Icons.lock_reset, color: AppTheme.primaryBlue),
+            const SizedBox(width: 12),
+            Text(l10n.getString('reset_password')),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.getString('reset_password_description'),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppTheme.textGray),
+            ),
+            const SizedBox(height: 20),
+            EnterpriseTextField(
+              controller: emailController,
+              label: l10n.getString('email'),
+              hint: l10n.getString('enter_email'),
+              keyboardType: TextInputType.emailAddress,
+              prefixIcon: const Icon(Icons.email_outlined),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return l10n.getString('email_required');
+                }
+                if (!RegExp(
+                  r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                ).hasMatch(value)) {
+                  return l10n.getString('email_invalid');
+                }
+                return null;
+              },
+            ),
+          ],
         ),
         actions: [
           TextButton(
@@ -76,24 +119,186 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Text(l10n.getString('cancel')),
           ),
           ElevatedButton(
-            onPressed: () async {
+            onPressed: () {
               Navigator.pop(context);
-              final authProvider = context.read<AuthProvider>();
-              await authProvider.resetPassword(_emailController.text.trim());
-
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(l10n.getString('password_reset_sent')),
-                  ),
-                );
-              }
+              _sendPasswordReset(emailController.text.trim());
             },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primaryBlue,
+              foregroundColor: AppTheme.pureWhite,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
             child: Text(l10n.getString('send')),
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _sendPasswordReset(String email) async {
+    final l10n = AppLocalizations.of(context);
+    final authProvider = context.read<AuthProvider>();
+
+    // Mostra loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(color: AppTheme.primaryBlue),
+            const SizedBox(height: 16),
+            Text(
+              l10n.getString('sending_reset_email'),
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    try {
+      await authProvider.resetPassword(email);
+
+      if (mounted) {
+        Navigator.pop(context); // Chiudi loading dialog
+
+        // Mostra success dialog
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: Row(
+              children: [
+                Icon(Icons.check_circle, color: AppTheme.successGreen),
+                const SizedBox(width: 12),
+                Text(l10n.getString('email_sent')),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.getString('password_reset_sent_to'),
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: AppTheme.primaryBlue.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Text(
+                    email,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.primaryBlue,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppTheme.warningOrange.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: AppTheme.warningOrange.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        color: AppTheme.warningOrange,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          l10n.getString('check_spam_folder'),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: AppTheme.warningOrange),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryBlue,
+                  foregroundColor: AppTheme.pureWhite,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: Text(l10n.getString('got_it')),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context); // Chiudi loading dialog
+
+        // Mostra error dialog
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: Row(
+              children: [
+                Icon(Icons.error_outline, color: AppTheme.errorRed),
+                const SizedBox(width: 12),
+                Text(l10n.getString('error')),
+              ],
+            ),
+            content: Text(
+              '${l10n.getString('reset_password_failed')}: ${e.toString()}',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(l10n.getString('ok')),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _showForgotPasswordDialog();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryBlue,
+                  foregroundColor: AppTheme.pureWhite,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: Text(l10n.getString('try_again')),
+              ),
+            ],
+          ),
+        );
+      }
+    }
   }
 
   @override
