@@ -11,7 +11,7 @@ import '../../l10n/app_localizations.dart';
 
 class UserProfileScreen extends StatefulWidget {
   final bool hideMenu;
-  
+
   const UserProfileScreen({super.key, this.hideMenu = false});
 
   @override
@@ -113,12 +113,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           }
 
           // Aggiorna i controller quando l'utente è disponibile
-          if (authProvider.currentUser != null &&
-              _currentUser == null) {
+          if (authProvider.currentUser != null && _currentUser == null) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              _updateControllersWithUserData(
-                authProvider.currentUser!,
-              );
+              _updateControllersWithUserData(authProvider.currentUser!);
             });
           }
 
@@ -128,9 +125,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   if (authProvider.isLoading)
-                    CircularProgressIndicator(
-                      color: AppTheme.primaryBlue,
-                    )
+                    CircularProgressIndicator(color: AppTheme.primaryBlue)
                   else
                     Icon(
                       Icons.person_off_rounded,
@@ -142,8 +137,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     authProvider.isLoading
                         ? l10n.getString('loading_profile')
                         : l10n.getString('no_user_data'),
-                    style: Theme.of(context).textTheme.bodyLarge
-                        ?.copyWith(color: AppTheme.textGray),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyLarge?.copyWith(color: AppTheme.textGray),
                   ),
                   if (!authProvider.isLoading) ...[
                     const SizedBox(height: 16),
@@ -167,20 +163,12 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Header con foto profilo e informazioni principali
-                _buildProfileHeader(
-                  authProvider.currentUser!,
-                  l10n,
-                  isTablet,
-                ),
+                _buildProfileHeader(authProvider.currentUser!, l10n, isTablet),
 
                 const SizedBox(height: 32),
 
                 // Statistiche e metriche
-                _buildStatsSection(
-                  authProvider.currentUser!,
-                  l10n,
-                  isTablet,
-                ),
+                _buildStatsSection(authProvider.currentUser!, l10n, isTablet),
 
                 const SizedBox(height: 32),
 

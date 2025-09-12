@@ -164,7 +164,7 @@ class GlobalHamburgerMenu extends StatelessWidget {
             isExpanded: isExpanded,
           ),
         ];
-      
+
       case AppUserType.legalEntity:
         return [
           _buildMenuItem(
@@ -186,7 +186,7 @@ class GlobalHamburgerMenu extends StatelessWidget {
             isExpanded: isExpanded,
           ),
         ];
-      
+
       case AppUserType.certifier:
         return [
           _buildMenuItem(
@@ -208,7 +208,7 @@ class GlobalHamburgerMenu extends StatelessWidget {
             isExpanded: isExpanded,
           ),
         ];
-      
+
       case AppUserType.user:
       default:
         return [
@@ -270,7 +270,10 @@ class GlobalHamburgerMenu extends StatelessWidget {
     );
   }
 
-  Widget _buildLogoutItem({required bool isExpanded, required AppLocalizations l10n}) {
+  Widget _buildLogoutItem({
+    required bool isExpanded,
+    required AppLocalizations l10n,
+  }) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(

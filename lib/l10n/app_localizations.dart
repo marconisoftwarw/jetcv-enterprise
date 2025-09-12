@@ -233,7 +233,8 @@ class AppLocalizations {
           'Le tue bozze e certificazioni in corso appariranno qui',
       'logout': 'Esci',
       'logout_confirmation': 'Conferma Logout',
-      'logout_confirmation_message': 'Sei sicuro di voler uscire dall\'applicazione?',
+      'logout_confirmation_message':
+          'Sei sicuro di voler uscire dall\'applicazione?',
       'language': 'Lingua',
       'theme': 'Tema',
       'dark_mode': 'Modalità Scura',
@@ -621,7 +622,8 @@ class AppLocalizations {
       'settings': 'Einstellungen',
       'logout': 'Abmelden',
       'logout_confirmation': 'Abmeldung bestätigen',
-      'logout_confirmation_message': 'Sind Sie sicher, dass Sie sich abmelden möchten?',
+      'logout_confirmation_message':
+          'Sind Sie sicher, dass Sie sich abmelden möchten?',
       'language': 'Sprache',
       'theme': 'Thema',
       'dark_mode': 'Dunkler Modus',
@@ -802,7 +804,8 @@ class AppLocalizations {
       'settings': 'Paramètres',
       'logout': 'Déconnexion',
       'logout_confirmation': 'Confirmer la Déconnexion',
-      'logout_confirmation_message': 'Êtes-vous sûr de vouloir vous déconnecter?',
+      'logout_confirmation_message':
+          'Êtes-vous sûr de vouloir vous déconnecter?',
       'language': 'Langue',
       'theme': 'Thème',
       'dark_mode': 'Mode sombre',

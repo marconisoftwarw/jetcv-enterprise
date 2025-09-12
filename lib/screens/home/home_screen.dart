@@ -318,7 +318,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
 class _DashboardContent extends StatelessWidget {
   final AppLocalizations l10n;
-  
+
   const _DashboardContent({required this.l10n});
 
   @override
@@ -427,7 +427,10 @@ class _DashboardContent extends StatelessWidget {
     );
   }
 
-  Widget _buildCertificationsChart(BuildContext context, AppLocalizations l10n) {
+  Widget _buildCertificationsChart(
+    BuildContext context,
+    AppLocalizations l10n,
+  ) {
     // Dati di esempio per il grafico (negli ultimi 6 mesi)
     final List<FlSpot> spots = [
       const FlSpot(0, 5), // Gennaio

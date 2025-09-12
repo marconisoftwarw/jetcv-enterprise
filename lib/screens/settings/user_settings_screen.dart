@@ -159,7 +159,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
                       // Header con informazioni utente
                       _buildUserHeader(l10n, isTablet),
 
-            const SizedBox(height: 32),
+                      const SizedBox(height: 32),
 
                       // Sezione Aspetto
                       _buildAppearanceSection(l10n, isTablet),
@@ -179,7 +179,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
                       // Sezione Supporto
                       _buildSupportSection(l10n, isTablet),
 
-            const SizedBox(height: 32),
+                      const SizedBox(height: 32),
 
                       // Sezione Account
                       _buildAccountSection(l10n, isTablet),
@@ -333,7 +333,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
                   ),
                   Switch(
                     value: themeProvider.isDarkMode,
-            onChanged: (value) {
+                    onChanged: (value) {
                       themeProvider.toggleTheme();
                     },
                     activeColor: AppTheme.primaryBlue,
@@ -745,7 +745,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
           ),
           TextButton(
             onPressed: () async {
-                Navigator.pop(context);
+              Navigator.pop(context);
               await context.read<AuthProvider>().signOut();
               if (mounted) {
                 Navigator.pushReplacementNamed(context, '/login');
