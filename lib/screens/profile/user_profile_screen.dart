@@ -635,51 +635,68 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             ],
           ),
           const SizedBox(height: 24),
-          GridView.count(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: isTablet ? 4 : 2,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            childAspectRatio: isTablet ? 1.2 : 1.1,
-            children: [
-              _buildStatCard(
-                l10n.getString('certifications'),
-                '0',
-                Icons.verified_rounded,
-                AppTheme.successGreen,
-                l10n.getString('total_certifications'),
-                '+0',
-                true,
-              ),
-              _buildStatCard(
-                l10n.getString('last_access'),
-                _formatLastAccess(user.updatedAt),
-                Icons.access_time_rounded,
-                AppTheme.primaryBlue,
-                l10n.getString('last_activity'),
-                null,
-                null,
-              ),
-              _buildStatCard(
-                l10n.getString('account_status'),
-                l10n.getString('active'),
-                Icons.check_circle_rounded,
-                AppTheme.successGreen,
-                l10n.getString('verified'),
-                null,
-                null,
-              ),
-              _buildStatCard(
-                l10n.getString('profile_completion'),
-                '${_calculateProfileCompletion(user)}%',
-                Icons.person_rounded,
-                AppTheme.warningOrange,
-                l10n.getString('completion_rate'),
-                null,
-                null,
-              ),
-            ],
+          LayoutBuilder(
+            builder: (context, constraints) {
+              // Calculate the number of rows needed based on crossAxisCount
+              final crossAxisCount = isTablet ? 4 : 2;
+              final itemCount = 4; // Number of stat cards
+              final rowCount = (itemCount / crossAxisCount).ceil();
+              
+              // Calculate the height needed for the GridView
+              final childHeight = isTablet ? 120 : 140; // Approximate height per card
+              final mainAxisSpacing = 16.0;
+              final totalHeight = (rowCount * childHeight) + ((rowCount - 1) * mainAxisSpacing);
+              
+              return SizedBox(
+                height: totalHeight,
+                child: GridView.count(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: crossAxisCount,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: mainAxisSpacing,
+                  childAspectRatio: isTablet ? 1.2 : 1.1,
+                  children: [
+                    _buildStatCard(
+                      l10n.getString('certifications'),
+                      '0',
+                      Icons.verified_rounded,
+                      AppTheme.successGreen,
+                      l10n.getString('total_certifications'),
+                      '+0',
+                      true,
+                    ),
+                    _buildStatCard(
+                      l10n.getString('last_access'),
+                      _formatLastAccess(user.updatedAt),
+                      Icons.access_time_rounded,
+                      AppTheme.primaryBlue,
+                      l10n.getString('last_activity'),
+                      null,
+                      null,
+                    ),
+                    _buildStatCard(
+                      l10n.getString('account_status'),
+                      l10n.getString('active'),
+                      Icons.check_circle_rounded,
+                      AppTheme.successGreen,
+                      l10n.getString('verified'),
+                      null,
+                      null,
+                    ),
+                    _buildStatCard(
+                      l10n.getString('profile_completion'),
+                      '${_calculateProfileCompletion(user)}%',
+                      Icons.person_rounded,
+                      AppTheme.warningOrange,
+                      l10n.getString('completion_rate'),
+                      null,
+                      null,
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
         ],
       ),
