@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import '../models/legal_entity_invitation.dart';
 import '../services/supabase_service.dart';
 import '../services/email_service.dart';
@@ -44,7 +45,7 @@ class InvitationProvider extends ChangeNotifier {
       );
 
       _invitations = invitations;
-      notifyListeners();
+      _safeNotifyListeners();
     } catch (e) {
       _setError('Errore nel caricamento degli inviti: $e');
     } finally {
@@ -63,7 +64,7 @@ class InvitationProvider extends ChangeNotifier {
       );
 
       _invitations = invitations;
-      notifyListeners();
+      _safeNotifyListeners();
     } catch (e) {
       _setError('Errore nel caricamento degli inviti: $e');
     } finally {
@@ -267,23 +268,30 @@ class InvitationProvider extends ChangeNotifier {
   // Metodi privati per la gestione dello stato
   void _setLoading(bool loading) {
     _isLoading = loading;
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   void _setError(String error) {
     _errorMessage = error;
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   void _clearError() {
     _errorMessage = null;
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   // Pulisce la cache locale
   void clearCache() {
     _invitations.clear();
     _errorMessage = null;
-    notifyListeners();
+    _safeNotifyListeners();
+  }
+
+  void _safeNotifyListeners() {
+    // Evita di chiamare notifyListeners durante la fase di build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      notifyListeners();
+    });
   }
 }

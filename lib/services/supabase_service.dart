@@ -314,6 +314,54 @@ class SupabaseService {
     }
   }
 
+  // New method for creating legal entity with user in one operation
+  Future<Map<String, dynamic>?> createLegalEntityWithUser({
+    required Map<String, dynamic> userData,
+    required Map<String, dynamic> legalEntityData,
+  }) async {
+    try {
+      print('🔄 SupabaseService: Creating legal entity with user via Edge Function...');
+      print('🔄 SupabaseService: User data: $userData');
+      print('🔄 SupabaseService: Legal entity data: $legalEntityData');
+
+      final response = await _client.functions.invoke(
+        'create-legal-entity-with-user',
+        body: {
+          'userData': userData,
+          'legalEntityData': legalEntityData,
+        },
+      );
+
+      print(
+        '🔄 SupabaseService: Edge Function response status: ${response.status}',
+      );
+      print(
+        '🔄 SupabaseService: Edge Function response data: ${response.data}',
+      );
+
+      if (response.status != 200 && response.status != 201) {
+        print(
+          '❌ SupabaseService: Edge Function error: Status ${response.status}',
+        );
+        return null;
+      }
+
+      final data = response.data;
+      if (data == null || data['ok'] != true) {
+        print(
+          '❌ SupabaseService: Edge Function error: ${data?['message'] ?? 'Unknown error'}',
+        );
+        return null;
+      }
+
+      print('✅ SupabaseService: Legal entity and user created successfully via Edge Function');
+      return data['data'];
+    } catch (e) {
+      print('❌ SupabaseService: Error creating legal entity with user via Edge Function: $e');
+      return null;
+    }
+  }
+
   // Metodo per recuperare utenti via Edge Function (bypass RLS)
   Future<app_models.AppUser?> getUserViaEdgeFunction(String userId) async {
     try {

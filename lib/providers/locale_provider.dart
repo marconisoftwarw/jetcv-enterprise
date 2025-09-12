@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LocaleProvider extends ChangeNotifier {
@@ -15,7 +16,7 @@ class LocaleProvider extends ChangeNotifier {
     final languageCode = prefs.getString('language_code') ?? 'it';
     final countryCode = prefs.getString('country_code') ?? 'IT';
     _locale = Locale(languageCode, countryCode);
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   Future<void> setLocale(Locale newLocale) async {
@@ -28,7 +29,7 @@ class LocaleProvider extends ChangeNotifier {
     await prefs.setString('language_code', newLocale.languageCode);
     await prefs.setString('country_code', newLocale.countryCode ?? '');
 
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   String getLanguageName(String languageCode) {
@@ -53,5 +54,12 @@ class LocaleProvider extends ChangeNotifier {
       {'code': 'de', 'name': 'Deutsch', 'flag': '🇩🇪'},
       {'code': 'fr', 'name': 'Français', 'flag': '🇫🇷'},
     ];
+  }
+
+  void _safeNotifyListeners() {
+    // Evita di chiamare notifyListeners durante la fase di build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      notifyListeners();
+    });
   }
 }

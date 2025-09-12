@@ -73,7 +73,10 @@ class _LegalEntityPublicRegistrationScreenState
   void initState() {
     super.initState();
     _loadUrlParameters();
-    _loadPricingData();
+    // Carica i dati dei pricing dopo che il widget è stato costruito
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadPricingData();
+    });
   }
 
   Future<void> _loadPricingData() async {
@@ -133,9 +136,9 @@ class _LegalEntityPublicRegistrationScreenState
               child: IndexedStack(
                 index: _currentStep,
                 children: [
-                  if (_currentStep == 0) _buildPricingStep(),
-                  if (_currentStep == 1) _buildPersonalInfoStep(),
-                  if (_currentStep == 2) _buildLegalEntityStep(),
+                  _buildPricingStep(),
+                  _buildPersonalInfoStep(),
+                  _buildLegalEntityStep(),
                 ],
               ),
             ),
@@ -797,12 +800,12 @@ class _LegalEntityPublicRegistrationScreenState
         }
         break;
       case 1:
-        if (!_personalFormKey.currentState!.validate()) {
+        if (_personalFormKey.currentState == null || !_personalFormKey.currentState!.validate()) {
           return false;
         }
         break;
       case 2:
-        if (!_entityFormKey.currentState!.validate()) {
+        if (_entityFormKey.currentState == null || !_entityFormKey.currentState!.validate()) {
           return false;
         }
         break;
@@ -846,19 +849,14 @@ class _LegalEntityPublicRegistrationScreenState
         firstName: _personalNameController.text.split(' ').first,
         lastName: _personalNameController.text.split(' ').length > 1
             ? _personalNameController.text.split(' ').skip(1).join(' ')
-            : '',
+            : 'N/A',
         email: _personalEmailController.text,
         phone: _personalPhoneController.text,
         profilePicture: personalProfileUrl,
         fullName: _personalNameController.text,
       );
 
-      final createdUser = await _supabaseService.createUser(user.toJson());
-      if (createdUser == null) {
-        throw Exception('Errore nella creazione dell\'utente');
-      }
-
-      // 3. Create legal entity
+      // 3. Create legal entity data
       final legalEntity = LegalEntity(
         idLegalEntity: const Uuid().v4(),
         idLegalEntityHash: const Uuid().v4(),
@@ -884,14 +882,23 @@ class _LegalEntityPublicRegistrationScreenState
         status: LegalEntityStatus.pending,
       );
 
-      final createdEntity = await _supabaseService.createLegalEntity(
-        legalEntity.toJson(),
+      // 4. Create both user and legal entity in one operation
+      final result = await _supabaseService.createLegalEntityWithUser(
+        userData: user.toJson(),
+        legalEntityData: {
+          ...legalEntity.toJson(),
+          'createdByIdUser': user.idUser,
+        },
       );
-      if (createdEntity == null) {
-        throw Exception('Errore nella creazione dell\'entità legale');
+      
+      if (result == null) {
+        throw Exception('Errore nella creazione dell\'utente e dell\'entità legale');
       }
 
-      // 4. Create pricing record (temporary/mock for now)
+      final createdUser = result['user'];
+      final createdEntity = result['legalEntity'];
+
+      // 5. Create pricing record (temporary/mock for now)
       if (_selectedPricing != null) {
         // TODO: Implement actual pricing purchase and database storage
         print(
@@ -904,7 +911,7 @@ class _LegalEntityPublicRegistrationScreenState
         // - Set expiration date
       }
 
-      // 5. Show success message
+      // 6. Show success message
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

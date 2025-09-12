@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import '../models/certifier.dart';
 import '../services/certifier_service.dart';
 
@@ -71,7 +72,7 @@ class CertifierProvider extends ChangeNotifier {
     try {
       final certifiers = await _certifierService.getAllCertifiers();
       _certifiers = certifiers;
-      notifyListeners();
+      _safeNotifyListeners();
     } catch (e) {
       _setError('Errore nel caricamento dei certificatori: $e');
     } finally {
@@ -89,7 +90,7 @@ class CertifierProvider extends ChangeNotifier {
         legalEntityId,
       );
       _certifiers = certifiers;
-      notifyListeners();
+      _safeNotifyListeners();
     } catch (e) {
       _setError('Errore nel caricamento dei certificatori: $e');
     } finally {
@@ -116,7 +117,7 @@ class CertifierProvider extends ChangeNotifier {
       final success = await _certifierService.createCertifier(certifier);
       if (success) {
         _certifiers.add(certifier);
-        notifyListeners();
+        _safeNotifyListeners();
       }
       return success;
     } catch (e) {
@@ -140,7 +141,7 @@ class CertifierProvider extends ChangeNotifier {
         );
         if (index != -1) {
           _certifiers[index] = certifier;
-          notifyListeners();
+          _safeNotifyListeners();
         }
       }
       return success;
@@ -161,7 +162,7 @@ class CertifierProvider extends ChangeNotifier {
       final success = await _certifierService.deleteCertifier(idCertifier);
       if (success) {
         _certifiers.removeWhere((c) => c.idCertifier == idCertifier);
-        notifyListeners();
+        _safeNotifyListeners();
       }
       return success;
     } catch (e) {
@@ -317,7 +318,7 @@ class CertifierProvider extends ChangeNotifier {
     _filterLegalEntityId = legalEntityId;
     _filterRole = role;
     _filterActiveOnly = activeOnly ?? _filterActiveOnly;
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   // Pulisce i filtri
@@ -325,18 +326,18 @@ class CertifierProvider extends ChangeNotifier {
     _filterLegalEntityId = null;
     _filterRole = null;
     _filterActiveOnly = true;
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   // Metodi privati per la gestione dello stato
   void _setLoading(bool loading) {
     _isLoading = loading;
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   void _setError(String message) {
     _errorMessage = message;
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   void _clearError() {
@@ -347,6 +348,13 @@ class CertifierProvider extends ChangeNotifier {
   void clearCache() {
     _certifiers.clear();
     _errorMessage = null;
-    notifyListeners();
+    _safeNotifyListeners();
+  }
+
+  void _safeNotifyListeners() {
+    // Evita di chiamare notifyListeners durante la fase di build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      notifyListeners();
+    });
   }
 }

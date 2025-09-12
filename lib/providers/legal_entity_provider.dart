@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import '../models/legal_entity.dart';
 import '../models/legal_entity_invitation.dart';
 import '../services/supabase_service.dart';
@@ -69,7 +70,7 @@ class LegalEntityProvider extends ChangeNotifier {
         '🔄 LegalEntityProvider: Entity names: ${_legalEntities.map((e) => e.legalName).join(', ')}',
       );
 
-      notifyListeners();
+      _safeNotifyListeners();
     } catch (e) {
       print('❌ LegalEntityProvider: Error loading legal entities: $e');
       _setError('Failed to load legal entities: $e');
@@ -132,7 +133,7 @@ class LegalEntityProvider extends ChangeNotifier {
         print(
           '🔄 LegalEntityProvider: Local state updated, notifying listeners...',
         );
-        notifyListeners();
+        _safeNotifyListeners();
         print('✅ LegalEntityProvider: Upsert completed successfully');
         return entity;
       }
@@ -186,7 +187,7 @@ class LegalEntityProvider extends ChangeNotifier {
         final index = _legalEntities.indexWhere((e) => e.idLegalEntity == id);
         if (index != -1) {
           _legalEntities[index] = updatedEntity;
-          notifyListeners();
+          _safeNotifyListeners();
         }
         print('✅ LegalEntityProvider: Legal entity approved successfully');
         return true;
@@ -232,7 +233,7 @@ class LegalEntityProvider extends ChangeNotifier {
         final index = _legalEntities.indexWhere((e) => e.idLegalEntity == id);
         if (index != -1) {
           _legalEntities[index] = updatedEntity;
-          notifyListeners();
+          _safeNotifyListeners();
         }
         print('✅ LegalEntityProvider: Legal entity rejected successfully');
         return true;
@@ -263,7 +264,7 @@ class LegalEntityProvider extends ChangeNotifier {
 
       if (entity != null) {
         _selectedLegalEntity = entity;
-        notifyListeners();
+        _safeNotifyListeners();
         return entity;
       }
 
@@ -344,7 +345,7 @@ class LegalEntityProvider extends ChangeNotifier {
         final index = _legalEntities.indexWhere((e) => e.idLegalEntity == id);
         if (index != -1) {
           _legalEntities[index] = updatedEntity;
-          notifyListeners();
+          _safeNotifyListeners();
         }
         print(
           '✅ LegalEntityProvider: Legal entity status updated successfully',
@@ -382,7 +383,7 @@ class LegalEntityProvider extends ChangeNotifier {
 
         if (initialCount > finalCount) {
           print('✅ LegalEntityProvider: Entity removed from local state');
-          notifyListeners();
+          _safeNotifyListeners();
         } else {
           print('⚠️ LegalEntityProvider: Entity not found in local state');
         }
@@ -625,5 +626,12 @@ class LegalEntityProvider extends ChangeNotifier {
   double get rejectionRate {
     if (totalCount == 0) return 0.0;
     return (rejectedCount / totalCount) * 100;
+  }
+
+  void _safeNotifyListeners() {
+    // Evita di chiamare notifyListeners durante la fase di build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _safeNotifyListeners();
+    });
   }
 }

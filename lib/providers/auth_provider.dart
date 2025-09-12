@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import '../models/user.dart';
 import '../services/supabase_service.dart';
 import '../services/user_type_service.dart';
@@ -59,12 +60,12 @@ class AuthProvider extends ChangeNotifier {
                   ? DateTime.parse(supabaseUser.updatedAt!)
                   : null,
             );
-            notifyListeners();
+            _safeNotifyListeners();
           }
           // Imposta tipo utente di default se non è stato caricato
           if (_userType == null) {
             _userType = AppUserType.user;
-            notifyListeners();
+            _safeNotifyListeners();
           }
           return true;
         }
@@ -73,7 +74,7 @@ class AuthProvider extends ChangeNotifier {
         // No valid session, clear user data
         if (_currentUser != null) {
           _currentUser = null;
-          notifyListeners();
+          _safeNotifyListeners();
         }
         return false;
       }
@@ -92,7 +93,7 @@ class AuthProvider extends ChangeNotifier {
       if (!_supabaseService.hasValidSession) {
         print('AuthProvider: No valid Supabase session found');
         _currentUser = null;
-        notifyListeners();
+        _safeNotifyListeners();
         return false;
       }
 
@@ -100,7 +101,7 @@ class AuthProvider extends ChangeNotifier {
       if (supabaseUser == null) {
         print('AuthProvider: No Supabase user found despite valid session');
         _currentUser = null;
-        notifyListeners();
+        _safeNotifyListeners();
         return false;
       }
 
@@ -253,7 +254,7 @@ class AuthProvider extends ChangeNotifier {
           _userType = AppUserType.user;
         }
 
-        notifyListeners();
+        _safeNotifyListeners();
         return true;
       }
 
@@ -337,7 +338,7 @@ class AuthProvider extends ChangeNotifier {
     try {
       await _supabaseService.signOut();
       _currentUser = null;
-      notifyListeners();
+      _safeNotifyListeners();
     } catch (e) {
       _setError('Sign out failed: $e');
     } finally {
@@ -372,7 +373,7 @@ class AuthProvider extends ChangeNotifier {
 
       if (updatedUser != null) {
         _currentUser = updatedUser;
-        notifyListeners();
+        _safeNotifyListeners();
       }
     } catch (e) {
       _setError('Profile update failed: $e');
@@ -410,7 +411,7 @@ class AuthProvider extends ChangeNotifier {
               ? DateTime.parse(supabaseUser.updatedAt!)
               : null,
         );
-        notifyListeners();
+        _safeNotifyListeners();
       }
     } catch (e) {
       _setError('Failed to refresh user data: $e');
@@ -444,17 +445,17 @@ class AuthProvider extends ChangeNotifier {
 
   void _setLoading(bool loading) {
     _isLoading = loading;
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   void _setError(String error) {
     _errorMessage = error;
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   void _clearError() {
     _errorMessage = null;
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   void clearError() {
@@ -524,17 +525,17 @@ class AuthProvider extends ChangeNotifier {
       if (userTypeString != null) {
         _userType = userTypeString.toUserType;
         print('✅ User type loaded: $_userType');
-        notifyListeners();
+        _safeNotifyListeners();
       } else {
         print('⚠️ No user type received, using default');
         _userType = AppUserType.user;
-        notifyListeners();
+        _safeNotifyListeners();
       }
     } catch (e) {
       print('❌ Error loading user type: $e');
       print('🔄 Using default user type');
       _userType = AppUserType.user;
-      notifyListeners();
+      _safeNotifyListeners();
     }
   }
 
@@ -557,17 +558,24 @@ class AuthProvider extends ChangeNotifier {
       if (userTypeString != null) {
         _userType = userTypeString.toUserType;
         print('✅ User type loaded: $_userType');
-        notifyListeners();
+        _safeNotifyListeners();
       } else {
         print('⚠️ No user type received, using default');
         _userType = AppUserType.user;
-        notifyListeners();
+        _safeNotifyListeners();
       }
     } catch (e) {
       print('❌ Error loading user type: $e');
       print('🔄 Using default user type');
       _userType = AppUserType.user;
-      notifyListeners();
+      _safeNotifyListeners();
     }
+  }
+
+  void _safeNotifyListeners() {
+    // Evita di chiamare notifyListeners durante la fase di build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      notifyListeners();
+    });
   }
 }

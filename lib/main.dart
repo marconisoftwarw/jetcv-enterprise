@@ -113,7 +113,12 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
       // Listen to auth state changes
       authProvider.addListener(() {
         if (mounted) {
-          setState(() {});
+          // Use addPostFrameCallback to avoid setState during build
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              setState(() {});
+            }
+          });
         }
       });
 
@@ -127,11 +132,13 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return Consumer3<AuthProvider, LocaleProvider, ThemeProvider>(
       builder: (context, authProvider, localeProvider, themeProvider, child) {
-        // Update theme provider with system brightness
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          final brightness = MediaQuery.of(context).platformBrightness;
-          themeProvider.updateSystemTheme(brightness);
-        });
+        // Update theme provider with system brightness (moved to avoid build conflicts)
+        final brightness = MediaQuery.of(context).platformBrightness;
+        if (themeProvider.themeMode == ThemeMode.system) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            themeProvider.updateSystemTheme(brightness);
+          });
+        }
 
         return MaterialApp(
           title: AppConfig.appName,

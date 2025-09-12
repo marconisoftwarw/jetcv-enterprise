@@ -134,13 +134,40 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void _validateAndResetSelectedIndex(AppUserType userType) {
+    int maxIndex;
+    switch (userType) {
+      case AppUserType.admin:
+        maxIndex = 4; // 5 items (0-4)
+        break;
+      case AppUserType.legalEntity:
+        maxIndex = 2; // 3 items (0-2)
+        break;
+      case AppUserType.certifier:
+        maxIndex = 2; // 3 items (0-2)
+        break;
+      case AppUserType.user:
+        maxIndex = 1; // 2 items (0-1)
+        break;
+      default:
+        maxIndex = 1;
+        break;
+    }
+
+    if (_selectedIndex > maxIndex) {
+      setState(() {
+        _selectedIndex = 0; // Reset to first item
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
-        // Controllo sicuro per verificare se l'utente è admin basato sul database
-        // final user = authProvider.currentUser;
-        // final isAdmin = user?.isAdminFromDatabase ?? false;
+        // Reset selectedIndex if it's out of range for current user type
+        final currentUserType = authProvider.userType ?? AppUserType.user;
+        _validateAndResetSelectedIndex(currentUserType);
 
         return Scaffold(
           appBar: MediaQuery.of(context).size.width <= 768
@@ -271,10 +298,8 @@ class _HomeScreenState extends State<HomeScreen> {
       case 0:
         return _DashboardContent(l10n: l10n);
       case 1:
-        return const CertificationListScreen();
+        return _buildLegalEntitiesManagementContent(l10n);
       case 2:
-        return const UserSettingsScreen(hideMenu: true);
-      case 3:
         return const UserProfileScreen(hideMenu: true);
       default:
         return _DashboardContent(l10n: l10n);
@@ -285,13 +310,13 @@ class _HomeScreenState extends State<HomeScreen> {
     final l10n = AppLocalizations.of(context);
     switch (_selectedIndex) {
       case 0:
-        return const CertificationListScreen();
+        return _DashboardContent(l10n: l10n);
       case 1:
-        return const UserSettingsScreen(hideMenu: true);
+        return const CertificationListScreen();
       case 2:
         return const UserProfileScreen(hideMenu: true);
       default:
-        return const CertificationListScreen();
+        return _DashboardContent(l10n: l10n);
     }
   }
 

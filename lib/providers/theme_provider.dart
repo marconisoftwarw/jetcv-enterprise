@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ThemeProvider extends ChangeNotifier {
@@ -39,7 +40,7 @@ class ThemeProvider extends ChangeNotifier {
       print('Error saving theme: $e');
     }
 
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   void _updateDarkMode() {
@@ -59,7 +60,7 @@ class ThemeProvider extends ChangeNotifier {
   void updateSystemTheme(Brightness brightness) {
     if (_themeMode == ThemeMode.system) {
       _isDarkMode = brightness == Brightness.dark;
-      notifyListeners();
+      _safeNotifyListeners();
     }
   }
 
@@ -79,5 +80,12 @@ class ThemeProvider extends ChangeNotifier {
 
   Future<void> setSystemMode() async {
     await setThemeMode(ThemeMode.system);
+  }
+
+  void _safeNotifyListeners() {
+    // Evita di chiamare notifyListeners durante la fase di build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      notifyListeners();
+    });
   }
 }

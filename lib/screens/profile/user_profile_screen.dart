@@ -106,15 +106,18 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         builder: (context, authProvider, child) {
           // Carica i dati dell'utente se non sono disponibili
           if (authProvider.isAuthenticated &&
-              authProvider.currentUser == null) {
-            WidgetsBinding.instance.addPostFrameCallback((_) async {
+              authProvider.currentUser == null &&
+              !authProvider.isLoading) {
+            // Usa Future.microtask invece di addPostFrameCallback per evitare conflitti
+            Future.microtask(() async {
               await authProvider.loadUserData();
             });
           }
 
           // Aggiorna i controller quando l'utente è disponibile
           if (authProvider.currentUser != null && _currentUser == null) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
+            // Usa Future.microtask invece di addPostFrameCallback
+            Future.microtask(() {
               _updateControllersWithUserData(authProvider.currentUser!);
             });
           }
@@ -320,8 +323,10 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   builder: (context, authProvider, child) {
                     // Carica i dati dell'utente se non sono disponibili
                     if (authProvider.isAuthenticated &&
-                        authProvider.currentUser == null) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) async {
+                        authProvider.currentUser == null &&
+                        !authProvider.isLoading) {
+                      // Usa Future.microtask invece di addPostFrameCallback per evitare conflitti
+                      Future.microtask(() async {
                         await authProvider.loadUserData();
                       });
                     }
@@ -329,7 +334,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     // Aggiorna i controller quando l'utente è disponibile
                     if (authProvider.currentUser != null &&
                         _currentUser == null) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                      // Usa Future.microtask invece di addPostFrameCallback
+                      Future.microtask(() {
                         _updateControllersWithUserData(
                           authProvider.currentUser!,
                         );

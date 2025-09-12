@@ -84,7 +84,7 @@ class PublicHomeScreen extends StatelessWidget {
 
                     // Testimonials Section
                     _buildTestimonialsSection(
-                      context,
+                        context,
                       l10n,
                       isDesktop,
                       isTablet,
@@ -124,7 +124,7 @@ class PublicHomeScreen extends StatelessWidget {
         ),
       ),
       child: Stack(
-        children: [
+                      children: [
           // Background Pattern
           Positioned.fill(
             child: Opacity(
@@ -152,6 +152,7 @@ class PublicHomeScreen extends StatelessWidget {
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   // Logo/Brand
                   Container(
@@ -218,18 +219,18 @@ class PublicHomeScreen extends StatelessWidget {
                           context,
                           l10n.getString('register_company'),
                           () => Navigator.pushNamed(
-                            context,
+                              context,
                             '/legal-entity/register',
                           ),
                           isPrimary: true,
                         ),
                         const SizedBox(width: 20),
                         _buildHeroButton(
-                          context,
+                              context,
                           l10n.getString('view_pricing'),
                           () => Navigator.pushNamed(
-                            context,
-                            '/legal-entity/pricing',
+                                context,
+                                '/legal-entity/pricing',
                           ),
                         ),
                       ],
@@ -252,17 +253,17 @@ class PublicHomeScreen extends StatelessWidget {
                           context,
                           l10n.getString('view_pricing'),
                           () => Navigator.pushNamed(
-                            context,
+                                context,
                             '/legal-entity/pricing',
                           ),
                           isFullWidth: true,
                         ),
                       ],
                     ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
         ],
       ),
     );
@@ -351,12 +352,12 @@ class PublicHomeScreen extends StatelessWidget {
     bool isTablet,
   ) {
     return Column(
-      children: [
-        Text(
+                  children: [
+                    Text(
           l10n.getString('professional_certification_platform'),
           style: Theme.of(context).textTheme.displayMedium?.copyWith(
-            color: AppTheme.textPrimary,
-            fontWeight: FontWeight.w700,
+                            color: AppTheme.textPrimary,
+                            fontWeight: FontWeight.w700,
             letterSpacing: -0.5,
             fontSize: isDesktop ? 42 : (isTablet ? 36 : 28),
           ),
@@ -385,7 +386,7 @@ class PublicHomeScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: _buildModernButton(
-                  context,
+                        context,
                   l10n.getString('create_certification'),
                   () => _showLoginPrompt(context, l10n),
                   icon: Icons.verified_user_rounded,
@@ -425,7 +426,7 @@ class PublicHomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Row(
-                children: [
+                  children: [
                   Expanded(
                     child: _buildModernButton(
                       context,
@@ -440,16 +441,16 @@ class PublicHomeScreen extends StatelessWidget {
                   const SizedBox(width: 16),
                   Expanded(
                     child: _buildModernButton(
-                      context,
+                        context,
                       l10n.getString('explore_cvs'),
                       () => Navigator.pushNamed(context, '/cv-list'),
                       icon: Icons.description_rounded,
                     ),
                   ),
                 ],
-              ),
-            ],
-          ),
+                    ),
+                  ],
+                ),
       ],
     );
   }
@@ -560,7 +561,7 @@ class PublicHomeScreen extends StatelessWidget {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+            children: [
         Text(
           l10n.getString('key_features'),
           style: Theme.of(context).textTheme.headlineLarge?.copyWith(
@@ -608,22 +609,22 @@ class PublicHomeScreen extends StatelessWidget {
   ) {
     return Container(
       padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
+                decoration: BoxDecoration(
         color: AppTheme.pureWhite,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppTheme.borderGray.withValues(alpha: 0.5)),
-        boxShadow: [
-          BoxShadow(
+                  boxShadow: [
+                    BoxShadow(
             color: color.withValues(alpha: 0.1),
             blurRadius: 20,
-            spreadRadius: 0,
+                      spreadRadius: 0,
             offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
           Container(
             width: 56,
             height: 56,
@@ -638,23 +639,23 @@ class PublicHomeScreen extends StatelessWidget {
 
           const SizedBox(height: 20),
 
-          Text(
-            title,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: AppTheme.textPrimary,
-              fontWeight: FontWeight.w600,
-              letterSpacing: -0.1,
-            ),
-          ),
+                    Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: AppTheme.textPrimary,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: -0.1,
+                      ),
+                    ),
 
-          const SizedBox(height: 8),
+                    const SizedBox(height: 8),
 
-          Text(
-            description,
+                    Text(
+                      description,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppTheme.textGray,
-              height: 1.5,
-            ),
+                        color: AppTheme.textGray,
+                        height: 1.5,
+                      ),
           ),
         ],
       ),
@@ -985,10 +986,10 @@ class PublicHomeScreen extends StatelessWidget {
               color: AppTheme.pureWhite.withValues(alpha: 0.6),
             ),
             textAlign: TextAlign.center,
+              ),
+            ],
           ),
-        ],
-      ),
-    );
+        );
   }
 
   // Footer Column
