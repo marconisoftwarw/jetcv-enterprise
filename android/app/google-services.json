@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "184485158453",
+    "project_id": "jetcv-enterprise",
+    "storage_bucket": "jetcv-enterprise.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:184485158453:android:your_android_app_id",
+        "android_client_info": {
+          "package_name": "com.example.flutterapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "184485158453-eiss6vsfou7r268b3klgojrftijh6oab.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.flutterapp",
+            "certificate_hash": "your_sha1_fingerprint"
+          }
+        },
+        {
+          "client_id": "184485158453-eiss6vsfou7r268b3klgojrftijh6oab.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "your_api_key"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "184485158453-eiss6vsfou7r268b3klgojrftijh6oab.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
