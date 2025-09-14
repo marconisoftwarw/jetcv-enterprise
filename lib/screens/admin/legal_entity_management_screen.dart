@@ -8,6 +8,8 @@ import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../widgets/global_hamburger_menu.dart';
 import '../../l10n/app_localizations.dart';
+import '../../services/email_service.dart';
+import '../../config/app_config.dart';
 
 class LegalEntityManagementScreen extends StatefulWidget {
   final bool hideMenu;
@@ -391,6 +393,52 @@ class _LegalEntityManagementScreenState
                       });
                       _filterEntities();
                     },
+                  ),
+                ),
+
+                const SizedBox(width: 12),
+
+                // Pulsante Invia Link Registrazione
+                GestureDetector(
+                  onTap: () => _showSendRegistrationLinkDialog(context),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          const Color(0xFF10B981),
+                          const Color(0xFF059669),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(25),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF10B981).withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.link, color: Colors.white, size: 20),
+                        const SizedBox(width: 8),
+                        Text(
+                          AppLocalizations.of(context).getString('send_registration_link_short'),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
 
@@ -1675,6 +1723,132 @@ class _LegalEntityManagementScreenState
     }
   }
 
+  void _showSendRegistrationLinkDialog(BuildContext context) {
+    final TextEditingController emailController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.link, color: Colors.green),
+            const SizedBox(width: 8),
+            Text(AppLocalizations.of(context).getString('send_registration_link')),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              AppLocalizations.of(context).getString('enter_email_for_registration_link'),
+              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+            ),
+            const SizedBox(height: 16),
+            CustomTextField(
+              controller: emailController,
+              labelText: 'Email destinatario *',
+              hintText: 'Inserisci l\'email del destinatario',
+              keyboardType: TextInputType.emailAddress,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'L\'email è obbligatoria';
+                }
+                if (!RegExp(
+                  r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                ).hasMatch(value)) {
+                  return 'Inserisci un\'email valida';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.green[50],
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.green[200]!),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline, color: Colors.green[700], size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      AppLocalizations.of(context).getString('registration_link_description'),
+                      style: TextStyle(color: Colors.green[700], fontSize: 12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(AppLocalizations.of(context).getString('cancel_short')),
+          ),
+          CustomButton(
+            text: AppLocalizations.of(context).getString('send_registration_link'),
+            onPressed: () async {
+              // Validazione
+              if (emailController.text.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(AppLocalizations.of(context).getString('enter_valid_email_short')),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+                return;
+              }
+
+              if (!RegExp(
+                r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+              ).hasMatch(emailController.text)) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(AppLocalizations.of(context).getString('enter_valid_email_short')),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+                return;
+              }
+
+              Navigator.of(context).pop();
+
+              // Salva il ScaffoldMessenger prima dell'operazione asincrona
+              final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+              // Genera e invia il link di registrazione
+              final success = await _sendRegistrationLink(emailController.text.trim());
+
+              if (mounted) {
+                if (success) {
+                  scaffoldMessenger.showSnackBar(
+                    SnackBar(
+                      content: Text(AppLocalizations.of(context).getString('registration_link_sent_successfully')),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                } else {
+                  scaffoldMessenger.showSnackBar(
+                    SnackBar(
+                      content: Text(AppLocalizations.of(context).getString('error_sending_registration_link')),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
+            },
+            icon: Icons.send,
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showSendInvitationDialog(LegalEntity entity) {
     final TextEditingController emailController = TextEditingController();
     final TextEditingController messageController = TextEditingController();
@@ -1873,6 +2047,39 @@ class _LegalEntityManagementScreenState
         ],
       ),
     );
+  }
+
+  Future<bool> _sendRegistrationLink(String email) async {
+    try {
+      // Genera il link di registrazione con l'email precompilata
+      final registrationLink = _generateRegistrationLink(email);
+      
+      // Invia l'email con il link
+      final emailService = EmailService();
+      final success = await emailService.sendRegistrationLinkEmail(
+        to: email,
+        registrationLink: registrationLink,
+      );
+      
+      return success;
+    } catch (e) {
+      print('Error sending registration link: $e');
+      return false;
+    }
+  }
+
+  String _generateRegistrationLink(String email) {
+    // Genera un link alla pagina di registrazione pubblica con l'email precompilata
+    final baseUrl = AppConfig.appUrl;
+    final registrationUrl = Uri.parse('$baseUrl/legal-entity-registration');
+    
+    // Aggiungi l'email come parametro di query
+    final finalUrl = registrationUrl.replace(queryParameters: {
+      'email': email,
+      'prefilled': 'true',
+    });
+    
+    return finalUrl.toString();
   }
 
   void _handleNavigation(int index) {

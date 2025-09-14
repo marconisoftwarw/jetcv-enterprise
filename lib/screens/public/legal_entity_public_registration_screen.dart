@@ -115,6 +115,69 @@ class _LegalEntityPublicRegistrationScreenState
     // In a real app, you would get the current URL from the route
     // For now, we'll check if there are any URL parameters passed to the screen
     // This would typically be done through route parameters or deep linking
+    
+    // For demonstration purposes, we'll simulate URL parameters
+    // In a real implementation, you would parse the actual URL parameters
+    // For now, we'll check if there are any pre-filled values from the route
+    final Map<String, String>? routeParams = ModalRoute.of(context)?.settings.arguments as Map<String, String>?;
+    
+    if (routeParams != null) {
+      // Pre-fill email if provided
+      if (routeParams['email'] != null) {
+        _entityEmailController.text = routeParams['email']!;
+        _personalEmailController.text = routeParams['email']!;
+      }
+      
+      // Pre-fill other fields if provided
+      if (routeParams['legal_name'] != null) {
+        _legalNameController.text = routeParams['legal_name']!;
+      }
+      if (routeParams['identifier_code'] != null) {
+        _identifierCodeController.text = routeParams['identifier_code']!;
+      }
+      if (routeParams['legal_rapresentative'] != null) {
+        _legalRepresentativeController.text = routeParams['legal_rapresentative']!;
+      }
+      if (routeParams['operational_address'] != null) {
+        _operationalAddressController.text = routeParams['operational_address']!;
+      }
+      if (routeParams['operational_city'] != null) {
+        _operationalCityController.text = routeParams['operational_city']!;
+      }
+      if (routeParams['operational_postal_code'] != null) {
+        _operationalPostalCodeController.text = routeParams['operational_postal_code']!;
+      }
+      if (routeParams['operational_state'] != null) {
+        _operationalStateController.text = routeParams['operational_state']!;
+      }
+      if (routeParams['operational_country'] != null) {
+        _operationalCountryController.text = routeParams['operational_country']!;
+      }
+      if (routeParams['headquarter_address'] != null) {
+        _headquarterAddressController.text = routeParams['headquarter_address']!;
+      }
+      if (routeParams['headquarter_city'] != null) {
+        _headquarterCityController.text = routeParams['headquarter_city']!;
+      }
+      if (routeParams['headquarter_postal_code'] != null) {
+        _headquarterPostalCodeController.text = routeParams['headquarter_postal_code']!;
+      }
+      if (routeParams['headquarter_state'] != null) {
+        _headquarterStateController.text = routeParams['headquarter_state']!;
+      }
+      if (routeParams['headquarter_country'] != null) {
+        _headquarterCountryController.text = routeParams['headquarter_country']!;
+      }
+      if (routeParams['phone'] != null) {
+        _phoneController.text = routeParams['phone']!;
+      }
+      if (routeParams['pec'] != null) {
+        _pecController.text = routeParams['pec']!;
+      }
+      if (routeParams['website'] != null) {
+        _websiteController.text = routeParams['website']!;
+      }
+    }
   }
 
   @override

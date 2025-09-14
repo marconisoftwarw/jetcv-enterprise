@@ -368,6 +368,170 @@ Questo è un messaggio automatico, non rispondere a questa email.
     }
   }
 
+  // Metodo per inviare email con link di registrazione
+  Future<bool> sendRegistrationLinkEmail({
+    required String to,
+    required String registrationLink,
+  }) async {
+    try {
+      final subject = 'JetCV Enterprise - Link di Registrazione Entità Legale';
+      final htmlContent = _generateRegistrationLinkEmailHtml(to, registrationLink);
+      final textContent = _generateRegistrationLinkEmailText(to, registrationLink);
+
+      final emailData = {
+        'to': to,
+        'subject': subject,
+        'html': htmlContent,
+        'text': textContent,
+      };
+
+      if (AppConfig.environment == 'development' && AppConfig.enableDebugMode) {
+        return await _sendViaMailHog(emailData);
+      } else {
+        return await _sendViaExternalService(emailData);
+      }
+    } catch (e) {
+      print('Error sending registration link email: $e');
+      return false;
+    }
+  }
+
+  // Genera HTML per l'email con link di registrazione
+  String _generateRegistrationLinkEmailHtml(String email, String registrationLink) {
+    return '''
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JetCV Enterprise - Registrazione Entità Legale</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #10B981;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #10B981;
+            margin: 0;
+            font-size: 28px;
+        }
+        .content {
+            margin-bottom: 30px;
+        }
+        .button {
+            display: inline-block;
+            background: linear-gradient(135deg, #10B981, #059669);
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 16px;
+            text-align: center;
+            margin: 20px 0;
+            box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+            transition: transform 0.2s;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+        }
+        .info-box {
+            background-color: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            color: #6b7280;
+            font-size: 12px;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 JetCV Enterprise</h1>
+            <p>Registrazione Entità Legale</p>
+        </div>
+        
+        <div class="content">
+            <h2>Benvenuto in JetCV Enterprise!</h2>
+            
+            <p>Hai ricevuto un invito per registrare la tua entità legale sulla piattaforma JetCV Enterprise.</p>
+            
+            <p><strong>Email:</strong> $email</p>
+            
+            <div style="text-align: center;">
+                <a href="$registrationLink" class="button">
+                    🎯 Registra Entità Legale
+                </a>
+            </div>
+            
+            <div class="info-box">
+                <strong>ℹ️ Informazioni:</strong> Cliccando sul pulsante sopra, accederai alla pagina di registrazione con l'email precompilata. Potrai completare la registrazione della tua entità legale in pochi semplici passaggi.
+            </div>
+            
+            <p>Se non hai richiesto questo invito, puoi ignorare questa email.</p>
+            
+            <p>Per assistenza, contatta il supporto tecnico.</p>
+        </div>
+        
+        <div class="footer">
+            <p>© 2024 JetCV Enterprise. Tutti i diritti riservati.</p>
+            <p>Questo è un messaggio automatico, non rispondere a questa email.</p>
+        </div>
+    </div>
+</body>
+</html>
+    ''';
+  }
+
+  // Genera testo semplice per l'email con link di registrazione
+  String _generateRegistrationLinkEmailText(String email, String registrationLink) {
+    return '''
+JetCV Enterprise - Registrazione Entità Legale
+
+Benvenuto in JetCV Enterprise!
+
+Hai ricevuto un invito per registrare la tua entità legale sulla piattaforma.
+
+Email: $email
+
+Per registrare la tua entità legale, visita questo link:
+$registrationLink
+
+ℹ️ Informazioni: Cliccando sul link sopra, accederai alla pagina di registrazione con l'email precompilata. Potrai completare la registrazione della tua entità legale in pochi semplici passaggi.
+
+Se non hai richiesto questo invito, puoi ignorare questa email.
+
+Per assistenza, contatta il supporto tecnico.
+
+© 2024 JetCV Enterprise. Tutti i diritti riservati.
+Questo è un messaggio automatico, non rispondere a questa email.
+    ''';
+  }
+
   // Metodo per inviare email di notifica
   Future<bool> sendNotificationEmail({
     required String to,
