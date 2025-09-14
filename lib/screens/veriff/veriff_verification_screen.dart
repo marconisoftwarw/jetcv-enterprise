@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../theme/app_theme.dart';
 import '../../config/app_config.dart';
-import '../../providers/auth_provider.dart';
 import '../../services/veriff_service.dart';
 import '../../widgets/linkedin_card.dart';
 import '../../widgets/linkedin_button.dart';
-import '../../l10n/app_localizations.dart';
 import '../../models/user.dart';
 
 class VeriffVerificationScreen extends StatefulWidget {
@@ -86,11 +83,39 @@ class _VeriffVerificationScreenState extends State<VeriffVerificationScreen> {
           print('🔍 Found nested _veriffUrl: $_veriffUrl');
         }
 
+        // Se non c'è URL, prova con la struttura diretta
+        if (_veriffUrl == null &&
+            response['verification']?['url'] != null) {
+          _veriffUrl = response['verification']['url'] as String;
+          print('🔍 Found direct _veriffUrl: $_veriffUrl');
+        }
+
+        // Se non c'è URL, prova con verificationUrl
+        if (_veriffUrl == null &&
+            response['verificationUrl'] != null) {
+          _veriffUrl = response['verificationUrl'] as String;
+          print('🔍 Found verificationUrl: $_veriffUrl');
+        }
+
         // Se non c'è sessionId, prova con la struttura nested
         if (_sessionId == null &&
             response['response']?['verification']?['id'] != null) {
           _sessionId = response['response']['verification']['id'] as String;
           print('🔍 Found nested _sessionId: $_sessionId');
+        }
+
+        // Se non c'è sessionId, prova con la struttura diretta
+        if (_sessionId == null &&
+            response['verification']?['id'] != null) {
+          _sessionId = response['verification']['id'] as String;
+          print('🔍 Found direct _sessionId: $_sessionId');
+        }
+
+        // Se non c'è sessionId, prova con sessionId
+        if (_sessionId == null &&
+            response['sessionId'] != null) {
+          _sessionId = response['sessionId'] as String;
+          print('🔍 Found sessionId: $_sessionId');
         }
       }
 

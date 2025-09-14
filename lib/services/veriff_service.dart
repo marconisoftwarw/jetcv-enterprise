@@ -22,7 +22,7 @@ class VeriffService {
           'email': user.email ?? '',
           'phoneNumber': user.phone ?? '',
           'gender': _mapGenderToVeriff(user.gender),
-          'dateOfBirth': user.dateOfBirth?.toIso8601String() ?? '',
+          'dateOfBirth': user.dateOfBirth?.toIso8601String(),
         },
       };
       
