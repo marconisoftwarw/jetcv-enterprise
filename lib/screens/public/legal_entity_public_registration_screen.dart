@@ -73,10 +73,10 @@ class _LegalEntityPublicRegistrationScreenState
   @override
   void initState() {
     super.initState();
-    _loadUrlParameters();
     // Carica i dati dei pricing dopo che il widget è stato costruito
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadPricingData();
+      _loadUrlParameters();
     });
   }
 
@@ -116,76 +116,80 @@ class _LegalEntityPublicRegistrationScreenState
     // For now, we'll check if there are any URL parameters passed to the screen
     // This would typically be done through route parameters or deep linking
     
-    // For demonstration purposes, we'll simulate URL parameters
-    // In a real implementation, you would parse the actual URL parameters
-    // For now, we'll check if there are any pre-filled values from the route
-    final Map<String, String>? routeParams = ModalRoute.of(context)?.settings.arguments as Map<String, String>?;
-    
-    if (routeParams != null) {
-      // Pre-fill email if provided
-      if (routeParams['email'] != null) {
-        _entityEmailController.text = routeParams['email']!;
-        _personalEmailController.text = routeParams['email']!;
-      }
+    try {
+      // For demonstration purposes, we'll simulate URL parameters
+      // In a real implementation, you would parse the actual URL parameters
+      // For now, we'll check if there are any pre-filled values from the route
+      final Map<String, String>? routeParams = ModalRoute.of(context)?.settings.arguments as Map<String, String>?;
       
-      // Pre-fill other fields if provided
-      if (routeParams['legal_name'] != null) {
-        _legalNameController.text = routeParams['legal_name']!;
+      if (routeParams != null) {
+        // Pre-fill email if provided
+        if (routeParams['email'] != null) {
+          _entityEmailController.text = routeParams['email']!;
+          _personalEmailController.text = routeParams['email']!;
+        }
+        
+        // Pre-fill other fields if provided
+        if (routeParams['legal_name'] != null) {
+          _legalNameController.text = routeParams['legal_name']!;
+        }
+        if (routeParams['identifier_code'] != null) {
+          _identifierCodeController.text = routeParams['identifier_code']!;
+        }
+        if (routeParams['legal_rapresentative'] != null) {
+          _legalRepresentativeController.text = routeParams['legal_rapresentative']!;
+        }
+        if (routeParams['operational_address'] != null) {
+          _operationalAddressController.text = routeParams['operational_address']!;
+        }
+        if (routeParams['operational_city'] != null) {
+          _operationalCityController.text = routeParams['operational_city']!;
+        }
+        if (routeParams['operational_postal_code'] != null) {
+          _operationalPostalCodeController.text = routeParams['operational_postal_code']!;
+        }
+        if (routeParams['operational_state'] != null) {
+          _operationalStateController.text = routeParams['operational_state']!;
+        }
+        if (routeParams['operational_country'] != null) {
+          _operationalCountryController.text = routeParams['operational_country']!;
+        }
+        if (routeParams['headquarter_address'] != null) {
+          _headquarterAddressController.text = routeParams['headquarter_address']!;
+        }
+        if (routeParams['headquarter_city'] != null) {
+          _headquarterCityController.text = routeParams['headquarter_city']!;
+        }
+        if (routeParams['headquarter_postal_code'] != null) {
+          _headquarterPostalCodeController.text = routeParams['headquarter_postal_code']!;
+        }
+        if (routeParams['headquarter_state'] != null) {
+          _headquarterStateController.text = routeParams['headquarter_state']!;
+        }
+        if (routeParams['headquarter_country'] != null) {
+          _headquarterCountryController.text = routeParams['headquarter_country']!;
+        }
+        if (routeParams['phone'] != null) {
+          _phoneController.text = routeParams['phone']!;
+        }
+        if (routeParams['pec'] != null) {
+          _pecController.text = routeParams['pec']!;
+        }
+        if (routeParams['website'] != null) {
+          _websiteController.text = routeParams['website']!;
+        }
       }
-      if (routeParams['identifier_code'] != null) {
-        _identifierCodeController.text = routeParams['identifier_code']!;
-      }
-      if (routeParams['legal_rapresentative'] != null) {
-        _legalRepresentativeController.text = routeParams['legal_rapresentative']!;
-      }
-      if (routeParams['operational_address'] != null) {
-        _operationalAddressController.text = routeParams['operational_address']!;
-      }
-      if (routeParams['operational_city'] != null) {
-        _operationalCityController.text = routeParams['operational_city']!;
-      }
-      if (routeParams['operational_postal_code'] != null) {
-        _operationalPostalCodeController.text = routeParams['operational_postal_code']!;
-      }
-      if (routeParams['operational_state'] != null) {
-        _operationalStateController.text = routeParams['operational_state']!;
-      }
-      if (routeParams['operational_country'] != null) {
-        _operationalCountryController.text = routeParams['operational_country']!;
-      }
-      if (routeParams['headquarter_address'] != null) {
-        _headquarterAddressController.text = routeParams['headquarter_address']!;
-      }
-      if (routeParams['headquarter_city'] != null) {
-        _headquarterCityController.text = routeParams['headquarter_city']!;
-      }
-      if (routeParams['headquarter_postal_code'] != null) {
-        _headquarterPostalCodeController.text = routeParams['headquarter_postal_code']!;
-      }
-      if (routeParams['headquarter_state'] != null) {
-        _headquarterStateController.text = routeParams['headquarter_state']!;
-      }
-      if (routeParams['headquarter_country'] != null) {
-        _headquarterCountryController.text = routeParams['headquarter_country']!;
-      }
-      if (routeParams['phone'] != null) {
-        _phoneController.text = routeParams['phone']!;
-      }
-      if (routeParams['pec'] != null) {
-        _pecController.text = routeParams['pec']!;
-      }
-      if (routeParams['website'] != null) {
-        _websiteController.text = routeParams['website']!;
-      }
+    } catch (e) {
+      print('Error loading URL parameters: $e');
+      // Non bloccare l'inizializzazione se c'è un errore
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.getString('legal_entity_registration')),
+        title: Text(AppLocalizations.of(context).getString('legal_entity_registration')),
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
       ),
@@ -201,7 +205,7 @@ class _LegalEntityPublicRegistrationScreenState
               child: IndexedStack(
                 index: _currentStep,
                 children: [
-                  _buildPricingStep(l10n),
+                  _buildPricingStep(),
                   _buildPersonalInfoStep(),
                   _buildLegalEntityStep(),
                 ],
@@ -209,7 +213,7 @@ class _LegalEntityPublicRegistrationScreenState
             ),
 
             // Navigation buttons
-            _buildNavigationButtons(l10n),
+            _buildNavigationButtons(),
           ],
         ),
       ),
@@ -270,7 +274,7 @@ class _LegalEntityPublicRegistrationScreenState
     );
   }
 
-  Widget _buildPricingStep(AppLocalizations l10n) {
+  Widget _buildPricingStep() {
     return Consumer<PricingProvider>(
       builder: (context, pricingProvider, child) {
         if (pricingProvider.isLoading) {
@@ -292,7 +296,7 @@ class _LegalEntityPublicRegistrationScreenState
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () => pricingProvider.loadPricings(),
-                  child: Text(l10n.getString('retry')),
+                  child: Text(AppLocalizations.of(context).getString('retry')),
                 ),
               ],
             ),
@@ -305,7 +309,7 @@ class _LegalEntityPublicRegistrationScreenState
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                l10n.getString('select_plan'),
+                AppLocalizations.of(context).getString('select_plan'),
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
@@ -806,7 +810,7 @@ class _LegalEntityPublicRegistrationScreenState
     );
   }
 
-  Widget _buildNavigationButtons(AppLocalizations l10n) {
+  Widget _buildNavigationButtons() {
     return Container(
       padding: const EdgeInsets.all(16),
       child: Row(
@@ -815,17 +819,17 @@ class _LegalEntityPublicRegistrationScreenState
             Expanded(
               child: CustomButton(
                 onPressed: _previousStep,
-                text: l10n.getString('back'),
+                text: AppLocalizations.of(context).getString('back'),
                 backgroundColor: Colors.grey,
               ),
             ),
           if (_currentStep > 0) const SizedBox(width: 16),
           Expanded(
             child: CustomButton(
-              onPressed: _isLoading ? null : () => _nextStep(l10n),
+              onPressed: _isLoading ? null : () => _nextStep(),
               text: _currentStep == _totalSteps - 1
-                  ? l10n.getString('complete_registration')
-                  : l10n.getString('next'),
+                  ? AppLocalizations.of(context).getString('complete_registration')
+                  : AppLocalizations.of(context).getString('next'),
               backgroundColor: _currentStep == _totalSteps - 1
                   ? Colors.green
                   : Colors.blue,
@@ -844,9 +848,9 @@ class _LegalEntityPublicRegistrationScreenState
     }
   }
 
-  void _nextStep(AppLocalizations l10n) async {
+  void _nextStep() async {
     if (_currentStep == _totalSteps - 1) {
-      await _completeRegistration(l10n);
+      await _completeRegistration();
     } else {
       if (_validateCurrentStep()) {
         setState(() {
@@ -878,7 +882,7 @@ class _LegalEntityPublicRegistrationScreenState
     return true;
   }
 
-  Future<void> _completeRegistration(AppLocalizations l10n) async {
+  Future<void> _completeRegistration() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() {
@@ -980,7 +984,7 @@ class _LegalEntityPublicRegistrationScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(l10n.getString('registration_completed_successfully')),
+            content: Text(AppLocalizations.of(context).getString('registration_completed_successfully')),
             backgroundColor: Colors.green,
           ),
         );

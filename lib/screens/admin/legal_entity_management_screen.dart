@@ -321,171 +321,186 @@ class _LegalEntityManagementScreenState
             const SizedBox(height: 20),
 
             // Filtri
-            Row(
+            Column(
               children: [
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[50],
-                      borderRadius: BorderRadius.circular(25),
-                      border: Border.all(color: Colors.grey[200]!),
-                    ),
-                    child: TextField(
-                      controller: _searchController,
-                      decoration: InputDecoration(
-                        hintText: 'Cerca per nome, email o codice...',
-                        hintStyle: TextStyle(color: Colors.grey[500]),
-                        prefixIcon: Icon(
-                          Icons.search,
-                          color: Colors.grey[500],
-                          size: 20,
+                // Campo di ricerca
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
                         ),
-                        border: InputBorder.none,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-
-                // Filtro stato
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[50],
-                    borderRadius: BorderRadius.circular(25),
-                    border: Border.all(color: Colors.grey[200]!),
-                  ),
-                  child: DropdownButton<String?>(
-                    value: _selectedStatus,
-                    hint: Text(
-                      'Tutti gli Stati',
-                      style: TextStyle(color: Colors.grey[500]),
-                    ),
-                    underline: const SizedBox(),
-                    items: [
-                      DropdownMenuItem(
-                        value: null,
-                        child: Text(AppLocalizations.of(context).getString('all_statuses_short')),
-                      ),
-                      DropdownMenuItem(
-                        value: 'pending',
-                        child: Text(AppLocalizations.of(context).getString('pending_short')),
-                      ),
-                      DropdownMenuItem(
-                        value: 'approved',
-                        child: Text(AppLocalizations.of(context).getString('approved_short')),
-                      ),
-                      DropdownMenuItem(
-                        value: 'rejected',
-                        child: Text(AppLocalizations.of(context).getString('rejected_short')),
-                      ),
-                    ],
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedStatus = value;
-                      });
-                      _filterEntities();
-                    },
-                  ),
-                ),
-
-                const SizedBox(width: 12),
-
-                // Pulsante Invia Link Registrazione
-                GestureDetector(
-                  onTap: () => _showSendRegistrationLinkDialog(context),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          const Color(0xFF10B981),
-                          const Color(0xFF059669),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(25),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF10B981).withOpacity(0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[50],
+                          borderRadius: BorderRadius.circular(25),
+                          border: Border.all(color: Colors.grey[200]!),
                         ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.link, color: Colors.white, size: 20),
-                        const SizedBox(width: 8),
-                        Text(
-                          AppLocalizations.of(context).getString('send_registration_link_short'),
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
+                        child: TextField(
+                          controller: _searchController,
+                          decoration: InputDecoration(
+                            hintText: 'Cerca per nome, email o codice...',
+                            hintStyle: TextStyle(color: Colors.grey[500]),
+                            prefixIcon: Icon(
+                              Icons.search,
+                              color: Colors.grey[500],
+                              size: 20,
+                            ),
+                            border: InputBorder.none,
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                const SizedBox(width: 12),
-
-                // Pulsante Nuova Entità
-                GestureDetector(
-                  onTap: () => _showCreateEntityDialog(context),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          const Color(0xFF2563EB),
-                          const Color(0xFF1D4ED8),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
                       ),
-                      borderRadius: BorderRadius.circular(25),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF2563EB).withOpacity(0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.add, color: Colors.white, size: 20),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Nuova',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
+                  ],
+                ),
+                
+                const SizedBox(height: 16),
+                
+                // Pulsante Invia Link Registrazione (sotto la barra di ricerca)
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => _showSendRegistrationLinkDialog(context),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 14,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              const Color(0xFF10B981),
+                              const Color(0xFF059669),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
                           ),
+                          borderRadius: BorderRadius.circular(25),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF10B981).withOpacity(0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
-                      ],
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.link, color: Colors.white, size: 22),
+                            const SizedBox(width: 10),
+                            Text(
+                              AppLocalizations.of(context).getString('send_registration_link_short'),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
+                ),
+                
+                const SizedBox(height: 16),
+                
+                // Filtro stato e pulsante Nuova
+                Row(
+                  children: [
+                    // Filtro stato
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[50],
+                        borderRadius: BorderRadius.circular(25),
+                        border: Border.all(color: Colors.grey[200]!),
+                      ),
+                      child: DropdownButton<String?>(
+                        value: _selectedStatus,
+                        hint: Text(
+                          'Tutti gli Stati',
+                          style: TextStyle(color: Colors.grey[500]),
+                        ),
+                        underline: const SizedBox(),
+                        items: [
+                          DropdownMenuItem(
+                            value: null,
+                            child: Text(AppLocalizations.of(context).getString('all_statuses_short')),
+                          ),
+                          DropdownMenuItem(
+                            value: 'pending',
+                            child: Text(AppLocalizations.of(context).getString('pending_short')),
+                          ),
+                          DropdownMenuItem(
+                            value: 'approved',
+                            child: Text(AppLocalizations.of(context).getString('approved_short')),
+                          ),
+                          DropdownMenuItem(
+                            value: 'rejected',
+                            child: Text(AppLocalizations.of(context).getString('rejected_short')),
+                          ),
+                        ],
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedStatus = value;
+                          });
+                          _filterEntities();
+                        },
+                      ),
+                    ),
+
+                    const SizedBox(width: 12),
+
+                    // Pulsante Nuova Entità
+                    GestureDetector(
+                      onTap: () => _showCreateEntityDialog(context),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              const Color(0xFF2563EB),
+                              const Color(0xFF1D4ED8),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(25),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF2563EB).withOpacity(0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.add, color: Colors.white, size: 20),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Nuova',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -1824,6 +1839,7 @@ class _LegalEntityManagementScreenState
               // Genera e invia il link di registrazione
               final success = await _sendRegistrationLink(emailController.text.trim());
 
+              // Controlla se il widget è ancora montato prima di mostrare il messaggio
               if (mounted) {
                 if (success) {
                   scaffoldMessenger.showSnackBar(
