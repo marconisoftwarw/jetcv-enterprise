@@ -806,7 +806,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 TextButton.icon(
                   onPressed: _removeUser,
                   icon: Icon(Icons.person_remove, size: 16),
-                  label: Text('Rimuovi Utente'),
+                  label: Text(AppLocalizations.of(context).getString('remove_user')),
                   style: TextButton.styleFrom(
                     foregroundColor: AppTheme.errorRed,
                   ),
@@ -1979,7 +1979,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           children: [
             Icon(Icons.check_circle, color: AppTheme.successGreen),
             const SizedBox(width: 8),
-            const Text('Successo'),
+            Text(AppLocalizations.of(context).getString('success_short')),
           ],
         ),
         content: Text(
@@ -2000,7 +2000,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 arguments: {'selectedIndex': 2},
               );
             },
-            child: const Text('OK'),
+            child: Text(AppLocalizations.of(context).getString('ok_short')),
           ),
         ],
       ),
@@ -2015,7 +2015,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           children: [
             Icon(Icons.error, color: AppTheme.errorRed),
             const SizedBox(width: 8),
-            const Text('Errore'),
+            Text(AppLocalizations.of(context).getString('error_short')),
           ],
         ),
         content: Text(

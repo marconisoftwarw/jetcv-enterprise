@@ -72,7 +72,7 @@ class _AdminCertifierDashboardScreenState
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () => certifierProvider.loadAllCertifiers(),
-                    child: const Text('Riprova'),
+                    child: Text(AppLocalizations.of(context).getString('retry_short')),
                   ),
                 ],
               ),
@@ -166,21 +166,21 @@ class _AdminCertifierDashboardScreenState
                   ),
                   value: provider.filterRole,
                   items: [
-                    const DropdownMenuItem(
+                    DropdownMenuItem(
                       value: null,
-                      child: Text('Tutti i ruoli'),
+                      child: Text(AppLocalizations.of(context).getString('all_roles_short')),
                     ),
-                    const DropdownMenuItem(
+                    DropdownMenuItem(
                       value: 'Certificatore',
-                      child: Text('Certificatore'),
+                      child: Text(AppLocalizations.of(context).getString('certifier_short')),
                     ),
-                    const DropdownMenuItem(
+                    DropdownMenuItem(
                       value: 'Senior Certificatore',
-                      child: Text('Senior Certificatore'),
+                      child: Text(AppLocalizations.of(context).getString('senior_certifier_short')),
                     ),
-                    const DropdownMenuItem(
+                    DropdownMenuItem(
                       value: 'Lead Certificatore',
-                      child: Text('Lead Certificatore'),
+                      child: Text(AppLocalizations.of(context).getString('lead_certifier_short')),
                     ),
                   ],
                   onChanged: (value) {
@@ -191,7 +191,7 @@ class _AdminCertifierDashboardScreenState
               const SizedBox(width: 16),
               Expanded(
                 child: CheckboxListTile(
-                  title: const Text('Solo attivi'),
+                  title: Text(AppLocalizations.of(context).getString('active_only_short')),
                   value: provider.filterActiveOnly,
                   onChanged: (value) {
                     provider.setFilters(activeOnly: value);
@@ -201,7 +201,7 @@ class _AdminCertifierDashboardScreenState
               const SizedBox(width: 16),
               ElevatedButton(
                 onPressed: () => provider.clearFilters(),
-                child: const Text('Pulisci Filtri'),
+                child: Text(AppLocalizations.of(context).getString('clear_filters_short')),
               ),
             ],
           ),
@@ -236,7 +236,7 @@ class _AdminCertifierDashboardScreenState
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () => _showInviteCertifierDialog(context),
-              child: const Text('Invita Certificatore'),
+              child: Text(AppLocalizations.of(context).getString('invite_certifier_short')),
             ),
           ],
         ),
@@ -260,7 +260,7 @@ class _AdminCertifierDashboardScreenState
             ElevatedButton.icon(
               onPressed: () => _showInviteCertifierDialog(context),
               icon: const Icon(Icons.person_add),
-              label: const Text('Nuovo'),
+              label: Text(AppLocalizations.of(context).getString('new_short')),
             ),
           ],
         ),
@@ -356,14 +356,14 @@ class _AdminCertifierDashboardScreenState
             if (certifier.hasInvitationToken)
               const PopupMenuItem(
                 value: 'resend',
-                child: Text('Rinvia Invito'),
+                child: Text(AppLocalizations.of(context).getString('resend_invitation_short')),
               ),
             if (certifier.active)
-              const PopupMenuItem(value: 'deactivate', child: Text('Disattiva'))
+              PopupMenuItem(value: 'deactivate', child: Text(AppLocalizations.of(context).getString('deactivate_short')))
             else
-              const PopupMenuItem(value: 'activate', child: Text('Attiva')),
-            const PopupMenuItem(value: 'edit', child: Text('Modifica')),
-            const PopupMenuItem(value: 'delete', child: Text('Elimina')),
+              PopupMenuItem(value: 'activate', child: Text(AppLocalizations.of(context).getString('activate_short'))),
+            PopupMenuItem(value: 'edit', child: Text(AppLocalizations.of(context).getString('edit_short'))),
+            PopupMenuItem(value: 'delete', child: Text(AppLocalizations.of(context).getString('delete_short'))),
           ],
         ),
       ),
@@ -404,7 +404,7 @@ class _AdminCertifierDashboardScreenState
     // TODO: Implementare rinvia invito
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(const SnackBar(content: Text('Invito rinviato')));
+    ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).getString('invitation_resent_short'))));
   }
 
   void _activateCertifier(Certifier certifier, CertifierProvider provider) {
@@ -421,21 +421,21 @@ class _AdminCertifierDashboardScreenState
     // TODO: Implementare modifica certificatore
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(const SnackBar(content: Text('Modifica certificatore')));
+    ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).getString('edit_certifier_short'))));
   }
 
   void _deleteCertifier(Certifier certifier, CertifierProvider provider) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Conferma eliminazione'),
+        title: Text(AppLocalizations.of(context).getString('confirm_deletion_short')),
         content: Text(
           'Sei sicuro di voler eliminare il certificatore "${certifier.roleDisplayName}"?',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Annulla'),
+            child: Text(AppLocalizations.of(context).getString('cancel_short')),
           ),
           TextButton(
             onPressed: () {
@@ -443,7 +443,7 @@ class _AdminCertifierDashboardScreenState
               provider.deleteCertifier(certifier.idCertifier);
             },
             style: TextButton.styleFrom(foregroundColor: AppTheme.errorRed),
-            child: const Text('Elimina'),
+            child: Text(AppLocalizations.of(context).getString('delete_short_confirm')),
           ),
         ],
       ),

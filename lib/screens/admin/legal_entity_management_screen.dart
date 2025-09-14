@@ -369,19 +369,19 @@ class _LegalEntityManagementScreenState
                     items: [
                       DropdownMenuItem(
                         value: null,
-                        child: Text('Tutti gli Stati'),
+                        child: Text(AppLocalizations.of(context).getString('all_statuses_short')),
                       ),
                       DropdownMenuItem(
                         value: 'pending',
-                        child: Text('In Attesa'),
+                        child: Text(AppLocalizations.of(context).getString('pending_short')),
                       ),
                       DropdownMenuItem(
                         value: 'approved',
-                        child: Text('Approvate'),
+                        child: Text(AppLocalizations.of(context).getString('approved_short')),
                       ),
                       DropdownMenuItem(
                         value: 'rejected',
-                        child: Text('Rifiutate'),
+                        child: Text(AppLocalizations.of(context).getString('rejected_short')),
                       ),
                     ],
                     onChanged: (value) {
@@ -695,7 +695,7 @@ class _LegalEntityManagementScreenState
                               size: 20,
                             ),
                             const SizedBox(width: 8),
-                            const Text('In Attesa'),
+                            Text(AppLocalizations.of(context).getString('pending_short')),
                           ],
                         ),
                       ),
@@ -711,7 +711,7 @@ class _LegalEntityManagementScreenState
                               size: 20,
                             ),
                             const SizedBox(width: 8),
-                            const Text('Approvata'),
+                            Text(AppLocalizations.of(context).getString('approved_short')),
                           ],
                         ),
                       ),
@@ -727,7 +727,7 @@ class _LegalEntityManagementScreenState
                               size: 20,
                             ),
                             const SizedBox(width: 8),
-                            const Text('Rifiutata'),
+                            Text(AppLocalizations.of(context).getString('rejected_short')),
                           ],
                         ),
                       ),
@@ -868,24 +868,24 @@ class _LegalEntityManagementScreenState
                 ),
                 child: DropdownButton<String?>(
                   value: _selectedStatus,
-                  hint: const Text('Tutti gli Stati'),
+                  hint: Text(AppLocalizations.of(context).getString('all_statuses_short')),
                   underline: const SizedBox(),
                   items: [
                     const DropdownMenuItem(
                       value: null,
-                      child: Text('Tutti gli Stati'),
+                      child: Text(AppLocalizations.of(context).getString('all_statuses_short')),
                     ),
                     const DropdownMenuItem(
                       value: 'pending',
-                      child: Text('In Attesa'),
+                      child: Text(AppLocalizations.of(context).getString('pending_short')),
                     ),
                     const DropdownMenuItem(
                       value: 'approved',
-                      child: Text('Approvate'),
+                      child: Text(AppLocalizations.of(context).getString('approved_short')),
                     ),
                     const DropdownMenuItem(
                       value: 'rejected',
-                      child: Text('Rifiutate'),
+                      child: Text(AppLocalizations.of(context).getString('rejected_short')),
                     ),
                   ],
                   onChanged: (value) {
@@ -1022,7 +1022,7 @@ class _LegalEntityManagementScreenState
                             size: 20,
                           ),
                           const SizedBox(width: 8),
-                          const Text('In Attesa'),
+                          Text(AppLocalizations.of(context).getString('pending_short')),
                         ],
                       ),
                     ),
@@ -1036,7 +1036,7 @@ class _LegalEntityManagementScreenState
                             size: 20,
                           ),
                           const SizedBox(width: 8),
-                          const Text('Approvata'),
+                          Text(AppLocalizations.of(context).getString('approved_short')),
                         ],
                       ),
                     ),
@@ -1050,7 +1050,7 @@ class _LegalEntityManagementScreenState
                             size: 20,
                           ),
                           const SizedBox(width: 8),
-                          const Text('Rifiutata'),
+                          Text(AppLocalizations.of(context).getString('rejected_short')),
                         ],
                       ),
                     ),
@@ -1139,19 +1139,19 @@ class _LegalEntityManagementScreenState
                 TextButton.icon(
                   onPressed: () => _showEntityDetails(entity),
                   icon: const Icon(Icons.visibility),
-                  label: const Text('Dettagli'),
+                  label: Text(AppLocalizations.of(context).getString('details_short')),
                 ),
 
                 TextButton.icon(
                   onPressed: () => _showEditEntityDialog(entity),
                   icon: const Icon(Icons.edit),
-                  label: const Text('Modifica'),
+                  label: Text(AppLocalizations.of(context).getString('edit_short')),
                 ),
 
                 TextButton.icon(
                   onPressed: () => _showSendInvitationDialog(entity),
                   icon: const Icon(Icons.email),
-                  label: const Text('Invia Invito'),
+                  label: Text(AppLocalizations.of(context).getString('send_invitation_short')),
                   style: TextButton.styleFrom(foregroundColor: Colors.blue),
                 ),
 
@@ -1195,7 +1195,7 @@ class _LegalEntityManagementScreenState
                             size: 20,
                           ),
                           const SizedBox(width: 8),
-                          const Text('In Attesa'),
+                          Text(AppLocalizations.of(context).getString('pending_short')),
                         ],
                       ),
                     ),
@@ -1209,7 +1209,7 @@ class _LegalEntityManagementScreenState
                             size: 20,
                           ),
                           const SizedBox(width: 8),
-                          const Text('Approvata'),
+                          Text(AppLocalizations.of(context).getString('approved_short')),
                         ],
                       ),
                     ),
@@ -1223,7 +1223,7 @@ class _LegalEntityManagementScreenState
                             size: 20,
                           ),
                           const SizedBox(width: 8),
-                          const Text('Rifiutata'),
+                          Text(AppLocalizations.of(context).getString('rejected_short')),
                         ],
                       ),
                     ),
@@ -1236,7 +1236,7 @@ class _LegalEntityManagementScreenState
                 TextButton.icon(
                   onPressed: () => _showDeleteDialog(entity),
                   icon: const Icon(Icons.delete),
-                  label: const Text('Elimina'),
+                  label: Text(AppLocalizations.of(context).getString('delete_short')),
                   style: TextButton.styleFrom(foregroundColor: Colors.red),
                 ),
               ],
@@ -1324,21 +1324,21 @@ class _LegalEntityManagementScreenState
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Chiudi'),
+            child: Text(AppLocalizations.of(context).getString('close_short')),
           ),
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
               _showSendInvitationDialog(entity);
             },
-            child: const Text('Invia Invito'),
+            child: Text(AppLocalizations.of(context).getString('send_invitation_short')),
           ),
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
               _showEditEntityDialog(entity);
             },
-            child: const Text('Modifica'),
+            child: Text(AppLocalizations.of(context).getString('edit_short')),
           ),
         ],
       ),
@@ -1392,7 +1392,7 @@ class _LegalEntityManagementScreenState
     if (mounted) {
       if (success) {
         scaffoldMessenger.showSnackBar(
-          const SnackBar(content: Text('Entità approvata con successo')),
+          SnackBar(content: Text(AppLocalizations.of(context).getString('entity_approved_successfully_short'))),
         );
       }
       _loadLegalEntities();
@@ -1405,11 +1405,11 @@ class _LegalEntityManagementScreenState
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Rifiuta Entità'),
+        title: Text(AppLocalizations.of(context).getString('reject_entity_short')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Inserisci il motivo del rifiuto:'),
+            Text(AppLocalizations.of(context).getString('enter_rejection_reason_short')),
             const SizedBox(height: 16),
             TextField(
               controller: reasonController,
@@ -1424,7 +1424,7 @@ class _LegalEntityManagementScreenState
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Annulla'),
+            child: Text(AppLocalizations.of(context).getString('cancel_short')),
           ),
           TextButton(
             onPressed: () async {
@@ -1447,7 +1447,7 @@ class _LegalEntityManagementScreenState
                 if (success) {
                   scaffoldMessenger.showSnackBar(
                     const SnackBar(
-                      content: Text('Entità rifiutata con successo'),
+                      content: Text(AppLocalizations.of(context).getString('entity_rejected_successfully_short')),
                     ),
                   );
                 }
@@ -1466,14 +1466,14 @@ class _LegalEntityManagementScreenState
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Elimina Entità'),
+        title: Text(AppLocalizations.of(context).getString('delete_short')),
         content: Text(
           'Sei sicuro di voler eliminare l\'entità "${entity.legalName ?? 'senza nome'}"? Questa azione non può essere annullata.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Annulla'),
+            child: Text(AppLocalizations.of(context).getString('cancel_short')),
           ),
           TextButton(
             onPressed: () async {
@@ -1492,7 +1492,7 @@ class _LegalEntityManagementScreenState
                 if (success) {
                   scaffoldMessenger.showSnackBar(
                     const SnackBar(
-                      content: Text('Entità eliminata con successo'),
+                      content: Text(AppLocalizations.of(context).getString('entity_deleted_successfully_short')),
                     ),
                   );
                   // Ricarica la lista
@@ -1572,7 +1572,7 @@ class _LegalEntityManagementScreenState
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Annulla'),
+            child: Text(AppLocalizations.of(context).getString('cancel_short')),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
@@ -1603,7 +1603,7 @@ class _LegalEntityManagementScreenState
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('Inserisci il motivo del rifiuto:'),
+              Text(AppLocalizations.of(context).getString('enter_rejection_reason_short')),
               const SizedBox(height: 16),
               TextField(
                 controller: reasonController,
@@ -1618,7 +1618,7 @@ class _LegalEntityManagementScreenState
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Annulla'),
+              child: Text(AppLocalizations.of(context).getString('cancel_short')),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
@@ -1777,7 +1777,7 @@ class _LegalEntityManagementScreenState
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Annulla'),
+            child: Text(AppLocalizations.of(context).getString('cancel_short')),
           ),
           CustomButton(
             text: 'Invia Invito',
@@ -2123,7 +2123,7 @@ class _LegalEntityFormDialogState extends State<LegalEntityFormDialog> {
                                       size: 20,
                                     ),
                                     const SizedBox(width: 8),
-                                    const Text('In Attesa'),
+                                    Text(AppLocalizations.of(context).getString('pending_short')),
                                   ],
                                 ),
                               ),
@@ -2139,7 +2139,7 @@ class _LegalEntityFormDialogState extends State<LegalEntityFormDialog> {
                                       size: 20,
                                     ),
                                     const SizedBox(width: 8),
-                                    const Text('Approvata'),
+                                    Text(AppLocalizations.of(context).getString('approved_short')),
                                   ],
                                 ),
                               ),
@@ -2155,7 +2155,7 @@ class _LegalEntityFormDialogState extends State<LegalEntityFormDialog> {
                                       size: 20,
                                     ),
                                     const SizedBox(width: 8),
-                                    const Text('Rifiutata'),
+                                    Text(AppLocalizations.of(context).getString('rejected_short')),
                                   ],
                                 ),
                               ),
@@ -2375,7 +2375,7 @@ class _LegalEntityFormDialogState extends State<LegalEntityFormDialog> {
               children: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Annulla'),
+                  child: Text(AppLocalizations.of(context).getString('cancel_short')),
                 ),
                 const SizedBox(width: 16),
                 CustomButton(

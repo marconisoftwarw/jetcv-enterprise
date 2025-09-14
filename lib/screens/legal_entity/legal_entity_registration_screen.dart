@@ -87,7 +87,7 @@ class _LegalEntityRegistrationScreenState
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Registration Submitted'),
+          title: Text(AppLocalizations.of(context).getString('registration_submitted')),
           content: const Text(
             'Thank you for your registration! Our team will review your information and contact you within 2-3 business days.',
           ),
@@ -97,7 +97,7 @@ class _LegalEntityRegistrationScreenState
                 Navigator.pop(context);
                 Navigator.pop(context);
               },
-              child: const Text('OK'),
+              child: Text(AppLocalizations.of(context).getString('ok_short')),
             ),
           ],
         ),
@@ -109,7 +109,7 @@ class _LegalEntityRegistrationScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Company Registration'),
+        title: Text(AppLocalizations.of(context).getString('company_registration')),
         backgroundColor: Color(AppConfig.primaryColorValue),
         foregroundColor: Colors.white,
       ),
@@ -416,7 +416,7 @@ class _LegalEntityRegistrationScreenState
                       onPressed: _isLoading
                           ? null
                           : () => Navigator.pop(context),
-                      text: 'Cancel',
+                      text: AppLocalizations.of(context).getString('cancel_short'),
                       variant: ButtonVariant.outlined,
                     ),
                   ),
@@ -425,8 +425,8 @@ class _LegalEntityRegistrationScreenState
                     child: CustomButton(
                       onPressed: _isLoading ? null : _submitRegistration,
                       text: _isLoading
-                          ? 'Submitting...'
-                          : 'Submit Registration',
+                          ? AppLocalizations.of(context).getString('submitting')
+                          : AppLocalizations.of(context).getString('submit_registration'),
                       isLoading: _isLoading,
                       variant: ButtonVariant.filled,
                     ),
@@ -439,7 +439,7 @@ class _LegalEntityRegistrationScreenState
               // Contact Information
               Center(
                 child: Text(
-                  'Questions? Contact us at support@jetcv.com',
+                  AppLocalizations.of(context).getString('questions_contact_support'),
                   style: TextStyle(color: Colors.grey[500], fontSize: 14),
                 ),
               ),
