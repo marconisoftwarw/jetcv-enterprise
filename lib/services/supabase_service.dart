@@ -320,16 +320,15 @@ class SupabaseService {
     required Map<String, dynamic> legalEntityData,
   }) async {
     try {
-      print('🔄 SupabaseService: Creating legal entity with user via Edge Function...');
+      print(
+        '🔄 SupabaseService: Creating legal entity with user via Edge Function...',
+      );
       print('🔄 SupabaseService: User data: $userData');
       print('🔄 SupabaseService: Legal entity data: $legalEntityData');
 
       final response = await _client.functions.invoke(
         'create-legal-entity-with-user',
-        body: {
-          'userData': userData,
-          'legalEntityData': legalEntityData,
-        },
+        body: {'userData': userData, 'legalEntityData': legalEntityData},
       );
 
       print(
@@ -354,10 +353,14 @@ class SupabaseService {
         return null;
       }
 
-      print('✅ SupabaseService: Legal entity and user created successfully via Edge Function');
+      print(
+        '✅ SupabaseService: Legal entity and user created successfully via Edge Function',
+      );
       return data['data'];
     } catch (e) {
-      print('❌ SupabaseService: Error creating legal entity with user via Edge Function: $e');
+      print(
+        '❌ SupabaseService: Error creating legal entity with user via Edge Function: $e',
+      );
       return null;
     }
   }

@@ -179,7 +179,11 @@ class _SignupScreenState extends State<SignupScreen> {
         context: context,
         barrierDismissible: false,
         builder: (context) => AlertDialog(
-          title: Text(AppLocalizations.of(context).getString('identity_verification_short')),
+          title: Text(
+            AppLocalizations.of(
+              context,
+            ).getString('identity_verification_short'),
+          ),
           content: const Text(
             'Per completare la registrazione, è necessario verificare la tua identità. '
             'Vuoi procedere ora con la verifica?',
@@ -187,11 +191,15 @@ class _SignupScreenState extends State<SignupScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: Text(AppLocalizations.of(context).getString('later_short')),
+              child: Text(
+                AppLocalizations.of(context).getString('later_short'),
+              ),
             ),
             ElevatedButton(
               onPressed: () => Navigator.pop(context, true),
-              child: Text(AppLocalizations.of(context).getString('proceed_short')),
+              child: Text(
+                AppLocalizations.of(context).getString('proceed_short'),
+              ),
             ),
           ],
         ),

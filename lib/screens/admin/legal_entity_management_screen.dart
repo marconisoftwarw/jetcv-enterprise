@@ -354,9 +354,9 @@ class _LegalEntityManagementScreenState
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Pulsante Invia Link Registrazione (sotto la barra di ricerca)
                 Row(
                   children: [
@@ -391,7 +391,9 @@ class _LegalEntityManagementScreenState
                             Icon(Icons.link, color: Colors.white, size: 22),
                             const SizedBox(width: 10),
                             Text(
-                              AppLocalizations.of(context).getString('send_registration_link_short'),
+                              AppLocalizations.of(
+                                context,
+                              ).getString('send_registration_link_short'),
                               style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w600,
@@ -404,9 +406,9 @@ class _LegalEntityManagementScreenState
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Filtro stato e pulsante Nuova
                 Row(
                   children: [
@@ -431,19 +433,35 @@ class _LegalEntityManagementScreenState
                         items: [
                           DropdownMenuItem(
                             value: null,
-                            child: Text(AppLocalizations.of(context).getString('all_statuses_short')),
+                            child: Text(
+                              AppLocalizations.of(
+                                context,
+                              ).getString('all_statuses_short'),
+                            ),
                           ),
                           DropdownMenuItem(
                             value: 'pending',
-                            child: Text(AppLocalizations.of(context).getString('pending_short')),
+                            child: Text(
+                              AppLocalizations.of(
+                                context,
+                              ).getString('pending_short'),
+                            ),
                           ),
                           DropdownMenuItem(
                             value: 'approved',
-                            child: Text(AppLocalizations.of(context).getString('approved_short')),
+                            child: Text(
+                              AppLocalizations.of(
+                                context,
+                              ).getString('approved_short'),
+                            ),
                           ),
                           DropdownMenuItem(
                             value: 'rejected',
-                            child: Text(AppLocalizations.of(context).getString('rejected_short')),
+                            child: Text(
+                              AppLocalizations.of(
+                                context,
+                              ).getString('rejected_short'),
+                            ),
                           ),
                         ],
                         onChanged: (value) {
@@ -759,7 +777,11 @@ class _LegalEntityManagementScreenState
                               size: 20,
                             ),
                             const SizedBox(width: 8),
-                            Text(AppLocalizations.of(context).getString('pending_short')),
+                            Text(
+                              AppLocalizations.of(
+                                context,
+                              ).getString('pending_short'),
+                            ),
                           ],
                         ),
                       ),
@@ -775,7 +797,11 @@ class _LegalEntityManagementScreenState
                               size: 20,
                             ),
                             const SizedBox(width: 8),
-                            Text(AppLocalizations.of(context).getString('approved_short')),
+                            Text(
+                              AppLocalizations.of(
+                                context,
+                              ).getString('approved_short'),
+                            ),
                           ],
                         ),
                       ),
@@ -791,7 +817,11 @@ class _LegalEntityManagementScreenState
                               size: 20,
                             ),
                             const SizedBox(width: 8),
-                            Text(AppLocalizations.of(context).getString('rejected_short')),
+                            Text(
+                              AppLocalizations.of(
+                                context,
+                              ).getString('rejected_short'),
+                            ),
                           ],
                         ),
                       ),
@@ -932,24 +962,42 @@ class _LegalEntityManagementScreenState
                 ),
                 child: DropdownButton<String?>(
                   value: _selectedStatus,
-                  hint: Text(AppLocalizations.of(context).getString('all_statuses_short')),
+                  hint: Text(
+                    AppLocalizations.of(
+                      context,
+                    ).getString('all_statuses_short'),
+                  ),
                   underline: const SizedBox(),
                   items: [
                     DropdownMenuItem(
                       value: null,
-                      child: Text(AppLocalizations.of(context).getString('all_statuses_short')),
+                      child: Text(
+                        AppLocalizations.of(
+                          context,
+                        ).getString('all_statuses_short'),
+                      ),
                     ),
                     DropdownMenuItem(
                       value: 'pending',
-                      child: Text(AppLocalizations.of(context).getString('pending_short')),
+                      child: Text(
+                        AppLocalizations.of(context).getString('pending_short'),
+                      ),
                     ),
                     DropdownMenuItem(
                       value: 'approved',
-                      child: Text(AppLocalizations.of(context).getString('approved_short')),
+                      child: Text(
+                        AppLocalizations.of(
+                          context,
+                        ).getString('approved_short'),
+                      ),
                     ),
                     DropdownMenuItem(
                       value: 'rejected',
-                      child: Text(AppLocalizations.of(context).getString('rejected_short')),
+                      child: Text(
+                        AppLocalizations.of(
+                          context,
+                        ).getString('rejected_short'),
+                      ),
                     ),
                   ],
                   onChanged: (value) {
@@ -1086,7 +1134,11 @@ class _LegalEntityManagementScreenState
                             size: 20,
                           ),
                           const SizedBox(width: 8),
-                          Text(AppLocalizations.of(context).getString('pending_short')),
+                          Text(
+                            AppLocalizations.of(
+                              context,
+                            ).getString('pending_short'),
+                          ),
                         ],
                       ),
                     ),
@@ -1100,7 +1152,11 @@ class _LegalEntityManagementScreenState
                             size: 20,
                           ),
                           const SizedBox(width: 8),
-                          Text(AppLocalizations.of(context).getString('approved_short')),
+                          Text(
+                            AppLocalizations.of(
+                              context,
+                            ).getString('approved_short'),
+                          ),
                         ],
                       ),
                     ),
@@ -1114,7 +1170,11 @@ class _LegalEntityManagementScreenState
                             size: 20,
                           ),
                           const SizedBox(width: 8),
-                          Text(AppLocalizations.of(context).getString('rejected_short')),
+                          Text(
+                            AppLocalizations.of(
+                              context,
+                            ).getString('rejected_short'),
+                          ),
                         ],
                       ),
                     ),
@@ -1203,19 +1263,27 @@ class _LegalEntityManagementScreenState
                 TextButton.icon(
                   onPressed: () => _showEntityDetails(entity),
                   icon: const Icon(Icons.visibility),
-                  label: Text(AppLocalizations.of(context).getString('details_short')),
+                  label: Text(
+                    AppLocalizations.of(context).getString('details_short'),
+                  ),
                 ),
 
                 TextButton.icon(
                   onPressed: () => _showEditEntityDialog(entity),
                   icon: const Icon(Icons.edit),
-                  label: Text(AppLocalizations.of(context).getString('edit_short')),
+                  label: Text(
+                    AppLocalizations.of(context).getString('edit_short'),
+                  ),
                 ),
 
                 TextButton.icon(
                   onPressed: () => _showSendInvitationDialog(entity),
                   icon: const Icon(Icons.email),
-                  label: Text(AppLocalizations.of(context).getString('send_invitation_short')),
+                  label: Text(
+                    AppLocalizations.of(
+                      context,
+                    ).getString('send_invitation_short'),
+                  ),
                   style: TextButton.styleFrom(foregroundColor: Colors.blue),
                 ),
 
@@ -1259,7 +1327,11 @@ class _LegalEntityManagementScreenState
                             size: 20,
                           ),
                           const SizedBox(width: 8),
-                          Text(AppLocalizations.of(context).getString('pending_short')),
+                          Text(
+                            AppLocalizations.of(
+                              context,
+                            ).getString('pending_short'),
+                          ),
                         ],
                       ),
                     ),
@@ -1273,7 +1345,11 @@ class _LegalEntityManagementScreenState
                             size: 20,
                           ),
                           const SizedBox(width: 8),
-                          Text(AppLocalizations.of(context).getString('approved_short')),
+                          Text(
+                            AppLocalizations.of(
+                              context,
+                            ).getString('approved_short'),
+                          ),
                         ],
                       ),
                     ),
@@ -1287,7 +1363,11 @@ class _LegalEntityManagementScreenState
                             size: 20,
                           ),
                           const SizedBox(width: 8),
-                          Text(AppLocalizations.of(context).getString('rejected_short')),
+                          Text(
+                            AppLocalizations.of(
+                              context,
+                            ).getString('rejected_short'),
+                          ),
                         ],
                       ),
                     ),
@@ -1300,7 +1380,9 @@ class _LegalEntityManagementScreenState
                 TextButton.icon(
                   onPressed: () => _showDeleteDialog(entity),
                   icon: const Icon(Icons.delete),
-                  label: Text(AppLocalizations.of(context).getString('delete_short')),
+                  label: Text(
+                    AppLocalizations.of(context).getString('delete_short'),
+                  ),
                   style: TextButton.styleFrom(foregroundColor: Colors.red),
                 ),
               ],
@@ -1395,7 +1477,9 @@ class _LegalEntityManagementScreenState
               Navigator.of(context).pop();
               _showSendInvitationDialog(entity);
             },
-            child: Text(AppLocalizations.of(context).getString('send_invitation_short')),
+            child: Text(
+              AppLocalizations.of(context).getString('send_invitation_short'),
+            ),
           ),
           TextButton(
             onPressed: () {
@@ -1456,7 +1540,13 @@ class _LegalEntityManagementScreenState
     if (mounted) {
       if (success) {
         scaffoldMessenger.showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context).getString('entity_approved_successfully_short'))),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(
+                context,
+              ).getString('entity_approved_successfully_short'),
+            ),
+          ),
         );
       }
       _loadLegalEntities();
@@ -1469,11 +1559,17 @@ class _LegalEntityManagementScreenState
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context).getString('reject_entity_short')),
+        title: Text(
+          AppLocalizations.of(context).getString('reject_entity_short'),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(AppLocalizations.of(context).getString('enter_rejection_reason_short')),
+            Text(
+              AppLocalizations.of(
+                context,
+              ).getString('enter_rejection_reason_short'),
+            ),
             const SizedBox(height: 16),
             TextField(
               controller: reasonController,
@@ -1511,7 +1607,11 @@ class _LegalEntityManagementScreenState
                 if (success) {
                   scaffoldMessenger.showSnackBar(
                     SnackBar(
-                      content: Text(AppLocalizations.of(context).getString('entity_rejected_successfully_short')),
+                      content: Text(
+                        AppLocalizations.of(
+                          context,
+                        ).getString('entity_rejected_successfully_short'),
+                      ),
                     ),
                   );
                 }
@@ -1556,7 +1656,11 @@ class _LegalEntityManagementScreenState
                 if (success) {
                   scaffoldMessenger.showSnackBar(
                     SnackBar(
-                      content: Text(AppLocalizations.of(context).getString('entity_deleted_successfully_short')),
+                      content: Text(
+                        AppLocalizations.of(
+                          context,
+                        ).getString('entity_deleted_successfully_short'),
+                      ),
                     ),
                   );
                   // Ricarica la lista
@@ -1667,7 +1771,11 @@ class _LegalEntityManagementScreenState
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(AppLocalizations.of(context).getString('enter_rejection_reason_short')),
+              Text(
+                AppLocalizations.of(
+                  context,
+                ).getString('enter_rejection_reason_short'),
+              ),
               const SizedBox(height: 16),
               TextField(
                 controller: reasonController,
@@ -1682,7 +1790,9 @@ class _LegalEntityManagementScreenState
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: Text(AppLocalizations.of(context).getString('cancel_short')),
+              child: Text(
+                AppLocalizations.of(context).getString('cancel_short'),
+              ),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
@@ -1748,7 +1858,9 @@ class _LegalEntityManagementScreenState
           children: [
             const Icon(Icons.link, color: Colors.green),
             const SizedBox(width: 8),
-            Text(AppLocalizations.of(context).getString('send_registration_link')),
+            Text(
+              AppLocalizations.of(context).getString('send_registration_link'),
+            ),
           ],
         ),
         content: Column(
@@ -1756,7 +1868,9 @@ class _LegalEntityManagementScreenState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              AppLocalizations.of(context).getString('enter_email_for_registration_link'),
+              AppLocalizations.of(
+                context,
+              ).getString('enter_email_for_registration_link'),
               style: TextStyle(fontSize: 14, color: Colors.grey[600]),
             ),
             const SizedBox(height: 16),
@@ -1791,7 +1905,9 @@ class _LegalEntityManagementScreenState
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      AppLocalizations.of(context).getString('registration_link_description'),
+                      AppLocalizations.of(
+                        context,
+                      ).getString('registration_link_description'),
                       style: TextStyle(color: Colors.green[700], fontSize: 12),
                     ),
                   ),
@@ -1806,13 +1922,19 @@ class _LegalEntityManagementScreenState
             child: Text(AppLocalizations.of(context).getString('cancel_short')),
           ),
           CustomButton(
-            text: AppLocalizations.of(context).getString('send_registration_link'),
+            text: AppLocalizations.of(
+              context,
+            ).getString('send_registration_link'),
             onPressed: () async {
               // Validazione
               if (emailController.text.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(AppLocalizations.of(context).getString('enter_valid_email_short')),
+                    content: Text(
+                      AppLocalizations.of(
+                        context,
+                      ).getString('enter_valid_email_short'),
+                    ),
                     backgroundColor: Colors.red,
                   ),
                 );
@@ -1824,7 +1946,11 @@ class _LegalEntityManagementScreenState
               ).hasMatch(emailController.text)) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(AppLocalizations.of(context).getString('enter_valid_email_short')),
+                    content: Text(
+                      AppLocalizations.of(
+                        context,
+                      ).getString('enter_valid_email_short'),
+                    ),
                     backgroundColor: Colors.red,
                   ),
                 );
@@ -1837,21 +1963,31 @@ class _LegalEntityManagementScreenState
               final scaffoldMessenger = ScaffoldMessenger.of(context);
 
               // Genera e invia il link di registrazione
-              final success = await _sendRegistrationLink(emailController.text.trim());
+              final success = await _sendRegistrationLink(
+                emailController.text.trim(),
+              );
 
               // Controlla se il widget è ancora montato prima di mostrare il messaggio
               if (mounted) {
                 if (success) {
                   scaffoldMessenger.showSnackBar(
                     SnackBar(
-                      content: Text(AppLocalizations.of(context).getString('registration_link_sent_successfully')),
+                      content: Text(
+                        AppLocalizations.of(
+                          context,
+                        ).getString('registration_link_sent_successfully'),
+                      ),
                       backgroundColor: Colors.green,
                     ),
                   );
                 } else {
                   scaffoldMessenger.showSnackBar(
                     SnackBar(
-                      content: Text(AppLocalizations.of(context).getString('error_sending_registration_link')),
+                      content: Text(
+                        AppLocalizations.of(
+                          context,
+                        ).getString('error_sending_registration_link'),
+                      ),
                       backgroundColor: Colors.red,
                     ),
                   );
@@ -2067,16 +2203,16 @@ class _LegalEntityManagementScreenState
 
   Future<bool> _sendRegistrationLink(String email) async {
     try {
-      // Genera il link di registrazione con l'email precompilata
-      final registrationLink = _generateRegistrationLink(email);
-      
+      // Genera il link di registrazione
+      final registrationLink = _generateRegistrationLink();
+
       // Invia l'email con il link
       final emailService = EmailService();
       final success = await emailService.sendRegistrationLinkEmail(
         to: email,
         registrationLink: registrationLink,
       );
-      
+
       return success;
     } catch (e) {
       print('Error sending registration link: $e');
@@ -2084,18 +2220,12 @@ class _LegalEntityManagementScreenState
     }
   }
 
-  String _generateRegistrationLink(String email) {
-    // Genera un link alla pagina di registrazione pubblica con l'email precompilata
+  String _generateRegistrationLink() {
+    // Genera un link alla pagina di registrazione pubblica senza parametri
     final baseUrl = AppConfig.appUrl;
     final registrationUrl = Uri.parse('$baseUrl/legal-entity-registration');
-    
-    // Aggiungi l'email come parametro di query
-    final finalUrl = registrationUrl.replace(queryParameters: {
-      'email': email,
-      'prefilled': 'true',
-    });
-    
-    return finalUrl.toString();
+
+    return registrationUrl.toString();
   }
 
   void _handleNavigation(int index) {
@@ -2347,7 +2477,11 @@ class _LegalEntityFormDialogState extends State<LegalEntityFormDialog> {
                                       size: 20,
                                     ),
                                     const SizedBox(width: 8),
-                                    Text(AppLocalizations.of(context).getString('pending_short')),
+                                    Text(
+                                      AppLocalizations.of(
+                                        context,
+                                      ).getString('pending_short'),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -2363,7 +2497,11 @@ class _LegalEntityFormDialogState extends State<LegalEntityFormDialog> {
                                       size: 20,
                                     ),
                                     const SizedBox(width: 8),
-                                    Text(AppLocalizations.of(context).getString('approved_short')),
+                                    Text(
+                                      AppLocalizations.of(
+                                        context,
+                                      ).getString('approved_short'),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -2379,7 +2517,11 @@ class _LegalEntityFormDialogState extends State<LegalEntityFormDialog> {
                                       size: 20,
                                     ),
                                     const SizedBox(width: 8),
-                                    Text(AppLocalizations.of(context).getString('rejected_short')),
+                                    Text(
+                                      AppLocalizations.of(
+                                        context,
+                                      ).getString('rejected_short'),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -2599,7 +2741,9 @@ class _LegalEntityFormDialogState extends State<LegalEntityFormDialog> {
               children: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: Text(AppLocalizations.of(context).getString('cancel_short')),
+                  child: Text(
+                    AppLocalizations.of(context).getString('cancel_short'),
+                  ),
                 ),
                 const SizedBox(width: 16),
                 CustomButton(

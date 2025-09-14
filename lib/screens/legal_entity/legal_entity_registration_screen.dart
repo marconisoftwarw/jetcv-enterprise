@@ -88,7 +88,9 @@ class _LegalEntityRegistrationScreenState
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text(AppLocalizations.of(context).getString('registration_submitted')),
+          title: Text(
+            AppLocalizations.of(context).getString('registration_submitted'),
+          ),
           content: const Text(
             'Thank you for your registration! Our team will review your information and contact you within 2-3 business days.',
           ),
@@ -110,7 +112,9 @@ class _LegalEntityRegistrationScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context).getString('company_registration')),
+        title: Text(
+          AppLocalizations.of(context).getString('company_registration'),
+        ),
         backgroundColor: Color(AppConfig.primaryColorValue),
         foregroundColor: Colors.white,
       ),
@@ -417,7 +421,9 @@ class _LegalEntityRegistrationScreenState
                       onPressed: _isLoading
                           ? null
                           : () => Navigator.pop(context),
-                      text: AppLocalizations.of(context).getString('cancel_short'),
+                      text: AppLocalizations.of(
+                        context,
+                      ).getString('cancel_short'),
                       variant: ButtonVariant.outlined,
                     ),
                   ),
@@ -427,7 +433,9 @@ class _LegalEntityRegistrationScreenState
                       onPressed: _isLoading ? null : _submitRegistration,
                       text: _isLoading
                           ? AppLocalizations.of(context).getString('submitting')
-                          : AppLocalizations.of(context).getString('submit_registration'),
+                          : AppLocalizations.of(
+                              context,
+                            ).getString('submit_registration'),
                       isLoading: _isLoading,
                       variant: ButtonVariant.filled,
                     ),
@@ -440,7 +448,9 @@ class _LegalEntityRegistrationScreenState
               // Contact Information
               Center(
                 child: Text(
-                  AppLocalizations.of(context).getString('questions_contact_support'),
+                  AppLocalizations.of(
+                    context,
+                  ).getString('questions_contact_support'),
                   style: TextStyle(color: Colors.grey[500], fontSize: 14),
                 ),
               ),

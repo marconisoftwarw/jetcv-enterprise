@@ -69,11 +69,12 @@ class AppLocalizations {
       'all_rights_reserved': 'Tutti i diritti riservati.',
       'professional_certification_platform_footer':
           'Piattaforma di certificazione e verifica professionale',
-      
+
       // Legal Entity Management
       'legal_entity_registration': 'Registrazione Entità Legale',
       'retry': 'Riprova',
-      'registration_completed_successfully': 'Registrazione completata con successo!',
+      'registration_completed_successfully':
+          'Registrazione completata con successo!',
       'all_statuses': 'Tutti gli Stati',
       'pending_status': 'In Attesa',
       'approved_status': 'Approvate',
@@ -95,12 +96,12 @@ class AppLocalizations {
       'send_email_invitation': 'Invia Invito Email',
       'enter_valid_email': 'Inserisci un\'email valida',
       'error_sending_invitation': 'Errore nell\'invio dell\'invito',
-      
+
       // Identity Verification
       'later': 'Più Tardi',
       'proceed': 'Procedi',
       'error_opening_verification': 'Errore nell\'apertura della verifica',
-      
+
       // Admin Dashboard
       'error_loading': 'Errore nel caricamento',
       'overview': 'Panoramica',
@@ -114,7 +115,8 @@ class AppLocalizations {
       'invite_certifier': 'Invita Certificatore',
       'new': 'Nuovo',
       'resend_invitation': 'Rinvia Invito',
-      'verification_completion_message': 'Per completare la registrazione, è necessario verificare la tua identità. Vuoi procedere ora con la verifica?',
+      'verification_completion_message':
+          'Per completare la registrazione, è necessario verificare la tua identità. Vuoi procedere ora con la verifica?',
       'dashboard_certifiers': 'Dashboard Certificatori',
       'certifier_management': 'Gestione Certificatori',
       'complete_registration': 'Completa Registrazione',
@@ -392,7 +394,7 @@ class AppLocalizations {
         'type_14': 'Tipo 14',
         'type_15': 'Tipo 15',
       },
-      
+
       // Additional missing keys
       'retry_short': 'Riprova',
       'all_roles_short': 'Tutti i ruoli',
@@ -436,10 +438,14 @@ class AppLocalizations {
       'enter_valid_email_short': 'Inserisci un\'email valida',
       'error_sending_invitation_short': 'Errore nell\'invio dell\'invito',
       'send_registration_link': 'Invia Link di Registrazione',
-      'enter_email_for_registration_link': 'Inserisci l\'email per inviare il link di registrazione',
-      'registration_link_sent_successfully': 'Link di registrazione inviato con successo',
-      'error_sending_registration_link': 'Errore nell\'invio del link di registrazione',
-      'registration_link_description': 'Il destinatario riceverà un link per accedere alla pagina di registrazione con l\'email precompilata',
+      'enter_email_for_registration_link':
+          'Inserisci l\'email per inviare il link di registrazione',
+      'registration_link_sent_successfully':
+          'Link di registrazione inviato con successo',
+      'error_sending_registration_link':
+          'Errore nell\'invio del link di registrazione',
+      'registration_link_description':
+          'Il destinatario riceverà un link per accedere alla pagina di registrazione con l\'email precompilata',
       'new_certification_short': 'Nuova Certificazione',
       'retry_short_lower': 'Riprova',
       'recent_sort': 'Più recenti',
@@ -456,7 +462,8 @@ class AppLocalizations {
       'error_short': 'Errore',
       'verification_initialization': 'Inizializzazione verifica in corso...',
       'unknown_state': 'Stato sconosciuto',
-      'verification_completed_redirect': 'Verifica completata! Reindirizzamento...',
+      'verification_completed_redirect':
+          'Verifica completata! Reindirizzamento...',
       'select_license': 'Seleziona Licenza',
       'no_plans_available': 'Nessun piano disponibile al momento',
       'user_removed_successfully': 'Utente rimosso con successo',
@@ -481,7 +488,8 @@ class AppLocalizations {
       'ok_short_upper': 'OK',
       'company_registration': 'Company Registration',
       'registration_via_invitation': 'Registrazione tramite Invito',
-      'registration_completed_successfully_short': 'Registrazione completata con successo!',
+      'registration_completed_successfully_short':
+          'Registrazione completata con successo!',
       'filter_by_status': 'Filter by Status',
       'all_statuses_upper': 'All Statuses',
       'pending_upper': 'Pending',
@@ -559,11 +567,12 @@ class AppLocalizations {
       'all_rights_reserved': 'All rights reserved.',
       'professional_certification_platform_footer':
           'Professional certification and verification platform',
-      
+
       // Legal Entity Management
       'legal_entity_registration': 'Legal Entity Registration',
       'retry': 'Retry',
-      'registration_completed_successfully': 'Registration completed successfully!',
+      'registration_completed_successfully':
+          'Registration completed successfully!',
       'all_statuses': 'All Statuses',
       'pending_status': 'Pending',
       'approved_status': 'Approved',
@@ -585,12 +594,12 @@ class AppLocalizations {
       'send_email_invitation': 'Send Email Invitation',
       'enter_valid_email': 'Enter a valid email',
       'error_sending_invitation': 'Error sending invitation',
-      
+
       // Identity Verification
       'later': 'Later',
       'proceed': 'Proceed',
       'error_opening_verification': 'Error opening verification',
-      
+
       // Admin Dashboard
       'error_loading': 'Error loading',
       'overview': 'Overview',
@@ -604,7 +613,8 @@ class AppLocalizations {
       'invite_certifier': 'Invite Certifier',
       'new': 'New',
       'resend_invitation': 'Resend Invitation',
-      'verification_completion_message': 'To complete registration, you need to verify your identity. Do you want to proceed with verification now?',
+      'verification_completion_message':
+          'To complete registration, you need to verify your identity. Do you want to proceed with verification now?',
       'dashboard_certifiers': 'Certifiers Dashboard',
       'certifier_management': 'Certifier Management',
       'complete_registration': 'Complete Registration',
@@ -794,7 +804,7 @@ class AppLocalizations {
         'type_14': 'Type 14',
         'type_15': 'Type 15',
       },
-      
+
       // Additional missing keys
       'retry_short': 'Retry',
       'all_roles_short': 'All roles',
@@ -838,10 +848,13 @@ class AppLocalizations {
       'enter_valid_email_short': 'Enter a valid email',
       'error_sending_invitation_short': 'Error sending invitation',
       'send_registration_link': 'Send Registration Link',
-      'enter_email_for_registration_link': 'Enter email to send registration link',
-      'registration_link_sent_successfully': 'Registration link sent successfully',
+      'enter_email_for_registration_link':
+          'Enter email to send registration link',
+      'registration_link_sent_successfully':
+          'Registration link sent successfully',
       'error_sending_registration_link': 'Error sending registration link',
-      'registration_link_description': 'The recipient will receive a link to access the registration page with pre-filled email',
+      'registration_link_description':
+          'The recipient will receive a link to access the registration page with pre-filled email',
       'new_certification_short': 'New Certification',
       'retry_short_lower': 'Retry',
       'recent_sort': 'Most recent',
@@ -856,9 +869,11 @@ class AppLocalizations {
       'success_short': 'Success',
       'ok_short': 'OK',
       'error_short': 'Error',
-      'verification_initialization': 'Verification initialization in progress...',
+      'verification_initialization':
+          'Verification initialization in progress...',
       'unknown_state': 'Unknown state',
-      'verification_completed_redirect': 'Verification completed! Redirecting...',
+      'verification_completed_redirect':
+          'Verification completed! Redirecting...',
       'select_license': 'Select License',
       'no_plans_available': 'No plans available at the moment',
       'user_removed_successfully': 'User removed successfully',
@@ -883,7 +898,8 @@ class AppLocalizations {
       'ok_short_upper': 'OK',
       'company_registration': 'Company Registration',
       'registration_via_invitation': 'Registration via Invitation',
-      'registration_completed_successfully_short': 'Registration completed successfully!',
+      'registration_completed_successfully_short':
+          'Registration completed successfully!',
       'filter_by_status': 'Filter by Status',
       'all_statuses_upper': 'All Statuses',
       'pending_upper': 'Pending',
@@ -1117,7 +1133,7 @@ class AppLocalizations {
         'type_14': 'Typ 14',
         'type_15': 'Typ 15',
       },
-      
+
       // Additional missing keys
       'retry_short': 'Wiederholen',
       'all_roles_short': 'Alle Rollen',
@@ -1160,10 +1176,14 @@ class AppLocalizations {
       'send_email_invitation_short': 'E-Mail-Einladung senden',
       'send_registration_link_short': 'Registrierungslink senden',
       'send_registration_link': 'Registrierungslink senden',
-      'enter_email_for_registration_link': 'E-Mail eingeben, um Registrierungslink zu senden',
-      'registration_link_sent_successfully': 'Registrierungslink erfolgreich gesendet',
-      'error_sending_registration_link': 'Fehler beim Senden des Registrierungslinks',
-      'registration_link_description': 'Der Empfänger erhält einen Link zur Registrierungsseite mit vorausgefüllter E-Mail',
+      'enter_email_for_registration_link':
+          'E-Mail eingeben, um Registrierungslink zu senden',
+      'registration_link_sent_successfully':
+          'Registrierungslink erfolgreich gesendet',
+      'error_sending_registration_link':
+          'Fehler beim Senden des Registrierungslinks',
+      'registration_link_description':
+          'Der Empfänger erhält einen Link zur Registrierungsseite mit vorausgefüllter E-Mail',
       'enter_valid_email_short': 'Gültige E-Mail eingeben',
       'error_sending_invitation_short': 'Fehler beim Senden der Einladung',
       'new_certification_short': 'Neue Zertifizierung',
@@ -1182,7 +1202,8 @@ class AppLocalizations {
       'error_short': 'Fehler',
       'verification_initialization': 'Verifizierung wird initialisiert...',
       'unknown_state': 'Unbekannter Status',
-      'verification_completed_redirect': 'Verifizierung abgeschlossen! Weiterleitung...',
+      'verification_completed_redirect':
+          'Verifizierung abgeschlossen! Weiterleitung...',
       'select_license': 'Lizenz auswählen',
       'no_plans_available': 'Derzeit keine Pläne verfügbar',
       'user_removed_successfully': 'Benutzer erfolgreich entfernt',
@@ -1190,7 +1211,8 @@ class AppLocalizations {
       'edit_short_lower': 'Bearbeiten',
       'remove_short': 'Entfernen',
       'error_generic': 'Fehler:',
-      'confirm_delete_media': 'Sind Sie sicher, dass Sie dieses Medium löschen möchten?',
+      'confirm_delete_media':
+          'Sind Sie sicher, dass Sie dieses Medium löschen möchten?',
       'media_deleted_successfully': 'Medium erfolgreich gelöscht',
       'select_file': 'Datei auswählen',
       'information_deleted_successfully': 'Information erfolgreich gelöscht',
@@ -1207,7 +1229,8 @@ class AppLocalizations {
       'ok_short_upper': 'OK',
       'company_registration': 'Unternehmensregistrierung',
       'registration_via_invitation': 'Registrierung über Einladung',
-      'registration_completed_successfully_short': 'Registrierung erfolgreich abgeschlossen!',
+      'registration_completed_successfully_short':
+          'Registrierung erfolgreich abgeschlossen!',
       'filter_by_status': 'Nach Status filtern',
       'all_statuses_upper': 'Alle Status',
       'pending_upper': 'Ausstehend',
@@ -1230,7 +1253,8 @@ class AppLocalizations {
       'create_entity': 'Entität erstellen',
       'submitting': 'Wird eingereicht...',
       'submit_registration': 'Registrierung einreichen',
-      'questions_contact_support': 'Fragen? Kontaktieren Sie uns unter support@jetcv.com',
+      'questions_contact_support':
+          'Fragen? Kontaktieren Sie uns unter support@jetcv.com',
       'account': 'Konto',
       'settings_saved': 'Einstellungen gespeichert',
       'help_center': 'Hilfezentrum',
@@ -1441,7 +1465,7 @@ class AppLocalizations {
         'type_14': 'Type 14',
         'type_15': 'Type 15',
       },
-      
+
       // Additional missing keys
       'retry_short': 'Réessayer',
       'all_roles_short': 'Tous les rôles',
@@ -1477,19 +1501,25 @@ class AppLocalizations {
       'enter_rejection_reason_short': 'Entrez la raison du rejet :',
       'entity_rejected_successfully_short': 'Entité rejetée avec succès',
       'entity_deleted_successfully_short': 'Entité supprimée avec succès',
-      'error_deleting_entity_short': 'Erreur lors de la suppression de l\'entité',
+      'error_deleting_entity_short':
+          'Erreur lors de la suppression de l\'entité',
       'edit_entity_status_short': 'Modifier le statut de l\'entité',
       'confirm_short': 'Confirmer',
       'rejection_reason_short': 'Raison du rejet',
       'send_email_invitation_short': 'Envoyer une invitation par e-mail',
       'send_registration_link_short': 'Envoyer le lien d\'inscription',
       'send_registration_link': 'Envoyer le lien d\'inscription',
-      'enter_email_for_registration_link': 'Entrez l\'e-mail pour envoyer le lien d\'inscription',
-      'registration_link_sent_successfully': 'Lien d\'inscription envoyé avec succès',
-      'error_sending_registration_link': 'Erreur lors de l\'envoi du lien d\'inscription',
-      'registration_link_description': 'Le destinataire recevra un lien pour accéder à la page d\'inscription avec l\'e-mail pré-rempli',
+      'enter_email_for_registration_link':
+          'Entrez l\'e-mail pour envoyer le lien d\'inscription',
+      'registration_link_sent_successfully':
+          'Lien d\'inscription envoyé avec succès',
+      'error_sending_registration_link':
+          'Erreur lors de l\'envoi du lien d\'inscription',
+      'registration_link_description':
+          'Le destinataire recevra un lien pour accéder à la page d\'inscription avec l\'e-mail pré-rempli',
       'enter_valid_email_short': 'Entrez un e-mail valide',
-      'error_sending_invitation_short': 'Erreur lors de l\'envoi de l\'invitation',
+      'error_sending_invitation_short':
+          'Erreur lors de l\'envoi de l\'invitation',
       'new_certification_short': 'Nouvelle certification',
       'retry_short_lower': 'Réessayer',
       'recent_sort': 'Plus récents',
@@ -1504,9 +1534,11 @@ class AppLocalizations {
       'success_short': 'Succès',
       'ok_short': 'OK',
       'error_short': 'Erreur',
-      'verification_initialization': 'Initialisation de la vérification en cours...',
+      'verification_initialization':
+          'Initialisation de la vérification en cours...',
       'unknown_state': 'État inconnu',
-      'verification_completed_redirect': 'Vérification terminée ! Redirection...',
+      'verification_completed_redirect':
+          'Vérification terminée ! Redirection...',
       'select_license': 'Sélectionner la licence',
       'no_plans_available': 'Aucun plan disponible pour le moment',
       'user_removed_successfully': 'Utilisateur supprimé avec succès',
@@ -1531,7 +1563,8 @@ class AppLocalizations {
       'ok_short_upper': 'OK',
       'company_registration': 'Inscription de l\'entreprise',
       'registration_via_invitation': 'Inscription via invitation',
-      'registration_completed_successfully_short': 'Inscription terminée avec succès !',
+      'registration_completed_successfully_short':
+          'Inscription terminée avec succès !',
       'filter_by_status': 'Filtrer par statut',
       'all_statuses_upper': 'Tous les statuts',
       'pending_upper': 'En attente',
@@ -1554,7 +1587,8 @@ class AppLocalizations {
       'create_entity': 'Créer une entité',
       'submitting': 'Soumission en cours...',
       'submit_registration': 'Soumettre l\'inscription',
-      'questions_contact_support': 'Des questions ? Contactez-nous à support@jetcv.com',
+      'questions_contact_support':
+          'Des questions ? Contactez-nous à support@jetcv.com',
       'account': 'Compte',
       'settings_saved': 'Paramètres sauvegardés',
       'help_center': 'Centre d\'aide',

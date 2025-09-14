@@ -8,6 +8,10 @@ class VeriffService {
     String callbackUrl = 'https://example.com/callback',
   }) async {
     try {
+      print('🔍 VeriffService: Starting requestVeriffSession');
+      print('🔍 User ID: ${user.idUser}');
+      print('🔍 User email: ${user.email}');
+      
       final supabaseService = SupabaseService();
 
       final body = {
@@ -21,25 +25,35 @@ class VeriffService {
           'dateOfBirth': user.dateOfBirth?.toIso8601String() ?? '',
         },
       };
+      
+      print('🔍 Request body: $body');
 
       // Chiama la Supabase Edge Function
+      print('🔍 Calling Edge Function: kyc-create-new-session');
       final response = await supabaseService.client.functions.invoke(
         'kyc-create-new-session',
         body: body,
       );
+      
+      print('🔍 Edge Function response status: ${response.status}');
+      print('🔍 Edge Function response data: ${response.data}');
 
       if (response.status == 200) {
         final responseData = response.data as Map<String, dynamic>;
+        print('🔍 Success! Response data: $responseData');
 
         // Salva i dati della sessione nel database
         await _saveKycAttempt(user.idUser, body, responseData);
 
         return responseData;
       } else {
-        throw Exception('Failed to request Veriff session: ${response.status}');
+        print('❌ Edge Function failed with status: ${response.status}');
+        print('❌ Response data: ${response.data}');
+        throw Exception('Failed to request Veriff session: ${response.status} - ${response.data}');
       }
     } catch (e) {
-      print('Error requesting Veriff session: $e');
+      print('❌ Error requesting Veriff session: $e');
+      print('❌ Error type: ${e.runtimeType}');
       rethrow;
     }
   }

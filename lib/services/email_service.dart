@@ -375,8 +375,14 @@ Questo è un messaggio automatico, non rispondere a questa email.
   }) async {
     try {
       final subject = 'JetCV Enterprise - Link di Registrazione Entità Legale';
-      final htmlContent = _generateRegistrationLinkEmailHtml(to, registrationLink);
-      final textContent = _generateRegistrationLinkEmailText(to, registrationLink);
+      final htmlContent = _generateRegistrationLinkEmailHtml(
+        to,
+        registrationLink,
+      );
+      final textContent = _generateRegistrationLinkEmailText(
+        to,
+        registrationLink,
+      );
 
       final emailData = {
         'to': to,
@@ -397,7 +403,10 @@ Questo è un messaggio automatico, non rispondere a questa email.
   }
 
   // Genera HTML per l'email con link di registrazione
-  String _generateRegistrationLinkEmailHtml(String email, String registrationLink) {
+  String _generateRegistrationLinkEmailHtml(
+    String email,
+    String registrationLink,
+  ) {
     return '''
 <!DOCTYPE html>
 <html>
@@ -508,7 +517,10 @@ Questo è un messaggio automatico, non rispondere a questa email.
   }
 
   // Genera testo semplice per l'email con link di registrazione
-  String _generateRegistrationLinkEmailText(String email, String registrationLink) {
+  String _generateRegistrationLinkEmailText(
+    String email,
+    String registrationLink,
+  ) {
     return '''
 JetCV Enterprise - Registrazione Entità Legale
 

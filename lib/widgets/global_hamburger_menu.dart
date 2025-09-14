@@ -342,25 +342,12 @@ class GlobalHamburgerMenu extends StatelessWidget {
             onPressed: () async {
               Navigator.of(context).pop();
 
-              // Mostra loading
-              showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (context) =>
-                    Center(child: CircularProgressIndicator()),
-              );
-
               try {
                 final authProvider = context.read<AuthProvider>();
                 await authProvider.signOut();
-
-                if (context.mounted) {
-                  Navigator.of(context).pop(); // Chiudi loading
-                  Navigator.pushReplacementNamed(context, '/login');
-                }
+                // La navigazione viene gestita automaticamente dal main.dart
               } catch (e) {
                 if (context.mounted) {
-                  Navigator.of(context).pop(); // Chiudi loading
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('${l10n.getString('logout_error')}: $e'),

@@ -13,6 +13,7 @@ import '../../providers/pricing_provider.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../l10n/app_localizations.dart';
+import '../veriff/veriff_verification_screen.dart';
 
 class LegalEntityPublicRegistrationScreen extends StatefulWidget {
   const LegalEntityPublicRegistrationScreen({super.key});
@@ -115,20 +116,21 @@ class _LegalEntityPublicRegistrationScreenState
     // In a real app, you would get the current URL from the route
     // For now, we'll check if there are any URL parameters passed to the screen
     // This would typically be done through route parameters or deep linking
-    
+
     try {
       // For demonstration purposes, we'll simulate URL parameters
       // In a real implementation, you would parse the actual URL parameters
       // For now, we'll check if there are any pre-filled values from the route
-      final Map<String, String>? routeParams = ModalRoute.of(context)?.settings.arguments as Map<String, String>?;
-      
+      final Map<String, String>? routeParams =
+          ModalRoute.of(context)?.settings.arguments as Map<String, String>?;
+
       if (routeParams != null) {
         // Pre-fill email if provided
         if (routeParams['email'] != null) {
           _entityEmailController.text = routeParams['email']!;
           _personalEmailController.text = routeParams['email']!;
         }
-        
+
         // Pre-fill other fields if provided
         if (routeParams['legal_name'] != null) {
           _legalNameController.text = routeParams['legal_name']!;
@@ -137,37 +139,44 @@ class _LegalEntityPublicRegistrationScreenState
           _identifierCodeController.text = routeParams['identifier_code']!;
         }
         if (routeParams['legal_rapresentative'] != null) {
-          _legalRepresentativeController.text = routeParams['legal_rapresentative']!;
+          _legalRepresentativeController.text =
+              routeParams['legal_rapresentative']!;
         }
         if (routeParams['operational_address'] != null) {
-          _operationalAddressController.text = routeParams['operational_address']!;
+          _operationalAddressController.text =
+              routeParams['operational_address']!;
         }
         if (routeParams['operational_city'] != null) {
           _operationalCityController.text = routeParams['operational_city']!;
         }
         if (routeParams['operational_postal_code'] != null) {
-          _operationalPostalCodeController.text = routeParams['operational_postal_code']!;
+          _operationalPostalCodeController.text =
+              routeParams['operational_postal_code']!;
         }
         if (routeParams['operational_state'] != null) {
           _operationalStateController.text = routeParams['operational_state']!;
         }
         if (routeParams['operational_country'] != null) {
-          _operationalCountryController.text = routeParams['operational_country']!;
+          _operationalCountryController.text =
+              routeParams['operational_country']!;
         }
         if (routeParams['headquarter_address'] != null) {
-          _headquarterAddressController.text = routeParams['headquarter_address']!;
+          _headquarterAddressController.text =
+              routeParams['headquarter_address']!;
         }
         if (routeParams['headquarter_city'] != null) {
           _headquarterCityController.text = routeParams['headquarter_city']!;
         }
         if (routeParams['headquarter_postal_code'] != null) {
-          _headquarterPostalCodeController.text = routeParams['headquarter_postal_code']!;
+          _headquarterPostalCodeController.text =
+              routeParams['headquarter_postal_code']!;
         }
         if (routeParams['headquarter_state'] != null) {
           _headquarterStateController.text = routeParams['headquarter_state']!;
         }
         if (routeParams['headquarter_country'] != null) {
-          _headquarterCountryController.text = routeParams['headquarter_country']!;
+          _headquarterCountryController.text =
+              routeParams['headquarter_country']!;
         }
         if (routeParams['phone'] != null) {
           _phoneController.text = routeParams['phone']!;
@@ -189,7 +198,9 @@ class _LegalEntityPublicRegistrationScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context).getString('legal_entity_registration')),
+        title: Text(
+          AppLocalizations.of(context).getString('legal_entity_registration'),
+        ),
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
       ),
@@ -310,7 +321,10 @@ class _LegalEntityPublicRegistrationScreenState
             children: [
               Text(
                 AppLocalizations.of(context).getString('select_plan'),
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 16),
               const Text(
@@ -828,7 +842,9 @@ class _LegalEntityPublicRegistrationScreenState
             child: CustomButton(
               onPressed: _isLoading ? null : () => _nextStep(),
               text: _currentStep == _totalSteps - 1
-                  ? AppLocalizations.of(context).getString('complete_registration')
+                  ? AppLocalizations.of(
+                      context,
+                    ).getString('complete_registration')
                   : AppLocalizations.of(context).getString('next'),
               backgroundColor: _currentStep == _totalSteps - 1
                   ? Colors.green
@@ -869,12 +885,14 @@ class _LegalEntityPublicRegistrationScreenState
         }
         break;
       case 1:
-        if (_personalFormKey.currentState == null || !_personalFormKey.currentState!.validate()) {
+        if (_personalFormKey.currentState == null ||
+            !_personalFormKey.currentState!.validate()) {
           return false;
         }
         break;
       case 2:
-        if (_entityFormKey.currentState == null || !_entityFormKey.currentState!.validate()) {
+        if (_entityFormKey.currentState == null ||
+            !_entityFormKey.currentState!.validate()) {
           return false;
         }
         break;
@@ -959,9 +977,11 @@ class _LegalEntityPublicRegistrationScreenState
           'createdByIdUser': user.idUser,
         },
       );
-      
+
       if (result == null) {
-        throw Exception('Errore nella creazione dell\'utente e dell\'entità legale');
+        throw Exception(
+          'Errore nella creazione dell\'utente e dell\'entità legale',
+        );
       }
 
       final createdUser = result['user'];
@@ -984,13 +1004,24 @@ class _LegalEntityPublicRegistrationScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context).getString('registration_completed_successfully')),
+            content: Text(
+              AppLocalizations.of(
+                context,
+              ).getString('registration_completed_successfully'),
+            ),
             backgroundColor: Colors.green,
           ),
         );
 
-        // Navigate to success page or login
-        Navigator.pushReplacementNamed(context, '/auth/login');
+        // Navigate to Veriff verification screen with user data
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => VeriffVerificationScreen(
+              userData: user.toJson(),
+            ),
+          ),
+        );
       }
     } catch (e) {
       print('❌ Error completing registration: $e');

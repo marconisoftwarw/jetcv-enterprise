@@ -747,9 +747,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
             onPressed: () async {
               Navigator.pop(context);
               await context.read<AuthProvider>().signOut();
-              if (mounted) {
-                Navigator.pushReplacementNamed(context, '/login');
-              }
+              // La navigazione viene gestita automaticamente dal main.dart
             },
             style: TextButton.styleFrom(foregroundColor: AppTheme.errorRed),
             child: Text(l10n.getString('sign_out')),

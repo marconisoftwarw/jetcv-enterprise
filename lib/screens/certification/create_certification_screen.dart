@@ -806,7 +806,9 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 TextButton.icon(
                   onPressed: _removeUser,
                   icon: Icon(Icons.person_remove, size: 16),
-                  label: Text(AppLocalizations.of(context).getString('remove_user')),
+                  label: Text(
+                    AppLocalizations.of(context).getString('remove_user'),
+                  ),
                   style: TextButton.styleFrom(
                     foregroundColor: AppTheme.errorRed,
                   ),

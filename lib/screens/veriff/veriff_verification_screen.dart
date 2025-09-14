@@ -8,9 +8,12 @@ import '../../services/veriff_service.dart';
 import '../../widgets/linkedin_card.dart';
 import '../../widgets/linkedin_button.dart';
 import '../../l10n/app_localizations.dart';
+import '../../models/user.dart';
 
 class VeriffVerificationScreen extends StatefulWidget {
-  const VeriffVerificationScreen({super.key});
+  final Map<String, dynamic>? userData;
+  
+  const VeriffVerificationScreen({super.key, this.userData});
 
   @override
   State<VeriffVerificationScreen> createState() =>
@@ -33,32 +36,37 @@ class _VeriffVerificationScreenState extends State<VeriffVerificationScreen> {
 
   Future<void> _initializeVeriffSession() async {
     try {
+      print('🔍 VeriffVerificationScreen: Starting _initializeVeriffSession');
+      
       setState(() {
         _isLoading = true;
         _errorMessage = null;
       });
 
-      // Aspetta un momento per permettere all'AuthProvider di aggiornarsi
-      await Future.delayed(const Duration(milliseconds: 1000));
-
-      final user = context.read<AuthProvider>().currentUser;
-
-      // Verifica che l'utente sia valido
-      if (user == null) {
-        throw Exception(
-          AppLocalizations.of(context).getString('user_not_authenticated'),
-        );
+      // Verifica che abbiamo i dati utente passati come parametro
+      if (widget.userData == null) {
+        print('❌ VeriffVerificationScreen: No user data provided');
+        throw Exception('Dati utente non forniti');
       }
+
+      print('🔍 VeriffVerificationScreen: Using user data from parameters');
+      final user = AppUser.fromJson(widget.userData!);
+      print('🔍 VeriffVerificationScreen: User from parameters: $user');
+      
+      print('🔍 VeriffVerificationScreen: User is valid, proceeding with Veriff session creation');
 
       // URL di callback per ricevere i risultati - punta alla home del progetto
       final callbackUrl = '${AppConfig.appUrl}/home';
+      print('🔍 VeriffVerificationScreen: Callback URL: $callbackUrl');
 
       // Richiedi sessione Veriff
+      print('🔍 VeriffVerificationScreen: Creating VeriffService and calling requestVeriffSession');
       final veriffService = VeriffService();
       final response = await veriffService.requestVeriffSession(
         user: user,
         callbackUrl: callbackUrl,
       );
+      print('🔍 VeriffVerificationScreen: VeriffService response received: $response');
 
       print('Veriff Session Response: $response');
 
@@ -67,17 +75,22 @@ class _VeriffVerificationScreenState extends State<VeriffVerificationScreen> {
         // Nuova struttura response
         _veriffUrl = response['verificationUrl'] as String?;
         _sessionId = response['sessionId'] as String?;
+        
+        print('🔍 Initial _veriffUrl: $_veriffUrl');
+        print('🔍 Initial _sessionId: $_sessionId');
 
         // Se non c'è verificationUrl, prova con la struttura nested
         if (_veriffUrl == null &&
             response['response']?['verification']?['url'] != null) {
           _veriffUrl = response['response']['verification']['url'] as String;
+          print('🔍 Found nested _veriffUrl: $_veriffUrl');
         }
 
         // Se non c'è sessionId, prova con la struttura nested
         if (_sessionId == null &&
             response['response']?['verification']?['id'] != null) {
           _sessionId = response['response']['verification']['id'] as String;
+          print('🔍 Found nested _sessionId: $_sessionId');
         }
       }
 
@@ -89,7 +102,8 @@ class _VeriffVerificationScreenState extends State<VeriffVerificationScreen> {
         throw Exception('URL di verifica non ricevuto da Veriff');
       }
     } catch (e) {
-      print('Error initializing Veriff session: $e');
+      print('❌ VeriffVerificationScreen: Error initializing Veriff session: $e');
+      print('❌ VeriffVerificationScreen: Error type: ${e.runtimeType}');
       setState(() {
         _isLoading = false;
         _errorMessage = 'Errore durante l\'inizializzazione della verifica: $e';
@@ -135,17 +149,7 @@ class _VeriffVerificationScreenState extends State<VeriffVerificationScreen> {
       );
     }
 
-    if (_errorMessage != null) {
-      return _buildErrorView();
-    }
-
-    if (_isVerificationComplete) {
-      return _buildCompletionView();
-    }
-
-    if (_veriffUrl != null) {
-      return _buildVerificationView();
-    }
+    return _buildVerificationView();
 
     return const Center(child: Text('Stato sconosciuto'));
   }
@@ -409,15 +413,32 @@ class _VeriffVerificationScreenState extends State<VeriffVerificationScreen> {
   }
 
   Future<void> _openVeriffInNewTab() async {
+    print('🔍 _openVeriffInNewTab called');
+    print('🔍 _veriffUrl: $_veriffUrl');
+    
     if (_veriffUrl != null) {
       try {
         final uri = Uri.parse(_veriffUrl!);
+        print('🔍 Parsed URI: $uri');
+        print('🔍 Can launch URL: ${await canLaunchUrl(uri)}');
+        
         if (await canLaunchUrl(uri)) {
-          await launchUrl(uri, mode: LaunchMode.externalApplication);
+          print('🔍 Launching URL...');
+          // Prova prima con externalApplication, poi con platformDefault
+          try {
+            await launchUrl(uri, mode: LaunchMode.externalApplication);
+            print('🔍 URL launched successfully with externalApplication');
+          } catch (e) {
+            print('🔍 externalApplication failed, trying platformDefault: $e');
+            await launchUrl(uri, mode: LaunchMode.platformDefault);
+            print('🔍 URL launched successfully with platformDefault');
+          }
         } else {
+          print('❌ Cannot launch URL');
           throw Exception('Impossibile aprire l\'URL di verifica');
         }
       } catch (e) {
+        print('❌ Error launching URL: $e');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -426,6 +447,16 @@ class _VeriffVerificationScreenState extends State<VeriffVerificationScreen> {
             ),
           );
         }
+      }
+    } else {
+      print('❌ _veriffUrl is null');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('URL di verifica non disponibile'),
+            backgroundColor: AppTheme.errorRed,
+          ),
+        );
       }
     }
   }
