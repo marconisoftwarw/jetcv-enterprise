@@ -6,6 +6,7 @@ import '../../models/certifier.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/linkedin_metric_card.dart';
 import '../../services/certification_edge_service.dart';
+import '../../l10n/app_localizations.dart';
 import 'invite_certifier_screen.dart';
 
 class AdminCertifierDashboardScreen extends StatefulWidget {
@@ -354,7 +355,7 @@ class _AdminCertifierDashboardScreenState
               _handleCertifierAction(value, certifier, provider),
           itemBuilder: (context) => [
             if (certifier.hasInvitationToken)
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'resend',
                 child: Text(AppLocalizations.of(context).getString('resend_invitation_short')),
               ),

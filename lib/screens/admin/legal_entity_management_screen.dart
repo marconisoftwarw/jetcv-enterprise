@@ -7,6 +7,7 @@ import '../../providers/auth_provider.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../widgets/global_hamburger_menu.dart';
+import '../../l10n/app_localizations.dart';
 
 class LegalEntityManagementScreen extends StatefulWidget {
   final bool hideMenu;
@@ -871,19 +872,19 @@ class _LegalEntityManagementScreenState
                   hint: Text(AppLocalizations.of(context).getString('all_statuses_short')),
                   underline: const SizedBox(),
                   items: [
-                    const DropdownMenuItem(
+                    DropdownMenuItem(
                       value: null,
                       child: Text(AppLocalizations.of(context).getString('all_statuses_short')),
                     ),
-                    const DropdownMenuItem(
+                    DropdownMenuItem(
                       value: 'pending',
                       child: Text(AppLocalizations.of(context).getString('pending_short')),
                     ),
-                    const DropdownMenuItem(
+                    DropdownMenuItem(
                       value: 'approved',
                       child: Text(AppLocalizations.of(context).getString('approved_short')),
                     ),
-                    const DropdownMenuItem(
+                    DropdownMenuItem(
                       value: 'rejected',
                       child: Text(AppLocalizations.of(context).getString('rejected_short')),
                     ),
@@ -1446,7 +1447,7 @@ class _LegalEntityManagementScreenState
               if (mounted) {
                 if (success) {
                   scaffoldMessenger.showSnackBar(
-                    const SnackBar(
+                    SnackBar(
                       content: Text(AppLocalizations.of(context).getString('entity_rejected_successfully_short')),
                     ),
                   );
@@ -1491,7 +1492,7 @@ class _LegalEntityManagementScreenState
               if (mounted) {
                 if (success) {
                   scaffoldMessenger.showSnackBar(
-                    const SnackBar(
+                    SnackBar(
                       content: Text(AppLocalizations.of(context).getString('entity_deleted_successfully_short')),
                     ),
                   );

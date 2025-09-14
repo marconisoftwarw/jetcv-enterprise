@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../config/app_config.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../widgets/custom_button.dart';
+import '../../l10n/app_localizations.dart';
 
 class LegalEntityRegistrationScreen extends StatefulWidget {
   const LegalEntityRegistrationScreen({super.key});
