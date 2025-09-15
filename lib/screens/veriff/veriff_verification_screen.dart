@@ -9,7 +9,7 @@ import '../../models/user.dart';
 
 class VeriffVerificationScreen extends StatefulWidget {
   final Map<String, dynamic>? userData;
-  
+
   const VeriffVerificationScreen({super.key, this.userData});
 
   @override
@@ -34,7 +34,7 @@ class _VeriffVerificationScreenState extends State<VeriffVerificationScreen> {
   Future<void> _initializeVeriffSession() async {
     try {
       print('🔍 VeriffVerificationScreen: Starting _initializeVeriffSession');
-      
+
       setState(() {
         _isLoading = true;
         _errorMessage = null;
@@ -49,21 +49,27 @@ class _VeriffVerificationScreenState extends State<VeriffVerificationScreen> {
       print('🔍 VeriffVerificationScreen: Using user data from parameters');
       final user = AppUser.fromJson(widget.userData!);
       print('🔍 VeriffVerificationScreen: User from parameters: $user');
-      
-      print('🔍 VeriffVerificationScreen: User is valid, proceeding with Veriff session creation');
+
+      print(
+        '🔍 VeriffVerificationScreen: User is valid, proceeding with Veriff session creation',
+      );
 
       // URL di callback per ricevere i risultati - punta alla home del progetto
       final callbackUrl = '${AppConfig.appUrl}/home';
       print('🔍 VeriffVerificationScreen: Callback URL: $callbackUrl');
 
       // Richiedi sessione Veriff
-      print('🔍 VeriffVerificationScreen: Creating VeriffService and calling requestVeriffSession');
+      print(
+        '🔍 VeriffVerificationScreen: Creating VeriffService and calling requestVeriffSession',
+      );
       final veriffService = VeriffService();
       final response = await veriffService.requestVeriffSession(
         user: user,
         callbackUrl: callbackUrl,
       );
-      print('🔍 VeriffVerificationScreen: VeriffService response received: $response');
+      print(
+        '🔍 VeriffVerificationScreen: VeriffService response received: $response',
+      );
 
       print('Veriff Session Response: $response');
 
@@ -72,7 +78,7 @@ class _VeriffVerificationScreenState extends State<VeriffVerificationScreen> {
         // Nuova struttura response
         _veriffUrl = response['verificationUrl'] as String?;
         _sessionId = response['sessionId'] as String?;
-        
+
         print('🔍 Initial _veriffUrl: $_veriffUrl');
         print('🔍 Initial _sessionId: $_sessionId');
 
@@ -84,15 +90,13 @@ class _VeriffVerificationScreenState extends State<VeriffVerificationScreen> {
         }
 
         // Se non c'è URL, prova con la struttura diretta
-        if (_veriffUrl == null &&
-            response['verification']?['url'] != null) {
+        if (_veriffUrl == null && response['verification']?['url'] != null) {
           _veriffUrl = response['verification']['url'] as String;
           print('🔍 Found direct _veriffUrl: $_veriffUrl');
         }
 
         // Se non c'è URL, prova con verificationUrl
-        if (_veriffUrl == null &&
-            response['verificationUrl'] != null) {
+        if (_veriffUrl == null && response['verificationUrl'] != null) {
           _veriffUrl = response['verificationUrl'] as String;
           print('🔍 Found verificationUrl: $_veriffUrl');
         }
@@ -105,15 +109,13 @@ class _VeriffVerificationScreenState extends State<VeriffVerificationScreen> {
         }
 
         // Se non c'è sessionId, prova con la struttura diretta
-        if (_sessionId == null &&
-            response['verification']?['id'] != null) {
+        if (_sessionId == null && response['verification']?['id'] != null) {
           _sessionId = response['verification']['id'] as String;
           print('🔍 Found direct _sessionId: $_sessionId');
         }
 
         // Se non c'è sessionId, prova con sessionId
-        if (_sessionId == null &&
-            response['sessionId'] != null) {
+        if (_sessionId == null && response['sessionId'] != null) {
           _sessionId = response['sessionId'] as String;
           print('🔍 Found sessionId: $_sessionId');
         }
@@ -127,7 +129,9 @@ class _VeriffVerificationScreenState extends State<VeriffVerificationScreen> {
         throw Exception('URL di verifica non ricevuto da Veriff');
       }
     } catch (e) {
-      print('❌ VeriffVerificationScreen: Error initializing Veriff session: $e');
+      print(
+        '❌ VeriffVerificationScreen: Error initializing Veriff session: $e',
+      );
       print('❌ VeriffVerificationScreen: Error type: ${e.runtimeType}');
       setState(() {
         _isLoading = false;
@@ -440,13 +444,13 @@ class _VeriffVerificationScreenState extends State<VeriffVerificationScreen> {
   Future<void> _openVeriffInNewTab() async {
     print('🔍 _openVeriffInNewTab called');
     print('🔍 _veriffUrl: $_veriffUrl');
-    
+
     if (_veriffUrl != null) {
       try {
         final uri = Uri.parse(_veriffUrl!);
         print('🔍 Parsed URI: $uri');
         print('🔍 Can launch URL: ${await canLaunchUrl(uri)}');
-        
+
         if (await canLaunchUrl(uri)) {
           print('🔍 Launching URL...');
           // Prova prima con externalApplication, poi con platformDefault

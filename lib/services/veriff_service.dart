@@ -11,7 +11,7 @@ class VeriffService {
       print('🔍 VeriffService: Starting requestVeriffSession');
       print('🔍 User ID: ${user.idUser}');
       print('🔍 User email: ${user.email}');
-      
+
       final supabaseService = SupabaseService();
 
       final body = {
@@ -25,7 +25,7 @@ class VeriffService {
           'dateOfBirth': user.dateOfBirth?.toIso8601String(),
         },
       };
-      
+
       print('🔍 Request body: $body');
 
       // Chiama la Supabase Edge Function
@@ -34,7 +34,7 @@ class VeriffService {
         'kyc-create-new-session',
         body: body,
       );
-      
+
       print('🔍 Edge Function response status: ${response.status}');
       print('🔍 Edge Function response data: ${response.data}');
 
@@ -49,7 +49,9 @@ class VeriffService {
       } else {
         print('❌ Edge Function failed with status: ${response.status}');
         print('❌ Response data: ${response.data}');
-        throw Exception('Failed to request Veriff session: ${response.status} - ${response.data}');
+        throw Exception(
+          'Failed to request Veriff session: ${response.status} - ${response.data}',
+        );
       }
     } catch (e) {
       print('❌ Error requesting Veriff session: $e');

@@ -150,117 +150,119 @@ class PublicHomeScreen extends StatelessWidget {
                 horizontal: isDesktop ? 80 : (isTablet ? 40 : 24),
                 vertical: 40,
               ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Logo/Brand
-                  Container(
-                    width: isDesktop ? 120 : 100,
-                    height: isDesktop ? 120 : 100,
-                    decoration: BoxDecoration(
-                      color: AppTheme.pureWhite.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(
-                        color: AppTheme.pureWhite.withValues(alpha: 0.3),
-                        width: 2,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Logo/Brand
+                    Container(
+                      width: isDesktop ? 120 : 100,
+                      height: isDesktop ? 120 : 100,
+                      decoration: BoxDecoration(
+                        color: AppTheme.pureWhite.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: AppTheme.pureWhite.withValues(alpha: 0.3),
+                          width: 2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppTheme.pureWhite.withValues(alpha: 0.2),
+                            blurRadius: 30,
+                            spreadRadius: 0,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppTheme.pureWhite.withValues(alpha: 0.2),
-                          blurRadius: 30,
-                          spreadRadius: 0,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
+                      child: Icon(
+                        Icons.verified_user_rounded,
+                        size: isDesktop ? 60 : 50,
+                        color: AppTheme.pureWhite,
+                      ),
                     ),
-                    child: Icon(
-                      Icons.verified_user_rounded,
-                      size: isDesktop ? 60 : 50,
-                      color: AppTheme.pureWhite,
+
+                    SizedBox(height: isDesktop ? 32 : 24),
+
+                    // Main Title
+                    Text(
+                      AppConfig.appName,
+                      style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                        color: AppTheme.pureWhite,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -1.0,
+                        fontSize: isDesktop ? 48 : (isTablet ? 40 : 32),
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                  ),
 
-                  SizedBox(height: isDesktop ? 32 : 24),
+                    SizedBox(height: isDesktop ? 16 : 12),
 
-                  // Main Title
-                  Text(
-                    AppConfig.appName,
-                    style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                      color: AppTheme.pureWhite,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -1.0,
-                      fontSize: isDesktop ? 48 : (isTablet ? 40 : 32),
+                    // Subtitle
+                    Text(
+                      l10n.getString('enterprise_certification_platform'),
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: AppTheme.pureWhite.withValues(alpha: 0.9),
+                        fontWeight: FontWeight.w500,
+                        fontSize: isDesktop ? 20 : 18,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
 
-                  SizedBox(height: isDesktop ? 16 : 12),
+                    SizedBox(height: isDesktop ? 40 : 32),
 
-                  // Subtitle
-                  Text(
-                    l10n.getString('enterprise_certification_platform'),
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: AppTheme.pureWhite.withValues(alpha: 0.9),
-                      fontWeight: FontWeight.w500,
-                      fontSize: isDesktop ? 20 : 18,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-
-                  SizedBox(height: isDesktop ? 40 : 32),
-
-                  // Hero CTA Buttons
-                  if (isDesktop)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _buildHeroButton(
-                          context,
-                          l10n.getString('register_company'),
-                          () => Navigator.pushNamed(
+                    // Hero CTA Buttons
+                    if (isDesktop)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _buildHeroButton(
                             context,
-                            '/legal-entity/register',
+                            l10n.getString('register_company'),
+                            () => Navigator.pushNamed(
+                              context,
+                              '/legal-entity/register',
+                            ),
+                            isPrimary: true,
                           ),
-                          isPrimary: true,
-                        ),
-                        const SizedBox(width: 20),
-                        _buildHeroButton(
-                          context,
-                          l10n.getString('view_pricing'),
-                          () => Navigator.pushNamed(
+                          const SizedBox(width: 20),
+                          _buildHeroButton(
                             context,
-                            '/legal-entity/pricing',
+                            l10n.getString('view_pricing'),
+                            () => Navigator.pushNamed(
+                              context,
+                              '/legal-entity/pricing',
+                            ),
                           ),
-                        ),
-                      ],
-                    )
-                  else
-                    Column(
-                      children: [
-                        _buildHeroButton(
-                          context,
-                          l10n.getString('register_company'),
-                          () => Navigator.pushNamed(
+                        ],
+                      )
+                    else
+                      Column(
+                        children: [
+                          _buildHeroButton(
                             context,
-                            '/legal-entity/register',
+                            l10n.getString('register_company'),
+                            () => Navigator.pushNamed(
+                              context,
+                              '/legal-entity/register',
+                            ),
+                            isPrimary: true,
+                            isFullWidth: true,
                           ),
-                          isPrimary: true,
-                          isFullWidth: true,
-                        ),
-                        const SizedBox(height: 16),
-                        _buildHeroButton(
-                          context,
-                          l10n.getString('view_pricing'),
-                          () => Navigator.pushNamed(
+                          const SizedBox(height: 16),
+                          _buildHeroButton(
                             context,
-                            '/legal-entity/pricing',
+                            l10n.getString('view_pricing'),
+                            () => Navigator.pushNamed(
+                              context,
+                              '/legal-entity/pricing',
+                            ),
+                            isFullWidth: true,
                           ),
-                          isFullWidth: true,
-                        ),
-                      ],
-                    ),
-                ],
+                        ],
+                      ),
+                  ],
+                ),
               ),
             ),
           ),

@@ -1017,9 +1017,8 @@ class _LegalEntityPublicRegistrationScreenState
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => VeriffVerificationScreen(
-              userData: user.toJson(),
-            ),
+            builder: (context) =>
+                VeriffVerificationScreen(userData: user.toJson()),
           ),
         );
       }
