@@ -180,18 +180,24 @@ class _LegalEntityManagementScreenState
                       return _buildLoadingState();
                     }
 
-                    return CustomScrollView(
-                      slivers: [
-                        // Header stile Airbnb (solo su desktop)
-                        if (MediaQuery.of(context).size.width > 768)
-                          _buildAirbnbHeader(isTablet),
+                    return RefreshIndicator(
+                      onRefresh: () async {
+                        await _loadLegalEntities();
+                      },
+                      color: const Color(0xFF2563EB),
+                      child: CustomScrollView(
+                        slivers: [
+                          // Header stile Airbnb (solo su desktop)
+                          if (MediaQuery.of(context).size.width > 768)
+                            _buildAirbnbHeader(isTablet),
 
-                        // Filtri e statistiche
-                        _buildFilterSection(provider, isTablet),
+                          // Filtri e statistiche
+                          _buildFilterSection(provider, isTablet),
 
-                        // Lista delle entità
-                        _buildEntityGrid(provider, isTablet),
-                      ],
+                          // Lista delle entità
+                          _buildEntityGrid(provider, isTablet),
+                        ],
+                      ),
                     );
                   },
                 ),
@@ -241,11 +247,46 @@ class _LegalEntityManagementScreenState
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(color: const Color(0xFF2563EB)),
-          const SizedBox(height: 16),
-          Text(
-            'Caricamento entità legali...',
-            style: TextStyle(color: Colors.grey[600], fontSize: 16),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: CircularProgressIndicator(
+                    color: const Color(0xFF2563EB),
+                    strokeWidth: 3,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Caricamento entità legali...',
+                  style: TextStyle(
+                    color: Colors.grey[700],
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Attendere prego...',
+                  style: TextStyle(color: Colors.grey[500], fontSize: 14),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -316,8 +357,40 @@ class _LegalEntityManagementScreenState
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         child: Column(
           children: [
-            // Statistiche
-            _buildStatsRow(provider, isTablet),
+            // Statistiche con indicatore di caricamento
+            if (provider.isLoading && provider.legalEntities.isNotEmpty)
+              Container(
+                padding: const EdgeInsets.all(16),
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: Colors.blue[50],
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.blue[200]!),
+                ),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        color: const Color(0xFF2563EB),
+                        strokeWidth: 2,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Aggiornamento dati in corso...',
+                      style: TextStyle(
+                        color: Colors.blue[700],
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else
+              _buildStatsRow(provider, isTablet),
             const SizedBox(height: 20),
 
             // Filtri
@@ -613,7 +686,7 @@ class _LegalEntityManagementScreenState
           crossAxisCount: crossAxisCount,
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
-          childAspectRatio: isTablet ? 1.1 : 1.0,
+          childAspectRatio: isTablet ? 1.2 : 1.1,
         ),
         delegate: SliverChildBuilderDelegate((context, index) {
           final entity = _filteredEntities[index];
@@ -624,82 +697,85 @@ class _LegalEntityManagementScreenState
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Container(
-        margin: const EdgeInsets.all(32),
-        padding: const EdgeInsets.all(32),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.grey[200]!),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: const Color(0xFF2563EB).withOpacity(0.1),
-                borderRadius: BorderRadius.circular(20),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(32),
+      child: Center(
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 400),
+          padding: const EdgeInsets.all(32),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.grey[200]!),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
               ),
-              child: Icon(
-                Icons.business_outlined,
-                size: 40,
-                color: const Color(0xFF2563EB),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'Nessuna entità legale',
-              style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.w600,
-                fontSize: 18,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              _searchController.text.isNotEmpty || _selectedStatus != null
-                  ? 'Prova a modificare i filtri di ricerca'
-                  : 'Crea la tua prima entità legale',
-              style: TextStyle(color: Colors.grey[600], fontSize: 14),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 20),
-            GestureDetector(
-              onTap: () => _showCreateEntityDialog(context),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
-                ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 80,
+                height: 80,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [const Color(0xFF2563EB), const Color(0xFF1D4ED8)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(25),
+                  color: const Color(0xFF2563EB).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
                 ),
-                child: Text(
-                  'Crea Entità',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
+                child: Icon(
+                  Icons.business_outlined,
+                  size: 40,
+                  color: const Color(0xFF2563EB),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Nessuna entità legale',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 18,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                _searchController.text.isNotEmpty || _selectedStatus != null
+                    ? 'Prova a modificare i filtri di ricerca'
+                    : 'Crea la tua prima entità legale',
+                style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => _showCreateEntityDialog(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2563EB),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    'Crea Entità',
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -834,11 +910,12 @@ class _LegalEntityManagementScreenState
             ),
 
             // Contenuto principale
-            Expanded(
+            Flexible(
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       entity.legalName ?? 'Nome non specificato',
@@ -863,7 +940,7 @@ class _LegalEntityManagementScreenState
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                    const Spacer(),
+                    const SizedBox(height: 12),
                     Row(
                       children: [
                         Icon(

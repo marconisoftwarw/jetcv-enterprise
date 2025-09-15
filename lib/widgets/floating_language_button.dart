@@ -15,6 +15,7 @@ class _FloatingLanguageButtonState extends State<FloatingLanguageButton>
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
   bool _isExpanded = false;
+  List<Map<String, String>> _cachedLanguages = [];
 
   @override
   void initState() {
@@ -26,6 +27,14 @@ class _FloatingLanguageButtonState extends State<FloatingLanguageButton>
     _scaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
+
+    // Pre-cache language data to avoid delays
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final localeProvider = context.read<LocaleProvider>();
+        _cachedLanguages = localeProvider.getSupportedLanguages();
+      }
+    });
   }
 
   @override
@@ -50,6 +59,11 @@ class _FloatingLanguageButtonState extends State<FloatingLanguageButton>
   Widget build(BuildContext context) {
     return Consumer<LocaleProvider>(
       builder: (context, localeProvider, child) {
+        // Use cached languages if available, otherwise get from provider
+        final languages = _cachedLanguages.isNotEmpty
+            ? _cachedLanguages
+            : localeProvider.getSupportedLanguages();
+
         return Positioned(
           bottom: 20,
           right: 20,
@@ -59,7 +73,7 @@ class _FloatingLanguageButtonState extends State<FloatingLanguageButton>
             children: [
               // Language options (appear when expanded)
               if (_isExpanded) ...[
-                ...localeProvider.getSupportedLanguages().map((language) {
+                ...languages.map((language) {
                   final isSelected =
                       localeProvider.locale.languageCode == language['code'];
                   return Container(
@@ -80,13 +94,19 @@ class _FloatingLanguageButtonState extends State<FloatingLanguageButton>
                         backgroundColor: isSelected
                             ? AppTheme.primaryBlue
                             : AppTheme.pureWhite,
-                        child: Text(
-                          language['flag']!,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: isSelected
-                                ? AppTheme.pureWhite
-                                : AppTheme.textPrimary,
+                        child: Container(
+                          width: 24,
+                          height: 24,
+                          alignment: Alignment.center,
+                          child: Text(
+                            language['flag']!,
+                            style: TextStyle(
+                              fontSize: 18,
+                              height: 1.0,
+                              color: isSelected
+                                  ? AppTheme.pureWhite
+                                  : AppTheme.textPrimary,
+                            ),
                           ),
                         ),
                       ),
