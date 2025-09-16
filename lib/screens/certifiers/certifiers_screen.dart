@@ -684,6 +684,9 @@ class _CertifiersScreenState extends State<CertifiersScreen>
 
   void _showCertifierActions(CertifierWithUser certifierWithUser) {
     final certifier = certifierWithUser.certifier;
+    final l10n = AppLocalizations.of(context);
+    final isTablet = MediaQuery.of(context).size.width > 768;
+
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
@@ -696,37 +699,171 @@ class _CertifiersScreenState extends State<CertifiersScreen>
           children: [
             ListTile(
               leading: Icon(Icons.visibility, color: AppTheme.primaryBlue),
-              title: Text('Visualizza dettagli'),
+              title: Text(l10n.getString('view_details')),
               onTap: () {
                 Navigator.pop(context);
-                // TODO: Navigate to certifier details
+                _showCertifierDetails(certifierWithUser, l10n, isTablet);
               },
             ),
             if (certifier.invitationToken != null) ...[
               ListTile(
                 leading: Icon(Icons.send, color: AppTheme.primaryBlue),
-                title: Text('Rinvia invito'),
+                title: Text(l10n.getString('resend_invitation')),
                 onTap: () {
                   Navigator.pop(context);
                   // TODO: Resend invitation
                 },
               ),
             ],
-            ListTile(
-              leading: Icon(
-                certifier.active ? Icons.person_off : Icons.person,
-                color: certifier.active
-                    ? AppTheme.errorRed
-                    : AppTheme.successGreen,
-              ),
-              title: Text(certifier.active ? 'Disattiva' : 'Attiva'),
-              onTap: () {
-                Navigator.pop(context);
-                // TODO: Toggle active status
-              },
-            ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showCertifierDetails(
+    CertifierWithUser certifierWithUser,
+    AppLocalizations l10n,
+    bool isTablet,
+  ) {
+    final certifier = certifierWithUser.certifier;
+    final user = certifierWithUser.user;
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final isAdmin = authProvider.userType == AppUserType.admin;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.verified_user, color: AppTheme.primaryBlue),
+            SizedBox(width: 8),
+            Text(l10n.getString('certifier_details')),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Informazioni personali
+              if (user != null) ...[
+                _buildDetailSection(l10n.getString('personal_information'), [
+                  _buildDetailRow(
+                    l10n.getString('first_name'),
+                    user.firstName ?? 'N/A',
+                  ),
+                  _buildDetailRow(
+                    l10n.getString('last_name'),
+                    user.lastName ?? 'N/A',
+                  ),
+                  _buildDetailRow(l10n.getString('email'), user.email ?? 'N/A'),
+                  if (user.dateOfBirth != null)
+                    _buildDetailRow(
+                      l10n.getString('date_of_birth'),
+                      certifierWithUser.dateOfBirthFormatted,
+                    ),
+                  if (user.phone != null)
+                    _buildDetailRow(l10n.getString('phone'), user.phone!),
+                  if (user.city != null)
+                    _buildDetailRow(l10n.getString('city'), user.city!),
+                  if (user.address != null)
+                    _buildDetailRow(l10n.getString('address'), user.address!),
+                ]),
+                SizedBox(height: 16),
+              ] else ...[
+                _buildDetailSection(l10n.getString('personal_information'), [
+                  _buildDetailRow(
+                    l10n.getString('status'),
+                    l10n.getString('pending_invitation'),
+                  ),
+                ]),
+                SizedBox(height: 16),
+              ],
+
+              // Informazioni del certificatore
+              _buildDetailSection(l10n.getString('certifier_information'), [
+                _buildDetailRow(
+                  l10n.getString('role'),
+                  certifier.role ?? 'N/A',
+                ),
+                _buildDetailRow(
+                  l10n.getString('status'),
+                  certifier.active
+                      ? l10n.getString('active')
+                      : l10n.getString('inactive'),
+                ),
+                if (certifier.kycPassed == true)
+                  _buildDetailRow(
+                    l10n.getString('kyc_status'),
+                    l10n.getString('kyc_verified'),
+                  ),
+                if (certifier.kycPassed == false)
+                  _buildDetailRow(
+                    l10n.getString('kyc_status'),
+                    l10n.getString('kyc_failed'),
+                  ),
+                if (isAdmin)
+                  _buildDetailRow(
+                    l10n.getString('legal_entity_id'),
+                    certifier.idLegalEntity,
+                  ),
+              ]),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.getString('close')),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailSection(String title, List<Widget> children) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: AppTheme.primaryBlack,
+          ),
+        ),
+        SizedBox(height: 8),
+        ...children,
+      ],
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              '$label:',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: AppTheme.textSecondary,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),
+            ),
+          ),
+        ],
       ),
     );
   }
