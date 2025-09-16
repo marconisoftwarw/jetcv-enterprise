@@ -454,7 +454,13 @@ class _CertificationListScreenState extends State<CertificationListScreen>
     return EnterpriseCard(
       isHoverable: true,
       onTap: () {
-        // TODO: Navigate to certification details
+        Navigator.of(context).pushNamed(
+          '/certification-detail',
+          arguments: {
+            'certificationId': cert['id_certification'],
+            'certificationData': cert,
+          },
+        );
       },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -861,7 +867,13 @@ class _CertificationListScreenState extends State<CertificationListScreen>
 
     return GestureDetector(
       onTap: () {
-        // TODO: Navigate to certification details
+        Navigator.of(context).pushNamed(
+          '/certification-detail',
+          arguments: {
+            'certificationId': cert['id_certification'],
+            'certificationData': cert,
+          },
+        );
       },
       child: Container(
         decoration: BoxDecoration(

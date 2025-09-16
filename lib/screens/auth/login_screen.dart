@@ -55,16 +55,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _forgotPassword() {
-    final l10n = AppLocalizations.of(context);
-
-    // Se non c'è email, mostra un dialog per inserirla
-    if (_emailController.text.isEmpty) {
-      _showForgotPasswordDialog();
-      return;
-    }
-
-    // Se c'è già un'email, procedi direttamente
-    _sendPasswordReset(_emailController.text.trim());
+    // Naviga direttamente alla schermata di reset password form
+    Navigator.pushNamed(context, '/password-reset-form');
   }
 
   void _showForgotPasswordDialog() {

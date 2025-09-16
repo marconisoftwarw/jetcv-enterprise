@@ -49,5 +49,18 @@
 	<string>Questa app utilizza la posizione per creare certificazioni geolocalizzate.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Questa app utilizza la posizione per creare certificazioni geolocalizzate.</string>
+	
+	<!-- OAuth URL Scheme for Google Sign-In -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>io.supabase.flutter</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>io.supabase.flutter</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

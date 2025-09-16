@@ -16,10 +16,15 @@ import 'l10n/app_localizations.dart';
 import 'screens/splash_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/signup_screen.dart';
+import 'screens/auth/auth_callback_screen.dart';
+import 'screens/auth/password_reset_screen.dart';
+import 'screens/auth/password_reset_form_screen.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/admin/admin_dashboard_screen.dart';
 import 'screens/public/public_home_screen.dart';
 import 'screens/certification/create_certification_screen.dart';
+import 'screens/certification/certification_detail_screen.dart';
+import 'screens/certifiers/certifiers_screen.dart';
 import 'screens/profile/user_profile_screen.dart';
 import 'screens/settings/user_settings_screen.dart';
 import 'screens/veriff/veriff_verification_screen.dart';
@@ -37,6 +42,9 @@ void main() async {
   await Supabase.initialize(
     url: AppConfig.supabaseUrl,
     anonKey: AppConfig.supabaseAnonKey,
+    authOptions: const FlutterAuthClientOptions(
+      authFlowType: AuthFlowType.pkce,
+    ),
   );
 
   runApp(const JetCVEnterpriseApp());
@@ -91,8 +99,15 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
 
     // Refresh authentication when app comes back to foreground
     if (state == AppLifecycleState.resumed) {
+      print('🔄 App resumed - checking authentication status...');
       final authProvider = context.read<AuthProvider>();
-      authProvider.checkAuthenticationStatus();
+      authProvider.checkAuthenticationStatus().then((isAuthenticated) {
+        if (isAuthenticated) {
+          print('✅ Authentication status restored on app resume');
+        } else {
+          print('ℹ️ No authentication found on app resume');
+        }
+      });
     }
   }
 
@@ -112,10 +127,22 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
       await authProvider.initialize();
       print('✅ AuthProvider initialized');
 
-      // Check authentication status
+      // Check authentication status after initialization
       print('🔍 Checking authentication status...');
       final isAuthenticated = await authProvider.checkAuthenticationStatus();
       print('🔍 Authentication status: $isAuthenticated');
+
+      if (isAuthenticated) {
+        print('✅ User is authenticated and state restored');
+      } else {
+        print('ℹ️ No authenticated user found');
+      }
+
+      // Initialize other providers
+      print('🏢 Initializing LegalEntityProvider...');
+      final legalEntityProvider = context.read<LegalEntityProvider>();
+      await legalEntityProvider.initialize();
+      print('✅ LegalEntityProvider initialized');
 
       // Listen to auth state changes
       authProvider.addListener(() {
@@ -202,7 +229,11 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
           ),
           routes: {
             '/login': (context) => const LoginScreen(),
+            '/password-reset': (context) => const PasswordResetScreen(),
+            '/password-reset-form': (context) =>
+                const PasswordResetFormScreen(),
             '/signup': (context) => const SignupScreen(),
+            '/auth/callback': (context) => const AuthCallbackScreen(),
             '/home': (context) => const HomeScreen(),
             '/admin': (context) => const AdminDashboardScreen(),
             '/public': (context) => const PublicHomeScreen(),
@@ -220,12 +251,46 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
                 const LegalEntityRegistrationScreen(),
           },
           onGenerateRoute: (settings) {
-            // Gestisci le route dinamiche qui se necessario
+            // Handle direct URL access and ensure authentication state is restored
+            print('🔄 Handling route: ${settings.name}');
+
+            // Check if this is a protected route
+            final protectedRoutes = [
+              '/home',
+              '/admin',
+              '/create-certification',
+              '/certification-detail',
+              '/certifiers',
+              '/profile',
+              '/settings',
+              '/veriff',
+              '/cv-list',
+              '/legal-entity',
+            ];
+
+            final isProtectedRoute = protectedRoutes.any(
+              (route) => settings.name?.startsWith(route) == true,
+            );
+
+            if (isProtectedRoute) {
+              // For protected routes, we need to ensure authentication is checked
+              print('🔒 Protected route detected: ${settings.name}');
+            }
+
+            // Return the appropriate route
             switch (settings.name) {
               case '/login':
                 return MaterialPageRoute(builder: (_) => const LoginScreen());
               case '/signup':
                 return MaterialPageRoute(builder: (_) => const SignupScreen());
+              case '/password-reset':
+                return MaterialPageRoute(
+                  builder: (_) => const PasswordResetScreen(),
+                );
+              case '/auth/callback':
+                return MaterialPageRoute(
+                  builder: (_) => const AuthCallbackScreen(),
+                );
               case '/home':
                 return MaterialPageRoute(builder: (_) => const HomeScreen());
               case '/admin':
@@ -239,6 +304,27 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
               case '/create-certification':
                 return MaterialPageRoute(
                   builder: (_) => const CreateCertificationScreen(),
+                );
+              case '/certification-detail':
+                final args = settings.arguments as Map<String, dynamic>?;
+                final certificationId = args?['certificationId'] as String?;
+                final certificationData =
+                    args?['certificationData'] as Map<String, dynamic>?;
+
+                if (certificationId == null) {
+                  // Invalid route, redirect to home
+                  return MaterialPageRoute(builder: (_) => const HomeScreen());
+                }
+
+                return MaterialPageRoute(
+                  builder: (_) => CertificationDetailScreen(
+                    certificationId: certificationId,
+                    certificationData: certificationData,
+                  ),
+                );
+              case '/certifiers':
+                return MaterialPageRoute(
+                  builder: (_) => const CertifiersScreen(),
                 );
               case '/profile':
                 return MaterialPageRoute(
@@ -274,8 +360,16 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
                   builder: (_) => const LegalEntityRegistrationScreen(),
                 );
               default:
+                // For unknown routes, redirect to appropriate home based on auth status
                 return MaterialPageRoute(
-                  builder: (_) => const PublicHomeScreen(),
+                  builder: (context) {
+                    final authProvider = context.read<AuthProvider>();
+                    if (authProvider.isAuthenticated &&
+                        authProvider.currentUser != null) {
+                      return const HomeScreen();
+                    }
+                    return const PublicHomeScreen();
+                  },
                 );
             }
           },

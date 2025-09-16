@@ -31,11 +31,31 @@ class GlobalHamburgerMenu extends StatelessWidget {
     final isDesktop = screenWidth > 1200;
 
     // Su desktop, il menu è sempre aperto
-    final shouldBeExpanded = isDesktop ? true : isExpanded;
+    // Su mobile molto piccolo (< 480px), forza sempre espansione quando aperto
+    final isMobile = screenWidth < 480;
+    final shouldBeExpanded = isDesktop
+        ? true
+        : (isMobile ? isExpanded : isExpanded);
+
+    // Calcola la larghezza appropriata per il dispositivo
+    double menuWidth;
+    if (shouldBeExpanded) {
+      if (isDesktop) {
+        menuWidth = 280;
+      } else if (isTablet) {
+        menuWidth = 260;
+      } else if (isMobile) {
+        menuWidth = screenWidth * 0.75; // 75% della larghezza schermo su mobile
+      } else {
+        menuWidth = 240;
+      }
+    } else {
+      menuWidth = 72;
+    }
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
-      width: shouldBeExpanded ? (isDesktop ? 280 : 260) : 72,
+      width: menuWidth,
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -64,6 +84,7 @@ class GlobalHamburgerMenu extends StatelessWidget {
                 child: shouldBeExpanded
                     ? Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -104,21 +125,28 @@ class GlobalHamburgerMenu extends StatelessWidget {
                       )
                     : Column(
                         mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          IconButton(
-                            icon: Icon(
-                              Icons.menu,
-                              color: Colors.white,
-                              size: 24,
+                          Flexible(
+                            child: IconButton(
+                              icon: Icon(
+                                Icons.menu,
+                                color: Colors.white,
+                                size: 22,
+                              ),
+                              onPressed: () => onExpansionChanged(true),
+                              tooltip: l10n.getString('open_menu'),
+                              padding: EdgeInsets.all(2),
+                              constraints: BoxConstraints(
+                                minHeight: 32,
+                                minWidth: 32,
+                              ),
                             ),
-                            onPressed: () => onExpansionChanged(true),
-                            tooltip: l10n.getString('open_menu'),
                           ),
-                          const SizedBox(height: 4),
                           Icon(
                             Icons.verified_user,
                             color: Colors.white,
-                            size: 20,
+                            size: 14,
                           ),
                         ],
                       ),
@@ -165,15 +193,21 @@ class GlobalHamburgerMenu extends StatelessWidget {
             isExpanded: isExpanded,
           ),
           _buildMenuItem(
+            icon: Icons.verified_user_outlined,
+            title: l10n.getString('certifiers'),
+            index: 3,
+            isExpanded: isExpanded,
+          ),
+          _buildMenuItem(
             icon: Icons.settings_outlined,
             title: l10n.getString('settings'),
-            index: 3,
+            index: 4,
             isExpanded: isExpanded,
           ),
           _buildMenuItem(
             icon: Icons.person_outline,
             title: l10n.getString('profile'),
-            index: 4,
+            index: 5,
             isExpanded: isExpanded,
           ),
         ];
@@ -193,9 +227,15 @@ class GlobalHamburgerMenu extends StatelessWidget {
             isExpanded: isExpanded,
           ),
           _buildMenuItem(
+            icon: Icons.verified_user_outlined,
+            title: l10n.getString('certifiers'),
+            index: 2,
+            isExpanded: isExpanded,
+          ),
+          _buildMenuItem(
             icon: Icons.person_outline,
             title: l10n.getString('profile'),
-            index: 2,
+            index: 3,
             isExpanded: isExpanded,
           ),
         ];
@@ -264,20 +304,30 @@ class GlobalHamburgerMenu extends StatelessWidget {
           size: 24,
         ),
         title: isExpanded
-            ? Text(
-                title,
-                style: TextStyle(
-                  color: isSelected ? const Color(0xFF2563EB) : Colors.black87,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                  fontSize: 14,
+            ? Flexible(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    color: isSelected
+                        ? const Color(0xFF2563EB)
+                        : Colors.black87,
+                    fontWeight: isSelected
+                        ? FontWeight.w600
+                        : FontWeight.normal,
+                    fontSize: MediaQuery.of(context).size.width < 480 ? 13 : 14,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
                 ),
               )
             : null,
         onTap: () => _handleNavigation(index),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         contentPadding: EdgeInsets.symmetric(
-          horizontal: isExpanded ? 16 : 8,
-          vertical: 8,
+          horizontal: isExpanded
+              ? (MediaQuery.of(context).size.width < 480 ? 12 : 16)
+              : 8,
+          vertical: 6,
         ),
       ),
     );
@@ -296,20 +346,26 @@ class GlobalHamburgerMenu extends StatelessWidget {
       child: ListTile(
         leading: Icon(Icons.logout, color: Colors.red[600], size: 24),
         title: isExpanded
-            ? Text(
-                l10n.getString('logout'),
-                style: TextStyle(
-                  color: Colors.red[600],
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
+            ? Flexible(
+                child: Text(
+                  l10n.getString('logout'),
+                  style: TextStyle(
+                    color: Colors.red[600],
+                    fontWeight: FontWeight.w600,
+                    fontSize: MediaQuery.of(context).size.width < 480 ? 13 : 14,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
                 ),
               )
             : null,
         onTap: () => _showLogoutDialog(l10n),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         contentPadding: EdgeInsets.symmetric(
-          horizontal: isExpanded ? 16 : 8,
-          vertical: 8,
+          horizontal: isExpanded
+              ? (MediaQuery.of(context).size.width < 480 ? 12 : 16)
+              : 8,
+          vertical: 6,
         ),
       ),
     );

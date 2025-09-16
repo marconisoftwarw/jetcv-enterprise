@@ -16,6 +16,7 @@ class _FloatingLanguageButtonState extends State<FloatingLanguageButton>
   late Animation<double> _scaleAnimation;
   bool _isExpanded = false;
   List<Map<String, String>> _cachedLanguages = [];
+  bool _flagsLoaded = false;
 
   @override
   void initState() {
@@ -33,6 +34,7 @@ class _FloatingLanguageButtonState extends State<FloatingLanguageButton>
       if (mounted) {
         final localeProvider = context.read<LocaleProvider>();
         _cachedLanguages = localeProvider.getSupportedLanguages();
+        _preloadFlags();
       }
     });
   }
@@ -41,6 +43,28 @@ class _FloatingLanguageButtonState extends State<FloatingLanguageButton>
   void dispose() {
     _animationController.dispose();
     super.dispose();
+  }
+
+  Future<void> _preloadFlags() async {
+    // Pre-carica le emoji delle bandiere per evitare ritardi
+    for (final language in _cachedLanguages) {
+      final flag = language['flag']!;
+      // Forza il rendering dell'emoji creando un widget temporaneo
+      final textPainter = TextPainter(
+        text: TextSpan(text: flag, style: const TextStyle(fontSize: 18)),
+        textDirection: TextDirection.ltr,
+      );
+      textPainter.layout();
+    }
+
+    // Simula un piccolo delay per assicurarsi che le emoji siano caricate
+    await Future.delayed(const Duration(milliseconds: 100));
+
+    if (mounted) {
+      setState(() {
+        _flagsLoaded = true;
+      });
+    }
   }
 
   void _toggleExpanded() {
@@ -98,16 +122,40 @@ class _FloatingLanguageButtonState extends State<FloatingLanguageButton>
                           width: 24,
                           height: 24,
                           alignment: Alignment.center,
-                          child: Text(
-                            language['flag']!,
-                            style: TextStyle(
-                              fontSize: 18,
-                              height: 1.0,
-                              color: isSelected
-                                  ? AppTheme.pureWhite
-                                  : AppTheme.textPrimary,
-                            ),
-                          ),
+                          child: _flagsLoaded
+                              ? Text(
+                                  language['flag']!,
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    height: 1.0,
+                                    color: isSelected
+                                        ? AppTheme.pureWhite
+                                        : AppTheme.textPrimary,
+                                  ),
+                                )
+                              : Container(
+                                  width: 18,
+                                  height: 18,
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? AppTheme.pureWhite.withOpacity(0.3)
+                                        : AppTheme.textPrimary.withOpacity(0.3),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Center(
+                                    child: SizedBox(
+                                      width: 12,
+                                      height: 12,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              Colors.white,
+                                            ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
                         ),
                       ),
                     ),

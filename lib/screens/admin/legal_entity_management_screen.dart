@@ -273,7 +273,7 @@ class _LegalEntityManagementScreenState
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Caricamento entità legali...',
+                  AppLocalizations.of(context).getString('loading_legal_entities'),
                   style: TextStyle(
                     color: Colors.grey[700],
                     fontSize: 16,
@@ -282,7 +282,7 @@ class _LegalEntityManagementScreenState
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Attendere prego...',
+                  AppLocalizations.of(context).getString('please_wait'),
                   style: TextStyle(color: Colors.grey[500], fontSize: 14),
                 ),
               ],

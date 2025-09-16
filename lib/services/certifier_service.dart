@@ -1,16 +1,52 @@
 import '../models/certifier.dart';
 import '../services/email_service.dart';
+import '../config/app_config.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class CertifierService {
   final EmailService _emailService = EmailService();
 
+  static const String _baseUrl = AppConfig.supabaseUrl;
+  static const String _apiKey = AppConfig.supabaseAnonKey;
+
+  static final Map<String, String> _headers = {
+    'Content-Type': 'application/json',
+    'apikey': _apiKey,
+    'Authorization': 'Bearer $_apiKey',
+  };
+
   // Carica tutti i certificatori
   Future<List<Certifier>> getAllCertifiers() async {
     try {
-      // TODO: Implementare chiamata al database
-      return [];
+      print('🔍 Getting all certifiers');
+
+      // Usa REST API per recuperare tutti i certificatori
+      final response = await http.get(
+        Uri.parse('$_baseUrl/rest/v1/certifier?select=*&order=created_at.desc'),
+        headers: _headers,
+      );
+
+      print(
+        '📊 All certifiers response: ${response.statusCode} - ${response.body}',
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        final certifiers = data
+            .map((item) => Certifier.fromJson(item))
+            .toList();
+
+        print('✅ Found ${certifiers.length} total certifiers');
+        return certifiers;
+      } else {
+        print(
+          '❌ Error getting all certifiers: ${response.statusCode} - ${response.body}',
+        );
+        return [];
+      }
     } catch (e) {
-      print('Error getting all certifiers: $e');
+      print('❌ Error getting all certifiers: $e');
       return [];
     }
   }
@@ -20,10 +56,36 @@ class CertifierService {
     String legalEntityId,
   ) async {
     try {
-      // TODO: Implementare chiamata al database
-      return [];
+      print('🔍 Getting certifiers for legal entity: $legalEntityId');
+
+      // Usa REST API per recuperare i certificatori
+      final response = await http.get(
+        Uri.parse(
+          '$_baseUrl/rest/v1/certifier?select=*&id_legal_entity=eq.$legalEntityId&order=created_at.desc',
+        ),
+        headers: _headers,
+      );
+
+      print(
+        '📊 Certifiers response: ${response.statusCode} - ${response.body}',
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        final certifiers = data
+            .map((item) => Certifier.fromJson(item))
+            .toList();
+
+        print('✅ Found ${certifiers.length} certifiers');
+        return certifiers;
+      } else {
+        print(
+          '❌ Error getting certifiers: ${response.statusCode} - ${response.body}',
+        );
+        return [];
+      }
     } catch (e) {
-      print('Error getting certifiers by legal entity: $e');
+      print('❌ Error getting certifiers by legal entity: $e');
       return [];
     }
   }

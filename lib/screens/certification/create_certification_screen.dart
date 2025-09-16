@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
+import 'dart:typed_data';
 import '../../theme/app_theme.dart';
 import '../../widgets/enterprise_card.dart';
 import '../../widgets/neon_button.dart';
 import '../../widgets/enterprise_text_field.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/certification_edge_service.dart';
+import '../../services/certification_media_service.dart';
+import '../../services/certification_upload_service.dart';
 import '../../services/certification_service_v2.dart';
 import '../../services/otp_service.dart';
 import '../../services/certification_category_edge_service.dart';
@@ -17,6 +19,7 @@ import '../../services/default_ids_service.dart';
 import '../../services/legal_entity_service.dart';
 import '../../services/location_service.dart';
 import '../../providers/auth_provider.dart';
+import '../../widgets/user_search_selector.dart';
 
 class CreateCertificationScreen extends StatefulWidget {
   const CreateCertificationScreen({super.key});
@@ -37,7 +40,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   final _otpController = TextEditingController();
   final _locationController = TextEditingController();
   String _selectedActivityType = '';
-  List<File> _mediaFiles = [];
+  List<XFile> _mediaFiles = [];
 
   // API state
   bool _isCreating = false;
@@ -62,6 +65,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
 
   // Users management
   List<UserData> _addedUsers = [];
+  bool _isOtpMode = true; // true = OTP mode, false = search mode
 
   // Certification information fields
   List<CertificationInformation> _certificationUserFields = [];
@@ -504,6 +508,52 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                       }
                     },
             ),
+            SizedBox(height: isTablet ? 12 : 8),
+
+            // Label per contattare il supporto se il tipo attività non è incluso
+            Container(
+              padding: EdgeInsets.all(isTablet ? 16 : 12),
+              decoration: BoxDecoration(
+                color: AppTheme.lightBlue.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: AppTheme.primaryBlue.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    color: AppTheme.primaryBlue,
+                    size: isTablet ? 20 : 18,
+                  ),
+                  SizedBox(width: isTablet ? 12 : 8),
+                  Expanded(
+                    child: RichText(
+                      text: TextSpan(
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppTheme.textGray,
+                          fontSize: isTablet ? 14 : 12,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: l10n.getString('activity_type_not_included'),
+                          ),
+                          TextSpan(text: ' '),
+                          TextSpan(
+                            text: l10n.getString('contact_jetcv_support'),
+                            style: TextStyle(
+                              color: AppTheme.primaryBlue,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             SizedBox(height: isTablet ? 20 : 16),
 
             EnterpriseTextField(
@@ -618,11 +668,56 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                         children: [
                           ClipRRect(
                             borderRadius: BorderRadius.circular(8),
-                            child: Image.file(
-                              _mediaFiles[index],
-                              width: double.infinity,
-                              height: double.infinity,
-                              fit: BoxFit.cover,
+                            child: FutureBuilder<Uint8List>(
+                              future: _mediaFiles[index].readAsBytes(),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  return Image.memory(
+                                    snapshot.data!,
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      print('❌ Error displaying image: $error');
+                                      return Container(
+                                        width: double.infinity,
+                                        height: double.infinity,
+                                        color: AppTheme.lightGrey,
+                                        child: Icon(
+                                          Icons.error_outline,
+                                          color: AppTheme.errorRed,
+                                          size: 24,
+                                        ),
+                                      );
+                                    },
+                                  );
+                                } else if (snapshot.hasError) {
+                                  print(
+                                    '❌ Error loading image: ${snapshot.error}',
+                                  );
+                                  return Container(
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                    color: AppTheme.lightGrey,
+                                    child: Icon(
+                                      Icons.error_outline,
+                                      color: AppTheme.errorRed,
+                                      size: 24,
+                                    ),
+                                  );
+                                } else {
+                                  return Container(
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                    color: AppTheme.lightGrey,
+                                    child: Icon(
+                                      Icons.image,
+                                      color: AppTheme.textSecondary,
+                                      size: 24,
+                                    ),
+                                  );
+                                }
+                              },
                             ),
                           ),
                           Positioned(
@@ -710,6 +805,137 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   }
 
   Widget _buildAddUserSection() {
+    final l10n = AppLocalizations.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 768;
+
+    return Column(
+      children: [
+        // Mode selector
+        _buildUserSelectionModeSelector(l10n, isTablet),
+        SizedBox(height: isTablet ? 20 : 16),
+
+        // Selected mode content
+        if (_isOtpMode)
+          _buildOtpUserSection(l10n, isTablet)
+        else
+          _buildSearchUserSection(l10n),
+      ],
+    );
+  }
+
+  Widget _buildUserSelectionModeSelector(AppLocalizations l10n, bool isTablet) {
+    return EnterpriseCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.getString('user_selection_mode'),
+            style: TextStyle(
+              fontSize: isTablet ? 18 : 16,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.primaryBlack,
+            ),
+          ),
+          SizedBox(height: isTablet ? 16 : 12),
+
+          Row(
+            children: [
+              Expanded(
+                child: _buildModeButton(
+                  isSelected: _isOtpMode,
+                  icon: Icons.numbers,
+                  title: l10n.getString('add_user_with_otp'),
+                  description: 'Aggiungi utente con codice OTP',
+                  onTap: () => setState(() => _isOtpMode = true),
+                  isTablet: isTablet,
+                ),
+              ),
+              SizedBox(width: isTablet ? 16 : 12),
+              Expanded(
+                child: _buildModeButton(
+                  isSelected: !_isOtpMode,
+                  icon: Icons.search,
+                  title: l10n.getString('add_existing_user'),
+                  description: 'Cerca tra utenti esistenti',
+                  onTap: () => setState(() => _isOtpMode = false),
+                  isTablet: isTablet,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModeButton({
+    required bool isSelected,
+    required IconData icon,
+    required String title,
+    required String description,
+    required VoidCallback onTap,
+    required bool isTablet,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: EdgeInsets.all(isTablet ? 16 : 12),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? AppTheme.primaryBlue.withValues(alpha: 0.1)
+                : AppTheme.lightGrey.withValues(alpha: 0.3),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected
+                  ? AppTheme.primaryBlue
+                  : AppTheme.borderGrey.withValues(alpha: 0.3),
+              width: isSelected ? 2 : 1,
+            ),
+          ),
+          child: Column(
+            children: [
+              Icon(
+                icon,
+                size: isTablet ? 32 : 28,
+                color: isSelected
+                    ? AppTheme.primaryBlue
+                    : AppTheme.textSecondary,
+              ),
+              SizedBox(height: isTablet ? 12 : 8),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: isTablet ? 14 : 13,
+                  fontWeight: FontWeight.w600,
+                  color: isSelected
+                      ? AppTheme.primaryBlue
+                      : AppTheme.textSecondary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: isTablet ? 6 : 4),
+              Text(
+                description,
+                style: TextStyle(
+                  fontSize: isTablet ? 12 : 11,
+                  color: AppTheme.textSecondary,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOtpUserSection(AppLocalizations l10n, bool isTablet) {
     return EnterpriseCard(
       child: Column(
         children: [
@@ -723,14 +949,14 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                   prefixIcon: Icon(Icons.numbers),
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: isTablet ? 16 : 12),
               NeonButton(
                 onPressed: _isVerifyingOtp ? null : _addUserByOTP,
                 text: _isVerifyingOtp ? 'Verificando...' : 'Aggiungi',
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: isTablet ? 20 : 16),
           Row(
             children: [
               Container(height: 1, color: AppTheme.borderGrey, width: 100),
@@ -744,11 +970,15 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               Expanded(child: Container(height: 1, color: AppTheme.borderGrey)),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: isTablet ? 20 : 16),
           Row(
             children: [
-              Icon(Icons.qr_code, size: 48, color: AppTheme.primaryBlue),
-              const SizedBox(width: 16),
+              Icon(
+                Icons.qr_code,
+                size: isTablet ? 48 : 40,
+                color: AppTheme.primaryBlue,
+              ),
+              SizedBox(width: isTablet ? 16 : 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -756,7 +986,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                     Text(
                       'Scansiona codice QR',
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: isTablet ? 16 : 14,
                         fontWeight: FontWeight.w600,
                         color: AppTheme.primaryBlack,
                       ),
@@ -764,7 +994,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                     Text(
                       'Scansiona il QR code dall\'app utente',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: isTablet ? 14 : 12,
                         color: AppTheme.textSecondary,
                       ),
                     ),
@@ -780,6 +1010,47 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildSearchUserSection(AppLocalizations l10n) {
+    if (_selectedLegalEntityId == null) {
+      return EnterpriseCard(
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            children: [
+              Icon(
+                Icons.warning_amber,
+                size: 48,
+                color: AppTheme.warningOrange,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Seleziona prima una Legal Entity',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.textSecondary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Per cercare utenti esistenti è necessario selezionare una Legal Entity nella sezione "Informazioni Generali"',
+                style: TextStyle(fontSize: 14, color: AppTheme.textSecondary),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return UserSearchSelector(
+      legalEntityId: _selectedLegalEntityId!,
+      onUserSelected: _addUserFromSearch,
+      selectedUsers: _addedUsers,
     );
   }
 
@@ -1237,6 +1508,10 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   }
 
   Widget _buildMediaReviewCard() {
+    final l10n = AppLocalizations.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 768;
+
     return EnterpriseCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1247,9 +1522,9 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               Icon(Icons.camera_alt, color: AppTheme.primaryBlue),
               const SizedBox(width: 8),
               Text(
-                'Media Real-time (0)',
+                'Media (${_mediaFiles.length})',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: isTablet ? 18 : 16,
                   fontWeight: FontWeight.bold,
                   color: AppTheme.primaryBlack,
                 ),
@@ -1257,10 +1532,129 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             ],
           ),
           const SizedBox(height: 16),
-          Text(
-            'Nessun media generale allegato',
-            style: TextStyle(color: AppTheme.textSecondary),
-          ),
+          if (_mediaFiles.isEmpty)
+            Container(
+              padding: EdgeInsets.all(isTablet ? 16 : 12),
+              decoration: BoxDecoration(
+                color: AppTheme.lightGrey.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: AppTheme.textSecondary.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    color: AppTheme.textSecondary,
+                    size: isTablet ? 20 : 18,
+                  ),
+                  SizedBox(width: isTablet ? 12 : 8),
+                  Expanded(
+                    child: Text(
+                      l10n.getString('no_media_attached'),
+                      style: TextStyle(
+                        fontSize: isTablet ? 14 : 12,
+                        color: AppTheme.textSecondary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else
+            Column(
+              children: [
+                for (int i = 0; i < _mediaFiles.length; i++)
+                  Container(
+                    margin: EdgeInsets.only(bottom: isTablet ? 12 : 8),
+                    padding: EdgeInsets.all(isTablet ? 12 : 8),
+                    decoration: BoxDecoration(
+                      color: AppTheme.lightGrey.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: AppTheme.primaryBlue.withValues(alpha: 0.2),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: isTablet ? 60 : 50,
+                          height: isTablet ? 60 : 50,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            color: AppTheme.lightGrey.withValues(alpha: 0.3),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: FutureBuilder<Uint8List>(
+                              future: _mediaFiles[i].readAsBytes(),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData && snapshot.data != null) {
+                                  return Image.memory(
+                                    snapshot.data!,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Icon(
+                                        Icons.image,
+                                        color: AppTheme.textSecondary,
+                                        size: isTablet ? 24 : 20,
+                                      );
+                                    },
+                                  );
+                                }
+                                return Icon(
+                                  Icons.image,
+                                  color: AppTheme.textSecondary,
+                                  size: isTablet ? 24 : 20,
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: isTablet ? 12 : 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _mediaFiles[i].name,
+                                style: TextStyle(
+                                  fontSize: isTablet ? 14 : 12,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppTheme.primaryBlack,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              SizedBox(height: isTablet ? 4 : 2),
+                              FutureBuilder<int>(
+                                future: _mediaFiles[i].length(),
+                                builder: (context, snapshot) {
+                                  final size = snapshot.data ?? 0;
+                                  final sizeKB = (size / 1024).round();
+                                  return Text(
+                                    '${sizeKB} KB',
+                                    style: TextStyle(
+                                      fontSize: isTablet ? 12 : 10,
+                                      color: AppTheme.textSecondary,
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(
+                          Icons.check_circle,
+                          color: AppTheme.successGreen,
+                          size: isTablet ? 20 : 18,
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
         ],
       ),
     );
@@ -1499,7 +1893,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   }
 
   Future<void> _createCertification() async {
-    print('🚀 Creating certification...');
+    print('🚀 Creating certification with unified upload service...');
 
     // Mostra alert di conferma prima di inviare
     final shouldProceed = await _showConfirmationDialog();
@@ -1591,22 +1985,6 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
       print('  - Legal Entity Name: $_legalEntityName');
       print('  - Location ID: $locationId');
 
-      print('✅ All required IDs available:');
-      print('  - certifierId: $certifierId');
-      print('  - legalEntityId: $legalEntityId');
-      print('  - locationId: ${locationId ?? 'fallback'}');
-
-      // Prepara i dati della certificazione
-      final certificationData = {
-        'id_certifier': certifierId,
-        'id_legal_entity': legalEntityId,
-        'id_location': locationId,
-        'n_users': _addedUsers.isNotEmpty ? 1 : 0,
-        'id_certification_category': categoryId,
-        'status': 'pending',
-        'draft_at': DateTime.now().toIso8601String(),
-      };
-
       // Prepara l'array certification_users
       List<Map<String, dynamic>> certificationUsers = [];
       if (_addedUsers.isNotEmpty) {
@@ -1625,8 +2003,6 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
         }
       }
 
-      print('📋 Certification data: $certificationData');
-
       // Test della connessione prima di creare
       final connectionTest = await CertificationEdgeService.testConnection();
       print('🔗 Connection test result: $connectionTest');
@@ -1639,57 +2015,71 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
         return;
       }
 
-      // Crea la certificazione
-      print('🚀 Starting certification creation...');
-      // Imposta la data di invio se lo status è "sent"
-      String? sentAt;
-      if (certificationData['status'] == 'sent') {
-        sentAt = DateTime.now().toIso8601String();
-        print('📤 Setting sent_at to: $sentAt');
+      // Scegli il servizio appropriato in base alla presenza di media
+      Map<String, dynamic>? result;
+
+      if (_mediaFiles.isNotEmpty) {
+        // Se ci sono media, usa il servizio di upload unificato
+        print('🚀 Creating certification with media files...');
+        print('📁 Media files to upload: ${_mediaFiles.length}');
+
+        result = await CertificationUploadService.createCertificationWithMedia(
+          idCertifier: certifierId,
+          idLegalEntity: legalEntityId,
+          idLocation: locationId,
+          nUsers: _addedUsers.isNotEmpty ? 1 : 0,
+          idCertificationCategory: categoryId,
+          status: 'pending',
+          draftAt: DateTime.now().toIso8601String(),
+          certificationUsers: certificationUsers.isNotEmpty
+              ? certificationUsers
+              : null,
+          mediaFiles: _mediaFiles,
+          acquisitionType: 'deferred',
+        );
+      } else {
+        // Se non ci sono media, usa il servizio certificazioni standard
+        print('🚀 Creating certification without media...');
+
+        result = await CertificationServiceV2.createCertification(
+          idCertifier: certifierId,
+          idLegalEntity: legalEntityId,
+          idLocation: locationId,
+          nUsers: _addedUsers.isNotEmpty ? 1 : 0,
+          idCertificationCategory: categoryId,
+          status: 'pending',
+          draftAt: DateTime.now().toIso8601String(),
+          certificationUsers: certificationUsers.isNotEmpty
+              ? certificationUsers
+              : null,
+        );
       }
 
-      final result = await CertificationServiceV2.createCertification(
-        idCertifier: certificationData['id_certifier'] as String,
-        idLegalEntity: certificationData['id_legal_entity'] as String,
-        idLocation: certificationData['id_location'] as String,
-        nUsers: certificationData['n_users'] as int,
-        idCertificationCategory:
-            certificationData['id_certification_category'] as String,
-        status: certificationData['status'] as String?,
-        sentAt: sentAt,
-        draftAt: certificationData['draft_at'] as String?,
-        media: _mediaFiles.isNotEmpty ? _convertMediaFilesToMaps() : null,
-        certificationUsers: certificationUsers.isNotEmpty
-            ? certificationUsers
-            : null,
-      );
-
       if (result != null) {
-        print('✅ Certification created successfully: $result');
+        print('✅ Certification created successfully with media: $result');
 
         // Blocca gli OTP utilizzati dopo la creazione della certificazione
-        await _blockUsedOtps(
-          result['data']['id_certification'],
-          certificationData,
-        );
-
-        // Se ci sono media files, aggiungili
-        if (_mediaFiles.isNotEmpty) {
-          await _addMediaToCertification(
-            result['data']['id_certification'],
-            locationId,
-          );
+        if (_addedUsers.isNotEmpty) {
+          await _blockUsedOtps(result['data']['id_certification'], {
+            'id_certification': result['data']['id_certification'],
+            'id_certifier': certifierId,
+            'id_legal_entity': legalEntityId,
+            'id_location': locationId,
+            'n_users': _addedUsers.length,
+            'id_certification_category': categoryId,
+            'status': 'pending',
+          });
         }
 
         setState(() {
-          _successMessage = 'Certificazione inviata con successo!';
+          _successMessage = 'Certificazione e media caricati con successo!';
           _isCreating = false;
         });
 
         // Mostra messaggio di successo e chiudi
         _showSuccessDialog();
       } else {
-        throw Exception('Failed to create certification');
+        throw Exception('Failed to create certification with media');
       }
     } catch (e) {
       print('💥 Error creating certification: $e');
@@ -1878,23 +2268,6 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     );
   }
 
-  /// Converte i File in Map per l'API
-  List<Map<String, dynamic>> _convertMediaFilesToMaps() {
-    return _mediaFiles.map((file) {
-      return {
-        'id_media_hash':
-            'media_${DateTime.now().millisecondsSinceEpoch}_${file.path.hashCode}',
-        'acquisition_type': 'upload',
-        'captured_at': DateTime.now().toIso8601String(),
-        'file_type': file.path.split('.').last.toLowerCase(),
-        'name': file.path.split('/').last,
-        'description': null,
-        'id_location':
-            'a5196c46-3d57-4e8c-b293-f4dff308a1a0', // Fallback ID per media
-      };
-    }).toList();
-  }
-
   /// Blocca gli OTP utilizzati dopo la creazione della certificazione
   Future<void> _blockUsedOtps(
     String certificationId,
@@ -1936,38 +2309,35 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     _usedOtps.clear();
   }
 
-  Future<void> _addMediaToCertification(
+  Future<void> _uploadMediaToCertification(
     String certificationId,
     String? locationId,
   ) async {
     try {
-      print('📸 Adding media to certification: $certificationId');
+      print('📸 Uploading media to certification: $certificationId');
 
       // Usa l'ID di location passato o fallback
       final mediaLocationId =
           locationId ?? 'a5196c46-3d57-4e8c-b293-f4dff308a1a0';
 
-      final mediaData = _mediaFiles
-          .map(
-            (file) => {
-              'name': file.path.split('/').last,
-              'description': 'Media file for certification',
-              'acquisition_type': 'camera',
-              'captured_at': DateTime.now().toIso8601String(),
-              'file_type': file.path.split('.').last,
-              'id_location': mediaLocationId,
-            },
-          )
-          .toList();
-
-      final result = await CertificationEdgeService.addCertificationMedia(
+      final result = await CertificationMediaService.uploadMedia(
         certificationId: certificationId,
-        media: mediaData,
+        mediaFiles: _mediaFiles,
+        acquisitionType: 'deferred',
+        capturedAt: DateTime.now().toIso8601String(),
+        idLocation: mediaLocationId,
+        description: 'Media file for certification',
       );
 
-      print('✅ Media added successfully: ${result.length} files');
+      if (result != null) {
+        print(
+          '✅ Media uploaded successfully: ${result['data']?.length ?? 0} files',
+        );
+      } else {
+        print('❌ Failed to upload media');
+      }
     } catch (e) {
-      print('💥 Error adding media: $e');
+      print('💥 Error uploading media: $e');
       // Non bloccare la creazione della certificazione per errori sui media
     }
   }
@@ -1995,12 +2365,10 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 // Se è un messaggio di successo per utente aggiunto, non chiudere la schermata
                 return;
               }
-              // Naviga alla dashboard dei certificatori (indice 2 nella HomeScreen)
-              Navigator.of(context).pushNamedAndRemoveUntil(
-                '/home',
-                (route) => false,
-                arguments: {'selectedIndex': 2},
-              );
+              // Naviga alla home senza selezionare nessun tab specifico
+              Navigator.of(
+                context,
+              ).pushNamedAndRemoveUntil('/home', (route) => false);
             },
             child: Text(AppLocalizations.of(context).getString('ok_short')),
           ),
@@ -2042,12 +2410,29 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   }
 
   void _addMedia() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      setState(() {
-        _mediaFiles.add(File(image.path));
-      });
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+      if (image != null) {
+        // Su web, usiamo direttamente XFile per evitare problemi con File
+        try {
+          // Testiamo se il file può essere letto
+          await image.readAsBytes();
+
+          setState(() {
+            _mediaFiles.add(image);
+          });
+          print('✅ Media file added successfully: ${image.name}');
+        } catch (fileError) {
+          print('❌ Error with file ${image.name}: $fileError');
+          _showErrorDialog(
+            'Errore nel caricamento del file. Riprova con un altro file.',
+          );
+        }
+      }
+    } catch (e) {
+      print('❌ Error picking image: $e');
+      _showErrorDialog('Errore nella selezione dell\'immagine. Riprova.');
     }
   }
 
@@ -2136,6 +2521,24 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
       _addedUsers.clear();
       _userFieldValues.clear();
     });
+  }
+
+  void _addUserFromSearch(UserData user) {
+    // Verifica se c'è già un utente (massimo 1 per certificazione)
+    if (_addedUsers.isNotEmpty) {
+      _showErrorDialog(
+        'È possibile aggiungere solo un utente per certificazione',
+      );
+      return;
+    }
+
+    setState(() {
+      _addedUsers.add(user);
+      // Inizializza i valori dei campi per il nuovo utente
+      _userFieldValues[user.idUser] = {};
+    });
+
+    _showSuccessDialog('Utente aggiunto con successo!');
   }
 
   void _sendCertification() {

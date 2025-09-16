@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/user.dart' as app_models;
@@ -83,13 +84,211 @@ class SupabaseService {
 
   Future<bool> signInWithGoogle() async {
     try {
-      await _auth.signInWithOAuth(
-        OAuthProvider.google,
-        redirectTo: 'io.supabase.flutter://login-callback/',
+      print('🔄 SupabaseService: Starting Google OAuth...');
+
+      if (kIsWeb) {
+        // Web-specific implementation with better error handling
+        print('🔄 SupabaseService: Using web OAuth flow...');
+
+        // Test Supabase connection before attempting authentication
+        print('🔄 SupabaseService: Testing Supabase connection...');
+        final supabaseConnected = await _testSupabaseConnection();
+        if (!supabaseConnected) {
+          print(
+            '⚠️ SupabaseService: Supabase connection test failed, but continuing...',
+          );
+        }
+
+        // Debug Supabase configuration
+        print('🔄 SupabaseService: Supabase URL: ${AppConfig.supabaseUrl}');
+        print(
+          '🔄 SupabaseService: Current session before auth: ${_auth.currentSession != null ? "exists" : "null"}',
+        );
+
+        try {
+          // Clear any existing auth state to prevent code verifier issues
+          if (_auth.currentSession != null) {
+            print(
+              '🔄 SupabaseService: Clearing existing session before new auth attempt',
+            );
+            await _auth.signOut();
+            await Future.delayed(const Duration(milliseconds: 500));
+          }
+
+          print('🔄 SupabaseService: Starting OAuth flow...');
+
+          // For web, use the current URL as redirect
+          final currentUrl = Uri.base.origin;
+          print('🔄 SupabaseService: Using redirect URL: $currentUrl');
+
+          await _auth.signInWithOAuth(
+            OAuthProvider.google,
+            redirectTo: currentUrl,
+            authScreenLaunchMode: LaunchMode.inAppWebView,
+          );
+
+          print(
+            '✅ SupabaseService: OAuth flow initiated with redirect to: $currentUrl',
+          );
+
+          // Wait for auth state change and check multiple times
+          for (int i = 0; i < 10; i++) {
+            await Future.delayed(const Duration(milliseconds: 500));
+            final session = _auth.currentSession;
+            if (session != null) {
+              print('✅ SupabaseService: Google OAuth successful');
+              print(
+                '✅ SupabaseService: Session created for user: ${session.user.email}',
+              );
+              return true;
+            }
+            print(
+              '🔄 SupabaseService: Waiting for session... attempt ${i + 1}/10',
+            );
+          }
+
+          throw Exception(
+            'Authentication timeout - no session created after 5 seconds',
+          );
+        } catch (e) {
+          print('❌ SupabaseService: Google OAuth error: $e');
+
+          // Handle specific code verifier error
+          if (e.toString().contains('Code verifier could not be found')) {
+            print(
+              '⚠️ SupabaseService: Code verifier error detected - clearing auth state and retrying',
+            );
+
+            try {
+              // Clear all auth state and local storage
+              await _auth.signOut();
+              await Future.delayed(const Duration(seconds: 1));
+
+              // Retry the OAuth flow once
+              print(
+                '🔄 SupabaseService: Retrying OAuth flow after clearing state...',
+              );
+
+              final retryRedirectUrl = Uri.base.origin;
+              print(
+                '🔄 SupabaseService: Using retry redirect URL: $retryRedirectUrl',
+              );
+
+              await _auth.signInWithOAuth(
+                OAuthProvider.google,
+                redirectTo: retryRedirectUrl,
+                authScreenLaunchMode: LaunchMode.inAppWebView,
+              );
+
+              // Wait for retry result
+              for (int i = 0; i < 10; i++) {
+                await Future.delayed(const Duration(milliseconds: 500));
+                final session = _auth.currentSession;
+                if (session != null) {
+                  print('✅ SupabaseService: Google OAuth successful on retry');
+                  print(
+                    '✅ SupabaseService: Session created for user: ${session.user.email}',
+                  );
+                  return true;
+                }
+                print(
+                  '🔄 SupabaseService: Retry waiting for session... attempt ${i + 1}/10',
+                );
+              }
+
+              throw Exception('Authentication retry also failed');
+            } catch (retryError) {
+              print('❌ SupabaseService: OAuth retry failed: $retryError');
+              return false;
+            }
+          } else {
+            print('❌ SupabaseService: Google sign-in failed: $e');
+            return false;
+          }
+        }
+      } else {
+        // Mobile implementation (iOS and Android)
+        print('🔄 SupabaseService: Using mobile OAuth flow...');
+
+        // Use platform-specific redirect URLs
+        String redirectUrl;
+        LaunchMode launchMode;
+
+        if (Platform.isIOS) {
+          redirectUrl = 'io.supabase.flutter://login-callback/';
+          launchMode = LaunchMode.platformDefault;
+          print('🔄 SupabaseService: iOS OAuth configuration');
+        } else if (Platform.isAndroid) {
+          redirectUrl = 'io.supabase.flutter://login-callback/';
+          launchMode = LaunchMode.platformDefault;
+          print('🔄 SupabaseService: Android OAuth configuration');
+        } else {
+          // Fallback for other platforms
+          redirectUrl = 'io.supabase.flutter://login-callback/';
+          launchMode = LaunchMode.platformDefault;
+          print('🔄 SupabaseService: Default mobile OAuth configuration');
+        }
+
+        print('🔄 SupabaseService: Using redirect URL: $redirectUrl');
+
+        try {
+          await _auth.signInWithOAuth(
+            OAuthProvider.google,
+            redirectTo: redirectUrl,
+            authScreenLaunchMode: launchMode,
+          );
+
+          print('✅ SupabaseService: Mobile OAuth flow initiated');
+
+          // Wait for auth state change and check multiple times
+          for (int i = 0; i < 10; i++) {
+            await Future.delayed(const Duration(milliseconds: 500));
+            final session = _auth.currentSession;
+            if (session != null) {
+              print('✅ SupabaseService: Mobile Google OAuth successful');
+              print(
+                '✅ SupabaseService: Session created for user: ${session.user.email}',
+              );
+              return true;
+            }
+            print(
+              '🔄 SupabaseService: Mobile waiting for session... attempt ${i + 1}/10',
+            );
+          }
+
+          throw Exception(
+            'Mobile authentication timeout - no session created after 5 seconds',
+          );
+        } catch (e) {
+          print('❌ SupabaseService: Mobile Google OAuth error: $e');
+          return false;
+        }
+      }
+    } catch (e) {
+      print('❌ SupabaseService: Error signing in with Google: $e');
+      return false;
+    }
+  }
+
+  /// Test Supabase connection (for debugging)
+  Future<bool> _testSupabaseConnection() async {
+    try {
+      print('🔄 SupabaseService: Testing Supabase connection...');
+
+      // Try to get current session (basic connectivity test)
+      final session = _auth.currentSession;
+      print(
+        '🔄 SupabaseService: Current session: ${session != null ? "exists" : "null"}',
       );
+
+      // Try to get auth settings (another connectivity test)
+      print(
+        '🔄 SupabaseService: Supabase client initialized: ${AppConfig.supabaseUrl}',
+      );
+
       return true;
     } catch (e) {
-      print('Error signing in with Google: $e');
+      print('❌ SupabaseService: Supabase connection test failed: $e');
       return false;
     }
   }
@@ -157,7 +356,28 @@ class SupabaseService {
   }
 
   Future<void> resetPassword(String email) async {
-    await _auth.resetPasswordForEmail(email);
+    try {
+      print('🔄 SupabaseService: Sending password reset email to: $email');
+
+      // Get the appropriate redirect URL based on platform
+      String redirectUrl;
+      if (kIsWeb) {
+        // For web, use the current origin with a password reset callback
+        redirectUrl = '${Uri.base.origin}/auth/password-reset';
+        print('🔄 SupabaseService: Using web redirect URL: $redirectUrl');
+      } else {
+        // For mobile, use the deep link
+        redirectUrl = 'io.supabase.flutter://password-reset/';
+        print('🔄 SupabaseService: Using mobile redirect URL: $redirectUrl');
+      }
+
+      await _auth.resetPasswordForEmail(email, redirectTo: redirectUrl);
+
+      print('✅ SupabaseService: Password reset email sent successfully');
+    } catch (e) {
+      print('❌ SupabaseService: Error sending password reset email: $e');
+      rethrow;
+    }
   }
 
   User? get currentUser => _auth.currentUser;
@@ -1426,6 +1646,51 @@ class SupabaseService {
       return true;
     } catch (e) {
       print('Error sending invitation: $e');
+      return false;
+    }
+  }
+
+  Future<bool> resetPasswordWithOldPassword({
+    required String email,
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    try {
+      print('🔄 SupabaseService: Starting password reset with old password...');
+      print('📧 Email: $email');
+
+      // First, verify the old password by attempting to sign in
+      try {
+        final verifyResponse = await _client.auth.signInWithPassword(
+          email: email,
+          password: oldPassword,
+        );
+
+        if (verifyResponse.user == null) {
+          print('❌ SupabaseService: Old password verification failed');
+          return false;
+        }
+
+        print('✅ SupabaseService: Old password verified successfully');
+      } catch (e) {
+        print('❌ SupabaseService: Old password verification error: $e');
+        return false;
+      }
+
+      // Update the password using Supabase's updateUser method
+      final response = await _client.auth.updateUser(
+        UserAttributes(password: newPassword),
+      );
+
+      if (response.user != null) {
+        print('✅ SupabaseService: Password updated successfully');
+        return true;
+      } else {
+        print('❌ SupabaseService: Password update failed');
+        return false;
+      }
+    } catch (e) {
+      print('❌ SupabaseService: Password reset error: $e');
       return false;
     }
   }

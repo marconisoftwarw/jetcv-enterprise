@@ -28,6 +28,8 @@ class AuthProvider extends ChangeNotifier {
   // Method to check and refresh authentication status
   Future<bool> checkAuthenticationStatus() async {
     try {
+      print('🔍 AuthProvider: Checking authentication status...');
+
       // First refresh the session if needed
       await _supabaseService.refreshSessionIfNeeded();
 
@@ -35,8 +37,14 @@ class AuthProvider extends ChangeNotifier {
       if (_supabaseService.hasValidSession) {
         final supabaseUser = _supabaseService.currentUser;
         if (supabaseUser != null) {
-          // Crea l'utente direttamente dai dati di Supabase se non esiste
-          if (_currentUser == null) {
+          print(
+            '✅ AuthProvider: Valid session found for user: ${supabaseUser.id}',
+          );
+
+          // Check if we need to restore or update user data
+          if (_currentUser == null || _currentUser!.idUser != supabaseUser.id) {
+            print('🔄 AuthProvider: Restoring/updating user data...');
+
             _currentUser = AppUser(
               idUser: supabaseUser.id,
               email: supabaseUser.email ?? '',
@@ -60,25 +68,37 @@ class AuthProvider extends ChangeNotifier {
                   ? DateTime.parse(supabaseUser.updatedAt!)
                   : null,
             );
+
+            // Load user type if not already loaded
+            if (_userType == null && supabaseUser.email != null) {
+              await _loadUserType(supabaseUser.email!);
+            }
+
             _safeNotifyListeners();
           }
-          // Imposta tipo utente di default se non è stato caricato
+
+          // Ensure user type is set
           if (_userType == null) {
             _userType = AppUserType.user;
             _safeNotifyListeners();
           }
+
           return true;
         }
+        print('❌ AuthProvider: Valid session but no user found');
         return false;
       } else {
+        print('❌ AuthProvider: No valid session found');
         // No valid session, clear user data
         if (_currentUser != null) {
           _currentUser = null;
+          _userType = null;
           _safeNotifyListeners();
         }
         return false;
       }
     } catch (e) {
+      print('❌ AuthProvider: Authentication check failed: $e');
       _setError('Authentication check failed: $e');
       return false;
     }
@@ -137,13 +157,76 @@ class AuthProvider extends ChangeNotifier {
     if (_isInitialized) return;
 
     try {
+      print('🔐 AuthProvider: Initializing...');
       await _supabaseService.initialize();
 
-      // No need to load user data on initialization
-      // User data will be loaded only when explicitly needed
+      // After Supabase initialization, check if there's a persisted session
+      print('🔍 AuthProvider: Checking for persisted session...');
+      await _restoreSessionFromPersistence();
+
       _isInitialized = true;
+      print('✅ AuthProvider: Initialization completed');
     } catch (e) {
+      print('❌ AuthProvider: Initialization failed: $e');
       _errorMessage = 'Failed to initialize: $e';
+    }
+  }
+
+  /// Restore session and user data from Supabase persistence
+  Future<void> _restoreSessionFromPersistence() async {
+    try {
+      // First refresh the session to ensure it's valid
+      await _supabaseService.refreshSessionIfNeeded();
+
+      // Check if Supabase has a valid persisted session
+      if (_supabaseService.hasValidSession) {
+        final supabaseUser = _supabaseService.currentUser;
+        if (supabaseUser != null) {
+          print(
+            '🔄 AuthProvider: Restoring user from persisted session: ${supabaseUser.id}',
+          );
+
+          // Restore user data from Supabase
+          _currentUser = AppUser(
+            idUser: supabaseUser.id,
+            email: supabaseUser.email ?? '',
+            firstName:
+                supabaseUser.userMetadata?['full_name']?.split(' ').first ?? '',
+            lastName:
+                supabaseUser.userMetadata?['full_name']
+                    ?.split(' ')
+                    .skip(1)
+                    .join(' ') ??
+                '',
+            type: UserType.user, // Default type
+            languageCode: 'it',
+            phone: supabaseUser.phone ?? '',
+            idUserHash: supabaseUser.id,
+            createdAt: supabaseUser.createdAt != null
+                ? DateTime.parse(supabaseUser.createdAt!)
+                : null,
+            updatedAt: supabaseUser.updatedAt != null
+                ? DateTime.parse(supabaseUser.updatedAt!)
+                : null,
+          );
+
+          // Set default user type
+          _userType = AppUserType.user;
+
+          // Load user type from service if needed
+          if (supabaseUser.email != null) {
+            await _loadUserType(supabaseUser.email!);
+          }
+
+          print('✅ AuthProvider: User session restored successfully');
+          _safeNotifyListeners();
+        }
+      } else {
+        print('ℹ️ AuthProvider: No valid persisted session found');
+      }
+    } catch (e) {
+      print('❌ AuthProvider: Error restoring session: $e');
+      // Don't set error here as this is initialization
     }
   }
 
@@ -214,6 +297,10 @@ class AuthProvider extends ChangeNotifier {
       );
 
       if (response.user != null) {
+        print(
+          '✅ AuthProvider: Login successful for user: ${response.user!.id}',
+        );
+
         // Crea l'utente direttamente dai dati di Supabase
         _currentUser = AppUser(
           idUser: response.user!.id,
@@ -546,6 +633,37 @@ class AuthProvider extends ChangeNotifier {
       await loadUserType();
     } else {
       print('❌ No user email available for testing');
+    }
+  }
+
+  Future<bool> resetPasswordWithOldPassword({
+    required String email,
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    _setLoading(true);
+    _clearError();
+
+    try {
+      final success = await _supabaseService.resetPasswordWithOldPassword(
+        email: email,
+        oldPassword: oldPassword,
+        newPassword: newPassword,
+      );
+
+      if (success) {
+        print('✅ Password reset successful');
+        return true;
+      } else {
+        _setError('Password reset failed');
+        return false;
+      }
+    } catch (e) {
+      print('❌ Password reset error: $e');
+      _setError('Password reset failed: $e');
+      return false;
+    } finally {
+      _setLoading(false);
     }
   }
 

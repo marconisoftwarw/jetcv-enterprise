@@ -858,10 +858,17 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               final itemCount = 4; // Number of stat cards
               final rowCount = (itemCount / crossAxisCount).ceil();
 
-              // Calculate the height needed for the GridView
+              // Calculate responsive height based on screen size
+              final screenHeight = MediaQuery.of(context).size.height;
               final childHeight = isTablet
-                  ? 120
-                  : 140; // Approximate height per card
+                  ? (screenHeight * 0.15).clamp(
+                      120.0,
+                      160.0,
+                    ) // 15% of screen height, min 120, max 160
+                  : (screenHeight * 0.18).clamp(
+                      140.0,
+                      180.0,
+                    ); // 18% of screen height, min 140, max 180
               final mainAxisSpacing = 16.0;
               final totalHeight =
                   (rowCount * childHeight) + ((rowCount - 1) * mainAxisSpacing);
@@ -874,7 +881,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   crossAxisCount: crossAxisCount,
                   crossAxisSpacing: 16,
                   mainAxisSpacing: mainAxisSpacing,
-                  childAspectRatio: isTablet ? 1.2 : 1.1,
+                  childAspectRatio: isTablet
+                      ? 1.1
+                      : 0.9, // Adjusted for better content visibility
                   children: [
                     _buildStatCard(
                       l10n.getString('certifications'),
@@ -931,8 +940,10 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     String? change,
     bool? isPositive,
   ) {
+    final isTablet = MediaQuery.of(context).size.width > 768;
+
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(isTablet ? 16 : 20),
       decoration: BoxDecoration(
         color: AppTheme.pureWhite,
         borderRadius: BorderRadius.circular(16),
@@ -948,24 +959,25 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Row(
             children: [
               Container(
-                width: 40,
-                height: 40,
+                width: isTablet ? 36 : 40,
+                height: isTablet ? 36 : 40,
                 decoration: BoxDecoration(
                   color: iconColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(icon, color: iconColor, size: 20),
+                child: Icon(icon, color: iconColor, size: isTablet ? 18 : 20),
               ),
               const Spacer(),
               if (change != null)
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isTablet ? 6 : 8,
+                    vertical: isTablet ? 3 : 4,
                   ),
                   decoration: BoxDecoration(
                     color: isPositive == true
@@ -980,33 +992,51 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                           ? AppTheme.successGreen
                           : AppTheme.errorRed,
                       fontWeight: FontWeight.w600,
+                      fontSize: isTablet ? 11 : 12,
                     ),
                   ),
                 ),
             ],
           ),
-          const SizedBox(height: 16),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: AppTheme.textPrimary,
+          const SizedBox(height: 12),
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  value,
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.textPrimary,
+                    fontSize: isTablet ? 20 : 24,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppTheme.textGray,
+                    fontWeight: FontWeight.w500,
+                    fontSize: isTablet ? 12 : 14,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppTheme.textGray,
+                    fontSize: isTablet ? 10 : 11,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            title,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppTheme.textGray,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            subtitle,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: AppTheme.textGray),
           ),
         ],
       ),

@@ -567,6 +567,26 @@ class LegalEntityProvider extends ChangeNotifier {
     }
   }
 
+  /// Initialize the provider and restore any cached data if needed
+  Future<void> initialize() async {
+    try {
+      print('🏢 LegalEntityProvider: Initializing...');
+
+      // Check if user is authenticated
+      if (await ensureAuthentication()) {
+        print('✅ LegalEntityProvider: User authenticated, provider ready');
+        // Don't automatically load data on initialization
+        // Data will be loaded when explicitly needed
+      } else {
+        print(
+          'ℹ️ LegalEntityProvider: No authenticated user, provider ready but inactive',
+        );
+      }
+    } catch (e) {
+      print('❌ LegalEntityProvider: Initialization failed: $e');
+    }
+  }
+
   // Search functionality
   List<LegalEntity> searchLegalEntities(String query) {
     if (query.isEmpty) return filteredLegalEntities;

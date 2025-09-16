@@ -16,6 +16,7 @@ import '../certification/certification_list_screen.dart';
 import '../profile/user_profile_screen.dart';
 import '../admin/legal_entity_management_screen.dart';
 import '../settings/user_settings_screen.dart';
+import '../../widgets/certifiers_content.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -83,10 +84,13 @@ class _HomeScreenState extends State<HomeScreen> {
       case 2: // Legal Entities
         // Rimani nella home
         break;
-      case 3: // Settings
+      case 3: // Certifiers
+        // Rimani nella home - mostra contenuto certificatori
+        break;
+      case 4: // Settings
         // Rimani nella home
         break;
-      case 4: // Profile
+      case 5: // Profile
         // Rimani nella home
         break;
     }
@@ -97,11 +101,11 @@ class _HomeScreenState extends State<HomeScreen> {
       case 0: // Dashboard
         // Rimani nella home
         break;
-      case 1: // My Certifications
+      case 1: // Legal Entity
         // Rimani nella home
         break;
-      case 2: // Settings
-        // Rimani nella home
+      case 2: // Certifiers
+        // Rimani nella home - mostra contenuto certificatori
         break;
       case 3: // Profile
         // Rimani nella home
@@ -138,10 +142,10 @@ class _HomeScreenState extends State<HomeScreen> {
     int maxIndex;
     switch (userType) {
       case AppUserType.admin:
-        maxIndex = 4; // 5 items (0-4)
+        maxIndex = 5; // 6 items (0-5)
         break;
       case AppUserType.legalEntity:
-        maxIndex = 2; // 3 items (0-2)
+        maxIndex = 3; // 4 items (0-3)
         break;
       case AppUserType.certifier:
         maxIndex = 2; // 3 items (0-2)
@@ -284,8 +288,10 @@ class _HomeScreenState extends State<HomeScreen> {
       case 2:
         return _buildLegalEntitiesManagementContent(l10n);
       case 3:
-        return const UserSettingsScreen(hideMenu: true);
+        return _buildCertifiersContent();
       case 4:
+        return const UserSettingsScreen(hideMenu: true);
+      case 5:
         return const UserProfileScreen(hideMenu: true);
       default:
         return _DashboardContent(l10n: l10n);
@@ -300,6 +306,8 @@ class _HomeScreenState extends State<HomeScreen> {
       case 1:
         return _buildLegalEntitiesManagementContent(l10n);
       case 2:
+        return _buildCertifiersContent();
+      case 3:
         return const UserProfileScreen(hideMenu: true);
       default:
         return _DashboardContent(l10n: l10n);
@@ -338,6 +346,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildSettingsContent(AppLocalizations l10n) {
     return const UserSettingsScreen(hideMenu: true);
+  }
+
+  Widget _buildCertifiersContent() {
+    return CertifiersContent();
   }
 }
 
