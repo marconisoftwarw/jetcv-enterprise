@@ -64,6 +64,7 @@ class _CertifiersContentState extends State<CertifiersContent> {
           '🔍 Loading certifiers for legal entity: ${selectedLegalEntity.idLegalEntity}',
         );
 
+        // Usa direttamente la Edge Function per ottenere certificatori e utenti
         certifiers = await _certifierService.getCertifiersByLegalEntity(
           selectedLegalEntity.idLegalEntity,
         );

@@ -16,15 +16,20 @@ class CertifierService {
     'Authorization': 'Bearer $_apiKey',
   };
 
-  // Carica tutti i certificatori
+  // Carica tutti i certificatori tramite Edge Function
   Future<List<Certifier>> getAllCertifiers() async {
     try {
-      print('🔍 Getting all certifiers');
+      print('🔍 Getting all certifiers via Edge Function');
 
-      // Usa REST API per recuperare tutti i certificatori
+      // Usa Edge Function per recuperare tutti i certificatori
       final response = await http.get(
-        Uri.parse('$_baseUrl/rest/v1/certifier?select=*&order=created_at.desc'),
-        headers: _headers,
+        Uri.parse('$_baseUrl/functions/v1/get-legal-entity-users'),
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': _apiKey,
+          'Authorization': 'Bearer $_apiKey',
+          'Origin': 'http://localhost:8080',
+        },
       );
 
       print(
@@ -32,12 +37,24 @@ class CertifierService {
       );
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-        final certifiers = data
-            .map((item) => Certifier.fromJson(item))
-            .toList();
+        final data = json.decode(response.body);
+        final certifiersData = data['certifiers'] as List<dynamic>? ?? [];
+        
+        // Converti i dati della Edge Function nel formato Certifier
+        final certifiers = certifiersData.map((item) {
+          // Estrai i dati utente se presenti
+          final userData = item['user'];
+          return Certifier(
+            idCertifier: item['id_certifier'],
+            role: item['role'],
+            active: item['active'] ?? true,
+            idUser: item['id_user'],
+            idLegalEntity: item['id_legal_entity'],
+            // Aggiungi altri campi se necessario
+          );
+        }).toList();
 
-        print('✅ Found ${certifiers.length} total certifiers');
+        print('✅ Found ${certifiers.length} total certifiers via Edge Function');
         return certifiers;
       } else {
         print(
@@ -51,19 +68,24 @@ class CertifierService {
     }
   }
 
-  // Carica certificatori per legal entity
+  // Carica certificatori per legal entity tramite Edge Function
   Future<List<Certifier>> getCertifiersByLegalEntity(
     String legalEntityId,
   ) async {
     try {
       print('🔍 Getting certifiers for legal entity: $legalEntityId');
 
-      // Usa REST API per recuperare i certificatori
+      // Usa Edge Function per recuperare i certificatori
       final response = await http.get(
         Uri.parse(
-          '$_baseUrl/rest/v1/certifier?select=*&id_legal_entity=eq.$legalEntityId&order=created_at.desc',
+          '$_baseUrl/functions/v1/get-legal-entity-users?id_legal_entity=$legalEntityId',
         ),
-        headers: _headers,
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': _apiKey,
+          'Authorization': 'Bearer $_apiKey',
+          'Origin': 'http://localhost:8080',
+        },
       );
 
       print(
@@ -71,12 +93,22 @@ class CertifierService {
       );
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-        final certifiers = data
-            .map((item) => Certifier.fromJson(item))
-            .toList();
+        final data = json.decode(response.body);
+        final certifiersData = data['certifiers'] as List<dynamic>? ?? [];
+        
+        // Converti i dati della Edge Function nel formato Certifier
+        final certifiers = certifiersData.map((item) {
+          return Certifier(
+            idCertifier: item['id_certifier'],
+            role: item['role'],
+            active: item['active'] ?? true,
+            idUser: item['id_user'],
+            idLegalEntity: item['id_legal_entity'],
+            // Aggiungi altri campi se necessario
+          );
+        }).toList();
 
-        print('✅ Found ${certifiers.length} certifiers');
+        print('✅ Found ${certifiers.length} certifiers via Edge Function');
         return certifiers;
       } else {
         print(
@@ -319,6 +351,40 @@ class CertifierService {
     } catch (e) {
       print('Error getting certifier stats: $e');
       return {};
+    }
+  }
+
+  // Ottiene i certificatori e utenti della legal entity tramite Edge Function
+  Future<Map<String, dynamic>?> getLegalEntityUsers(String idLegalEntity) async {
+    try {
+      print('🔍 Getting legal entity users for ID: $idLegalEntity');
+
+      final response = await http.get(
+        Uri.parse('$_baseUrl/functions/v1/get-legal-entity-users?id_legal_entity=$idLegalEntity'),
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': _apiKey,
+          'Authorization': 'Bearer $_apiKey',
+          'Origin': 'http://localhost:8080',
+        },
+      );
+
+      print('📊 Legal entity users response: ${response.statusCode} - ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        print('✅ Legal entity users retrieved successfully');
+        print('📊 Found ${data['certifiers']?.length ?? 0} certifiers');
+        print('📊 Found ${data['certification_users']?.length ?? 0} certification users');
+        print('📊 Found ${data['users_distinct']?.length ?? 0} distinct users');
+        return data;
+      } else {
+        print('❌ Error getting legal entity users: ${response.statusCode} - ${response.body}');
+        return null;
+      }
+    } catch (e) {
+      print('❌ Error getting legal entity users: $e');
+      return null;
     }
   }
 }
