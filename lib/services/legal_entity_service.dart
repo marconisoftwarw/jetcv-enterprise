@@ -12,7 +12,9 @@ class LegalEntityService {
       print('🔍 Getting legal entities for user: $userId');
 
       final response = await http.get(
-        Uri.parse('$_baseUrl/functions/v1/get-legal-entities-by-user?id_user=$userId'),
+        Uri.parse(
+          '$_baseUrl/functions/v1/get-legal-entities-by-user?id_user=$userId',
+        ),
         headers: {
           'Content-Type': 'application/json',
           'apikey': _apiKey,
@@ -21,19 +23,25 @@ class LegalEntityService {
         },
       );
 
-      print('📊 Legal entities response: ${response.statusCode} - ${response.body}');
+      print(
+        '📊 Legal entities response: ${response.statusCode} - ${response.body}',
+      );
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['ok'] == true) {
           final legalEntitiesData = data['data'] as List<dynamic>? ?? [];
-          return legalEntitiesData.map((item) => LegalEntityInfo.fromJson(item)).toList();
+          return legalEntitiesData
+              .map((item) => LegalEntityInfo.fromJson(item))
+              .toList();
         } else {
           print('❌ Error in response: ${data['error']}');
           return [];
         }
       } else {
-        print('❌ Error getting legal entities: ${response.statusCode} - ${response.body}');
+        print(
+          '❌ Error getting legal entities: ${response.statusCode} - ${response.body}',
+        );
         return [];
       }
     } catch (e) {
@@ -43,7 +51,9 @@ class LegalEntityService {
   }
 
   // Ottiene una mappa di ID -> Nome per le legal entities
-  Future<Map<String, String>> getLegalEntityNamesMap(List<String> legalEntityIds) async {
+  Future<Map<String, String>> getLegalEntityNamesMap(
+    List<String> legalEntityIds,
+  ) async {
     try {
       print('🔍 Getting legal entity names for IDs: $legalEntityIds');
 

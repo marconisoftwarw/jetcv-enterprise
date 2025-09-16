@@ -358,7 +358,7 @@ class _CertifiersContentState extends State<CertifiersContent> {
                       ),
                     ),
                   ],
-                  
+
                   SizedBox(height: 8),
                   Row(
                     children: [
@@ -558,10 +558,6 @@ class _CertifiersContentState extends State<CertifiersContent> {
               // Informazioni del certificatore
               _buildDetailSection(l10n.getString('certifier_information'), [
                 _buildDetailRow(
-                  l10n.getString('role'),
-                  certifier.role ?? 'N/A',
-                ),
-                _buildDetailRow(
                   l10n.getString('status'),
                   certifier.active
                       ? l10n.getString('active')
@@ -577,11 +573,12 @@ class _CertifiersContentState extends State<CertifiersContent> {
                     l10n.getString('kyc_status'),
                     l10n.getString('kyc_failed'),
                   ),
-                 if (isAdmin)
-                   _buildDetailRow(
-                     l10n.getString('legal_entity_id'),
-                     certifierWithUser.legalEntityName ?? certifier.idLegalEntity,
-                   ),
+                if (isAdmin)
+                  _buildDetailRow(
+                    l10n.getString('legal_entity_id'),
+                    certifierWithUser.legalEntityName ??
+                        certifier.idLegalEntity,
+                  ),
               ]),
             ],
           ),

@@ -803,11 +803,12 @@ class _CertifiersScreenState extends State<CertifiersScreen>
                     l10n.getString('kyc_status'),
                     l10n.getString('kyc_failed'),
                   ),
-                 if (isAdmin)
-                   _buildDetailRow(
-                     l10n.getString('legal_entity_id'),
-                     certifierWithUser.legalEntityName ?? certifier.idLegalEntity,
-                   ),
+                if (isAdmin)
+                  _buildDetailRow(
+                    l10n.getString('legal_entity_id'),
+                    certifierWithUser.legalEntityName ??
+                        certifier.idLegalEntity,
+                  ),
               ]),
             ],
           ),

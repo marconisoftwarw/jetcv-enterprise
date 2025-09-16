@@ -12,11 +12,7 @@ class CertifierWithUser {
   final AppUser? user;
   final String? legalEntityName;
 
-  CertifierWithUser({
-    required this.certifier,
-    this.user,
-    this.legalEntityName,
-  });
+  CertifierWithUser({required this.certifier, this.user, this.legalEntityName});
 
   // Getters per accesso rapido ai dati utente
   String get fullName {
@@ -532,10 +528,10 @@ class CertifierService {
         }).toList();
 
         print('✅ Found ${certifiersWithUser.length} certifiers with user data');
-        
+
         // Recupera i nomi delle legal entities
         await _populateLegalEntityNames(certifiersWithUser);
-        
+
         return certifiersWithUser;
       } else {
         print(
@@ -594,7 +590,9 @@ class CertifierService {
   }
 
   // Popola i nomi delle legal entities per i certificatori
-  Future<void> _populateLegalEntityNames(List<CertifierWithUser> certifiersWithUser) async {
+  Future<void> _populateLegalEntityNames(
+    List<CertifierWithUser> certifiersWithUser,
+  ) async {
     try {
       // Raccoglie tutti gli ID delle legal entities uniche
       final legalEntityIds = certifiersWithUser
@@ -607,12 +605,14 @@ class CertifierService {
         return;
       }
 
-      print('🔍 Populating legal entity names for ${legalEntityIds.length} entities');
+      print(
+        '🔍 Populating legal entity names for ${legalEntityIds.length} entities',
+      );
 
       // Per ora, crea una mappa temporanea con gli ID
       // In futuro si potrebbe implementare una chiamata alla Edge Function
       final legalEntityNamesMap = <String, String>{};
-      
+
       for (final id in legalEntityIds) {
         legalEntityNamesMap[id] = 'Legal Entity ${id.substring(0, 8)}...';
       }
@@ -621,7 +621,7 @@ class CertifierService {
       for (final certifierWithUser in certifiersWithUser) {
         final legalEntityId = certifierWithUser.certifier.idLegalEntity;
         final legalEntityName = legalEntityNamesMap[legalEntityId];
-        
+
         if (legalEntityName != null) {
           // Crea un nuovo oggetto con il nome della legal entity
           final updatedCertifier = CertifierWithUser(
@@ -629,7 +629,7 @@ class CertifierService {
             user: certifierWithUser.user,
             legalEntityName: legalEntityName,
           );
-          
+
           // Sostituisce l'oggetto nella lista
           final index = certifiersWithUser.indexOf(certifierWithUser);
           if (index != -1) {
