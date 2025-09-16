@@ -59,7 +59,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
 
   // Legal entity information
   String? _legalEntityName;
-  List<Map<String, dynamic>> _legalEntities = [];
+  List<LegalEntityInfo> _legalEntities = [];
   String? _selectedLegalEntityId;
   bool _isLoadingLegalEntities = true;
 
@@ -175,17 +175,17 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
       print('🔍 Current user ID: $currentUserId');
 
       // Carica tutte le legal entities dell'utente
-      final legalEntities = await LegalEntityService.getLegalEntitiesByUser(
+      final legalEntityService = LegalEntityService();
+      final legalEntities = await legalEntityService.getLegalEntitiesByUser(
         currentUserId,
       );
 
-      if (legalEntities != null && legalEntities.isNotEmpty) {
+      if (legalEntities.isNotEmpty) {
         setState(() {
           _legalEntities = legalEntities;
           // Seleziona automaticamente la prima legal entity
-          _selectedLegalEntityId =
-              legalEntities.first['id_legal_entity'] as String?;
-          _legalEntityName = legalEntities.first['legal_name'] as String?;
+          _selectedLegalEntityId = legalEntities.first.idLegalEntity;
+          _legalEntityName = legalEntities.first.legalName;
           _isLoadingLegalEntities = false;
         });
         print('✅ Loaded ${legalEntities.length} legal entities for user');
@@ -436,8 +436,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                     ]
                   : _legalEntities.map((legalEntity) {
                       return DropdownMenuItem<String>(
-                        value: legalEntity['id_legal_entity'] as String,
-                        child: Text(legalEntity['legal_name'] as String),
+                        value: legalEntity.idLegalEntity,
+                        child: Text(legalEntity.displayName),
                       );
                     }).toList(),
               onChanged: _isLoadingLegalEntities
@@ -448,11 +448,10 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                           _selectedLegalEntityId = newValue;
                           // Trova il nome della legal entity selezionata
                           final selectedEntity = _legalEntities.firstWhere(
-                            (entity) => entity['id_legal_entity'] == newValue,
+                            (entity) => entity.idLegalEntity == newValue,
                             orElse: () => _legalEntities.first,
                           );
-                          _legalEntityName =
-                              selectedEntity['legal_name'] as String?;
+                          _legalEntityName = selectedEntity.legalName;
                           print('🔍 Selected legal entity: $_legalEntityName');
                         });
                       }

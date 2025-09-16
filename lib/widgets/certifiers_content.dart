@@ -358,17 +358,7 @@ class _CertifiersContentState extends State<CertifiersContent> {
                       ),
                     ),
                   ],
-                  if (isAdmin) ...[
-                    SizedBox(height: 4),
-                    Text(
-                      'Legal Entity: ${certifier.idLegalEntity}',
-                      style: TextStyle(
-                        fontSize: isTablet ? 12 : 10,
-                        color: AppTheme.textSecondary,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                  ],
+                  
                   SizedBox(height: 8),
                   Row(
                     children: [
@@ -587,11 +577,11 @@ class _CertifiersContentState extends State<CertifiersContent> {
                     l10n.getString('kyc_status'),
                     l10n.getString('kyc_failed'),
                   ),
-                if (isAdmin)
-                  _buildDetailRow(
-                    l10n.getString('legal_entity_id'),
-                    certifier.idLegalEntity,
-                  ),
+                 if (isAdmin)
+                   _buildDetailRow(
+                     l10n.getString('legal_entity_id'),
+                     certifierWithUser.legalEntityName ?? certifier.idLegalEntity,
+                   ),
               ]),
             ],
           ),

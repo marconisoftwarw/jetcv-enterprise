@@ -581,7 +581,7 @@ class _CertifiersScreenState extends State<CertifiersScreen>
                   if (isAdmin) ...[
                     SizedBox(height: 4),
                     Text(
-                      'Legal Entity: ${certifier.idLegalEntity}',
+                      'Legal Entity: ${certifierWithUser.legalEntityName ?? certifier.idLegalEntity}',
                       style: TextStyle(
                         fontSize: isTablet ? 12 : 10,
                         color: AppTheme.textSecondary,
@@ -803,11 +803,11 @@ class _CertifiersScreenState extends State<CertifiersScreen>
                     l10n.getString('kyc_status'),
                     l10n.getString('kyc_failed'),
                   ),
-                if (isAdmin)
-                  _buildDetailRow(
-                    l10n.getString('legal_entity_id'),
-                    certifier.idLegalEntity,
-                  ),
+                 if (isAdmin)
+                   _buildDetailRow(
+                     l10n.getString('legal_entity_id'),
+                     certifierWithUser.legalEntityName ?? certifier.idLegalEntity,
+                   ),
               ]),
             ],
           ),

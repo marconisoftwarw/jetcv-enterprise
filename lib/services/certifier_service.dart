@@ -1,6 +1,7 @@
 import '../models/certifier.dart';
 import '../models/user.dart';
 import '../services/email_service.dart';
+import '../services/legal_entity_service.dart';
 import '../config/app_config.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -9,8 +10,13 @@ import 'dart:convert';
 class CertifierWithUser {
   final Certifier certifier;
   final AppUser? user;
+  final String? legalEntityName;
 
-  CertifierWithUser({required this.certifier, this.user});
+  CertifierWithUser({
+    required this.certifier,
+    this.user,
+    this.legalEntityName,
+  });
 
   // Getters per accesso rapido ai dati utente
   String get fullName {
@@ -56,6 +62,7 @@ class CertifierWithUser {
 
 class CertifierService {
   final EmailService _emailService = EmailService();
+  final LegalEntityService _legalEntityService = LegalEntityService();
 
   static const String _baseUrl = AppConfig.supabaseUrl;
   static const String _apiKey = AppConfig.supabaseAnonKey;
@@ -520,10 +527,15 @@ class CertifierService {
               idLegalEntity: item['id_legal_entity'],
             ),
             user: user,
+            legalEntityName: null, // Sarà popolato dopo
           );
         }).toList();
 
         print('✅ Found ${certifiersWithUser.length} certifiers with user data');
+        
+        // Recupera i nomi delle legal entities
+        await _populateLegalEntityNames(certifiersWithUser);
+        
         return certifiersWithUser;
       } else {
         print(
@@ -578,6 +590,57 @@ class CertifierService {
     } catch (e) {
       print('❌ Error getting legal entity users: $e');
       return null;
+    }
+  }
+
+  // Popola i nomi delle legal entities per i certificatori
+  Future<void> _populateLegalEntityNames(List<CertifierWithUser> certifiersWithUser) async {
+    try {
+      // Raccoglie tutti gli ID delle legal entities uniche
+      final legalEntityIds = certifiersWithUser
+          .map((c) => c.certifier.idLegalEntity)
+          .toSet()
+          .toList();
+
+      if (legalEntityIds.isEmpty) {
+        print('⚠️ No legal entity IDs found');
+        return;
+      }
+
+      print('🔍 Populating legal entity names for ${legalEntityIds.length} entities');
+
+      // Per ora, crea una mappa temporanea con gli ID
+      // In futuro si potrebbe implementare una chiamata alla Edge Function
+      final legalEntityNamesMap = <String, String>{};
+      
+      for (final id in legalEntityIds) {
+        legalEntityNamesMap[id] = 'Legal Entity ${id.substring(0, 8)}...';
+      }
+
+      // Aggiorna i certificatori con i nomi delle legal entities
+      for (final certifierWithUser in certifiersWithUser) {
+        final legalEntityId = certifierWithUser.certifier.idLegalEntity;
+        final legalEntityName = legalEntityNamesMap[legalEntityId];
+        
+        if (legalEntityName != null) {
+          // Crea un nuovo oggetto con il nome della legal entity
+          final updatedCertifier = CertifierWithUser(
+            certifier: certifierWithUser.certifier,
+            user: certifierWithUser.user,
+            legalEntityName: legalEntityName,
+          );
+          
+          // Sostituisce l'oggetto nella lista
+          final index = certifiersWithUser.indexOf(certifierWithUser);
+          if (index != -1) {
+            certifiersWithUser[index] = updatedCertifier;
+          }
+        }
+      }
+
+      print('✅ Legal entity names populated');
+    } catch (e) {
+      print('❌ Error populating legal entity names: $e');
     }
   }
 }

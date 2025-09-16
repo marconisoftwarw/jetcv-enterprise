@@ -1,136 +1,91 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/app_config.dart';
 
 class LegalEntityService {
-  static Future<List<Map<String, dynamic>>?> getLegalEntitiesByUser(
-    String userId,
-  ) async {
+  static const String _baseUrl = AppConfig.supabaseUrl;
+  static const String _apiKey = AppConfig.supabaseAnonKey;
+
+  // Ottiene le legal entities per un utente
+  Future<List<LegalEntityInfo>> getLegalEntitiesByUser(String userId) async {
     try {
-      print('🔍 Fetching legal entities by user from Edge Function...');
-      print('🔍 User ID: $userId');
-
-      // Get the current user's access token
-      final session = Supabase.instance.client.auth.currentSession;
-      if (session == null) {
-        print('❌ No active session found');
-        return null;
-      }
-
-      final url = '${AppConfig.supabaseUrl}/functions/v1/get-legal-of-user';
-
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${session.accessToken}',
-          'apikey': AppConfig.supabaseAnonKey,
-        },
-        body: json.encode({'id_user': userId}),
-      );
-
-      print('🔍 Response status: ${response.statusCode}');
-      print('🔍 Response body: ${response.body}');
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (data['ok'] == true && data['data'] != null) {
-          print(
-            '✅ Successfully fetched ${data['count']} legal entities for user',
-          );
-          return List<Map<String, dynamic>>.from(data['data']);
-        } else {
-          print('❌ Error in response: ${data['message']}');
-          return null;
-        }
-      } else {
-        print('❌ HTTP error: ${response.statusCode} - ${response.body}');
-        return null;
-      }
-    } catch (e) {
-      print('❌ Error fetching legal entities by user: $e');
-      return null;
-    }
-  }
-
-  static Future<String?> getLegalEntityNameByUser(String userId) async {
-    try {
-      final legalEntities = await getLegalEntitiesByUser(userId);
-      if (legalEntities != null && legalEntities.isNotEmpty) {
-        // Prendi sempre la prima legal entity associata all'utente
-        // Se ce ne sono più di una, viene caricata sempre la prima
-        final legalEntity = legalEntities.first;
-        final legalName = legalEntity['legal_name'] as String?;
-        print(
-          '✅ Found legal entity name for user: $legalName (first of ${legalEntities.length} entities)',
-        );
-        return legalName;
-      } else {
-        print('❌ No legal entities found for user');
-        return null;
-      }
-    } catch (e) {
-      print('❌ Error getting legal entity name by user: $e');
-      return null;
-    }
-  }
-
-  // Metodo di fallback per compatibilità
-  static Future<List<Map<String, dynamic>>?> getLegalEntities() async {
-    try {
-      print('🔍 Fetching legal entities from Edge Function...');
-
-      // Get the current user's access token
-      final session = Supabase.instance.client.auth.currentSession;
-      if (session == null) {
-        print('❌ No active session found');
-        return null;
-      }
-
-      final url = '${AppConfig.supabaseUrl}/functions/v1/get-legal-entities';
+      print('🔍 Getting legal entities for user: $userId');
 
       final response = await http.get(
-        Uri.parse(url),
+        Uri.parse('$_baseUrl/functions/v1/get-legal-entities-by-user?id_user=$userId'),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${session.accessToken}',
+          'apikey': _apiKey,
+          'Authorization': 'Bearer $_apiKey',
+          'Origin': 'http://localhost:8080',
         },
       );
 
+      print('📊 Legal entities response: ${response.statusCode} - ${response.body}');
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        if (data['ok'] == true && data['data'] != null) {
-          print('✅ Successfully fetched ${data['count']} legal entities');
-          return List<Map<String, dynamic>>.from(data['data']);
+        if (data['ok'] == true) {
+          final legalEntitiesData = data['data'] as List<dynamic>? ?? [];
+          return legalEntitiesData.map((item) => LegalEntityInfo.fromJson(item)).toList();
         } else {
-          print('❌ Error in response: ${data['message']}');
-          return null;
+          print('❌ Error in response: ${data['error']}');
+          return [];
         }
       } else {
-        print('❌ HTTP error: ${response.statusCode} - ${response.body}');
-        return null;
+        print('❌ Error getting legal entities: ${response.statusCode} - ${response.body}');
+        return [];
       }
     } catch (e) {
-      print('❌ Error fetching legal entities: $e');
-      return null;
+      print('❌ Error getting legal entities: $e');
+      return [];
     }
   }
 
-  static Future<String?> getLegalEntityName(String legalEntityId) async {
+  // Ottiene una mappa di ID -> Nome per le legal entities
+  Future<Map<String, String>> getLegalEntityNamesMap(List<String> legalEntityIds) async {
     try {
-      final legalEntities = await getLegalEntities();
-      if (legalEntities != null) {
-        final legalEntity = legalEntities.firstWhere(
-          (entity) => entity['id_legal_entity'] == legalEntityId,
-          orElse: () => {},
-        );
-        return legalEntity['legal_name'] as String?;
-      }
-      return null;
+      print('🔍 Getting legal entity names for IDs: $legalEntityIds');
+
+      // Per ora, restituisco una mappa vuota
+      // In futuro si potrebbe creare una Edge Function specifica per questo
+      return {};
     } catch (e) {
-      print('❌ Error getting legal entity name: $e');
-      return null;
+      print('❌ Error getting legal entity names: $e');
+      return {};
+    }
+  }
+}
+
+class LegalEntityInfo {
+  final String idLegalEntity;
+  final String? legalName;
+  final String? identifierCode;
+  final String? status;
+
+  LegalEntityInfo({
+    required this.idLegalEntity,
+    this.legalName,
+    this.identifierCode,
+    this.status,
+  });
+
+  factory LegalEntityInfo.fromJson(Map<String, dynamic> json) {
+    return LegalEntityInfo(
+      idLegalEntity: json['id_legal_entity'] ?? '',
+      legalName: json['legal_name'],
+      identifierCode: json['identifier_code'],
+      status: json['status'],
+    );
+  }
+
+  String get displayName {
+    if (legalName?.isNotEmpty == true) {
+      return legalName!;
+    } else if (identifierCode?.isNotEmpty == true) {
+      return identifierCode!;
+    } else {
+      return 'Legal Entity ${idLegalEntity.substring(0, 8)}...';
     }
   }
 }
