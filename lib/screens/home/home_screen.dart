@@ -444,7 +444,6 @@ class _DashboardContent extends StatelessWidget {
                 _buildCertificationsChart(context, l10n),
 
                 const SizedBox(height: 40),
-
               ],
             ),
           ),
