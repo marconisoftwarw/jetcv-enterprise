@@ -234,16 +234,18 @@ class AppUser {
             )
           : null,
       dateOfBirth: json['dateOfBirth'] != null
-          ? DateTime.parse(json['dateOfBirth'])
+          ? DateTime.tryParse(json['dateOfBirth'])
           : null,
       address: json['address'],
       city: json['city'],
       state: json['state'],
       postalCode: json['postalCode'],
       countryCode: json['countryCode'],
-      createdAt: DateTime.parse(json['createdAt']),
+      createdAt: json['createdAt'] != null 
+          ? DateTime.tryParse(json['createdAt']) ?? DateTime.now()
+          : DateTime.now(),
       updatedAt: json['updatedAt'] != null
-          ? DateTime.parse(json['updatedAt'])
+          ? DateTime.tryParse(json['updatedAt'])
           : null,
     );
 

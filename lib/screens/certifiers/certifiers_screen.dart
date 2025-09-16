@@ -19,7 +19,7 @@ class CertifiersScreen extends StatefulWidget {
 class _CertifiersScreenState extends State<CertifiersScreen>
     with TickerProviderStateMixin {
   final CertifierService _certifierService = CertifierService();
-  List<Certifier> _certifiers = [];
+  List<CertifierWithUser> _certifiersWithUser = [];
   bool _isLoading = true;
   String? _errorMessage;
   late AnimationController _loadingAnimationController;
@@ -70,14 +70,15 @@ class _CertifiersScreenState extends State<CertifiersScreen>
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final isAdmin = authProvider.userType == AppUserType.admin;
 
-      List<Certifier> certifiers;
+      List<CertifierWithUser> certifiersWithUser;
 
       if (isAdmin) {
-        // Admin vede tutti i certificatori
+        // Admin vede tutti i certificatori - per ora usa il metodo base
         print('🔍 Loading all certifiers for admin');
-        certifiers = await _certifierService.getAllCertifiers();
+        final certifiers = await _certifierService.getAllCertifiers();
+        certifiersWithUser = certifiers.map((c) => CertifierWithUser(certifier: c)).toList();
       } else {
-        // Legal entity vede solo i propri certificatori
+        // Legal entity vede solo i propri certificatori con dati utente
         final legalEntityProvider = Provider.of<LegalEntityProvider>(
           context,
           listen: false,
@@ -93,17 +94,17 @@ class _CertifiersScreenState extends State<CertifiersScreen>
         }
 
         print(
-          '🔍 Loading certifiers for legal entity: ${selectedLegalEntity.idLegalEntity}',
+          '🔍 Loading certifiers with user data for legal entity: ${selectedLegalEntity.idLegalEntity}',
         );
 
-        // Usa direttamente la Edge Function per ottenere certificatori e utenti
-        certifiers = await _certifierService.getCertifiersByLegalEntity(
+        // Usa la nuova Edge Function per ottenere certificatori con dati utente
+        certifiersWithUser = await _certifierService.getCertifiersWithUserByLegalEntity(
           selectedLegalEntity.idLegalEntity,
         );
       }
 
       setState(() {
-        _certifiers = certifiers;
+        _certifiersWithUser = certifiersWithUser;
         _isLoading = false;
       });
     } catch (e) {
@@ -186,7 +187,7 @@ class _CertifiersScreenState extends State<CertifiersScreen>
       );
     }
 
-    if (_certifiers.isEmpty) {
+    if (_certifiersWithUser.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -221,12 +222,12 @@ class _CertifiersScreenState extends State<CertifiersScreen>
 
     return ListView.separated(
       padding: EdgeInsets.all(isTablet ? 24 : 16),
-      itemCount: _certifiers.length,
+      itemCount: _certifiersWithUser.length,
       separatorBuilder: (context, index) =>
           SizedBox(height: isTablet ? 16 : 12),
       itemBuilder: (context, index) {
-        final certifier = _certifiers[index];
-        return _buildCertifierCard(certifier, l10n, isTablet);
+        final certifierWithUser = _certifiersWithUser[index];
+        return _buildCertifierCard(certifierWithUser, l10n, isTablet);
       },
     );
   }
@@ -438,10 +439,12 @@ class _CertifiersScreenState extends State<CertifiersScreen>
   }
 
   Widget _buildCertifierCard(
-    Certifier certifier,
+    CertifierWithUser certifierWithUser,
     AppLocalizations l10n,
     bool isTablet,
   ) {
+    final certifier = certifierWithUser.certifier;
+    final user = certifierWithUser.user;
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final isAdmin = authProvider.userType == AppUserType.admin;
 
@@ -460,13 +463,26 @@ class _CertifiersScreenState extends State<CertifiersScreen>
                     : AppTheme.neutralGrey.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(isTablet ? 30 : 25),
               ),
-              child: Icon(
-                Icons.person,
-                color: certifier.active
-                    ? AppTheme.primaryBlue
-                    : AppTheme.textSecondary,
-                size: isTablet ? 28 : 24,
-              ),
+              child: user != null
+                  ? Center(
+                      child: Text(
+                        certifierWithUser.initials,
+                        style: TextStyle(
+                          color: certifier.active
+                              ? AppTheme.primaryBlue
+                              : AppTheme.textSecondary,
+                          fontSize: isTablet ? 18 : 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    )
+                  : Icon(
+                      Icons.person,
+                      color: certifier.active
+                          ? AppTheme.primaryBlue
+                          : AppTheme.textSecondary,
+                      size: isTablet ? 28 : 24,
+                    ),
             ),
             SizedBox(width: isTablet ? 16 : 12),
 
@@ -475,14 +491,60 @@ class _CertifiersScreenState extends State<CertifiersScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    certifier.idUser ?? 'Invito in sospeso',
-                    style: TextStyle(
-                      fontSize: isTablet ? 16 : 14,
-                      fontWeight: FontWeight.w600,
-                      color: AppTheme.primaryBlack,
+                  // First Name - sempre mostrato
+                  if (user != null) ...[
+                    Text(
+                      user.firstName?.isNotEmpty == true ? user.firstName! : 'N/A',
+                      style: TextStyle(
+                        fontSize: isTablet ? 16 : 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.primaryBlack,
+                      ),
                     ),
-                  ),
+                    // Last Name - sempre mostrato
+                    Text(
+                      user.lastName?.isNotEmpty == true && user.lastName != 'N/A' ? user.lastName! : 'N/A',
+                      style: TextStyle(
+                        fontSize: isTablet ? 16 : 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.primaryBlack,
+                      ),
+                    ),
+                    // Email - sempre mostrata
+                    SizedBox(height: 2),
+                    Text(
+                      user.email?.isNotEmpty == true ? user.email! : 'N/A',
+                      style: TextStyle(
+                        fontSize: isTablet ? 13 : 11,
+                        color: AppTheme.textSecondary,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ] else ...[
+                    Text(
+                      certifier.idUser != null ? 'User ID: ${certifier.idUser}' : 'Invito in sospeso',
+                      style: TextStyle(
+                        fontSize: isTablet ? 16 : 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.primaryBlack,
+                      ),
+                    ),
+                  ],
+                  
+                  
+                  // Data di nascita
+                  if (user != null && user.dateOfBirth != null) ...[
+                    SizedBox(height: 2),
+                    Text(
+                      'Nato il ${certifierWithUser.dateOfBirthFormatted}',
+                      style: TextStyle(
+                        fontSize: isTablet ? 12 : 10,
+                        color: AppTheme.textSecondary,
+                      ),
+                    ),
+                  ],
+                  
+                  // Ruolo
                   if (certifier.role != null) ...[
                     SizedBox(height: 4),
                     Text(
@@ -490,6 +552,20 @@ class _CertifiersScreenState extends State<CertifiersScreen>
                       style: TextStyle(
                         fontSize: isTablet ? 14 : 12,
                         color: AppTheme.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                  
+                  // Città
+                  if (user != null && user.city != null) ...[
+                    SizedBox(height: 2),
+                    Text(
+                      user.city!,
+                      style: TextStyle(
+                        fontSize: isTablet ? 12 : 10,
+                        color: AppTheme.textSecondary,
+                        fontStyle: FontStyle.italic,
                       ),
                     ),
                   ],
@@ -589,7 +665,7 @@ class _CertifiersScreenState extends State<CertifiersScreen>
                 color: AppTheme.textSecondary,
                 size: isTablet ? 24 : 20,
               ),
-              onPressed: () => _showCertifierActions(certifier),
+              onPressed: () => _showCertifierActions(certifierWithUser),
             ),
           ],
         ),
@@ -597,7 +673,8 @@ class _CertifiersScreenState extends State<CertifiersScreen>
     );
   }
 
-  void _showCertifierActions(Certifier certifier) {
+  void _showCertifierActions(CertifierWithUser certifierWithUser) {
+    final certifier = certifierWithUser.certifier;
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(

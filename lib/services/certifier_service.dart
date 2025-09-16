@@ -1,8 +1,54 @@
 import '../models/certifier.dart';
+import '../models/user.dart';
 import '../services/email_service.dart';
 import '../config/app_config.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+// Classe estesa per certificatori con dati utente
+class CertifierWithUser {
+  final Certifier certifier;
+  final AppUser? user;
+
+  CertifierWithUser({
+    required this.certifier,
+    this.user,
+  });
+
+  // Getters per accesso rapido ai dati utente
+  String get fullName {
+    if (user == null) return 'Nome non disponibile';
+    
+    // Mostra sempre firstName e lastName separatamente se disponibili
+    String firstName = user!.firstName?.isNotEmpty == true ? user!.firstName! : '';
+    String lastName = user!.lastName?.isNotEmpty == true && user!.lastName != 'N/A' ? user!.lastName! : '';
+    
+    // Combina firstName e lastName
+    if (firstName.isNotEmpty && lastName.isNotEmpty) {
+      return '$firstName $lastName';
+    } else if (firstName.isNotEmpty) {
+      return firstName;
+    } else if (lastName.isNotEmpty) {
+      return lastName;
+    }
+    
+    // Se firstName e lastName sono entrambi null o vuoti, usa l'email
+    if (user!.email?.isNotEmpty == true) {
+      return user!.email!;
+    }
+    
+    // Fallback finale
+    return 'User ID: ${user!.idUser}';
+  }
+  String get email => user?.email ?? 'Email non disponibile';
+  DateTime? get dateOfBirth => user?.dateOfBirth;
+  String get dateOfBirthFormatted {
+    if (dateOfBirth == null) return 'Data di nascita non disponibile';
+    return '${dateOfBirth!.day.toString().padLeft(2, '0')}/${dateOfBirth!.month.toString().padLeft(2, '0')}/${dateOfBirth!.year}';
+  }
+  String get initials => user?.initials ?? 'N/A';
+  bool get hasUserData => user != null;
+}
 
 class CertifierService {
   final EmailService _emailService = EmailService();
@@ -44,6 +90,8 @@ class CertifierService {
         final certifiers = certifiersData.map((item) {
           // Estrai i dati utente se presenti
           final userData = item['user'];
+          print('🔍 User data for certifier ${item['id_certifier']}: $userData');
+          
           return Certifier(
             idCertifier: item['id_certifier'],
             role: item['role'],
@@ -353,6 +401,125 @@ class CertifierService {
     } catch (e) {
       print('Error getting certifier stats: $e');
       return {};
+    }
+  }
+
+  // Ottiene certificatori con dati utente per legal entity
+  Future<List<CertifierWithUser>> getCertifiersWithUserByLegalEntity(
+    String legalEntityId,
+  ) async {
+    try {
+      print('🔍 Getting certifiers with user data for legal entity: $legalEntityId');
+
+      String url;
+      if (legalEntityId == 'all') {
+        // Per admin, chiama senza parametri per ottenere tutti i certificatori
+        url = '$_baseUrl/functions/v1/get-user-legal-entity';
+      } else {
+        // Per legal entity specifica
+        url = '$_baseUrl/functions/v1/get-user-legal-entity?id_legal_entity=$legalEntityId';
+      }
+
+      // Usa Edge Function per recuperare i certificatori con dati utente
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': _apiKey,
+          'Authorization': 'Bearer $_apiKey',
+          'Origin': 'http://localhost:8080',
+        },
+      );
+
+      print(
+        '📊 Certifiers with user data response: ${response.statusCode} - ${response.body}',
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        print('🔍 Full Edge Function response: $data');
+        final certifiersData = data['certifiers'] as List<dynamic>? ?? [];
+        print('🔍 Certifiers data extracted: $certifiersData');
+        
+            // Converti i dati della Edge Function nel formato CertifierWithUser
+            final certifiersWithUser = certifiersData.map((item) {
+              print('🔍 Processing certifier item: $item');
+              final userData = item['user'];
+              print('🔍 User data from item: $userData');
+              AppUser? user;
+              
+              if (userData != null) {
+                try {
+                  // Debug dei dati utente prima del parsing
+                  print('🔍 User data keys: ${userData.keys.toList()}');
+                  print('🔍 User data idUser: ${userData['idUser']}');
+                  print('🔍 User data fullName: ${userData['fullName']}');
+                  print('🔍 User data firstName: ${userData['firstName']}');
+                  print('🔍 User data lastName: ${userData['lastName']}');
+                  print('🔍 User data email: ${userData['email']}');
+                  print('🔍 User data dateOfBirth: ${userData['dateOfBirth']}');
+                  
+                  user = AppUser.fromJson(userData);
+                  print('✅ Parsed user data successfully:');
+                  print('   - idUser: ${user.idUser}');
+                  print('   - fullName: ${user.fullName}');
+                  print('   - firstName: ${user.firstName}');
+                  print('   - lastName: ${user.lastName}');
+                  print('   - email: ${user.email}');
+                  print('   - dateOfBirth: ${user.dateOfBirth}');
+                } catch (e) {
+                  print('❌ Error parsing user data: $e');
+                  print('❌ Raw user data was: $userData');
+                  
+                  // Fallback: crea un oggetto AppUser minimo
+                  try {
+                    user = AppUser(
+                      idUser: userData['idUser'] ?? 'unknown',
+                      idUserHash: userData['idUserHash'] ?? 'unknown',
+                      fullName: userData['fullName'],
+                      firstName: userData['firstName'],
+                      lastName: userData['lastName'],
+                      email: userData['email'],
+                      dateOfBirth: userData['dateOfBirth'] != null 
+                          ? DateTime.tryParse(userData['dateOfBirth']) 
+                          : null,
+                      createdAt: userData['createdAt'] != null 
+                          ? DateTime.tryParse(userData['createdAt']) ?? DateTime.now()
+                          : DateTime.now(),
+                    );
+                    print('✅ Created fallback user: ${user.fullName} (${user.email})');
+                  } catch (fallbackError) {
+                    print('❌ Fallback also failed: $fallbackError');
+                    user = null;
+                  }
+                }
+              } else {
+                print('⚠️ No user data found for certifier ${item['id_certifier']}');
+              }
+          
+          return CertifierWithUser(
+            certifier: Certifier(
+              idCertifier: item['id_certifier'],
+              role: item['role'],
+              active: item['active'] ?? true,
+              idUser: item['id_user'],
+              idLegalEntity: item['id_legal_entity'],
+            ),
+            user: user,
+          );
+        }).toList();
+
+        print('✅ Found ${certifiersWithUser.length} certifiers with user data');
+        return certifiersWithUser;
+      } else {
+        print(
+          '❌ Error getting certifiers with user data: ${response.statusCode} - ${response.body}',
+        );
+        return [];
+      }
+    } catch (e) {
+      print('❌ Error getting certifiers with user data: $e');
+      return [];
     }
   }
 
