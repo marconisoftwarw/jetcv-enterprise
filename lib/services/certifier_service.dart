@@ -23,7 +23,7 @@ class CertifierService {
 
       // Usa Edge Function per recuperare tutti i certificatori
       final response = await http.get(
-        Uri.parse('$_baseUrl/functions/v1/get-legal-entity-users'),
+        Uri.parse('$_baseUrl/functions/v1/get-user-legal-entity'),
         headers: {
           'Content-Type': 'application/json',
           'apikey': _apiKey,
@@ -39,7 +39,7 @@ class CertifierService {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final certifiersData = data['certifiers'] as List<dynamic>? ?? [];
-        
+
         // Converti i dati della Edge Function nel formato Certifier
         final certifiers = certifiersData.map((item) {
           // Estrai i dati utente se presenti
@@ -54,7 +54,9 @@ class CertifierService {
           );
         }).toList();
 
-        print('✅ Found ${certifiers.length} total certifiers via Edge Function');
+        print(
+          '✅ Found ${certifiers.length} total certifiers via Edge Function',
+        );
         return certifiers;
       } else {
         print(
@@ -78,7 +80,7 @@ class CertifierService {
       // Usa Edge Function per recuperare i certificatori
       final response = await http.get(
         Uri.parse(
-          '$_baseUrl/functions/v1/get-legal-entity-users?id_legal_entity=$legalEntityId',
+          '$_baseUrl/functions/v1/get-user-legal-entity?id_legal_entity=$legalEntityId',
         ),
         headers: {
           'Content-Type': 'application/json',
@@ -95,7 +97,7 @@ class CertifierService {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final certifiersData = data['certifiers'] as List<dynamic>? ?? [];
-        
+
         // Converti i dati della Edge Function nel formato Certifier
         final certifiers = certifiersData.map((item) {
           return Certifier(
@@ -355,12 +357,16 @@ class CertifierService {
   }
 
   // Ottiene i certificatori e utenti della legal entity tramite Edge Function
-  Future<Map<String, dynamic>?> getLegalEntityUsers(String idLegalEntity) async {
+  Future<Map<String, dynamic>?> getLegalEntityUsers(
+    String idLegalEntity,
+  ) async {
     try {
       print('🔍 Getting legal entity users for ID: $idLegalEntity');
 
       final response = await http.get(
-        Uri.parse('$_baseUrl/functions/v1/get-legal-entity-users?id_legal_entity=$idLegalEntity'),
+        Uri.parse(
+          '$_baseUrl/functions/v1/get-user-legal-entity?id_legal_entity=$idLegalEntity',
+        ),
         headers: {
           'Content-Type': 'application/json',
           'apikey': _apiKey,
@@ -369,17 +375,23 @@ class CertifierService {
         },
       );
 
-      print('📊 Legal entity users response: ${response.statusCode} - ${response.body}');
+      print(
+        '📊 Legal entity users response: ${response.statusCode} - ${response.body}',
+      );
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         print('✅ Legal entity users retrieved successfully');
         print('📊 Found ${data['certifiers']?.length ?? 0} certifiers');
-        print('📊 Found ${data['certification_users']?.length ?? 0} certification users');
+        print(
+          '📊 Found ${data['certification_users']?.length ?? 0} certification users',
+        );
         print('📊 Found ${data['users_distinct']?.length ?? 0} distinct users');
         return data;
       } else {
-        print('❌ Error getting legal entity users: ${response.statusCode} - ${response.body}');
+        print(
+          '❌ Error getting legal entity users: ${response.statusCode} - ${response.body}',
+        );
         return null;
       }
     } catch (e) {
