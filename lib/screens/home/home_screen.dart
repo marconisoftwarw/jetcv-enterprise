@@ -445,17 +445,6 @@ class _DashboardContent extends StatelessWidget {
 
                 const SizedBox(height: 40),
 
-                // Recent activity
-                Text(
-                  l10n.getString('recent_activity'),
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: AppTheme.textPrimary,
-                    letterSpacing: -0.2,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                _buildRecentActivityList(context),
               ],
             ),
           ),
