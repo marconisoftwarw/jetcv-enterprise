@@ -76,7 +76,9 @@ class _CertifiersScreenState extends State<CertifiersScreen>
         // Admin vede tutti i certificatori - per ora usa il metodo base
         print('🔍 Loading all certifiers for admin');
         final certifiers = await _certifierService.getAllCertifiers();
-        certifiersWithUser = certifiers.map((c) => CertifierWithUser(certifier: c)).toList();
+        certifiersWithUser = certifiers
+            .map((c) => CertifierWithUser(certifier: c))
+            .toList();
       } else {
         // Legal entity vede solo i propri certificatori con dati utente
         final legalEntityProvider = Provider.of<LegalEntityProvider>(
@@ -98,9 +100,10 @@ class _CertifiersScreenState extends State<CertifiersScreen>
         );
 
         // Usa la nuova Edge Function per ottenere certificatori con dati utente
-        certifiersWithUser = await _certifierService.getCertifiersWithUserByLegalEntity(
-          selectedLegalEntity.idLegalEntity,
-        );
+        certifiersWithUser = await _certifierService
+            .getCertifiersWithUserByLegalEntity(
+              selectedLegalEntity.idLegalEntity,
+            );
       }
 
       setState(() {
@@ -494,7 +497,9 @@ class _CertifiersScreenState extends State<CertifiersScreen>
                   // First Name - sempre mostrato
                   if (user != null) ...[
                     Text(
-                      user.firstName?.isNotEmpty == true ? user.firstName! : 'N/A',
+                      user.firstName?.isNotEmpty == true
+                          ? user.firstName!
+                          : 'N/A',
                       style: TextStyle(
                         fontSize: isTablet ? 16 : 14,
                         fontWeight: FontWeight.w600,
@@ -503,7 +508,10 @@ class _CertifiersScreenState extends State<CertifiersScreen>
                     ),
                     // Last Name - sempre mostrato
                     Text(
-                      user.lastName?.isNotEmpty == true && user.lastName != 'N/A' ? user.lastName! : 'N/A',
+                      user.lastName?.isNotEmpty == true &&
+                              user.lastName != 'N/A'
+                          ? user.lastName!
+                          : 'N/A',
                       style: TextStyle(
                         fontSize: isTablet ? 16 : 14,
                         fontWeight: FontWeight.w600,
@@ -522,7 +530,9 @@ class _CertifiersScreenState extends State<CertifiersScreen>
                     ),
                   ] else ...[
                     Text(
-                      certifier.idUser != null ? 'User ID: ${certifier.idUser}' : 'Invito in sospeso',
+                      certifier.idUser != null
+                          ? 'User ID: ${certifier.idUser}'
+                          : 'Invito in sospeso',
                       style: TextStyle(
                         fontSize: isTablet ? 16 : 14,
                         fontWeight: FontWeight.w600,
@@ -530,8 +540,7 @@ class _CertifiersScreenState extends State<CertifiersScreen>
                       ),
                     ),
                   ],
-                  
-                  
+
                   // Data di nascita
                   if (user != null && user.dateOfBirth != null) ...[
                     SizedBox(height: 2),
@@ -543,7 +552,7 @@ class _CertifiersScreenState extends State<CertifiersScreen>
                       ),
                     ),
                   ],
-                  
+
                   // Ruolo
                   if (certifier.role != null) ...[
                     SizedBox(height: 4),
@@ -556,7 +565,7 @@ class _CertifiersScreenState extends State<CertifiersScreen>
                       ),
                     ),
                   ],
-                  
+
                   // Città
                   if (user != null && user.city != null) ...[
                     SizedBox(height: 2),

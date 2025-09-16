@@ -241,7 +241,7 @@ class AppUser {
       state: json['state'],
       postalCode: json['postalCode'],
       countryCode: json['countryCode'],
-      createdAt: json['createdAt'] != null 
+      createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt']) ?? DateTime.now()
           : DateTime.now(),
       updatedAt: json['updatedAt'] != null

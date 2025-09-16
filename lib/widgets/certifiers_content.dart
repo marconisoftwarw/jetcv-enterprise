@@ -46,7 +46,8 @@ class _CertifiersContentState extends State<CertifiersContent> {
       if (isAdmin) {
         // Admin vede tutti i certificatori con dati utente
         print('🔍 Loading all certifiers with user data for admin');
-        certifiersWithUser = await _certifierService.getCertifiersWithUserByLegalEntity('all');
+        certifiersWithUser = await _certifierService
+            .getCertifiersWithUserByLegalEntity('all');
       } else {
         // Legal entity vede solo i propri certificatori con dati utente
         final selectedLegalEntity = legalEntityProvider.selectedLegalEntity;
@@ -65,9 +66,10 @@ class _CertifiersContentState extends State<CertifiersContent> {
         );
 
         // Usa la nuova Edge Function per ottenere certificatori con dati utente
-        certifiersWithUser = await _certifierService.getCertifiersWithUserByLegalEntity(
-          selectedLegalEntity.idLegalEntity,
-        );
+        certifiersWithUser = await _certifierService
+            .getCertifiersWithUserByLegalEntity(
+              selectedLegalEntity.idLegalEntity,
+            );
       }
 
       setState(() {
@@ -219,7 +221,7 @@ class _CertifiersContentState extends State<CertifiersContent> {
     final user = certifierWithUser.user;
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final isAdmin = authProvider.userType == AppUserType.admin;
-    
+
     // Debug logging
     print('🔍 Building certifier card:');
     print('   - Certifier ID: ${certifier.idCertifier}');
@@ -277,7 +279,9 @@ class _CertifiersContentState extends State<CertifiersContent> {
                   // First Name - sempre mostrato
                   if (user != null) ...[
                     Text(
-                      user.firstName?.isNotEmpty == true ? user.firstName! : 'N/A',
+                      user.firstName?.isNotEmpty == true
+                          ? user.firstName!
+                          : 'N/A',
                       style: TextStyle(
                         fontSize: isTablet ? 16 : 14,
                         fontWeight: FontWeight.w600,
@@ -286,7 +290,10 @@ class _CertifiersContentState extends State<CertifiersContent> {
                     ),
                     // Last Name - sempre mostrato
                     Text(
-                      user.lastName?.isNotEmpty == true && user.lastName != 'N/A' ? user.lastName! : 'N/A',
+                      user.lastName?.isNotEmpty == true &&
+                              user.lastName != 'N/A'
+                          ? user.lastName!
+                          : 'N/A',
                       style: TextStyle(
                         fontSize: isTablet ? 16 : 14,
                         fontWeight: FontWeight.w600,
@@ -313,7 +320,7 @@ class _CertifiersContentState extends State<CertifiersContent> {
                       ),
                     ),
                   ],
-                  
+
                   // Data di nascita
                   if (user != null && user.dateOfBirth != null) ...[
                     SizedBox(height: 2),
@@ -325,7 +332,7 @@ class _CertifiersContentState extends State<CertifiersContent> {
                       ),
                     ),
                   ],
-                  
+
                   // Ruolo
                   if (certifier.role != null) ...[
                     SizedBox(height: 4),
@@ -338,7 +345,7 @@ class _CertifiersContentState extends State<CertifiersContent> {
                       ),
                     ),
                   ],
-                  
+
                   // Città
                   if (user != null && user.city != null) ...[
                     SizedBox(height: 2),
