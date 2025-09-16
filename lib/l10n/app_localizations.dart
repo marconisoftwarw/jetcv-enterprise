@@ -825,7 +825,7 @@ class AppLocalizations {
       'recent_activity': 'Recent Activity',
       'last_6_months': 'Last 6 months',
       'this_month': 'This month',
-      'total': 'Total',
+
       'monthly_average': 'Monthly Average',
       'growth': 'Growth',
       'change_password': 'Change Password',
@@ -1491,7 +1491,7 @@ class AppLocalizations {
       'recent_activity': 'Activité Récente',
       'last_6_months': '6 Derniers Mois',
       'this_month': 'Ce Mois',
-      'total': 'Total',
+
       'monthly_average': 'Moyenne Mensuelle',
       'growth': 'Croissance',
       'change_password': 'Changer le Mot de Passe',

@@ -392,36 +392,36 @@ class _CertifiersContentState extends State<CertifiersContent> {
                   // TODO: Navigate to certifier details
                 },
               ),
-            if (certifier.invitationToken != null) ...[
+              if (certifier.invitationToken != null) ...[
+                ListTile(
+                  leading: Icon(Icons.send, color: AppTheme.primaryBlue),
+                  title: Text(l10n.getString('resend_invitation')),
+                  onTap: () {
+                    Navigator.pop(context);
+                    // TODO: Resend invitation
+                  },
+                ),
+              ],
               ListTile(
-                leading: Icon(Icons.send, color: AppTheme.primaryBlue),
-                title: Text(l10n.getString('resend_invitation')),
+                leading: Icon(
+                  certifier.active ? Icons.person_off : Icons.person,
+                  color: certifier.active
+                      ? AppTheme.errorRed
+                      : AppTheme.successGreen,
+                ),
+                title: Text(
+                  certifier.active
+                      ? l10n.getString('deactivate')
+                      : l10n.getString('activate'),
+                ),
                 onTap: () {
                   Navigator.pop(context);
-                  // TODO: Resend invitation
+                  // TODO: Toggle active status
                 },
               ),
             ],
-            ListTile(
-              leading: Icon(
-                certifier.active ? Icons.person_off : Icons.person,
-                color: certifier.active
-                    ? AppTheme.errorRed
-                    : AppTheme.successGreen,
-              ),
-              title: Text(
-                certifier.active
-                    ? l10n.getString('deactivate')
-                    : l10n.getString('activate'),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                // TODO: Toggle active status
-              },
-            ),
-          ],
-        ),
-      );
+          ),
+        );
       },
     );
   }

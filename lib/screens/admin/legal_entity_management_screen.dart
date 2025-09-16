@@ -119,7 +119,9 @@ class _LegalEntityManagementScreenState
                 },
               ),
               title: Text(
-                'Gestione Entità Legali',
+                AppLocalizations.of(
+                  context,
+                ).getString('legal_entity_management'),
                 style: TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.bold,
@@ -273,7 +275,9 @@ class _LegalEntityManagementScreenState
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  AppLocalizations.of(context).getString('loading_legal_entities'),
+                  AppLocalizations.of(
+                    context,
+                  ).getString('loading_legal_entities'),
                   style: TextStyle(
                     color: Colors.grey[700],
                     fontSize: 16,
@@ -311,7 +315,7 @@ class _LegalEntityManagementScreenState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Gestione Entità Legali',
+              AppLocalizations.of(context).getString('legal_entity_management'),
               style: TextStyle(
                 color: Colors.black,
                 fontWeight: FontWeight.w700,
@@ -320,7 +324,7 @@ class _LegalEntityManagementScreenState
             ),
             const SizedBox(height: 4),
             Text(
-              'Gestisci e monitora le entità registrate',
+              AppLocalizations.of(context).getString('manage_monitor_entities'),
               style: TextStyle(color: Colors.grey[600], fontSize: 14),
             ),
           ],
@@ -379,7 +383,7 @@ class _LegalEntityManagementScreenState
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      'Aggiornamento dati in corso...',
+                      AppLocalizations.of(context).getString('updating_data'),
                       style: TextStyle(
                         color: Colors.blue[700],
                         fontSize: 14,
@@ -413,7 +417,9 @@ class _LegalEntityManagementScreenState
                         child: TextField(
                           controller: _searchController,
                           decoration: InputDecoration(
-                            hintText: 'Cerca per nome, email o codice...',
+                            hintText: AppLocalizations.of(
+                              context,
+                            ).getString('search_placeholder'),
                             hintStyle: TextStyle(color: Colors.grey[500]),
                             prefixIcon: Icon(
                               Icons.search,
@@ -499,7 +505,9 @@ class _LegalEntityManagementScreenState
                       child: DropdownButton<String?>(
                         value: _selectedStatus,
                         hint: Text(
-                          'Tutti gli Stati',
+                          AppLocalizations.of(
+                            context,
+                          ).getString('all_statuses'),
                           style: TextStyle(color: Colors.grey[500]),
                         ),
                         underline: const SizedBox(),
@@ -580,7 +588,7 @@ class _LegalEntityManagementScreenState
                             Icon(Icons.add, color: Colors.white, size: 20),
                             const SizedBox(width: 8),
                             Text(
-                              'Nuova',
+                              AppLocalizations.of(context).getString('new'),
                               style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w600,
@@ -606,7 +614,7 @@ class _LegalEntityManagementScreenState
       children: [
         Expanded(
           child: _buildStatCard(
-            'Totale',
+            AppLocalizations.of(context).getString('total'),
             provider.totalCount,
             const Color(0xFF2563EB),
           ),
@@ -614,7 +622,7 @@ class _LegalEntityManagementScreenState
         const SizedBox(width: 12),
         Expanded(
           child: _buildStatCard(
-            'In Attesa',
+            AppLocalizations.of(context).getString('pending'),
             provider.pendingCount,
             Colors.orange,
           ),
@@ -622,7 +630,7 @@ class _LegalEntityManagementScreenState
         const SizedBox(width: 12),
         Expanded(
           child: _buildStatCard(
-            'Approvate',
+            AppLocalizations.of(context).getString('approved'),
             provider.approvedCount,
             Colors.green,
           ),
@@ -630,7 +638,7 @@ class _LegalEntityManagementScreenState
         const SizedBox(width: 12),
         Expanded(
           child: _buildStatCard(
-            'Rifiutate',
+            AppLocalizations.of(context).getString('rejected'),
             provider.rejectedCount,
             Colors.red,
           ),
@@ -733,7 +741,7 @@ class _LegalEntityManagementScreenState
               ),
               const SizedBox(height: 20),
               Text(
-                'Nessuna entità legale',
+                AppLocalizations.of(context).getString('no_legal_entities'),
                 style: TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.w600,
@@ -744,8 +752,12 @@ class _LegalEntityManagementScreenState
               const SizedBox(height: 8),
               Text(
                 _searchController.text.isNotEmpty || _selectedStatus != null
-                    ? 'Prova a modificare i filtri di ricerca'
-                    : 'Crea la tua prima entità legale',
+                    ? AppLocalizations.of(
+                        context,
+                      ).getString('try_modify_filters')
+                    : AppLocalizations.of(
+                        context,
+                      ).getString('create_first_entity'),
                 style: TextStyle(color: Colors.grey[600], fontSize: 14),
                 textAlign: TextAlign.center,
                 maxLines: 2,
@@ -769,7 +781,7 @@ class _LegalEntityManagementScreenState
                     elevation: 0,
                   ),
                   child: Text(
-                    'Crea Entità',
+                    AppLocalizations.of(context).getString('create_entity'),
                     style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                   ),
                 ),
@@ -918,7 +930,10 @@ class _LegalEntityManagementScreenState
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      entity.legalName ?? 'Nome non specificato',
+                      entity.legalName ??
+                          AppLocalizations.of(
+                            context,
+                          ).getString('name_not_specified'),
                       style: TextStyle(
                         color: Colors.black,
                         fontWeight: FontWeight.w700,
@@ -929,7 +944,10 @@ class _LegalEntityManagementScreenState
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      entity.identifierCode ?? 'Codice non specificato',
+                      entity.identifierCode ??
+                          AppLocalizations.of(
+                            context,
+                          ).getString('code_not_specified'),
                       style: TextStyle(color: Colors.grey[600], fontSize: 14),
                     ),
                     const SizedBox(height: 4),
@@ -973,11 +991,11 @@ class _LegalEntityManagementScreenState
     final difference = now.difference(date);
 
     if (difference.inDays == 0) {
-      return 'Oggi';
+      return AppLocalizations.of(context).getString('today');
     } else if (difference.inDays == 1) {
-      return 'Ieri';
+      return AppLocalizations.of(context).getString('yesterday');
     } else if (difference.inDays < 7) {
-      return '${difference.inDays} giorni fa';
+      return '${difference.inDays} ${AppLocalizations.of(context).getString('days_ago')}';
     } else {
       return '${date.day}/${date.month}/${date.year}';
     }
@@ -1151,7 +1169,10 @@ class _LegalEntityManagementScreenState
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        entity.legalName ?? 'Nome non specificato',
+                        entity.legalName ??
+                            AppLocalizations.of(
+                              context,
+                            ).getString('name_not_specified'),
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -1159,7 +1180,10 @@ class _LegalEntityManagementScreenState
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        entity.identifierCode ?? 'Codice non specificato',
+                        entity.identifierCode ??
+                            AppLocalizations.of(
+                              context,
+                            ).getString('code_not_specified'),
                         style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                       ),
                     ],
@@ -2117,7 +2141,10 @@ class _LegalEntityManagementScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    entity.legalName ?? 'Nome non specificato',
+                    entity.legalName ??
+                        AppLocalizations.of(
+                          context,
+                        ).getString('name_not_specified'),
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   if (entity.email != null) ...[
