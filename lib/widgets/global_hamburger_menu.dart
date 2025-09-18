@@ -193,7 +193,7 @@ class GlobalHamburgerMenu extends StatelessWidget {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                'JetCV',
+                                l10n.getString('app_title'),
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 18,
