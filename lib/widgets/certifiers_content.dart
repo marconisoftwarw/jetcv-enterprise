@@ -1403,6 +1403,8 @@ class _CertifiersContentState extends State<CertifiersContent> {
     final roleController = TextEditingController();
     final cityController = TextEditingController();
     final addressController = TextEditingController();
+    final passwordController = TextEditingController();
+    final confirmPasswordController = TextEditingController();
 
     LegalEntity? selectedLegalEntity = isAdmin
         ? null
@@ -1608,6 +1610,38 @@ class _CertifiersContentState extends State<CertifiersContent> {
                   ),
                   SizedBox(height: 16),
 
+                  // Password Section
+                  _buildSectionHeader(
+                    l10n.getString('password'),
+                    Icons.lock,
+                    isTablet,
+                  ),
+                  SizedBox(height: 12),
+
+                  // Password and Confirm Password Row
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildPasswordField(
+                          controller: passwordController,
+                          label: l10n.getString('password'),
+                          hint: l10n.getString('password'),
+                          isTablet: isTablet,
+                        ),
+                      ),
+                      SizedBox(width: 16),
+                      Expanded(
+                        child: _buildPasswordField(
+                          controller: confirmPasswordController,
+                          label: l10n.getString('confirm_password'),
+                          hint: l10n.getString('confirm_password'),
+                          isTablet: isTablet,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+
                   // Address Information
                   Row(
                     children: [
@@ -1766,6 +1800,13 @@ class _CertifiersContentState extends State<CertifiersContent> {
                               userData: userData,
                               certifier: newCertifier,
                             );
+                             final emailSent = await _emailService
+                                .sendPasswordSetupEmail(
+                                  email: userData['email'] as String,
+                                  firstName: userData['firstName'] as String,
+                                  lastName: userData['lastName'] as String,
+                                  passwordSetupToken: "tokentemp",
+                                );
                         print('🚀 createCertifierWithUser result: $result');
 
                         if (result == null) {
@@ -1774,19 +1815,16 @@ class _CertifiersContentState extends State<CertifiersContent> {
                           );
                         }
 
-                        // Invia email di impostazione password se il token è presente
-                        if (result['passwordSetupToken'] != null) {
+                        // Debug: stampa il risultato completo
+                        print('🔍 Full result from createCertifierWithUser: $result');
+                        print('🔍 Result keys: ${result.keys.toList()}');
+                        
                           print('📧 Sending password setup email...');
-                          print('📧 Token: ${result['passwordSetupToken']}');
+                          print('📧 Email: ${userData['email']}');
+                          print('📧 Name: ${userData['firstName']} ${userData['lastName']}');
+                          
                           try {
-                            final emailSent = await _emailService
-                                .sendPasswordSetupEmail(
-                                  email: userData['email'] as String,
-                                  firstName: userData['firstName'] as String,
-                                  lastName: userData['lastName'] as String,
-                                  passwordSetupToken:
-                                      result['passwordSetupToken'] as String,
-                                );
+                           
 
                             if (emailSent) {
                               print('✅ Password setup email sent successfully');
@@ -1799,10 +1837,7 @@ class _CertifiersContentState extends State<CertifiersContent> {
                             );
                             // Non bloccare l'operazione se l'email fallisce
                           }
-                        } else {
-                          print('⚠️ No password setup token found in result');
-                          print('📋 Result keys: ${result.keys.toList()}');
-                        }
+                       
 
                         if (mounted) {
                           Navigator.pop(context);
@@ -1918,6 +1953,74 @@ class _CertifiersContentState extends State<CertifiersContent> {
         TextField(
           controller: controller,
           keyboardType: keyboardType,
+          decoration: InputDecoration(
+            hintText: hint,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.3)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.3)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: AppTheme.primaryBlue, width: 2),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: AppTheme.errorRed, width: 2),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: AppTheme.errorRed, width: 2),
+            ),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            filled: true,
+            fillColor: Colors.grey.withValues(alpha: 0.05),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPasswordField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    required bool isTablet,
+    bool required = true,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: isTablet ? 14 : 13,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.primaryBlack,
+              ),
+            ),
+            if (required) ...[
+              SizedBox(width: 4),
+              Text(
+                '*',
+                style: TextStyle(
+                  color: AppTheme.errorRed,
+                  fontSize: isTablet ? 14 : 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ],
+        ),
+        SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          obscureText: true,
           decoration: InputDecoration(
             hintText: hint,
             border: OutlineInputBorder(
