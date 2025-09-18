@@ -245,8 +245,7 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
             '/cv-list': (context) => const CVListScreen(),
             '/legal-entity/pricing': (context) =>
                 const LegalEntityPricingScreen(),
-            '/legal-entity/register': (context) =>
-                const LegalEntityPublicRegistrationScreen(),
+            // Removed '/legal-entity/register' from static routes - handled in onGenerateRoute
             '/legal-entity-registration': (context) =>
                 const LegalEntityRegistrationScreen(),
           },
@@ -345,8 +344,26 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
                   builder: (_) => const LegalEntityPricingScreen(),
                 );
               case '/legal-entity/register':
+                // Gestisci parametri URL per inviti via email
+                print('🔍 Handling /legal-entity/register route');
+                print('🔍 Route settings: ${settings.toString()}');
+                print('🔍 Route arguments: ${settings.arguments}');
+
+                // Estrai parametri URL se disponibili
+                Map<String, String>? urlParams;
+                if (settings.name != null) {
+                  final uri = Uri.parse(settings.name!);
+                  if (uri.queryParameters.isNotEmpty) {
+                    urlParams = Map<String, String>.from(uri.queryParameters);
+                    print('🔍 Extracted URL params: $urlParams');
+                  }
+                }
+
                 return MaterialPageRoute(
-                  builder: (_) => const LegalEntityPublicRegistrationScreen(),
+                  builder: (_) => LegalEntityPublicRegistrationScreen(
+                    urlParameters: urlParams,
+                  ),
+                  settings: settings,
                 );
               case '/legal-entity/invitation-details':
                 final args = settings.arguments as Map<String, String>?;

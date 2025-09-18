@@ -243,8 +243,8 @@ Questo è un messaggio automatico, non rispondere a questa email.
     final baseUrl = AppConfig.appUrl;
     final token = invitation.invitationToken;
 
-    // Costruisci l'URL base per il signup
-    final url = Uri.parse('$baseUrl/signup');
+    // Costruisci l'URL base per la registrazione dell'entità legale
+    final url = Uri.parse('$baseUrl/legal-entity/register');
 
     // Aggiungi i parametri di query
     final queryParams = <String, String>{

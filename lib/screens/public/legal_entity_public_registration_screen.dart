@@ -13,10 +13,13 @@ import '../../providers/pricing_provider.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../l10n/app_localizations.dart';
+import '../../services/url_parameter_service.dart';
 import '../veriff/veriff_verification_screen.dart';
 
 class LegalEntityPublicRegistrationScreen extends StatefulWidget {
-  const LegalEntityPublicRegistrationScreen({super.key});
+  final Map<String, String>? urlParameters;
+
+  const LegalEntityPublicRegistrationScreen({super.key, this.urlParameters});
 
   @override
   State<LegalEntityPublicRegistrationScreen> createState() =>
@@ -112,80 +115,150 @@ class _LegalEntityPublicRegistrationScreenState
   }
 
   void _loadUrlParameters() {
-    // Check if this is a link-based registration
-    // In a real app, you would get the current URL from the route
-    // For now, we'll check if there are any URL parameters passed to the screen
-    // This would typically be done through route parameters or deep linking
-
     try {
-      // For demonstration purposes, we'll simulate URL parameters
-      // In a real implementation, you would parse the actual URL parameters
-      // For now, we'll check if there are any pre-filled values from the route
+      print('🔍 Loading URL parameters for legal entity registration...');
+
+      // Estrai parametri dall'URL corrente (per inviti via email)
+      final uri = Uri.base;
+      final queryParams = uri.queryParameters;
+
+      print('🔍 Current URL: ${uri.toString()}');
+      print('🔍 Query parameters: $queryParams');
+
+      // Controlla anche i parametri del route (per navigazione interna)
       final Map<String, String>? routeParams =
           ModalRoute.of(context)?.settings.arguments as Map<String, String>?;
 
-      if (routeParams != null) {
-        // Pre-fill email if provided
-        if (routeParams['email'] != null) {
-          _entityEmailController.text = routeParams['email']!;
-          _personalEmailController.text = routeParams['email']!;
+      // Parametri passati dal costruttore (dal routing)
+      final Map<String, String>? widgetParams = widget.urlParameters;
+
+      // Combina tutti i parametri disponibili (widget params hanno priorità)
+      final allParams = <String, String>{
+        ...queryParams,
+        if (routeParams != null) ...routeParams,
+        if (widgetParams != null) ...widgetParams,
+      };
+
+      print('🔍 Widget parameters: $widgetParams');
+      print('🔍 Route parameters: $routeParams');
+
+      print('🔍 Combined parameters: $allParams');
+
+      if (allParams.isNotEmpty) {
+        // Pre-fill email if provided (sia per l'entità che per la persona)
+        if (allParams['email'] != null) {
+          _entityEmailController.text = allParams['email']!;
+          _personalEmailController.text = allParams['email']!;
+          print('🔍 Pre-filled email: ${allParams['email']}');
         }
 
-        // Pre-fill other fields if provided
-        if (routeParams['legal_name'] != null) {
-          _legalNameController.text = routeParams['legal_name']!;
+        // Pre-fill legal entity fields if provided
+        if (allParams['legal_name'] != null) {
+          _legalNameController.text = allParams['legal_name']!;
+          print('🔍 Pre-filled legal_name: ${allParams['legal_name']}');
         }
-        if (routeParams['identifier_code'] != null) {
-          _identifierCodeController.text = routeParams['identifier_code']!;
+        if (allParams['identifier_code'] != null) {
+          _identifierCodeController.text = allParams['identifier_code']!;
+          print(
+            '🔍 Pre-filled identifier_code: ${allParams['identifier_code']}',
+          );
         }
-        if (routeParams['legal_rapresentative'] != null) {
+        if (allParams['legal_rapresentative'] != null) {
           _legalRepresentativeController.text =
-              routeParams['legal_rapresentative']!;
+              allParams['legal_rapresentative']!;
+          // Pre-fill anche il nome personale dal rappresentante legale
+          final representativeName = allParams['legal_rapresentative']!;
+          _personalNameController.text = representativeName;
+          print('🔍 Pre-filled legal_rapresentative: $representativeName');
         }
-        if (routeParams['operational_address'] != null) {
+        if (allParams['entity_email'] != null) {
+          _entityEmailController.text = allParams['entity_email']!;
+          print('🔍 Pre-filled entity_email: ${allParams['entity_email']}');
+        }
+        if (allParams['operational_address'] != null) {
           _operationalAddressController.text =
-              routeParams['operational_address']!;
+              allParams['operational_address']!;
         }
-        if (routeParams['operational_city'] != null) {
-          _operationalCityController.text = routeParams['operational_city']!;
+        if (allParams['operational_city'] != null) {
+          _operationalCityController.text = allParams['operational_city']!;
         }
-        if (routeParams['operational_postal_code'] != null) {
+        if (allParams['operational_postal_code'] != null) {
           _operationalPostalCodeController.text =
-              routeParams['operational_postal_code']!;
+              allParams['operational_postal_code']!;
         }
-        if (routeParams['operational_state'] != null) {
-          _operationalStateController.text = routeParams['operational_state']!;
+        if (allParams['operational_state'] != null) {
+          _operationalStateController.text = allParams['operational_state']!;
         }
-        if (routeParams['operational_country'] != null) {
+        if (allParams['operational_country'] != null) {
           _operationalCountryController.text =
-              routeParams['operational_country']!;
+              allParams['operational_country']!;
         }
-        if (routeParams['headquarter_address'] != null) {
+        if (allParams['headquarter_address'] != null) {
           _headquarterAddressController.text =
-              routeParams['headquarter_address']!;
+              allParams['headquarter_address']!;
         }
-        if (routeParams['headquarter_city'] != null) {
-          _headquarterCityController.text = routeParams['headquarter_city']!;
+        if (allParams['headquarter_city'] != null) {
+          _headquarterCityController.text = allParams['headquarter_city']!;
         }
-        if (routeParams['headquarter_postal_code'] != null) {
+        if (allParams['headquarter_postal_code'] != null) {
           _headquarterPostalCodeController.text =
-              routeParams['headquarter_postal_code']!;
+              allParams['headquarter_postal_code']!;
         }
-        if (routeParams['headquarter_state'] != null) {
-          _headquarterStateController.text = routeParams['headquarter_state']!;
+        if (allParams['headquarter_state'] != null) {
+          _headquarterStateController.text = allParams['headquarter_state']!;
         }
-        if (routeParams['headquarter_country'] != null) {
+        if (allParams['headquarter_country'] != null) {
           _headquarterCountryController.text =
-              routeParams['headquarter_country']!;
+              allParams['headquarter_country']!;
         }
-        if (routeParams['phone'] != null) {
-          _phoneController.text = routeParams['phone']!;
+        if (allParams['phone'] != null) {
+          _phoneController.text = allParams['phone']!;
         }
-        if (routeParams['pec'] != null) {
-          _pecController.text = routeParams['pec']!;
+        if (allParams['pec'] != null) {
+          _pecController.text = allParams['pec']!;
         }
-        if (routeParams['website'] != null) {
-          _websiteController.text = routeParams['website']!;
+        if (allParams['website'] != null) {
+          _websiteController.text = allParams['website']!;
+        }
+
+        // Se abbiamo un token di invito, mostra un messaggio informativo
+        if (allParams['token'] != null) {
+          print('🔍 Invitation token found: ${allParams['token']}');
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Registrazione tramite invito - Campi precompilati',
+                  ),
+                  backgroundColor: Colors.green,
+                  duration: Duration(seconds: 3),
+                ),
+              );
+            }
+          });
+        }
+      } else {
+        // Se non ci sono parametri combinati, prova a estrarre dall'URL completo
+        print('🔍 No combined params, trying to extract from current location...');
+        final currentLocation = ModalRoute.of(context)?.settings.name;
+        if (currentLocation != null && currentLocation.contains('?')) {
+          print('🔍 Found URL with parameters: $currentLocation');
+          final uri = Uri.parse(currentLocation);
+          final locationParams = uri.queryParameters;
+          print('🔍 Location parameters: $locationParams');
+          
+          // Precompila con i parametri trovati
+          if (locationParams['email'] != null) {
+            _entityEmailController.text = locationParams['email']!;
+            _personalEmailController.text = locationParams['email']!;
+            print('🔍 Pre-filled email from location: ${locationParams['email']}');
+          }
+          
+          if (locationParams['legal_name'] != null) {
+            _legalNameController.text = locationParams['legal_name']!;
+            print('🔍 Pre-filled legal_name from location: ${locationParams['legal_name']}');
+          }
         }
       }
     } catch (e) {
@@ -196,6 +269,11 @@ class _LegalEntityPublicRegistrationScreenState
 
   @override
   Widget build(BuildContext context) {
+    // Debug per verificare se la schermata viene caricata correttamente
+    print('🔍 LegalEntityPublicRegistrationScreen build called');
+    print('🔍 Widget urlParameters: ${widget.urlParameters}');
+    print('🔍 Current route: ${ModalRoute.of(context)?.settings.name}');
+    
     return Scaffold(
       appBar: AppBar(
         title: Text(
