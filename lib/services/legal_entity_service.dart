@@ -29,15 +29,23 @@ class LegalEntityService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        if (data['ok'] == true) {
-          final legalEntitiesData = data['data'] as List<dynamic>? ?? [];
-          return legalEntitiesData
-              .map((item) => LegalEntityInfo.fromJson(item))
-              .toList();
+        
+        // Handle direct array response from get-legal-entities-by-user
+        List<dynamic> legalEntitiesData;
+        if (data is List) {
+          // Direct array response
+          legalEntitiesData = data;
+        } else if (data is Map && data['ok'] == true && data['data'] is List) {
+          // Wrapped response format
+          legalEntitiesData = data['data'] as List<dynamic>;
         } else {
-          print('❌ Error in response: ${data['error']}');
+          print('❌ Unexpected response format: $data');
           return [];
         }
+        
+        return legalEntitiesData
+            .map((item) => LegalEntityInfo.fromJson(item))
+            .toList();
       } else {
         print(
           '❌ Error getting legal entities: ${response.statusCode} - ${response.body}',

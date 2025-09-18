@@ -1001,16 +1001,23 @@ class SupabaseService {
         }
 
         final data = response.data;
-        if (data == null || data['ok'] != true) {
+        
+        // Handle direct array response from get-legal-entities-by-user
+        List<dynamic> entitiesList;
+        if (data is List) {
+          // Direct array response
+          entitiesList = data;
+        } else if (data is Map && data['ok'] == true && data['data'] is List) {
+          // Wrapped response format
+          entitiesList = data['data'] as List;
+        } else {
           print(
-            '❌ Edge Function error: ${data?['message'] ?? 'Unknown error'}',
+            '❌ Edge Function error: ${data?['message'] ?? 'Unexpected response format'}',
           );
           throw Exception(
-            'Edge Function returned error: ${data?['message'] ?? 'Unknown error'}',
+            'Edge Function returned error: ${data?['message'] ?? 'Unexpected response format'}',
           );
         }
-
-        final entitiesList = data['data'] as List;
         print('🔍 Edge Function returned ${entitiesList.length} entities');
 
         // Apply status filter if specified
@@ -1089,14 +1096,21 @@ class SupabaseService {
         }
 
         final data = jsonDecode(response.body);
-        if (data == null || data['ok'] != true) {
+        
+        // Handle direct array response from get-legal-entities-by-user
+        List<dynamic> entitiesList;
+        if (data is List) {
+          // Direct array response
+          entitiesList = data;
+        } else if (data is Map && data['ok'] == true && data['data'] is List) {
+          // Wrapped response format
+          entitiesList = data['data'] as List;
+        } else {
           print(
-            '❌ HTTP fallback error: ${data?['message'] ?? 'Unknown error'}',
+            '❌ HTTP fallback error: Unexpected response format',
           );
           return [];
         }
-
-        final entitiesList = data['data'] as List;
         print('🔍 HTTP fallback returned ${entitiesList.length} entities');
 
         // Apply status filter if specified
@@ -1159,16 +1173,23 @@ class SupabaseService {
         }
 
         final data = response.data;
-        if (data == null || data['ok'] != true) {
+        
+        // Handle direct array response from get-legal-entities-by-user
+        List<dynamic> entitiesList;
+        if (data is List) {
+          // Direct array response
+          entitiesList = data;
+        } else if (data is Map && data['ok'] == true && data['data'] is List) {
+          // Wrapped response format
+          entitiesList = data['data'] as List;
+        } else {
           print(
-            '❌ Edge Function error: ${data?['message'] ?? 'Unknown error'}',
+            '❌ Edge Function error: ${data?['message'] ?? 'Unexpected response format'}',
           );
           throw Exception(
-            'Edge Function returned error: ${data?['message'] ?? 'Unknown error'}',
+            'Edge Function returned error: ${data?['message'] ?? 'Unexpected response format'}',
           );
         }
-
-        final entitiesList = data['data'] as List;
         print('🔍 Edge Function returned ${entitiesList.length} entities');
 
         // Find entity by ID
@@ -1236,14 +1257,21 @@ class SupabaseService {
         }
 
         final data = jsonDecode(response.body);
-        if (data == null || data['ok'] != true) {
+        
+        // Handle direct array response from get-legal-entities-by-user
+        List<dynamic> entitiesList;
+        if (data is List) {
+          // Direct array response
+          entitiesList = data;
+        } else if (data is Map && data['ok'] == true && data['data'] is List) {
+          // Wrapped response format
+          entitiesList = data['data'] as List;
+        } else {
           print(
-            '❌ HTTP fallback error: ${data?['message'] ?? 'Unknown error'}',
+            '❌ HTTP fallback error: Unexpected response format',
           );
           return null;
         }
-
-        final entitiesList = data['data'] as List;
         print('🔍 HTTP fallback returned ${entitiesList.length} entities');
 
         // Find entity by ID
