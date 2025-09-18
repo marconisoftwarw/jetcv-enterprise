@@ -2323,7 +2323,7 @@ class _LegalEntityManagementScreenState
   String _generateRegistrationLink() {
     // Genera un link alla pagina di registrazione pubblica senza parametri
     final baseUrl = AppConfig.appUrl;
-    final registrationUrl = Uri.parse('$baseUrl/legal-entity-registration');
+    final registrationUrl = Uri.parse('$baseUrl/#/legal-entity/register');
 
     return registrationUrl.toString();
   }

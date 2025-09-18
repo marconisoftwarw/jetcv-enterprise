@@ -344,6 +344,7 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
                   builder: (_) => const LegalEntityPricingScreen(),
                 );
               case '/legal-entity/register':
+              case '/#/legal-entity/register':
                 // Gestisci parametri URL per inviti via email
                 print('🔍 Handling /legal-entity/register route');
                 print('🔍 Route settings: ${settings.toString()}');
@@ -355,7 +356,20 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
                   final uri = Uri.parse(settings.name!);
                   if (uri.queryParameters.isNotEmpty) {
                     urlParams = Map<String, String>.from(uri.queryParameters);
-                    print('🔍 Extracted URL params: $urlParams');
+                    print('🔍 Extracted URL params from settings: $urlParams');
+                  }
+                }
+
+                // Se non ci sono parametri nelle settings, prova a estrarre dall'URL corrente
+                if (urlParams == null || urlParams.isEmpty) {
+                  try {
+                    final currentUri = Uri.base;
+                    if (currentUri.queryParameters.isNotEmpty) {
+                      urlParams = Map<String, String>.from(currentUri.queryParameters);
+                      print('🔍 Extracted URL params from current URI: $urlParams');
+                    }
+                  } catch (e) {
+                    print('🔍 Error extracting params from current URI: $e');
                   }
                 }
 
@@ -373,9 +387,42 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
                   ),
                 );
               case '/legal-entity-registration':
-                return MaterialPageRoute(
-                  builder: (_) => const LegalEntityRegistrationScreen(),
-                );
+              case '/#/legal-entity-registration':
+                // Gestisci parametri URL per inviti via email anche per /legal-entity-registration
+                print('🔍 Handling /legal-entity-registration route');
+                print('🔍 Route settings: ${settings.toString()}');
+                print('🔍 Route arguments: ${settings.arguments}');
+
+                // Estrai parametri URL se disponibili
+                Map<String, String>? urlParams;
+                if (settings.name != null) {
+                  final uri = Uri.parse(settings.name!);
+                  if (uri.queryParameters.isNotEmpty) {
+                    urlParams = Map<String, String>.from(uri.queryParameters);
+                    print('🔍 Extracted URL params: $urlParams');
+                  }
+                }
+
+                // Se ci sono parametri URL, usa LegalEntityPublicRegistrationScreen per pre-compilare
+                if (urlParams != null && urlParams.isNotEmpty) {
+                  print(
+                    '🔍 Using LegalEntityPublicRegistrationScreen with pre-filled data',
+                  );
+                  return MaterialPageRoute(
+                    builder: (_) => LegalEntityPublicRegistrationScreen(
+                      urlParameters: urlParams,
+                    ),
+                    settings: settings,
+                  );
+                } else {
+                  // Altrimenti usa la schermata normale
+                  print(
+                    '🔍 Using LegalEntityRegistrationScreen (no URL params)',
+                  );
+                  return MaterialPageRoute(
+                    builder: (_) => const LegalEntityRegistrationScreen(),
+                  );
+                }
               default:
                 // For unknown routes, redirect to appropriate home based on auth status
                 return MaterialPageRoute(

@@ -244,7 +244,8 @@ Questo è un messaggio automatico, non rispondere a questa email.
     final token = invitation.invitationToken;
 
     // Costruisci l'URL base per la registrazione dell'entità legale
-    final url = Uri.parse('$baseUrl/legal-entity/register');
+    // Usa hash-based routing per Flutter web
+    final url = Uri.parse('$baseUrl/#/legal-entity/register');
 
     // Aggiungi i parametri di query
     final queryParams = <String, String>{
@@ -567,6 +568,14 @@ Questo è un messaggio automatico, non rispondere a questa email.
       print('Error sending notification email: $e');
       return false;
     }
+  }
+
+  // Metodo pubblico per testare la generazione del link di invito
+  String generateTestInvitationLink(
+    LegalEntityInvitation invitation,
+    Map<String, dynamic>? legalEntityData,
+  ) {
+    return _generateInvitationLink(invitation, legalEntityData);
   }
 
   // Metodo per inviare invito a certificatore

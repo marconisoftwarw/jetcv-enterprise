@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:provider/provider.dart';
+import 'dart:html' as html;
 import '../../models/pricing.dart';
 import '../../models/user.dart' show AppUser;
 import '../../models/legal_entity.dart';
@@ -124,6 +125,8 @@ class _LegalEntityPublicRegistrationScreenState
 
       print('🔍 Current URL: ${uri.toString()}');
       print('🔍 Query parameters: $queryParams');
+      print('🔍 Hash fragment: ${uri.fragment}');
+      print('🔍 Full URI: $uri');
 
       // Controlla anche i parametri del route (per navigazione interna)
       final Map<String, String>? routeParams =
@@ -132,15 +135,50 @@ class _LegalEntityPublicRegistrationScreenState
       // Parametri passati dal costruttore (dal routing)
       final Map<String, String>? widgetParams = widget.urlParameters;
 
+      // Prova anche a estrarre parametri dall'URL completo se necessario
+      Map<String, String> additionalParams = {};
+      try {
+        // Se non ci sono parametri nella query string, prova a estrarre dall'URL completo
+        if (queryParams.isEmpty) {
+          final currentLocation = ModalRoute.of(context)?.settings.name;
+          if (currentLocation != null) {
+            print('🔍 Trying to extract from current location: $currentLocation');
+            final locationUri = Uri.parse(currentLocation);
+            additionalParams = Map<String, String>.from(locationUri.queryParameters);
+            print('🔍 Additional params from location: $additionalParams');
+          }
+        }
+        
+        // Prova anche a estrarre dall'URL del browser direttamente
+        if (additionalParams.isEmpty) {
+          try {
+            // Usa dart:html per accedere all'URL del browser (solo per web)
+            final browserUrl = html.window.location.href;
+            print('🔍 Browser URL: $browserUrl');
+            final browserUri = Uri.parse(browserUrl);
+            if (browserUri.queryParameters.isNotEmpty) {
+              additionalParams = Map<String, String>.from(browserUri.queryParameters);
+              print('🔍 Additional params from browser URL: $additionalParams');
+            }
+          } catch (e) {
+            print('🔍 Error extracting from browser URL (not web or error): $e');
+          }
+        }
+      } catch (e) {
+        print('🔍 Error extracting additional params: $e');
+      }
+
       // Combina tutti i parametri disponibili (widget params hanno priorità)
       final allParams = <String, String>{
         ...queryParams,
+        ...additionalParams,
         if (routeParams != null) ...routeParams,
         if (widgetParams != null) ...widgetParams,
       };
 
       print('🔍 Widget parameters: $widgetParams');
       print('🔍 Route parameters: $routeParams');
+      print('🔍 Additional parameters: $additionalParams');
 
       print('🔍 Combined parameters: $allParams');
 
@@ -240,24 +278,30 @@ class _LegalEntityPublicRegistrationScreenState
         }
       } else {
         // Se non ci sono parametri combinati, prova a estrarre dall'URL completo
-        print('🔍 No combined params, trying to extract from current location...');
+        print(
+          '🔍 No combined params, trying to extract from current location...',
+        );
         final currentLocation = ModalRoute.of(context)?.settings.name;
         if (currentLocation != null && currentLocation.contains('?')) {
           print('🔍 Found URL with parameters: $currentLocation');
           final uri = Uri.parse(currentLocation);
           final locationParams = uri.queryParameters;
           print('🔍 Location parameters: $locationParams');
-          
+
           // Precompila con i parametri trovati
           if (locationParams['email'] != null) {
             _entityEmailController.text = locationParams['email']!;
             _personalEmailController.text = locationParams['email']!;
-            print('🔍 Pre-filled email from location: ${locationParams['email']}');
+            print(
+              '🔍 Pre-filled email from location: ${locationParams['email']}',
+            );
           }
-          
+
           if (locationParams['legal_name'] != null) {
             _legalNameController.text = locationParams['legal_name']!;
-            print('🔍 Pre-filled legal_name from location: ${locationParams['legal_name']}');
+            print(
+              '🔍 Pre-filled legal_name from location: ${locationParams['legal_name']}',
+            );
           }
         }
       }
@@ -273,7 +317,7 @@ class _LegalEntityPublicRegistrationScreenState
     print('🔍 LegalEntityPublicRegistrationScreen build called');
     print('🔍 Widget urlParameters: ${widget.urlParameters}');
     print('🔍 Current route: ${ModalRoute.of(context)?.settings.name}');
-    
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
