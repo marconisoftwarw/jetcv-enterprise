@@ -170,11 +170,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
                 const SizedBox(height: 32),
 
-                // Statistiche e metriche
-                _buildStatsSection(authProvider.currentUser!, l10n, isTablet),
-
-                const SizedBox(height: 32),
-
                 // Form per le informazioni personali
                 _buildPersonalInfoForm(l10n, isTablet),
               ],
@@ -388,15 +383,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                         children: [
                           // Header con foto profilo e informazioni principali
                           _buildProfileHeader(
-                            authProvider.currentUser!,
-                            l10n,
-                            isTablet,
-                          ),
-
-                          const SizedBox(height: 32),
-
-                          // Statistiche e metriche
-                          _buildStatsSection(
                             authProvider.currentUser!,
                             l10n,
                             isTablet,
