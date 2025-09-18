@@ -48,27 +48,35 @@ class _HomeScreenState extends State<HomeScreen> {
     final authProvider = context.read<AuthProvider>();
     final userType = authProvider.userType;
 
+    // Valida l'indice prima di procedere
+    _validateAndResetSelectedIndex(userType ?? AppUserType.user);
+
+    // Se l'indice è stato resettato, usa quello valido
+    final validIndex = _isValidIndex(index, userType ?? AppUserType.user)
+        ? index
+        : 0;
+
     // Aggiorna l'indice selezionato per mostrare il contenuto nella UI di destra
     setState(() {
-      _selectedIndex = index;
+      _selectedIndex = validIndex;
     });
 
     // Naviga basandosi sul tipo di utente
     switch (userType ?? AppUserType.user) {
       case AppUserType.admin:
-        _handleAdminNavigation(index);
+        _handleAdminNavigation(validIndex);
         break;
       case AppUserType.legalEntity:
-        _handleLegalEntityNavigation(index);
+        _handleLegalEntityNavigation(validIndex);
         break;
       case AppUserType.certifier:
-        _handleCertifierNavigation(index);
+        _handleCertifierNavigation(validIndex);
         break;
       case AppUserType.user:
-        _handleUserNavigation(index);
+        _handleUserNavigation(validIndex);
         break;
       default:
-        _handleUserNavigation(index);
+        _handleUserNavigation(validIndex);
         break;
     }
   }
@@ -138,14 +146,14 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _validateAndResetSelectedIndex(AppUserType userType) {
+  bool _isValidIndex(int index, AppUserType userType) {
     int maxIndex;
     switch (userType) {
       case AppUserType.admin:
         maxIndex = 5; // 6 items (0-5)
         break;
       case AppUserType.legalEntity:
-        maxIndex = 3; // 4 items (0-3)
+        maxIndex = 4; // 5 items (0-4)
         break;
       case AppUserType.certifier:
         maxIndex = 2; // 3 items (0-2)
@@ -157,8 +165,11 @@ class _HomeScreenState extends State<HomeScreen> {
         maxIndex = 1;
         break;
     }
+    return index >= 0 && index <= maxIndex;
+  }
 
-    if (_selectedIndex > maxIndex) {
+  void _validateAndResetSelectedIndex(AppUserType userType) {
+    if (!_isValidIndex(_selectedIndex, userType)) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           setState(() {
@@ -175,7 +186,7 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (context, authProvider, child) {
         // Reset selectedIndex if it's out of range for current user type
         final currentUserType = authProvider.userType ?? AppUserType.user;
-        _validateAndResetSelectedIndex(currentUserType);
+        // Non chiamare _validateAndResetSelectedIndex qui per evitare loop infiniti
 
         return Scaffold(
           appBar: MediaQuery.of(context).size.width <= 768
@@ -284,6 +295,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildAdminContent() {
     final l10n = AppLocalizations.of(context);
+
+    // Controllo di sicurezza per l'indice
+    if (!_isValidIndex(_selectedIndex, AppUserType.admin)) {
+      return _DashboardContent(l10n: l10n);
+    }
+
     switch (_selectedIndex) {
       case 0:
         return _DashboardContent(l10n: l10n);
@@ -304,6 +321,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildLegalEntityContent() {
     final l10n = AppLocalizations.of(context);
+
+    // Controllo di sicurezza per l'indice
+    if (!_isValidIndex(_selectedIndex, AppUserType.legalEntity)) {
+      return _DashboardContent(l10n: l10n);
+    }
+
     switch (_selectedIndex) {
       case 0:
         return _DashboardContent(l10n: l10n);
@@ -312,6 +335,8 @@ class _HomeScreenState extends State<HomeScreen> {
       case 2:
         return _buildCertifiersContent();
       case 3:
+        return const UserSettingsScreen(hideMenu: true);
+      case 4:
         return const UserProfileScreen(hideMenu: true);
       default:
         return _DashboardContent(l10n: l10n);
@@ -320,6 +345,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildCertifierContent() {
     final l10n = AppLocalizations.of(context);
+
+    // Controllo di sicurezza per l'indice
+    if (!_isValidIndex(_selectedIndex, AppUserType.certifier)) {
+      return _DashboardContent(l10n: l10n);
+    }
+
     switch (_selectedIndex) {
       case 0:
         return _DashboardContent(l10n: l10n);
@@ -334,6 +365,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildUserContent() {
     final l10n = AppLocalizations.of(context);
+
+    // Controllo di sicurezza per l'indice
+    if (!_isValidIndex(_selectedIndex, AppUserType.user)) {
+      return const UserProfileScreen(hideMenu: true);
+    }
+
     switch (_selectedIndex) {
       case 0:
         return const UserProfileScreen(hideMenu: true);

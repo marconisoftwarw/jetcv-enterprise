@@ -445,6 +445,55 @@ class SupabaseService {
     }
   }
 
+  // Handle OAuth callback and PKCE exchange
+  Future<bool> handleOAuthCallback() async {
+    try {
+      print('🔄 SupabaseService: Handling OAuth callback...');
+
+      // Get current URL to check for auth parameters
+      final uri = Uri.base;
+      final code = uri.queryParameters['code'];
+      final state = uri.queryParameters['state'];
+
+      print('🔍 SupabaseService: Callback URL: ${uri.toString()}');
+      print('🔍 SupabaseService: Authorization code: $code');
+      print('🔍 SupabaseService: State: $state');
+
+      if (code != null) {
+        print('🔄 SupabaseService: Processing authorization code...');
+
+        // Wait for Supabase to automatically handle the PKCE exchange
+        await Future.delayed(const Duration(milliseconds: 1000));
+
+        // Try to refresh session to trigger PKCE exchange
+        try {
+          await _auth.refreshSession();
+          print('🔄 SupabaseService: Session refresh attempted');
+        } catch (e) {
+          print('⚠️ SupabaseService: Session refresh failed: $e');
+        }
+
+        // Check if we now have a valid session
+        final session = _auth.currentSession;
+        if (session != null) {
+          print(
+            '✅ SupabaseService: OAuth callback successful, session created',
+          );
+          return true;
+        } else {
+          print('❌ SupabaseService: OAuth callback failed, no session');
+          return false;
+        }
+      } else {
+        print('❌ SupabaseService: No authorization code in callback URL');
+        return false;
+      }
+    } catch (e) {
+      print('❌ SupabaseService: Error handling OAuth callback: $e');
+      return false;
+    }
+  }
+
   // Get access token for API calls
   Future<String?> getAccessToken() async {
     try {
@@ -1018,8 +1067,13 @@ class SupabaseService {
           return [];
         }
 
+        // For GET requests, we need to pass parameters as query parameters, not in the body
+        final uri = Uri.parse(
+          url,
+        ).replace(queryParameters: {if (status != null) 'status': status});
+
         final response = await http.get(
-          Uri.parse(url),
+          uri,
           headers: {
             'Authorization': 'Bearer ${currentSession.accessToken}',
             'Content-Type': 'application/json',
@@ -1164,8 +1218,11 @@ class SupabaseService {
           return null;
         }
 
+        // For GET requests, we need to pass parameters as query parameters, not in the body
+        final uri = Uri.parse(url).replace(queryParameters: {'id': id});
+
         final response = await http.get(
-          Uri.parse(url),
+          uri,
           headers: {
             'Authorization': 'Bearer ${currentSession.accessToken}',
             'Content-Type': 'application/json',

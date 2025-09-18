@@ -26,7 +26,7 @@ class CertificationListScreen extends StatefulWidget {
 
 class _CertificationListScreenState extends State<CertificationListScreen>
     with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+  TabController? _tabController;
   int _selectedTabIndex = 0;
 
   // Dati delle certificazioni
@@ -42,14 +42,26 @@ class _CertificationListScreenState extends State<CertificationListScreen>
   void initState() {
     super.initState();
     print('🏁 CertificationListScreen initState called');
-    _tabController = TabController(length: 2, vsync: this);
-    _tabController.addListener(() {
-      setState(() {
-        _selectedTabIndex = _tabController.index;
+
+    try {
+      _tabController = TabController(length: 2, vsync: this);
+      _tabController!.addListener(() {
+        if (mounted &&
+            _tabController != null &&
+            _tabController!.length > 0 &&
+            _tabController!.index >= 0 &&
+            _tabController!.index < _tabController!.length) {
+          setState(() {
+            _selectedTabIndex = _tabController!.index;
+          });
+        }
       });
-    });
-    print('📞 CertificationListScreen ready');
-    _loadCertifications();
+      print('📞 CertificationListScreen TabController ready');
+      _loadCertifications();
+    } catch (e) {
+      print('❌ Error initializing TabController: $e');
+      _errorMessage = 'Error initializing interface: $e';
+    }
   }
 
   Future<void> _loadCertifications() async {
@@ -201,7 +213,9 @@ class _CertificationListScreenState extends State<CertificationListScreen>
 
   @override
   void dispose() {
-    _tabController.dispose();
+    if (_tabController != null) {
+      _tabController!.dispose();
+    }
     super.dispose();
   }
 
@@ -212,6 +226,54 @@ class _CertificationListScreenState extends State<CertificationListScreen>
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 768;
     final isDesktop = screenWidth > 1024;
+
+    // Se c'è un errore di inizializzazione, mostralo
+    if (_errorMessage != null) {
+      return Scaffold(
+        backgroundColor: AppTheme.pureWhite,
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error_outline, color: Colors.red, size: 48),
+              SizedBox(height: 16),
+              Text(
+                'Errore di inizializzazione',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8),
+              Text(
+                _errorMessage!,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey[600]),
+              ),
+              SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _errorMessage = null;
+                  });
+                  initState();
+                },
+                child: Text('Riprova'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Se il TabController non è ancora inizializzato, mostra un loading
+    if (_tabController == null || _tabController!.length == 0) {
+      return Scaffold(
+        backgroundColor: AppTheme.pureWhite,
+        body: Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryBlue),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       backgroundColor: AppTheme.pureWhite,
@@ -292,6 +354,20 @@ class _CertificationListScreenState extends State<CertificationListScreen>
   }
 
   Widget _buildFilterTabs(AppLocalizations l10n) {
+    // Se il TabController non è inizializzato, non mostrare i tab
+    if (_tabController == null || _tabController!.length == 0) {
+      return SliverToBoxAdapter(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryBlue),
+            ),
+          ),
+        ),
+      );
+    }
+
     return SliverToBoxAdapter(
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -300,16 +376,24 @@ class _CertificationListScreenState extends State<CertificationListScreen>
             Expanded(
               child: _buildTabButton(
                 'Bozze e In corso',
-                _tabController.index == 0,
-                () => _tabController.animateTo(0),
+                _tabController!.length > 0 && _tabController!.index == 0,
+                () {
+                  if (_tabController != null && _tabController!.length > 0) {
+                    _tabController!.animateTo(0);
+                  }
+                },
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: _buildTabButton(
                 'Emesse',
-                _tabController.index == 1,
-                () => _tabController.animateTo(1),
+                _tabController!.length > 1 && _tabController!.index == 1,
+                () {
+                  if (_tabController != null && _tabController!.length > 1) {
+                    _tabController!.animateTo(1);
+                  }
+                },
               ),
             ),
             const SizedBox(width: 16),
@@ -403,9 +487,20 @@ class _CertificationListScreenState extends State<CertificationListScreen>
   }
 
   Widget _buildMainContent(AppLocalizations l10n, bool isTablet) {
+    // Se il TabController non è inizializzato, mostra un loading
+    if (_tabController == null || _tabController!.length == 0) {
+      return SliverFillRemaining(
+        child: Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryBlue),
+          ),
+        ),
+      );
+    }
+
     return SliverFillRemaining(
       child: TabBarView(
-        controller: _tabController,
+        controller: _tabController!,
         children: [_buildDraftsTab(), _buildSentTab()],
       ),
     );

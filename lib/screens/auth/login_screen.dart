@@ -42,6 +42,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (success && mounted) {
       Navigator.pushReplacementNamed(context, '/home');
+    } else if (mounted && authProvider.errorMessage != null) {
+      // Show error alert for incorrect login parameters
+      await _showLoginErrorAlert(authProvider.errorMessage!);
     }
   }
 
@@ -291,6 +294,64 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     }
+  }
+
+  // Show login error alert
+  Future<void> _showLoginErrorAlert(String errorMessage) async {
+    final l10n = AppLocalizations.of(context);
+
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Row(
+            children: [
+              Icon(Icons.error_outline, color: Colors.red[600], size: 28),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  l10n.getString('login_failed'),
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.getString('login_parameters_incorrect'),
+                style: const TextStyle(fontSize: 16, height: 1.4),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                // Clear the password field for security
+                _passwordController.clear();
+              },
+              child: Text(
+                l10n.getString('try_again'),
+                style: TextStyle(
+                  color: Colors.blue[600],
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override

@@ -1560,10 +1560,7 @@ class _LegalEntityManagementScreenState
               Text(entity.displayHeadquarters),
               const SizedBox(height: 16),
               _buildDetailRow('Stato', entity.statusDisplayName),
-              _buildDetailRow(
-                'Data Creazione',
-                entity.createdAt.toString().split(' ')[0],
-              ),
+              _buildDetailRow('Data Creazione', _formatDate(entity.createdAt)),
             ],
           ),
         ),
@@ -2924,6 +2921,20 @@ class _LegalEntityFormDialogState extends State<LegalEntityFormDialog> {
         return Colors.green;
       case LegalEntityStatus.rejected:
         return Colors.red;
+    }
+  }
+
+  // Safe date formatting method
+  String _formatDate(DateTime? dateTime) {
+    if (dateTime == null) return 'N/A';
+
+    try {
+      final dateString = dateTime.toString();
+      final parts = dateString.split(' ');
+      return parts.isNotEmpty ? parts[0] : 'N/A';
+    } catch (e) {
+      print('Error formatting date: $e');
+      return 'N/A';
     }
   }
 }

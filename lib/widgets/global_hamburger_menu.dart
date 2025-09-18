@@ -316,8 +316,8 @@ class GlobalHamburgerMenu extends StatelessWidget {
           'index': 0,
         },
         {
-          'icon': Icons.verified,
-          'label': l10n.getString('certifications'),
+          'icon': Icons.business,
+          'label': l10n.getString('legal_entities'),
           'index': 1,
         },
         {
@@ -346,33 +346,18 @@ class GlobalHamburgerMenu extends StatelessWidget {
           'label': l10n.getString('certifications'),
           'index': 1,
         },
-        {
-          'icon': Icons.settings,
-          'label': l10n.getString('settings'),
-          'index': 2,
-        },
-        {'icon': Icons.person, 'label': l10n.getString('profile'), 'index': 3},
+        {'icon': Icons.person, 'label': l10n.getString('profile'), 'index': 2},
       ];
     }
     // User menu
     else {
       menuItems = [
-        {
-          'icon': Icons.dashboard,
-          'label': l10n.getString('dashboard'),
-          'index': 0,
-        },
-        {
-          'icon': Icons.verified,
-          'label': l10n.getString('certifications'),
-          'index': 1,
-        },
+        {'icon': Icons.person, 'label': l10n.getString('profile'), 'index': 0},
         {
           'icon': Icons.settings,
           'label': l10n.getString('settings'),
-          'index': 2,
+          'index': 1,
         },
-        {'icon': Icons.person, 'label': l10n.getString('profile'), 'index': 3},
       ];
     }
 

@@ -651,7 +651,7 @@ class LegalEntityProvider extends ChangeNotifier {
   void _safeNotifyListeners() {
     // Evita di chiamare notifyListeners durante la fase di build
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _safeNotifyListeners();
+      notifyListeners();
     });
   }
 }

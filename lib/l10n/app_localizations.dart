@@ -256,7 +256,7 @@ class AppLocalizations {
           'Si è verificato un errore durante il reset della password. Verifica che la password attuale sia corretta e riprova.',
       'go_to_login': 'Vai al Login',
       'back_to_login': 'Torna al Login',
-      'try_again': 'Riprova',
+
       'send': 'Invia',
       'password_reset_sent': 'Email di reset password inviata!',
       'loading_legal_entities': 'Caricamento legal entities...',
@@ -282,6 +282,10 @@ class AppLocalizations {
           'Contatta JetCV Enterprise a questo indirizzo: test@mail.com',
       'specific_course': 'Corso Specifico',
       'workshop': 'Workshop',
+      'login_failed': 'Accesso fallito',
+      'login_parameters_incorrect':
+          'I parametri di accesso inseriti non sono corretti. Verifica email e password e riprova.',
+      'try_again': 'Riprova',
       'seminar': 'Seminario',
       'online_training': 'Formazione Online',
       'exam': 'Esame',
@@ -1260,6 +1264,9 @@ class AppLocalizations {
       'user_management': 'User Management',
       'user_results': 'User Results',
       'workshop': 'Workshop',
+      'login_failed': 'Login failed',
+      'login_parameters_incorrect':
+          'The login parameters entered are incorrect. Please check your email and password and try again.',
     },
     'de': {
       'app_title': 'JetCV Enterprise',
@@ -1741,6 +1748,9 @@ class AppLocalizations {
       'user_management': 'Benutzerverwaltung',
       'user_results': 'Benutzerergebnisse',
       'workshop': 'Workshop',
+      'login_failed': 'Anmeldung fehlgeschlagen',
+      'login_parameters_incorrect':
+          'Die eingegebenen Anmeldedaten sind nicht korrekt. Bitte überprüfen Sie Ihre E-Mail und Ihr Passwort und versuchen Sie es erneut.',
     },
     'fr': {
       'app_title': 'JetCV Enterprise',
@@ -2227,6 +2237,9 @@ class AppLocalizations {
       'user_management': 'Gestion des Utilisateurs',
       'user_results': 'Résultats Utilisateur',
       'workshop': 'Atelier',
+      'login_failed': 'Connexion échouée',
+      'login_parameters_incorrect':
+          'Les paramètres de connexion saisis sont incorrects. Veuillez vérifier votre email et mot de passe et réessayer.',
     },
   };
 

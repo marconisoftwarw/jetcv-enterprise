@@ -444,11 +444,14 @@ class AppUser {
   }
 
   String get initials {
-    if (firstName != null && lastName != null) {
+    if (firstName != null &&
+        firstName!.isNotEmpty &&
+        lastName != null &&
+        lastName!.isNotEmpty) {
       return '${firstName![0].toUpperCase()}${lastName![0].toUpperCase()}';
-    } else if (firstName != null) {
+    } else if (firstName != null && firstName!.isNotEmpty) {
       return firstName![0].toUpperCase();
-    } else if (lastName != null) {
+    } else if (lastName != null && lastName!.isNotEmpty) {
       return lastName![0].toUpperCase();
     } else {
       return 'U';

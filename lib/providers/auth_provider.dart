@@ -48,15 +48,12 @@ class AuthProvider extends ChangeNotifier {
             _currentUser = AppUser(
               idUser: supabaseUser.id,
               email: supabaseUser.email ?? '',
-              firstName:
-                  supabaseUser.userMetadata?['full_name']?.split(' ').first ??
-                  '',
-              lastName:
-                  supabaseUser.userMetadata?['full_name']
-                      ?.split(' ')
-                      .skip(1)
-                      .join(' ') ??
-                  '',
+              firstName: _extractFirstName(
+                supabaseUser.userMetadata?['full_name'],
+              ),
+              lastName: _extractLastName(
+                supabaseUser.userMetadata?['full_name'],
+              ),
               type: UserType.user, // Default type
               languageCode: 'it',
               phone: supabaseUser.phone ?? '',
@@ -190,14 +187,10 @@ class AuthProvider extends ChangeNotifier {
           _currentUser = AppUser(
             idUser: supabaseUser.id,
             email: supabaseUser.email ?? '',
-            firstName:
-                supabaseUser.userMetadata?['full_name']?.split(' ').first ?? '',
-            lastName:
-                supabaseUser.userMetadata?['full_name']
-                    ?.split(' ')
-                    .skip(1)
-                    .join(' ') ??
-                '',
+            firstName: _extractFirstName(
+              supabaseUser.userMetadata?['full_name'],
+            ),
+            lastName: _extractLastName(supabaseUser.userMetadata?['full_name']),
             type: UserType.user, // Default type
             languageCode: 'it',
             phone: supabaseUser.phone ?? '',
@@ -305,14 +298,10 @@ class AuthProvider extends ChangeNotifier {
         _currentUser = AppUser(
           idUser: response.user!.id,
           email: response.user!.email ?? '',
-          firstName:
-              response.user!.userMetadata?['full_name']?.split(' ').first ?? '',
-          lastName:
-              response.user!.userMetadata?['full_name']
-                  ?.split(' ')
-                  .skip(1)
-                  .join(' ') ??
-              '',
+          firstName: _extractFirstName(
+            response.user!.userMetadata?['full_name'],
+          ),
+          lastName: _extractLastName(response.user!.userMetadata?['full_name']),
           type: UserType.user, // Default type
           languageCode: 'it',
           phone: response.user!.phone ?? '',
@@ -419,6 +408,32 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  // Handle OAuth callback (useful for manual callback handling)
+  Future<bool> handleOAuthCallback() async {
+    try {
+      _setLoading(true);
+      _clearError();
+
+      final success = await _supabaseService.handleOAuthCallback();
+
+      if (success) {
+        // Refresh user data after successful OAuth
+        await checkAuthenticationStatus();
+        print('✅ AuthProvider: OAuth callback handled successfully');
+        return true;
+      } else {
+        _setError('OAuth authentication failed');
+        return false;
+      }
+    } catch (e) {
+      print('❌ AuthProvider: OAuth callback error: $e');
+      _setError('OAuth callback failed: $e');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   Future<void> signOut() async {
     try {
       await _supabaseService.signOut();
@@ -477,14 +492,8 @@ class AuthProvider extends ChangeNotifier {
         _currentUser = AppUser(
           idUser: supabaseUser.id,
           email: supabaseUser.email ?? '',
-          firstName:
-              supabaseUser.userMetadata?['full_name']?.split(' ').first ?? '',
-          lastName:
-              supabaseUser.userMetadata?['full_name']
-                  ?.split(' ')
-                  .skip(1)
-                  .join(' ') ??
-              '',
+          firstName: _extractFirstName(supabaseUser.userMetadata?['full_name']),
+          lastName: _extractLastName(supabaseUser.userMetadata?['full_name']),
           type: UserType.user, // Default type
           languageCode: 'it',
           phone: supabaseUser.phone ?? '',
@@ -570,14 +579,8 @@ class AuthProvider extends ChangeNotifier {
       _currentUser = AppUser(
         idUser: supabaseUser.id,
         email: supabaseUser.email ?? '',
-        firstName:
-            supabaseUser.userMetadata?['full_name']?.split(' ').first ?? '',
-        lastName:
-            supabaseUser.userMetadata?['full_name']
-                ?.split(' ')
-                .skip(1)
-                .join(' ') ??
-            '',
+        firstName: _extractFirstName(supabaseUser.userMetadata?['full_name']),
+        lastName: _extractLastName(supabaseUser.userMetadata?['full_name']),
         type: UserType.user, // Default type
         languageCode: 'it',
         phone: supabaseUser.phone ?? '',
@@ -693,5 +696,32 @@ class AuthProvider extends ChangeNotifier {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       notifyListeners();
     });
+  }
+
+  // Safe name extraction methods to prevent RangeError
+  String _extractFirstName(String? fullName) {
+    if (fullName == null || fullName.trim().isEmpty) return '';
+
+    try {
+      final parts = fullName.trim().split(' ');
+      return parts.isNotEmpty ? parts[0] : '';
+    } catch (e) {
+      print('Error extracting first name from "$fullName": $e');
+      return '';
+    }
+  }
+
+  String _extractLastName(String? fullName) {
+    if (fullName == null || fullName.trim().isEmpty) return '';
+
+    try {
+      final parts = fullName.trim().split(' ');
+      if (parts.length <= 1) return '';
+
+      return parts.skip(1).join(' ');
+    } catch (e) {
+      print('Error extracting last name from "$fullName": $e');
+      return '';
+    }
   }
 }
