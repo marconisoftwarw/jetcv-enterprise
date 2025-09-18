@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../config/app_config.dart';
 import '../../theme/app_theme.dart';
-import '../../widgets/neon_button.dart';
-import '../../widgets/enterprise_card.dart';
 import '../../widgets/page_with_floating_language.dart';
 import '../../l10n/app_localizations.dart';
 

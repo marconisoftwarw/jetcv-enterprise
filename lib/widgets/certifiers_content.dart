@@ -37,10 +37,12 @@ class _CertifiersContentState extends State<CertifiersContent> {
 
   Future<void> _loadCertifiers() async {
     try {
-      setState(() {
-        _isLoading = true;
-        _errorMessage = null;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = true;
+          _errorMessage = null;
+        });
+      }
 
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final legalEntityProvider = Provider.of<LegalEntityProvider>(
@@ -61,11 +63,13 @@ class _CertifiersContentState extends State<CertifiersContent> {
         final selectedLegalEntity = legalEntityProvider.selectedLegalEntity;
 
         if (selectedLegalEntity == null) {
-          final l10n = AppLocalizations.of(context);
-          setState(() {
-            _errorMessage = l10n.getString('no_legal_entity_selected');
-            _isLoading = false;
-          });
+          if (mounted) {
+            final l10n = AppLocalizations.of(context);
+            setState(() {
+              _errorMessage = l10n.getString('no_legal_entity_selected');
+              _isLoading = false;
+            });
+          }
           return;
         }
 
@@ -80,19 +84,23 @@ class _CertifiersContentState extends State<CertifiersContent> {
             );
       }
 
-      setState(() {
-        _certifiersWithUser = certifiersWithUser;
-        _filteredCertifiers = certifiersWithUser;
-        _extractFilterOptions();
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _certifiersWithUser = certifiersWithUser;
+          _filteredCertifiers = certifiersWithUser;
+          _extractFilterOptions();
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       print('❌ Error loading certifiers: $e');
-      final l10n = AppLocalizations.of(context);
-      setState(() {
-        _errorMessage = '${l10n.getString('error_loading_certifiers')}: $e';
-        _isLoading = false;
-      });
+      if (mounted) {
+        final l10n = AppLocalizations.of(context);
+        setState(() {
+          _errorMessage = '${l10n.getString('error_loading_certifiers')}: $e';
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -111,14 +119,17 @@ class _CertifiersContentState extends State<CertifiersContent> {
       }
     }
 
-    setState(() {
-      _availableRoles = roles.toList()..sort();
-      _availableCities = cities.toList()..sort();
-    });
+    if (mounted) {
+      setState(() {
+        _availableRoles = roles.toList()..sort();
+        _availableCities = cities.toList()..sort();
+      });
+    }
   }
 
   void _applyFilters() {
-    setState(() {
+    if (mounted) {
+      setState(() {
       _filteredCertifiers = _certifiersWithUser.where((certifierWithUser) {
         // Filtro per data di nascita
         if (_selectedBirthDate != null &&
@@ -145,16 +156,19 @@ class _CertifiersContentState extends State<CertifiersContent> {
 
         return true;
       }).toList();
-    });
+      });
+    }
   }
 
   void _clearFilters() {
-    setState(() {
-      _selectedBirthDate = null;
-      _selectedRole = null;
-      _selectedCity = null;
-      _filteredCertifiers = _certifiersWithUser;
-    });
+    if (mounted) {
+      setState(() {
+        _selectedBirthDate = null;
+        _selectedRole = null;
+        _selectedCity = null;
+        _filteredCertifiers = _certifiersWithUser;
+      });
+    }
   }
 
   @override
@@ -496,7 +510,7 @@ class _CertifiersContentState extends State<CertifiersContent> {
               );
             },
           );
-          if (picked != null) {
+          if (picked != null && mounted) {
             setState(() {
               _selectedBirthDate = picked;
             });
@@ -634,10 +648,12 @@ class _CertifiersContentState extends State<CertifiersContent> {
               ),
             ],
             onChanged: (value) {
-              setState(() {
-                _selectedRole = value;
-              });
-              _applyFilters();
+              if (mounted) {
+                setState(() {
+                  _selectedRole = value;
+                });
+                _applyFilters();
+              }
             },
           ),
         ),
@@ -738,10 +754,12 @@ class _CertifiersContentState extends State<CertifiersContent> {
               ),
             ],
             onChanged: (value) {
-              setState(() {
-                _selectedCity = value;
-              });
-              _applyFilters();
+              if (mounted) {
+                setState(() {
+                  _selectedCity = value;
+                });
+                _applyFilters();
+              }
             },
           ),
         ),

@@ -264,10 +264,10 @@ class _LegalEntityPublicRegistrationScreenState
                   const SizedBox(height: 8),
                   Text(
                     index == 0
-                        ? 'Pricing'
+                        ? AppLocalizations.of(context).getString('pricing')
                         : index == 1
-                        ? 'Personale'
-                        : 'Azienda',
+                        ? AppLocalizations.of(context).getString('personal_info')
+                        : AppLocalizations.of(context).getString('company_info'),
                     style: TextStyle(
                       fontSize: 12,
                       color: isActive ? Colors.blue : Colors.grey,
@@ -300,7 +300,7 @@ class _LegalEntityPublicRegistrationScreenState
                 const Icon(Icons.error, size: 64, color: Colors.red),
                 const SizedBox(height: 16),
                 Text(
-                  'Errore nel caricamento dei piani: ${pricingProvider.errorMessage}',
+                  '${AppLocalizations.of(context).getString('pricing_plans_loading_error')}: ${pricingProvider.errorMessage}',
                   style: TextStyle(color: Colors.red),
                   textAlign: TextAlign.center,
                 ),
@@ -327,9 +327,9 @@ class _LegalEntityPublicRegistrationScreenState
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Scegli il piano più adatto alle tue esigenze.',
-                style: TextStyle(fontSize: 16, color: Colors.grey),
+              Text(
+                AppLocalizations.of(context).getString('choose_plan_subtitle'),
+                style: const TextStyle(fontSize: 16, color: Colors.grey),
               ),
               const SizedBox(height: 24),
 
@@ -397,10 +397,10 @@ class _LegalEntityPublicRegistrationScreenState
                             color: isSelected ? Colors.blue : Colors.green,
                           ),
                         ),
-                        const Text(
-                          '/anno',
-                          style: TextStyle(fontSize: 12, color: Colors.grey),
-                        ),
+                          Text(
+                            AppLocalizations.of(context).getString('per_year'),
+                            style: const TextStyle(fontSize: 12, color: Colors.grey),
+                          ),
                       ],
                     ),
                   ],
@@ -434,10 +434,10 @@ class _LegalEntityPublicRegistrationScreenState
                       color: Colors.blue,
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: const Text(
-                      'PIANO SELEZIONATO',
+                    child: Text(
+                      AppLocalizations.of(context).getString('plan_selected'),
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
@@ -457,14 +457,14 @@ class _LegalEntityPublicRegistrationScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Informazioni Personali',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          Text(
+            AppLocalizations.of(context).getString('personal_information'),
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Inserisci le tue informazioni personali.',
-            style: TextStyle(fontSize: 16, color: Colors.grey),
+          Text(
+            AppLocalizations.of(context).getString('enter_personal_info'),
+            style: const TextStyle(fontSize: 16, color: Colors.grey),
           ),
           const SizedBox(height: 24),
 
@@ -484,7 +484,7 @@ class _LegalEntityPublicRegistrationScreenState
                 const SizedBox(height: 16),
                 CustomButton(
                   onPressed: _pickPersonalProfilePicture,
-                  text: 'Carica Foto Profilo',
+                  text: AppLocalizations.of(context).getString('upload_profile_photo'),
                   backgroundColor: Colors.grey,
                 ),
               ],
@@ -501,10 +501,10 @@ class _LegalEntityPublicRegistrationScreenState
                   width: double.infinity,
                   child: CustomTextField(
                     controller: _personalNameController,
-                    labelText: 'Nome Completo *',
+                    labelText: '${AppLocalizations.of(context).getString('full_name')} *',
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Inserisci il tuo nome completo';
+                        return AppLocalizations.of(context).getString('enter_full_name');
                       }
                       return null;
                     },
@@ -519,12 +519,12 @@ class _LegalEntityPublicRegistrationScreenState
                     keyboardType: TextInputType.emailAddress,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Inserisci la tua email';
+                        return AppLocalizations.of(context).getString('enter_email');
                       }
                       if (!RegExp(
                         r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
                       ).hasMatch(value)) {
-                        return 'Inserisci un\'email valida';
+                        return AppLocalizations.of(context).getString('enter_valid_email');
                       }
                       return null;
                     },
@@ -535,7 +535,7 @@ class _LegalEntityPublicRegistrationScreenState
                   width: double.infinity,
                   child: CustomTextField(
                     controller: _personalPhoneController,
-                    labelText: 'Telefono',
+                    labelText: AppLocalizations.of(context).getString('phone'),
                     keyboardType: TextInputType.phone,
                   ),
                 ),
@@ -553,14 +553,14 @@ class _LegalEntityPublicRegistrationScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Informazioni Entità Legale',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          Text(
+            AppLocalizations.of(context).getString('legal_entity_information'),
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Inserisci le informazioni della tua azienda.',
-            style: TextStyle(fontSize: 16, color: Colors.grey),
+          Text(
+            AppLocalizations.of(context).getString('enter_company_info'),
+            style: const TextStyle(fontSize: 16, color: Colors.grey),
           ),
           const SizedBox(height: 24),
 
@@ -582,7 +582,7 @@ class _LegalEntityPublicRegistrationScreenState
                     const SizedBox(height: 8),
                     CustomButton(
                       onPressed: _pickEntityProfilePicture,
-                      text: 'Logo Azienda',
+                      text: AppLocalizations.of(context).getString('company_logo'),
                       backgroundColor: Colors.grey,
                     ),
                   ],
@@ -604,7 +604,7 @@ class _LegalEntityPublicRegistrationScreenState
                     const SizedBox(height: 8),
                     CustomButton(
                       onPressed: _pickEntityCompanyPicture,
-                      text: 'Foto Azienda',
+                      text: AppLocalizations.of(context).getString('company_photo'),
                       backgroundColor: Colors.grey,
                     ),
                   ],
@@ -623,10 +623,10 @@ class _LegalEntityPublicRegistrationScreenState
                   width: double.infinity,
                   child: CustomTextField(
                     controller: _legalNameController,
-                    labelText: 'Nome Entità Legale *',
+                    labelText: '${AppLocalizations.of(context).getString('legal_entity_name')} *',
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Inserisci il nome dell\'entità legale';
+                        return AppLocalizations.of(context).getString('enter_legal_entity_name');
                       }
                       return null;
                     },
@@ -637,10 +637,10 @@ class _LegalEntityPublicRegistrationScreenState
                   width: double.infinity,
                   child: CustomTextField(
                     controller: _identifierCodeController,
-                    labelText: 'Codice Identificativo *',
+                    labelText: '${AppLocalizations.of(context).getString('identifier_code')} *',
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Inserisci il codice identificativo';
+                        return AppLocalizations.of(context).getString('enter_identifier_code');
                       }
                       return null;
                     },
@@ -651,16 +651,16 @@ class _LegalEntityPublicRegistrationScreenState
                   width: double.infinity,
                   child: CustomTextField(
                     controller: _entityEmailController,
-                    labelText: 'Email Aziendale *',
+                    labelText: '${AppLocalizations.of(context).getString('company_email')} *',
                     keyboardType: TextInputType.emailAddress,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Inserisci l\'email aziendale';
+                        return AppLocalizations.of(context).getString('enter_company_email');
                       }
                       if (!RegExp(
                         r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
                       ).hasMatch(value)) {
-                        return 'Inserisci un\'email valida';
+                        return AppLocalizations.of(context).getString('enter_valid_email');
                       }
                       return null;
                     },
@@ -671,10 +671,10 @@ class _LegalEntityPublicRegistrationScreenState
                   width: double.infinity,
                   child: CustomTextField(
                     controller: _legalRepresentativeController,
-                    labelText: 'Rappresentante Legale *',
+                    labelText: '${AppLocalizations.of(context).getString('legal_representative')} *',
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Inserisci il rappresentante legale';
+                        return AppLocalizations.of(context).getString('enter_legal_representative');
                       }
                       return null;
                     },
@@ -683,16 +683,16 @@ class _LegalEntityPublicRegistrationScreenState
                 const SizedBox(height: 16),
 
                 // Operational address
-                const Text(
-                  'Indirizzo Operativo',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                Text(
+                  AppLocalizations.of(context).getString('operational_address'),
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
                   child: CustomTextField(
                     controller: _operationalAddressController,
-                    labelText: 'Indirizzo',
+                        labelText: AppLocalizations.of(context).getString('address'),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -701,14 +701,14 @@ class _LegalEntityPublicRegistrationScreenState
                     Expanded(
                       child: CustomTextField(
                         controller: _operationalCityController,
-                        labelText: 'Città',
+                        labelText: AppLocalizations.of(context).getString('city'),
                       ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
                       child: CustomTextField(
                         controller: _operationalPostalCodeController,
-                        labelText: 'CAP',
+                        labelText: AppLocalizations.of(context).getString('postal_code'),
                       ),
                     ),
                   ],
@@ -719,14 +719,14 @@ class _LegalEntityPublicRegistrationScreenState
                     Expanded(
                       child: CustomTextField(
                         controller: _operationalStateController,
-                        labelText: 'Provincia',
+                        labelText: AppLocalizations.of(context).getString('province'),
                       ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
                       child: CustomTextField(
                         controller: _operationalCountryController,
-                        labelText: 'Paese',
+                        labelText: AppLocalizations.of(context).getString('country'),
                       ),
                     ),
                   ],
@@ -734,16 +734,16 @@ class _LegalEntityPublicRegistrationScreenState
                 const SizedBox(height: 24),
 
                 // Headquarter address
-                const Text(
-                  'Sede Legale',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                Text(
+                  AppLocalizations.of(context).getString('headquarters'),
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
                   child: CustomTextField(
                     controller: _headquarterAddressController,
-                    labelText: 'Indirizzo',
+                        labelText: AppLocalizations.of(context).getString('address'),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -752,14 +752,14 @@ class _LegalEntityPublicRegistrationScreenState
                     Expanded(
                       child: CustomTextField(
                         controller: _headquarterCityController,
-                        labelText: 'Città',
+                        labelText: AppLocalizations.of(context).getString('city'),
                       ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
                       child: CustomTextField(
                         controller: _headquarterPostalCodeController,
-                        labelText: 'CAP',
+                        labelText: AppLocalizations.of(context).getString('postal_code'),
                       ),
                     ),
                   ],
@@ -770,14 +770,14 @@ class _LegalEntityPublicRegistrationScreenState
                     Expanded(
                       child: CustomTextField(
                         controller: _headquarterStateController,
-                        labelText: 'Provincia',
+                        labelText: AppLocalizations.of(context).getString('province'),
                       ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
                       child: CustomTextField(
                         controller: _headquarterCountryController,
-                        labelText: 'Paese',
+                        labelText: AppLocalizations.of(context).getString('country'),
                       ),
                     ),
                   ],
@@ -785,16 +785,16 @@ class _LegalEntityPublicRegistrationScreenState
                 const SizedBox(height: 24),
 
                 // Contact information
-                const Text(
-                  'Informazioni di Contatto',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                Text(
+                  AppLocalizations.of(context).getString('contact_information'),
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
                   child: CustomTextField(
                     controller: _phoneController,
-                    labelText: 'Telefono',
+                    labelText: AppLocalizations.of(context).getString('phone'),
                     keyboardType: TextInputType.phone,
                   ),
                 ),
@@ -803,7 +803,7 @@ class _LegalEntityPublicRegistrationScreenState
                   width: double.infinity,
                   child: CustomTextField(
                     controller: _pecController,
-                    labelText: 'PEC',
+                    labelText: AppLocalizations.of(context).getString('pec'),
                     keyboardType: TextInputType.emailAddress,
                   ),
                 ),
@@ -812,7 +812,7 @@ class _LegalEntityPublicRegistrationScreenState
                   width: double.infinity,
                   child: CustomTextField(
                     controller: _websiteController,
-                    labelText: 'Sito Web',
+                    labelText: AppLocalizations.of(context).getString('website'),
                     keyboardType: TextInputType.url,
                   ),
                 ),
@@ -880,7 +880,7 @@ class _LegalEntityPublicRegistrationScreenState
     switch (_currentStep) {
       case 0:
         if (_selectedPricing == null) {
-          _showError('Seleziona un piano per continuare');
+          _showError(AppLocalizations.of(context).getString('select_plan_to_continue'));
           return false;
         }
         break;
@@ -980,7 +980,7 @@ class _LegalEntityPublicRegistrationScreenState
 
       if (result == null) {
         throw Exception(
-          'Errore nella creazione dell\'utente e dell\'entità legale',
+          AppLocalizations.of(context).getString('user_entity_creation_error'),
         );
       }
 
@@ -1024,7 +1024,7 @@ class _LegalEntityPublicRegistrationScreenState
       }
     } catch (e) {
       print('❌ Error completing registration: $e');
-      _showError('Errore durante la registrazione: $e');
+      _showError('${AppLocalizations.of(context).getString('registration_error')}: $e');
     } finally {
       if (mounted) {
         setState(() {
@@ -1055,7 +1055,7 @@ class _LegalEntityPublicRegistrationScreenState
         });
       }
     } catch (e) {
-      _showError('Errore nella selezione dell\'immagine: $e');
+      _showError('${AppLocalizations.of(context).getString('image_selection_error')}: $e');
     }
   }
 
@@ -1074,7 +1074,7 @@ class _LegalEntityPublicRegistrationScreenState
         });
       }
     } catch (e) {
-      _showError('Errore nella selezione dell\'immagine: $e');
+      _showError('${AppLocalizations.of(context).getString('image_selection_error')}: $e');
     }
   }
 
@@ -1093,7 +1093,7 @@ class _LegalEntityPublicRegistrationScreenState
         });
       }
     } catch (e) {
-      _showError('Errore nella selezione dell\'immagine: $e');
+      _showError('${AppLocalizations.of(context).getString('image_selection_error')}: $e');
     }
   }
 }

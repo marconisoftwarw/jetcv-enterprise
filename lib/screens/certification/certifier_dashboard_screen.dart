@@ -1,12 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import '../../theme/app_theme.dart';
-import '../../widgets/linkedin_button.dart';
-import '../../widgets/linkedin_card.dart';
-import '../../l10n/app_localizations.dart';
 import '../../services/certification_edge_service.dart';
-import '../../config/app_config.dart';
 import 'create_certification_screen.dart';
 import 'certification_category_management_screen.dart';
 import 'certification_information_management_screen.dart';
@@ -22,7 +15,6 @@ class CertifierDashboardScreen extends StatefulWidget {
 class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  int _selectedTabIndex = 0;
 
   // Dati delle certificazioni
   List<Map<String, dynamic>> _issuedCertifications = [];
@@ -33,14 +25,7 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
   @override
   void initState() {
     super.initState();
-    print('🏁 CertifierDashboardScreen initState called');
     _tabController = TabController(length: 2, vsync: this);
-    _tabController.addListener(() {
-      setState(() {
-        _selectedTabIndex = _tabController.index;
-      });
-    });
-    print('📞 Calling _loadCertifications from initState');
     _loadCertifications();
   }
 
@@ -51,7 +36,6 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
   }
 
   Future<void> _loadCertifications() async {
-    print('🚀 _loadCertifications called!');
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -59,19 +43,14 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
 
     try {
       // Prima testa la connessione alla Edge Function
-      print('🧪 Testing Edge Function connection...');
       final connectionOk = await CertificationEdgeService.testConnection();
 
       if (!connectionOk) {
-        print('⚠️ Edge Function not available, using mock data for testing');
         _loadMockData();
         return;
       }
 
-      print('✅ Edge Function connection OK, loading certifications...');
-
       // Carica certificazioni emesse (status: completed, closed)
-      print('📋 Loading issued certifications...');
       final issuedResult = await CertificationEdgeService.getCertifications(
         status: 'sent',
         limit: 50,
@@ -79,15 +58,11 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
       );
 
       // Carica bozze e in corso (status: draft, submitted)
-      print('📝 Loading draft certifications...');
       final draftResult = await CertificationEdgeService.getCertifications(
         status: 'draft',
         limit: 50,
         offset: 0,
       );
-
-      print('📊 Issued certifications: ${issuedResult?['data']?.length ?? 0}');
-      print('📝 Draft certifications: ${draftResult?['data']?.length ?? 0}');
 
       if (mounted) {
         setState(() {
@@ -99,12 +74,8 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
           );
           _isLoading = false;
         });
-        print(
-          '✅ State updated with ${_issuedCertifications.length} issued and ${_draftCertifications.length} draft certifications',
-        );
       }
     } catch (e) {
-      print('💥 Error loading certifications: $e');
       if (mounted) {
         setState(() {
           _errorMessage = 'Errore nel caricamento delle certificazioni: $e';
@@ -115,8 +86,6 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
   }
 
   void _loadMockData() {
-    print('📝 Loading mock data for testing...');
-
     final mockIssued = [
       {
         'id_certification': 'cert-001',
@@ -166,50 +135,6 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
         _isLoading = false;
         _errorMessage = null;
       });
-    }
-  }
-
-  Future<void> _testDirectApiCall() async {
-    print('🧪 Testing direct API call...');
-
-    try {
-      const String url =
-          '${AppConfig.supabaseUrl}/functions/v1/certification-crud';
-      final headers = {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ${AppConfig.supabaseAnonKey}',
-        'apikey': AppConfig.supabaseAnonKey,
-      };
-
-      print('🌐 Direct URL: $url');
-      print('🔑 Direct Headers: $headers');
-
-      final response = await http.get(Uri.parse(url), headers: headers);
-
-      print('📡 Direct Response Status: ${response.statusCode}');
-      print('📄 Direct Response Body: ${response.body}');
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        print('✅ Direct API call successful! Data: $data');
-
-        if (mounted) {
-          setState(() {
-            _issuedCertifications = List<Map<String, dynamic>>.from(
-              data['data'] ?? [],
-            );
-            _draftCertifications = [];
-            _isLoading = false;
-            _errorMessage = null;
-          });
-        }
-      } else {
-        print(
-          '❌ Direct API call failed: ${response.statusCode} - ${response.body}',
-        );
-      }
-    } catch (e) {
-      print('💥 Direct API call exception: $e');
     }
   }
 
@@ -270,7 +195,11 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
                               ),
                             ),
                             child: IconButton(
-                              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 18),
+                              icon: const Icon(
+                                Icons.arrow_back_ios_new,
+                                color: Colors.white,
+                                size: 18,
+                              ),
                               onPressed: () => Navigator.pop(context),
                             ),
                           ),
@@ -312,13 +241,19 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFF3B82F6).withValues(alpha: 0.4),
+                                  color: const Color(
+                                    0xFF3B82F6,
+                                  ).withValues(alpha: 0.4),
                                   blurRadius: 12,
                                   offset: const Offset(0, 4),
                                 ),
                               ],
                             ),
-                            child: const Icon(Icons.person, color: Colors.white, size: 20),
+                            child: const Icon(
+                              Icons.person,
+                              color: Colors.white,
+                              size: 20,
+                            ),
                           ),
                         ],
                       ),
@@ -384,7 +319,9 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
                         ),
                         indicatorSize: TabBarIndicatorSize.tab,
                         labelColor: Colors.white,
-                        unselectedLabelColor: Colors.white.withValues(alpha: 0.6),
+                        unselectedLabelColor: Colors.white.withValues(
+                          alpha: 0.6,
+                        ),
                         labelStyle: const TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 14,
@@ -427,10 +364,7 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(28),
           gradient: LinearGradient(
-            colors: [
-              const Color(0xFF3B82F6),
-              const Color(0xFF8B5CF6),
-            ],
+            colors: [const Color(0xFF3B82F6), const Color(0xFF8B5CF6)],
           ),
           boxShadow: [
             BoxShadow(
@@ -455,10 +389,7 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
           icon: const Icon(Icons.add_rounded, size: 24),
           label: const Text(
             'Nuova Certificazione',
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 16,
-            ),
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
           ),
         ),
       ),
@@ -480,10 +411,7 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(30),
                 gradient: LinearGradient(
-                  colors: [
-                    const Color(0xFF3B82F6),
-                    const Color(0xFF8B5CF6),
-                  ],
+                  colors: [const Color(0xFF3B82F6), const Color(0xFF8B5CF6)],
                 ),
               ),
               child: const CircularProgressIndicator(
@@ -528,7 +456,11 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
                   borderRadius: BorderRadius.circular(32),
                   color: Colors.red.withValues(alpha: 0.2),
                 ),
-                child: const Icon(Icons.error_outline, size: 32, color: Colors.red),
+                child: const Icon(
+                  Icons.error_outline,
+                  size: 32,
+                  color: Colors.red,
+                ),
               ),
               const SizedBox(height: 16),
               const Text(
@@ -553,10 +485,7 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
                   gradient: LinearGradient(
-                    colors: [
-                      const Color(0xFF3B82F6),
-                      const Color(0xFF8B5CF6),
-                    ],
+                    colors: [const Color(0xFF3B82F6), const Color(0xFF8B5CF6)],
                   ),
                 ),
                 child: ElevatedButton(
@@ -671,7 +600,10 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
               ),
               const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
                   gradient: LinearGradient(
@@ -711,94 +643,6 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
     );
   }
 
-  List<Widget> _buildCertificationsList(
-    List<Map<String, dynamic>> certifications,
-    bool isTablet,
-  ) {
-    return certifications.map((cert) {
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 16),
-        child: _buildCertificationCard(cert, isTablet),
-      );
-    }).toList();
-  }
-
-  Widget _buildEmptyState(String title, String subtitle) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.assignment_outlined,
-            size: 64,
-            color: AppTheme.textSecondary,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.primaryBlack,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(subtitle, style: TextStyle(color: AppTheme.textSecondary)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildManagementCard(
-    String title,
-    String description,
-    IconData icon,
-    Color color,
-    VoidCallback onTap,
-    bool isTablet,
-  ) {
-    return LinkedInCard(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: EdgeInsets.all(isTablet ? 20 : 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: isTablet ? 48 : 40,
-                height: isTablet ? 48 : 40,
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(icon, color: color, size: isTablet ? 24 : 20),
-              ),
-              SizedBox(height: isTablet ? 12 : 8),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: isTablet ? 18 : 16,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.primaryBlack,
-                ),
-              ),
-              SizedBox(height: isTablet ? 6 : 4),
-              Text(
-                description,
-                style: TextStyle(
-                  fontSize: isTablet ? 14 : 12,
-                  color: AppTheme.textSecondary,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildDraftsTab() {
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 768;
@@ -814,10 +658,7 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(30),
                 gradient: LinearGradient(
-                  colors: [
-                    const Color(0xFF3B82F6),
-                    const Color(0xFF8B5CF6),
-                  ],
+                  colors: [const Color(0xFF3B82F6), const Color(0xFF8B5CF6)],
                 ),
               ),
               child: const CircularProgressIndicator(
@@ -862,7 +703,11 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
                   borderRadius: BorderRadius.circular(32),
                   color: Colors.red.withValues(alpha: 0.2),
                 ),
-                child: const Icon(Icons.error_outline, size: 32, color: Colors.red),
+                child: const Icon(
+                  Icons.error_outline,
+                  size: 32,
+                  color: Colors.red,
+                ),
               ),
               const SizedBox(height: 16),
               const Text(
@@ -887,10 +732,7 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
                   gradient: LinearGradient(
-                    colors: [
-                      const Color(0xFF3B82F6),
-                      const Color(0xFF8B5CF6),
-                    ],
+                    colors: [const Color(0xFF3B82F6), const Color(0xFF8B5CF6)],
                   ),
                 ),
                 child: ElevatedButton(
@@ -937,7 +779,10 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
               ),
               const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
                   gradient: LinearGradient(
@@ -977,153 +822,6 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
     );
   }
 
-  Widget _buildCertificationCard(Map<String, dynamic> cert, bool isTablet) {
-    final status = cert['status'] ?? 'draft';
-    final statusColor = _getStatusColor(status);
-    final statusText = _getStatusText(status);
-    final createdAt =
-        DateTime.tryParse(cert['created_at'] ?? '') ?? DateTime.now();
-    final nUsers = cert['n_users'] ?? 0;
-
-    return LinkedInCard(
-      child: InkWell(
-        onTap: () {
-          // TODO: Navigate to certification details
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: EdgeInsets.all(isTablet ? 16 : 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: isTablet ? 60 : 50,
-                    height: isTablet ? 60 : 50,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      color: AppTheme.primaryBlue.withValues(alpha: 0.1),
-                    ),
-                    child: Icon(
-                      Icons.workspace_premium,
-                      color: AppTheme.primaryBlue,
-                      size: isTablet ? 30 : 24,
-                    ),
-                  ),
-                  SizedBox(width: isTablet ? 16 : 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                'Certificazione ${cert['serial_number'] ?? 'N/A'}',
-                                style: TextStyle(
-                                  fontSize: isTablet ? 18 : 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppTheme.primaryBlack,
-                                ),
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: statusColor.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                statusText,
-                                style: TextStyle(
-                                  color: statusColor,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: isTablet ? 6 : 4),
-                        Text(
-                          'Categoria: ${cert['id_certification_category'] ?? 'N/A'}',
-                          style: TextStyle(
-                            fontSize: isTablet ? 14 : 12,
-                            color: AppTheme.textSecondary,
-                          ),
-                        ),
-                        SizedBox(height: isTablet ? 8 : 6),
-                        Text(
-                          'Utenti: $nUsers',
-                          style: TextStyle(
-                            fontSize: isTablet ? 14 : 12,
-                            color: AppTheme.primaryBlack,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(
-                    Icons.arrow_forward_ios,
-                    color: AppTheme.textSecondary,
-                    size: 16,
-                  ),
-                ],
-              ),
-              SizedBox(height: isTablet ? 16 : 12),
-              Row(
-                children: [
-                  Icon(
-                    Icons.calendar_today,
-                    size: 16,
-                    color: AppTheme.textSecondary,
-                  ),
-                  SizedBox(width: 4),
-                  Text(
-                    'Creata: ${createdAt.day}/${createdAt.month}/${createdAt.year}',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: AppTheme.textSecondary,
-                    ),
-                  ),
-                  const Spacer(),
-                  if (cert['updated_t'] != null) ...[
-                    Icon(Icons.update, size: 16, color: AppTheme.textSecondary),
-                    SizedBox(width: 4),
-                    Text(
-                      'Aggiornata: ${DateTime.tryParse(cert['updated_t'])?.day}/${DateTime.tryParse(cert['updated_t'])?.month}/${DateTime.tryParse(cert['updated_t'])?.year}',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: AppTheme.textSecondary,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'sent':
-        return AppTheme.successGreen;
-      case 'closed':
-        return AppTheme.textSecondary;
-      case 'draft':
-        return AppTheme.warningOrange;
-      default:
-        return AppTheme.textSecondary;
-    }
-  }
-
   String _getStatusText(String status) {
     switch (status) {
       case 'sent':
@@ -1137,7 +835,12 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
     }
   }
 
-  Widget _buildQuickStat(String label, String value, Color color, IconData icon) {
+  Widget _buildQuickStat(
+    String label,
+    String value,
+    Color color,
+    IconData icon,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -1196,15 +899,9 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            color.withValues(alpha: 0.2),
-            color.withValues(alpha: 0.05),
-          ],
+          colors: [color.withValues(alpha: 0.2), color.withValues(alpha: 0.05)],
         ),
-        border: Border.all(
-          color: color.withValues(alpha: 0.3),
-          width: 1,
-        ),
+        border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
       ),
       child: Material(
         color: Colors.transparent,
@@ -1322,7 +1019,7 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
     return certifications.asMap().entries.map((entry) {
       int index = entry.key;
       Map<String, dynamic> cert = entry.value;
-      
+
       return Padding(
         padding: const EdgeInsets.only(bottom: 20),
         child: _buildModernCertificationCard(cert, isTablet, index),
@@ -1330,11 +1027,16 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
     }).toList();
   }
 
-  Widget _buildModernCertificationCard(Map<String, dynamic> cert, bool isTablet, int index) {
+  Widget _buildModernCertificationCard(
+    Map<String, dynamic> cert,
+    bool isTablet,
+    int index,
+  ) {
     final status = cert['status'] ?? 'draft';
     final statusColor = _getModernStatusColor(status);
     final statusText = _getStatusText(status);
-    final createdAt = DateTime.tryParse(cert['created_at'] ?? '') ?? DateTime.now();
+    final createdAt =
+        DateTime.tryParse(cert['created_at'] ?? '') ?? DateTime.now();
     final nUsers = cert['n_users'] ?? 0;
 
     return Container(
@@ -1418,7 +1120,10 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
                         color: statusColor.withValues(alpha: 0.2),
