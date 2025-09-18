@@ -319,13 +319,13 @@ class _LegalEntityManagementScreenState
               style: TextStyle(
                 color: Colors.black,
                 fontWeight: FontWeight.w700,
-                fontSize: 22,
+                fontSize: 18,
               ),
             ),
             const SizedBox(height: 4),
             Text(
               AppLocalizations.of(context).getString('manage_monitor_entities'),
-              style: TextStyle(color: Colors.grey[600], fontSize: 14),
+              style: TextStyle(color: Colors.grey[600], fontSize: 10),
             ),
           ],
         ),
