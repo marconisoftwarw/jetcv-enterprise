@@ -142,13 +142,17 @@ class _LegalEntityPublicRegistrationScreenState
         if (queryParams.isEmpty) {
           final currentLocation = ModalRoute.of(context)?.settings.name;
           if (currentLocation != null) {
-            print('🔍 Trying to extract from current location: $currentLocation');
+            print(
+              '🔍 Trying to extract from current location: $currentLocation',
+            );
             final locationUri = Uri.parse(currentLocation);
-            additionalParams = Map<String, String>.from(locationUri.queryParameters);
+            additionalParams = Map<String, String>.from(
+              locationUri.queryParameters,
+            );
             print('🔍 Additional params from location: $additionalParams');
           }
         }
-        
+
         // Prova anche a estrarre dall'URL del browser direttamente
         if (additionalParams.isEmpty) {
           try {
@@ -157,11 +161,15 @@ class _LegalEntityPublicRegistrationScreenState
             print('🔍 Browser URL: $browserUrl');
             final browserUri = Uri.parse(browserUrl);
             if (browserUri.queryParameters.isNotEmpty) {
-              additionalParams = Map<String, String>.from(browserUri.queryParameters);
+              additionalParams = Map<String, String>.from(
+                browserUri.queryParameters,
+              );
               print('🔍 Additional params from browser URL: $additionalParams');
             }
           } catch (e) {
-            print('🔍 Error extracting from browser URL (not web or error): $e');
+            print(
+              '🔍 Error extracting from browser URL (not web or error): $e',
+            );
           }
         }
       } catch (e) {

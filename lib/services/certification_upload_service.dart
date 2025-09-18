@@ -44,7 +44,8 @@ class CertificationUploadService {
 
       // Se non ci sono media files, usa JSON mode
       if (mediaFiles == null || mediaFiles.isEmpty) {
-        return await _createCertificationJsonMode(
+        // Se non ci sono media, usa il servizio standard (certifications-compose)
+        return await _createCertificationStandardMode(
           idCertifier: idCertifier,
           idLegalEntity: idLegalEntity,
           idLocation: idLocation,
@@ -61,7 +62,7 @@ class CertificationUploadService {
       // Crea una richiesta multipart
       final request = http.MultipartRequest(
         'POST',
-        Uri.parse('$_baseUrl/functions/v1/certificatio-upload'),
+        Uri.parse('$_baseUrl/functions/v1/create-media-certification'),
       );
 
       // Aggiungi gli headers (senza Content-Type per multipart)
@@ -70,14 +71,14 @@ class CertificationUploadService {
         'Authorization': 'Bearer $_apiKey',
       });
 
-      // Aggiungi i parametri della certificazione
+      // Aggiungi i campi richiesti per certifications-compose
       request.fields['id_certifier'] = idCertifier;
       request.fields['id_legal_entity'] = idLegalEntity;
       request.fields['id_location'] = idLocation;
       request.fields['n_users'] = nUsers.toString();
       request.fields['id_certification_category'] = idCertificationCategory;
-      request.fields['status'] = status ?? 'draft';
 
+      // Aggiungi i campi opzionali
       if (sentAt != null) {
         request.fields['sent_at'] = sentAt;
       }
@@ -87,24 +88,23 @@ class CertificationUploadService {
       if (closedAt != null) {
         request.fields['closed_at'] = closedAt;
       }
-
-      // Aggiungi i certification_users se presenti
-      if (certificationUsers != null && certificationUsers.isNotEmpty) {
-        request.fields['certification_users'] = json.encode(certificationUsers);
-      }
-
-      // Aggiungi i parametri per i media
-      request.fields['acquisition_type'] = acquisitionType ?? 'deferred';
-      request.fields['return_signed_url'] = 'true';
-
-      if (capturedAt != null) {
-        request.fields['captured_at'] = capturedAt;
-      }
       if (description != null) {
         request.fields['description'] = description;
       }
+      if (acquisitionType != null) {
+        request.fields['acquisition_type'] = acquisitionType;
+      }
+      if (capturedAt != null) {
+        request.fields['captured_at'] = capturedAt;
+      }
       if (fileTypeOverride != null) {
         request.fields['file_type'] = fileTypeOverride;
+      }
+      request.fields['return_signed_url'] = 'true';
+
+      // Aggiungi i certification_users se presenti
+      if (certificationUsers != null && certificationUsers.isNotEmpty) {
+        request.fields['users_json'] = json.encode(certificationUsers);
       }
 
       // Aggiungi i file media
@@ -176,8 +176,8 @@ class CertificationUploadService {
     }
   }
 
-  /// Create certification without media (JSON mode)
-  static Future<Map<String, dynamic>?> _createCertificationJsonMode({
+  /// Create certification without media (standard mode using certifications-compose)
+  static Future<Map<String, dynamic>?> _createCertificationStandardMode({
     required String idCertifier,
     required String idLegalEntity,
     required String idLocation,
@@ -190,25 +190,25 @@ class CertificationUploadService {
     List<Map<String, dynamic>>? certificationUsers,
   }) async {
     try {
-      print('🚀 Creating certification (JSON mode)...');
+      print(
+        '🚀 Creating certification (standard mode with certification-crud)...',
+      );
 
+      // Prepara il body della richiesta per certifications-compose (JSON mode)
       final requestBody = {
-        'id_certifier': idCertifier,
-        'id_legal_entity': idLegalEntity,
-        'id_location': idLocation,
-        'n_users': nUsers,
-        'id_certification_category': idCertificationCategory,
-        'status': status ?? 'draft',
+        'certification': {
+          'id_certifier': idCertifier,
+          'id_legal_entity': idLegalEntity,
+          'id_location': idLocation,
+          'n_users': nUsers,
+          'id_certification_category': idCertificationCategory,
+        },
+        'users': certificationUsers ?? [],
+        'media': <Map<String, dynamic>>[],
       };
 
-      if (sentAt != null) requestBody['sent_at'] = sentAt;
-      if (draftAt != null) requestBody['draft_at'] = draftAt;
-      if (closedAt != null) requestBody['closed_at'] = closedAt;
-      if (certificationUsers != null)
-        requestBody['certification_users'] = certificationUsers;
-
       final response = await http.post(
-        Uri.parse('$_baseUrl/functions/v1/certificatio-upload'),
+        Uri.parse('$_baseUrl/functions/v1/certifications-compose'),
         headers: _headers,
         body: json.encode(requestBody),
       );

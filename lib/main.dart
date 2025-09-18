@@ -365,8 +365,12 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
                   try {
                     final currentUri = Uri.base;
                     if (currentUri.queryParameters.isNotEmpty) {
-                      urlParams = Map<String, String>.from(currentUri.queryParameters);
-                      print('🔍 Extracted URL params from current URI: $urlParams');
+                      urlParams = Map<String, String>.from(
+                        currentUri.queryParameters,
+                      );
+                      print(
+                        '🔍 Extracted URL params from current URI: $urlParams',
+                      );
                     }
                   } catch (e) {
                     print('🔍 Error extracting params from current URI: $e');
