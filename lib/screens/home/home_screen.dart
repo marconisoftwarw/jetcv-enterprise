@@ -159,8 +159,12 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     if (_selectedIndex > maxIndex) {
-      setState(() {
-        _selectedIndex = 0; // Reset to first item
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _selectedIndex = 0; // Reset to first item
+          });
+        }
       });
     }
   }
@@ -1700,7 +1704,13 @@ class _UserSettingsContentState extends State<UserSettingsContent> {
             onPressed: () async {
               Navigator.pop(context);
               await context.read<AuthProvider>().signOut();
-              // La navigazione viene gestita automaticamente dal main.dart
+
+              // Navigate to public home after logout
+              if (context.mounted) {
+                Navigator.of(
+                  context,
+                ).pushNamedAndRemoveUntil('/public', (route) => false);
+              }
             },
             style: TextButton.styleFrom(foregroundColor: AppTheme.errorRed),
             child: Text(l10n.getString('sign_out')),

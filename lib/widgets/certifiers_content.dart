@@ -130,32 +130,32 @@ class _CertifiersContentState extends State<CertifiersContent> {
   void _applyFilters() {
     if (mounted) {
       setState(() {
-      _filteredCertifiers = _certifiersWithUser.where((certifierWithUser) {
-        // Filtro per data di nascita
-        if (_selectedBirthDate != null &&
-            certifierWithUser.user?.dateOfBirth != null) {
-          final userBirthDate = certifierWithUser.user!.dateOfBirth!;
-          if (userBirthDate.year != _selectedBirthDate!.year ||
-              userBirthDate.month != _selectedBirthDate!.month ||
-              userBirthDate.day != _selectedBirthDate!.day) {
+        _filteredCertifiers = _certifiersWithUser.where((certifierWithUser) {
+          // Filtro per data di nascita
+          if (_selectedBirthDate != null &&
+              certifierWithUser.user?.dateOfBirth != null) {
+            final userBirthDate = certifierWithUser.user!.dateOfBirth!;
+            if (userBirthDate.year != _selectedBirthDate!.year ||
+                userBirthDate.month != _selectedBirthDate!.month ||
+                userBirthDate.day != _selectedBirthDate!.day) {
+              return false;
+            }
+          }
+
+          // Filtro per ruolo
+          if (_selectedRole != null &&
+              certifierWithUser.certifier.role != _selectedRole) {
             return false;
           }
-        }
 
-        // Filtro per ruolo
-        if (_selectedRole != null &&
-            certifierWithUser.certifier.role != _selectedRole) {
-          return false;
-        }
+          // Filtro per città
+          if (_selectedCity != null &&
+              certifierWithUser.user?.city != _selectedCity) {
+            return false;
+          }
 
-        // Filtro per città
-        if (_selectedCity != null &&
-            certifierWithUser.user?.city != _selectedCity) {
-          return false;
-        }
-
-        return true;
-      }).toList();
+          return true;
+        }).toList();
       });
     }
   }

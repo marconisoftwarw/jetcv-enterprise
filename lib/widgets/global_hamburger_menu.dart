@@ -511,6 +511,13 @@ class GlobalHamburgerMenu extends StatelessWidget {
                   listen: false,
                 );
                 await authProvider.signOut();
+
+                // Navigate to public home after logout
+                if (context.mounted) {
+                  Navigator.of(
+                    context,
+                  ).pushNamedAndRemoveUntil('/public', (route) => false);
+                }
               } catch (e) {
                 print('Error during logout: $e');
               }

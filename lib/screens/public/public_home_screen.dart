@@ -1,11 +1,94 @@
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 import '../../config/app_config.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/page_with_floating_language.dart';
 import '../../l10n/app_localizations.dart';
 
-class PublicHomeScreen extends StatelessWidget {
+class PublicHomeScreen extends StatefulWidget {
   const PublicHomeScreen({super.key});
+
+  @override
+  State<PublicHomeScreen> createState() => _PublicHomeScreenState();
+}
+
+class _PublicHomeScreenState extends State<PublicHomeScreen>
+    with TickerProviderStateMixin {
+  late AnimationController _heroAnimationController;
+  late AnimationController _floatingAnimationController;
+  late AnimationController _particleAnimationController;
+  
+  late Animation<double> _heroFadeAnimation;
+  late Animation<Offset> _heroSlideAnimation;
+  late Animation<double> _floatingAnimation;
+  late Animation<double> _particleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    
+    // Hero animation (fade in + slide up)
+    _heroAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    );
+    
+    // Floating animation for cards
+    _floatingAnimationController = AnimationController(
+      duration: const Duration(seconds: 3),
+      vsync: this,
+    );
+    
+    // Particle animation for background
+    _particleAnimationController = AnimationController(
+      duration: const Duration(seconds: 8),
+      vsync: this,
+    );
+
+    _heroFadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _heroAnimationController,
+        curve: const Interval(0.0, 0.6, curve: Curves.easeOutCubic),
+      ),
+    );
+
+    _heroSlideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.3),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+        parent: _heroAnimationController,
+        curve: const Interval(0.2, 0.8, curve: Curves.easeOutCubic),
+      ),
+    );
+
+    _floatingAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _floatingAnimationController,
+        curve: Curves.easeInOutSine,
+      ),
+    );
+    
+    _particleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _particleAnimationController,
+        curve: Curves.linear,
+      ),
+    );
+
+    // Start animations
+    _heroAnimationController.forward();
+    _floatingAnimationController.repeat(reverse: true);
+    _particleAnimationController.repeat();
+  }
+
+  @override
+  void dispose() {
+    _heroAnimationController.dispose();
+    _floatingAnimationController.dispose();
+    _particleAnimationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,41 +102,36 @@ class PublicHomeScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         body: CustomScrollView(
           slivers: [
-            // Hero Section with Modern App Bar
+            // Ultra Modern Hero Section
             SliverAppBar(
-              expandedHeight: isDesktop ? 500 : (isTablet ? 400 : 350),
+              expandedHeight: isDesktop ? 800 : (isTablet ? 650 : 550),
               floating: false,
               pinned: true,
               elevation: 0,
-              backgroundColor: Colors.white,
+              backgroundColor: const Color(0xFF0A0E27),
+              automaticallyImplyLeading: false,
               flexibleSpace: FlexibleSpaceBar(
                 titlePadding: EdgeInsets.zero,
-                background: _buildHeroSection(
+                background: _buildModernHeroSection(
                   context,
                   l10n,
                   isDesktop,
                   isTablet,
                 ),
               ),
-              actions: [
-                _buildNavButton(
-                  context,
-                  l10n.getString('public_cvs'),
-                  () => Navigator.pushNamed(context, '/cv-list'),
+              bottom: PreferredSize(
+                preferredSize: const Size.fromHeight(0),
+                child: Container(
+                  height: 30,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(30),
+                      topRight: Radius.circular(30),
+                    ),
+                  ),
                 ),
-                _buildNavButton(
-                  context,
-                  l10n.getString('pricing'),
-                  () => Navigator.pushNamed(context, '/legal-entity/pricing'),
-                ),
-                _buildNavButton(
-                  context,
-                  l10n.getString('login'),
-                  () => Navigator.pushNamed(context, '/login'),
-                  isPrimary: true,
-                ),
-                const SizedBox(width: 16),
-              ],
+              ),
             ),
 
             // Main Content Section
@@ -102,170 +180,488 @@ class PublicHomeScreen extends StatelessWidget {
     );
   }
 
-  // Hero Section Builder
-  Widget _buildHeroSection(
+  // Ultra Modern Hero Section 2025
+  Widget _buildModernHeroSection(
     BuildContext context,
     AppLocalizations l10n,
     bool isDesktop,
     bool isTablet,
   ) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppTheme.primaryBlue,
-            AppTheme.primaryBlue.withValues(alpha: 0.8),
-            AppTheme.purple.withValues(alpha: 0.9),
-          ],
-        ),
-      ),
-      child: Stack(
-        children: [
-          // Background Pattern
-          Positioned.fill(
-            child: Opacity(
-              opacity: 0.1,
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      AppTheme.pureWhite.withValues(alpha: 0.1),
-                      AppTheme.pureWhite.withValues(alpha: 0.05),
-                    ],
+    return AnimatedBuilder(
+      animation: Listenable.merge([
+        _heroAnimationController,
+        _floatingAnimationController,
+        _particleAnimationController,
+      ]),
+      builder: (context, child) {
+        return Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF0A0E27),
+                Color(0xFF1A1F3A),
+                Color(0xFF2D1B69),
+                Color(0xFF6366F1),
+              ],
+              stops: [0.0, 0.3, 0.7, 1.0],
+            ),
+          ),
+          child: Stack(
+            children: [
+              // Animated Particles Background
+              _buildParticleBackground(),
+              
+              // Glassmorphic Navigation Bar
+              _buildGlassmorphicNavBar(context, l10n, isDesktop),
+              
+              // Main Hero Content
+              SafeArea(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isDesktop ? 120 : (isTablet ? 60 : 32),
+                    vertical: isDesktop ? 80 : 60,
+                  ),
+                  child: FadeTransition(
+                    opacity: _heroFadeAnimation,
+                    child: SlideTransition(
+                      position: _heroSlideAnimation,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // Floating Brand Icon with Glow
+                          Transform.translate(
+                            offset: Offset(0, math.sin(_floatingAnimation.value * 2 * math.pi) * 8),
+                            child: Container(
+                              width: isDesktop ? 140 : 120,
+                              height: isDesktop ? 140 : 120,
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    Color(0xFF06B6D4),
+                                    Color(0xFF3B82F6),
+                                    Color(0xFF8B5CF6),
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(32),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFF06B6D4).withValues(alpha: 0.4),
+                                    blurRadius: 40,
+                                    spreadRadius: 0,
+                                    offset: const Offset(0, 20),
+                                  ),
+                                  BoxShadow(
+                                    color: const Color(0xFF8B5CF6).withValues(alpha: 0.3),
+                                    blurRadius: 60,
+                                    spreadRadius: 0,
+                                    offset: const Offset(0, 40),
+                                  ),
+                                ],
+                              ),
+                              child: Icon(
+                                Icons.verified_user_rounded,
+                                size: isDesktop ? 70 : 60,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+
+                          SizedBox(height: isDesktop ? 48 : 32),
+
+                          // Animated Main Title with Gradient
+                          ShaderMask(
+                            shaderCallback: (bounds) => const LinearGradient(
+                              colors: [
+                                Color(0xFFFFFFFF),
+                                Color(0xFF06B6D4),
+                                Color(0xFF8B5CF6),
+                              ],
+                            ).createShader(bounds),
+                            child: Text(
+                              AppConfig.appName,
+                              style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: -2.0,
+                                fontSize: isDesktop ? 72 : (isTablet ? 56 : 42),
+                                height: 1.1,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+
+                          SizedBox(height: isDesktop ? 24 : 16),
+
+                          // Modern Subtitle with Typewriter Effect
+                          Container(
+                            constraints: BoxConstraints(maxWidth: isDesktop ? 800 : 600),
+                            child: Text(
+                              l10n.getString('enterprise_certification_platform'),
+                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                color: Colors.white.withValues(alpha: 0.9),
+                                fontWeight: FontWeight.w400,
+                                fontSize: isDesktop ? 24 : 20,
+                                height: 1.5,
+                                letterSpacing: 0.5,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+
+                          SizedBox(height: isDesktop ? 64 : 48),
+
+                          // Modern CTA Buttons with Micro-interactions
+                          if (isDesktop)
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                _buildModernCTAButton(
+                                  context,
+                                  l10n.getString('register_company'),
+                                  () => Navigator.pushNamed(context, '/legal-entity/register'),
+                                  isPrimary: true,
+                                ),
+                                const SizedBox(width: 24),
+                                _buildModernCTAButton(
+                                  context,
+                                  l10n.getString('view_pricing'),
+                                  () => Navigator.pushNamed(context, '/legal-entity/pricing'),
+                                ),
+                                const SizedBox(width: 24),
+                                _buildModernCTAButton(
+                                  context,
+                                  l10n.getString('explore_cvs'),
+                                  () => Navigator.pushNamed(context, '/cv-list'),
+                                  isSecondary: true,
+                                ),
+                              ],
+                            )
+                          else
+                            Column(
+                              children: [
+                                _buildModernCTAButton(
+                                  context,
+                                  l10n.getString('register_company'),
+                                  () => Navigator.pushNamed(context, '/legal-entity/register'),
+                                  isPrimary: true,
+                                  isFullWidth: true,
+                                ),
+                                const SizedBox(height: 16),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _buildModernCTAButton(
+                                        context,
+                                        l10n.getString('view_pricing'),
+                                        () => Navigator.pushNamed(context, '/legal-entity/pricing'),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: _buildModernCTAButton(
+                                        context,
+                                        l10n.getString('explore_cvs'),
+                                        () => Navigator.pushNamed(context, '/cv-list'),
+                                        isSecondary: true,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+
+                          if (isDesktop) ...[
+                            const SizedBox(height: 80),
+                            // Trust Indicators
+                            _buildTrustIndicators(context, l10n),
+                          ],
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
+            ],
           ),
-          // Content
-          SafeArea(
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: isDesktop ? 80 : (isTablet ? 40 : 24),
-                vertical: 40,
+        );
+      },
+    );
+  }
+
+  // Animated Particle Background
+  Widget _buildParticleBackground() {
+    return Positioned.fill(
+      child: CustomPaint(
+        painter: ParticlePainter(_particleAnimation.value),
+      ),
+    );
+  }
+
+  // Glassmorphic Navigation Bar
+  Widget _buildGlassmorphicNavBar(
+    BuildContext context,
+    AppLocalizations l10n,
+    bool isDesktop,
+  ) {
+    return Positioned(
+      top: 0,
+      left: 0,
+      right: 0,
+      child: SafeArea(
+        child: Container(
+          margin: EdgeInsets.all(isDesktop ? 32 : 16),
+          padding: EdgeInsets.symmetric(
+            horizontal: isDesktop ? 32 : 20,
+            vertical: isDesktop ? 16 : 12,
+          ),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.white.withValues(alpha: 0.1),
+                Colors.white.withValues(alpha: 0.05),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.2),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
               ),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Logo
+              Row(
+                children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF06B6D4), Color(0xFF8B5CF6)],
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.verified_user_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    AppConfig.appName,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 18,
+                    ),
+                  ),
+                ],
+              ),
+              
+              // Navigation Items
+              if (isDesktop)
+                Row(
                   children: [
-                    // Logo/Brand
-                    Container(
-                      width: isDesktop ? 120 : 100,
-                      height: isDesktop ? 120 : 100,
-                      decoration: BoxDecoration(
-                        color: AppTheme.pureWhite.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(
-                          color: AppTheme.pureWhite.withValues(alpha: 0.3),
-                          width: 2,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppTheme.pureWhite.withValues(alpha: 0.2),
-                            blurRadius: 30,
-                            spreadRadius: 0,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        Icons.verified_user_rounded,
-                        size: isDesktop ? 60 : 50,
-                        color: AppTheme.pureWhite,
-                      ),
+                    _buildGlassNavItem(
+                      l10n.getString('public_cvs'),
+                      () => Navigator.pushNamed(context, '/cv-list'),
                     ),
-
-                    SizedBox(height: isDesktop ? 32 : 24),
-
-                    // Main Title
-                    Text(
-                      AppConfig.appName,
-                      style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                        color: AppTheme.pureWhite,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -1.0,
-                        fontSize: isDesktop ? 48 : (isTablet ? 40 : 32),
-                      ),
-                      textAlign: TextAlign.center,
+                    const SizedBox(width: 8),
+                    _buildGlassNavItem(
+                      l10n.getString('pricing'),
+                      () => Navigator.pushNamed(context, '/legal-entity/pricing'),
                     ),
-
-                    SizedBox(height: isDesktop ? 16 : 12),
-
-                    // Subtitle
-                    Text(
-                      l10n.getString('enterprise_certification_platform'),
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: AppTheme.pureWhite.withValues(alpha: 0.9),
-                        fontWeight: FontWeight.w500,
-                        fontSize: isDesktop ? 20 : 18,
-                      ),
-                      textAlign: TextAlign.center,
+                    const SizedBox(width: 16),
+                    _buildGlassNavButton(
+                      l10n.getString('login'),
+                      () => Navigator.pushNamed(context, '/login'),
                     ),
-
-                    SizedBox(height: isDesktop ? 40 : 32),
-
-                    // Hero CTA Buttons
-                    if (isDesktop)
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _buildHeroButton(
-                            context,
-                            l10n.getString('register_company'),
-                            () => Navigator.pushNamed(
-                              context,
-                              '/legal-entity/register',
-                            ),
-                            isPrimary: true,
-                          ),
-                          const SizedBox(width: 20),
-                          _buildHeroButton(
-                            context,
-                            l10n.getString('view_pricing'),
-                            () => Navigator.pushNamed(
-                              context,
-                              '/legal-entity/pricing',
-                            ),
-                          ),
-                        ],
-                      )
-                    else
-                      Column(
-                        children: [
-                          _buildHeroButton(
-                            context,
-                            l10n.getString('register_company'),
-                            () => Navigator.pushNamed(
-                              context,
-                              '/legal-entity/register',
-                            ),
-                            isPrimary: true,
-                            isFullWidth: true,
-                          ),
-                          const SizedBox(height: 16),
-                          _buildHeroButton(
-                            context,
-                            l10n.getString('view_pricing'),
-                            () => Navigator.pushNamed(
-                              context,
-                              '/legal-entity/pricing',
-                            ),
-                            isFullWidth: true,
-                          ),
-                        ],
-                      ),
                   ],
                 ),
-              ),
-            ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Glass Navigation Item
+  Widget _buildGlassNavItem(String text, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Text(
+          text,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.9),
+            fontWeight: FontWeight.w500,
+            fontSize: 15,
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Glass Navigation Button
+  Widget _buildGlassNavButton(String text, VoidCallback onTap) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF06B6D4), Color(0xFF3B82F6)],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF06B6D4).withValues(alpha: 0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            child: Text(
+              text,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+                fontSize: 15,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Modern CTA Button with Micro-interactions
+  Widget _buildModernCTAButton(
+    BuildContext context,
+    String text,
+    VoidCallback onPressed, {
+    bool isPrimary = false,
+    bool isSecondary = false,
+    bool isFullWidth = false,
+  }) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: onPressed,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          width: isFullWidth ? double.infinity : null,
+          padding: EdgeInsets.symmetric(
+            horizontal: isPrimary ? 32 : 24,
+            vertical: isPrimary ? 16 : 14,
+          ),
+          decoration: BoxDecoration(
+            gradient: isPrimary
+                ? const LinearGradient(
+                    colors: [Color(0xFF06B6D4), Color(0xFF3B82F6)],
+                  )
+                : isSecondary
+                    ? null
+                    : LinearGradient(
+                        colors: [
+                          Colors.white.withValues(alpha: 0.1),
+                          Colors.white.withValues(alpha: 0.05),
+                        ],
+                      ),
+            border: isSecondary
+                ? Border.all(color: Colors.white.withValues(alpha: 0.3))
+                : null,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: isPrimary
+                ? [
+                    BoxShadow(
+                      color: const Color(0xFF06B6D4).withValues(alpha: 0.4),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                  ]
+                : [],
+          ),
+          child: Center(
+            child: Text(
+              text,
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: isPrimary ? FontWeight.w700 : FontWeight.w600,
+                fontSize: isPrimary ? 16 : 15,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Trust Indicators
+  Widget _buildTrustIndicators(BuildContext context, AppLocalizations l10n) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.white.withValues(alpha: 0.1),
+            Colors.white.withValues(alpha: 0.05),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _buildTrustItem('10K+', l10n.getString('certifications_issued')),
+          _buildTrustItem('500+', l10n.getString('companies_verified')),
+          _buildTrustItem('99.9%', l10n.getString('uptime_guarantee')),
+          _buildTrustItem('24/7', l10n.getString('support_available')),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTrustItem(String number, String label) {
+    return Column(
+      children: [
+        Text(
+          number,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w800,
+            fontSize: 24,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.8),
+            fontWeight: FontWeight.w500,
+            fontSize: 12,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
     );
   }
 
@@ -662,7 +1058,7 @@ class PublicHomeScreen extends StatelessWidget {
     );
   }
 
-  // Stats Section
+  // Ultra Modern Stats Section 2025
   Widget _buildStatsSection(
     BuildContext context,
     AppLocalizations l10n,
@@ -670,100 +1066,276 @@ class PublicHomeScreen extends StatelessWidget {
     bool isTablet,
   ) {
     final stats = [
-      {'number': '10K+', 'label': l10n.getString('certifications_issued')},
-      {'number': '500+', 'label': l10n.getString('companies_verified')},
-      {'number': '99.9%', 'label': l10n.getString('uptime_guarantee')},
-      {'number': '24/7', 'label': l10n.getString('support_available')},
+      {
+        'number': '10K+',
+        'label': l10n.getString('certifications_issued'),
+        'icon': Icons.verified_rounded,
+        'color': const Color(0xFF06B6D4)
+      },
+      {
+        'number': '500+',
+        'label': l10n.getString('companies_verified'),
+        'icon': Icons.business_rounded,
+        'color': const Color(0xFF3B82F6)
+      },
+      {
+        'number': '99.9%',
+        'label': l10n.getString('uptime_guarantee'),
+        'icon': Icons.trending_up_rounded,
+        'color': const Color(0xFF10B981)
+      },
+      {
+        'number': '24/7',
+        'label': l10n.getString('support_available'),
+        'icon': Icons.support_agent_rounded,
+        'color': const Color(0xFF8B5CF6)
+      },
     ];
 
-    return Container(
-      padding: EdgeInsets.all(isDesktop ? 60 : 40),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppTheme.primaryBlue.withValues(alpha: 0.05),
-            AppTheme.purple.withValues(alpha: 0.05),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Column(
-        children: [
-          Text(
-            l10n.getString('trusted_by_thousands'),
-            style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-              color: AppTheme.textPrimary,
-              fontWeight: FontWeight.w700,
-              fontSize: isDesktop ? 32 : 28,
+    return AnimatedBuilder(
+      animation: _floatingAnimationController,
+      builder: (context, child) {
+        return Container(
+          margin: EdgeInsets.symmetric(horizontal: isDesktop ? 0 : 16),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF0A0E27),
+                Color(0xFF1A1F3A),
+                Color(0xFF2D1B69),
+              ],
             ),
-            textAlign: TextAlign.center,
+            borderRadius: BorderRadius.circular(32),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF0A0E27).withValues(alpha: 0.3),
+                blurRadius: 40,
+                spreadRadius: 0,
+                offset: const Offset(0, 20),
+              ),
+            ],
           ),
+          child: Stack(
+            children: [
+              // Glassmorphic overlay
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.white.withValues(alpha: 0.1),
+                      Colors.white.withValues(alpha: 0.05),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(32),
+                ),
+              ),
+              
+              // Content
+              Padding(
+                padding: EdgeInsets.all(isDesktop ? 80 : 48),
+                child: Column(
+                  children: [
+                    // Modern Title with gradient
+                    ShaderMask(
+                      shaderCallback: (bounds) => const LinearGradient(
+                        colors: [
+                          Color(0xFFFFFFFF),
+                          Color(0xFF06B6D4),
+                          Color(0xFF8B5CF6),
+                        ],
+                      ).createShader(bounds),
+                      child: Text(
+                        l10n.getString('trusted_by_thousands'),
+                        style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                          fontSize: isDesktop ? 48 : 32,
+                          letterSpacing: -1.0,
+                          height: 1.2,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
 
-          SizedBox(height: isDesktop ? 48 : 32),
+                    SizedBox(height: isDesktop ? 64 : 48),
 
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: isDesktop ? 4 : (isTablet ? 2 : 1),
-              crossAxisSpacing: 24,
-              mainAxisSpacing: 24,
-            ),
-            itemCount: stats.length,
-            itemBuilder: (context, index) {
-              final stat = stats[index];
-              return _buildStatCard(
-                context,
-                stat['number'] as String,
-                stat['label'] as String,
-              );
-            },
+                    // Modern Stats Grid
+                    if (isDesktop)
+                      Row(
+                        children: stats.map((stat) {
+                          final index = stats.indexOf(stat);
+                          return Expanded(
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: index == 0 || index == stats.length - 1 ? 0 : 12,
+                              ),
+                              child: _buildModernStatCard(
+                                context,
+                                stat['number'] as String,
+                                stat['label'] as String,
+                                stat['icon'] as IconData,
+                                stat['color'] as Color,
+                                index,
+                                isDesktop,
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      )
+                    else
+                      GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: isTablet ? 2 : 1,
+                          crossAxisSpacing: 24,
+                          mainAxisSpacing: 24,
+                          childAspectRatio: isTablet ? 1.5 : 2.5,
+                        ),
+                        itemCount: stats.length,
+                        itemBuilder: (context, index) {
+                          final stat = stats[index];
+                          return _buildModernStatCard(
+                            context,
+                            stat['number'] as String,
+                            stat['label'] as String,
+                            stat['icon'] as IconData,
+                            stat['color'] as Color,
+                            index,
+                            isDesktop,
+                          );
+                        },
+                      ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  // Stat Card
-  Widget _buildStatCard(BuildContext context, String number, String label) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: AppTheme.pureWhite,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.primaryBlue.withValues(alpha: 0.1),
-            blurRadius: 20,
-            spreadRadius: 0,
-            offset: const Offset(0, 4),
-          ),
-        ],
+  // Ultra Modern Stat Card 2025
+  Widget _buildModernStatCard(
+    BuildContext context,
+    String number,
+    String label,
+    IconData icon,
+    Color color,
+    int index,
+    bool isDesktop,
+  ) {
+    return Transform.translate(
+      offset: Offset(
+        0,
+        math.sin(_floatingAnimation.value * 2 * math.pi + index * 0.5) * 5,
       ),
-      child: Column(
-        children: [
-          Text(
-            number,
-            style: Theme.of(context).textTheme.displaySmall?.copyWith(
-              color: AppTheme.primaryBlue,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.5,
-            ),
+      child: Container(
+        padding: EdgeInsets.all(isDesktop ? 32 : 24),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.white.withValues(alpha: 0.15),
+              Colors.white.withValues(alpha: 0.05),
+            ],
           ),
-
-          const SizedBox(height: 8),
-
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppTheme.textGray,
-              fontWeight: FontWeight.w500,
-            ),
-            textAlign: TextAlign.center,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.2),
+            width: 1,
           ),
-        ],
+          boxShadow: [
+            BoxShadow(
+              color: color.withValues(alpha: 0.2),
+              blurRadius: 30,
+              spreadRadius: 0,
+              offset: const Offset(0, 15),
+            ),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 20,
+              spreadRadius: 0,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Animated Icon with Glow
+            Container(
+              width: isDesktop ? 64 : 56,
+              height: isDesktop ? 64 : 56,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [color, color.withValues(alpha: 0.7)],
+                ),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withValues(alpha: 0.4),
+                    blurRadius: 20,
+                    spreadRadius: 0,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Icon(
+                icon,
+                color: Colors.white,
+                size: isDesktop ? 32 : 28,
+              ),
+            ),
+
+            SizedBox(height: isDesktop ? 24 : 20),
+
+            // Animated Number with Gradient
+            ShaderMask(
+              shaderCallback: (bounds) => LinearGradient(
+                colors: [Colors.white, color],
+              ).createShader(bounds),
+              child: Text(
+                number,
+                style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w900,
+                  fontSize: isDesktop ? 36 : 28,
+                  letterSpacing: -1.0,
+                  height: 1.0,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+
+            SizedBox(height: isDesktop ? 16 : 12),
+
+            // Centered Label with Perfect Typography
+            Container(
+              constraints: BoxConstraints(maxWidth: isDesktop ? 200 : 150),
+              child: Text(
+                label,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Colors.white.withValues(alpha: 0.9),
+                  fontWeight: FontWeight.w500,
+                  fontSize: isDesktop ? 16 : 14,
+                  height: 1.4,
+                  letterSpacing: 0.3,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1014,5 +1586,52 @@ class PublicHomeScreen extends StatelessWidget {
           )
           .toList(),
     );
+  }
+}
+
+// Particle Painter for animated background
+class ParticlePainter extends CustomPainter {
+  final double animationValue;
+  
+  ParticlePainter(this.animationValue);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..style = PaintingStyle.fill;
+
+    // Create animated particles
+    for (int i = 0; i < 50; i++) {
+      final x = (i * 37.0 + animationValue * 50) % size.width;
+      final y = (i * 23.0 + animationValue * 30) % size.height;
+      final radius = (math.sin(animationValue * 2 * math.pi + i) * 2 + 3).abs();
+      
+      paint.color = [
+        const Color(0xFF06B6D4).withValues(alpha: 0.1),
+        const Color(0xFF3B82F6).withValues(alpha: 0.1),
+        const Color(0xFF8B5CF6).withValues(alpha: 0.1),
+      ][i % 3];
+      
+      canvas.drawCircle(Offset(x, y), radius, paint);
+    }
+
+    // Create larger floating orbs
+    for (int i = 0; i < 5; i++) {
+      final x = (i * 200.0 + animationValue * 20) % size.width;
+      final y = (i * 150.0 + animationValue * 15) % size.height;
+      final radius = 30.0 + math.sin(animationValue * math.pi + i) * 10;
+      
+      paint.color = [
+        const Color(0xFF06B6D4).withValues(alpha: 0.05),
+        const Color(0xFF8B5CF6).withValues(alpha: 0.05),
+      ][i % 2];
+      
+      canvas.drawCircle(Offset(x, y), radius, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(ParticlePainter oldDelegate) {
+    return oldDelegate.animationValue != animationValue;
   }
 }

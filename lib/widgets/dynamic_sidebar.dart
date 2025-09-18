@@ -243,7 +243,13 @@ class DynamicSidebar extends StatelessWidget {
               onPressed: () async {
                 Navigator.of(context).pop();
                 await authProvider.signOut();
-                // La navigazione viene gestita automaticamente dal main.dart
+
+                // Navigate to public home after logout
+                if (context.mounted) {
+                  Navigator.of(
+                    context,
+                  ).pushNamedAndRemoveUntil('/public', (route) => false);
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.errorRed,

@@ -153,6 +153,23 @@ class _CVListScreenState extends State<CVListScreen> {
     );
   }
 
+  bool _hasActiveFilters() {
+    return _searchController.text.trim().isNotEmpty ||
+        _locationController.text.trim().isNotEmpty ||
+        _showVerifiedOnly ||
+        _selectedSortBy != 'recent';
+  }
+
+  void _clearAllFilters() {
+    setState(() {
+      _searchController.clear();
+      _locationController.clear();
+      _showVerifiedOnly = false;
+      _selectedSortBy = 'recent';
+    });
+    _filterCVs();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -222,31 +239,33 @@ class _CVListScreenState extends State<CVListScreen> {
                 ),
               ),
               const SizedBox(width: 12),
-              DropdownButtonFormField<String>(
-                value: _selectedSortBy,
-                decoration: InputDecoration(
-                  labelText: 'Ordina per',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+              Expanded(
+                child: DropdownButtonFormField<String>(
+                  value: _selectedSortBy,
+                  decoration: InputDecoration(
+                    labelText: 'Ordina per',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
+                  items: const [
+                    DropdownMenuItem(value: 'recent', child: Text('Più recenti')),
+                    DropdownMenuItem(value: 'name', child: Text('Nome')),
+                    DropdownMenuItem(value: 'location', child: Text('Località')),
+                    DropdownMenuItem(
+                      value: 'verified',
+                      child: Text('Verificati'),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() {
+                        _selectedSortBy = value;
+                      });
+                      _filterCVs();
+                    }
+                  },
                 ),
-                items: const [
-                  DropdownMenuItem(value: 'recent', child: Text('Più recenti')),
-                  DropdownMenuItem(value: 'name', child: Text('Nome')),
-                  DropdownMenuItem(value: 'location', child: Text('Località')),
-                  DropdownMenuItem(
-                    value: 'verified',
-                    child: Text('Verificati'),
-                  ),
-                ],
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() {
-                      _selectedSortBy = value;
-                    });
-                    _filterCVs();
-                  }
-                },
               ),
             ],
           ),
@@ -269,6 +288,23 @@ class _CVListScreenState extends State<CVListScreen> {
                 checkmarkColor: AppTheme.primaryBlue,
               ),
               const SizedBox(width: 12),
+              if (_hasActiveFilters())
+                ElevatedButton.icon(
+                  onPressed: _clearAllFilters,
+                  icon: const Icon(Icons.clear, size: 16),
+                  label: const Text('Pulisci filtri'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.errorRed,
+                    foregroundColor: AppTheme.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                ),
+              const Spacer(),
               Text(
                 '${_filteredCVs.length} CV trovati',
                 style: TextStyle(fontSize: 14, color: AppTheme.primaryBlack),

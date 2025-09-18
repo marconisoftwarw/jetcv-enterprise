@@ -448,7 +448,8 @@ class AppLocalizations {
       'per_year': '/anno',
       'image_selection_error': 'Errore nella selezione dell\'immagine',
       'registration_error': 'Errore durante la registrazione',
-      'user_entity_creation_error': 'Errore nella creazione dell\'utente e dell\'entità legale',
+      'user_entity_creation_error':
+          'Errore nella creazione dell\'utente e dell\'entità legale',
       'contact_support': 'Contatta Supporto',
       'help': 'Aiuto',
       'search': 'Cerca',
@@ -967,7 +968,7 @@ class AppLocalizations {
       'operational_address': 'Operational Address',
 
       'province': 'Province',
-   
+
       'headquarters': 'Headquarters',
       'contact_information': 'Contact Information',
       'pec': 'PEC',
@@ -1377,7 +1378,7 @@ class AppLocalizations {
           'Professionelle Zertifizierungsplattform',
       'streamline_business_verification':
           'Optimieren Sie Ihren Geschäftsverifizierungsprozess mit unserem umfassenden Rechtseinheiten-Managementsystem.',
- 
+
       'register_company': 'Unternehmen registrieren',
       'explore_cvs': 'CVs erkunden',
       'create_certification': 'Zertifizierung erstellen',
@@ -1424,7 +1425,8 @@ class AppLocalizations {
       'pricing': 'Preisgestaltung',
       'personal_info': 'Persönlich',
       'company_info': 'Unternehmen',
-      'choose_plan_subtitle': 'Wählen Sie den Plan, der am besten zu Ihren Bedürfnissen passt.',
+      'choose_plan_subtitle':
+          'Wählen Sie den Plan, der am besten zu Ihren Bedürfnissen passt.',
       'personal_information': 'Persönliche Informationen',
       'enter_personal_info': 'Geben Sie Ihre persönlichen Informationen ein.',
       'upload_profile_photo': 'Profilbild hochladen',
@@ -1455,7 +1457,8 @@ class AppLocalizations {
       'per_year': '/Jahr',
       'image_selection_error': 'Fehler bei der Bildauswahl',
       'registration_error': 'Registrierungsfehler',
-      'user_entity_creation_error': 'Fehler beim Erstellen von Benutzer und Rechtseinheit',
+      'user_entity_creation_error':
+          'Fehler beim Erstellen von Benutzer und Rechtseinheit',
       'contact_support': 'Support kontaktieren',
       'help': 'Hilfe',
       'search': 'Suchen',
@@ -1904,8 +1907,9 @@ class AppLocalizations {
       'pricing': 'Tarification',
       'personal_info': 'Personnel',
       'company_info': 'Entreprise',
-      'choose_plan_subtitle': 'Choisissez le plan qui correspond le mieux à vos besoins.',
-  
+      'choose_plan_subtitle':
+          'Choisissez le plan qui correspond le mieux à vos besoins.',
+
       'enter_personal_info': 'Entrez vos informations personnelles.',
       'upload_profile_photo': 'Télécharger Photo de Profil',
       'full_name': 'Nom Complet',
@@ -1930,11 +1934,13 @@ class AppLocalizations {
       'website': 'Site Web',
       'plan_selected': 'PLAN SÉLECTIONNÉ',
       'select_plan_to_continue': 'Sélectionnez un plan pour continuer',
-      'pricing_plans_loading_error': 'Erreur de chargement des plans tarifaires',
+      'pricing_plans_loading_error':
+          'Erreur de chargement des plans tarifaires',
       'per_year': '/an',
       'image_selection_error': 'Erreur de sélection d\'image',
       'registration_error': 'Erreur d\'inscription',
-      'user_entity_creation_error': 'Erreur de création d\'utilisateur et d\'entité légale',
+      'user_entity_creation_error':
+          'Erreur de création d\'utilisateur et d\'entité légale',
       'contact_support': 'Contacter le support',
       'help': 'Aide',
       'search': 'Rechercher',

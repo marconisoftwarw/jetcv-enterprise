@@ -292,7 +292,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               onTap: () async {
                 Navigator.pop(context);
                 await context.read<AuthProvider>().signOut();
-                // La navigazione viene gestita automaticamente dal main.dart
+
+                // Navigate to public home after logout
+                if (context.mounted) {
+                  Navigator.of(
+                    context,
+                  ).pushNamedAndRemoveUntil('/public', (route) => false);
+                }
               },
             ),
             const SizedBox(height: 16),
