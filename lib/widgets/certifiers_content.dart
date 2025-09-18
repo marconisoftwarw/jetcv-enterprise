@@ -18,8 +18,16 @@ class CertifiersContent extends StatefulWidget {
 class _CertifiersContentState extends State<CertifiersContent> {
   final CertifierService _certifierService = CertifierService();
   List<CertifierWithUser> _certifiersWithUser = [];
+  List<CertifierWithUser> _filteredCertifiers = [];
   bool _isLoading = true;
   String? _errorMessage;
+
+  // Filtri
+  DateTime? _selectedBirthDate;
+  String? _selectedRole;
+  String? _selectedCity;
+  List<String> _availableRoles = [];
+  List<String> _availableCities = [];
 
   @override
   void initState() {
@@ -74,6 +82,8 @@ class _CertifiersContentState extends State<CertifiersContent> {
 
       setState(() {
         _certifiersWithUser = certifiersWithUser;
+        _filteredCertifiers = certifiersWithUser;
+        _extractFilterOptions();
         _isLoading = false;
       });
     } catch (e) {
@@ -84,6 +94,67 @@ class _CertifiersContentState extends State<CertifiersContent> {
         _isLoading = false;
       });
     }
+  }
+
+  void _extractFilterOptions() {
+    final roles = <String>{};
+    final cities = <String>{};
+
+    for (final certifierWithUser in _certifiersWithUser) {
+      if (certifierWithUser.certifier.role != null &&
+          certifierWithUser.certifier.role!.isNotEmpty) {
+        roles.add(certifierWithUser.certifier.role!);
+      }
+      if (certifierWithUser.user?.city != null &&
+          certifierWithUser.user!.city!.isNotEmpty) {
+        cities.add(certifierWithUser.user!.city!);
+      }
+    }
+
+    setState(() {
+      _availableRoles = roles.toList()..sort();
+      _availableCities = cities.toList()..sort();
+    });
+  }
+
+  void _applyFilters() {
+    setState(() {
+      _filteredCertifiers = _certifiersWithUser.where((certifierWithUser) {
+        // Filtro per data di nascita
+        if (_selectedBirthDate != null &&
+            certifierWithUser.user?.dateOfBirth != null) {
+          final userBirthDate = certifierWithUser.user!.dateOfBirth!;
+          if (userBirthDate.year != _selectedBirthDate!.year ||
+              userBirthDate.month != _selectedBirthDate!.month ||
+              userBirthDate.day != _selectedBirthDate!.day) {
+            return false;
+          }
+        }
+
+        // Filtro per ruolo
+        if (_selectedRole != null &&
+            certifierWithUser.certifier.role != _selectedRole) {
+          return false;
+        }
+
+        // Filtro per città
+        if (_selectedCity != null &&
+            certifierWithUser.user?.city != _selectedCity) {
+          return false;
+        }
+
+        return true;
+      }).toList();
+    });
+  }
+
+  void _clearFilters() {
+    setState(() {
+      _selectedBirthDate = null;
+      _selectedRole = null;
+      _selectedCity = null;
+      _filteredCertifiers = _certifiersWithUser;
+    });
   }
 
   @override
@@ -133,7 +204,7 @@ class _CertifiersContentState extends State<CertifiersContent> {
       );
     }
 
-    if (_certifiersWithUser.isEmpty) {
+    if (_filteredCertifiers.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -192,6 +263,9 @@ class _CertifiersContentState extends State<CertifiersContent> {
           ),
         ),
 
+        // Sezione filtri
+        _buildFiltersSection(l10n, isTablet),
+
         // Lista certificatori
         Expanded(
           child: ListView.separated(
@@ -199,16 +273,360 @@ class _CertifiersContentState extends State<CertifiersContent> {
               horizontal: isTablet ? 24 : 16,
               vertical: isTablet ? 8 : 4,
             ),
-            itemCount: _certifiersWithUser.length,
+            itemCount: _filteredCertifiers.length,
             separatorBuilder: (context, index) =>
                 SizedBox(height: isTablet ? 16 : 12),
             itemBuilder: (context, index) {
-              final certifierWithUser = _certifiersWithUser[index];
+              final certifierWithUser = _filteredCertifiers[index];
               return _buildCertifierCard(certifierWithUser, l10n, isTablet);
             },
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildFiltersSection(AppLocalizations l10n, bool isTablet) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: isTablet ? 24 : 16),
+      padding: EdgeInsets.all(isTablet ? 20 : 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.1), width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header filtri
+          Row(
+            children: [
+              Icon(
+                Icons.filter_list,
+                color: AppTheme.primaryBlue,
+                size: isTablet ? 24 : 20,
+              ),
+              SizedBox(width: 8),
+              Text(
+                l10n.getString('filters'),
+                style: TextStyle(
+                  fontSize: isTablet ? 18 : 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.primaryBlack,
+                ),
+              ),
+              const Spacer(),
+              GestureDetector(
+                onTap: _clearFilters,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color:
+                        (_selectedBirthDate != null ||
+                            _selectedRole != null ||
+                            _selectedCity != null)
+                        ? AppTheme.errorRed.withValues(alpha: 0.1)
+                        : AppTheme.neutralGrey.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color:
+                          (_selectedBirthDate != null ||
+                              _selectedRole != null ||
+                              _selectedCity != null)
+                          ? AppTheme.errorRed.withValues(alpha: 0.3)
+                          : AppTheme.neutralGrey.withValues(alpha: 0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.clear,
+                        color:
+                            (_selectedBirthDate != null ||
+                                _selectedRole != null ||
+                                _selectedCity != null)
+                            ? AppTheme.errorRed
+                            : AppTheme.neutralGrey,
+                        size: 16,
+                      ),
+                      SizedBox(width: 4),
+                      Text(
+                        l10n.getString('clear_filters'),
+                        style: TextStyle(
+                          color:
+                              (_selectedBirthDate != null ||
+                                  _selectedRole != null ||
+                                  _selectedCity != null)
+                              ? AppTheme.errorRed
+                              : AppTheme.neutralGrey,
+                          fontSize: isTablet ? 13 : 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          SizedBox(height: isTablet ? 20 : 16),
+
+          // Filtri
+          Wrap(
+            spacing: isTablet ? 16 : 12,
+            runSpacing: isTablet ? 16 : 12,
+            children: [
+              // Filtro data di nascita
+              _buildDateFilter(l10n, isTablet),
+
+              // Filtro ruolo
+              _buildRoleFilter(l10n, isTablet),
+
+              // Filtro città
+              _buildCityFilter(l10n, isTablet),
+            ],
+          ),
+
+          SizedBox(height: isTablet ? 16 : 12),
+
+          // Contatore risultati
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.info_outline, color: AppTheme.primaryBlue, size: 16),
+                SizedBox(width: 8),
+                Text(
+                  '${_filteredCertifiers.length} ${l10n.getString('certifiers_found')}',
+                  style: TextStyle(
+                    color: AppTheme.primaryBlue,
+                    fontSize: isTablet ? 14 : 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDateFilter(AppLocalizations l10n, bool isTablet) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: _selectedBirthDate != null
+              ? AppTheme.primaryBlue
+              : Colors.grey.withValues(alpha: 0.2),
+          width: 1,
+        ),
+      ),
+      child: InkWell(
+        onTap: () async {
+          final DateTime? picked = await showDatePicker(
+            context: context,
+            initialDate: _selectedBirthDate ?? DateTime.now(),
+            firstDate: DateTime(1900),
+            lastDate: DateTime.now(),
+            builder: (context, child) {
+              return Theme(
+                data: Theme.of(context).copyWith(
+                  colorScheme: ColorScheme.light(
+                    primary: AppTheme.primaryBlue,
+                    onPrimary: Colors.white,
+                    surface: Colors.white,
+                    onSurface: Colors.black,
+                  ),
+                ),
+                child: child!,
+              );
+            },
+          );
+          if (picked != null) {
+            setState(() {
+              _selectedBirthDate = picked;
+            });
+            _applyFilters();
+          }
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: EdgeInsets.all(isTablet ? 12 : 10),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.cake,
+                color: _selectedBirthDate != null
+                    ? AppTheme.primaryBlue
+                    : Colors.grey[600],
+                size: isTablet ? 20 : 18,
+              ),
+              SizedBox(width: 8),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    l10n.getString('birth_date'),
+                    style: TextStyle(
+                      fontSize: isTablet ? 12 : 11,
+                      color: Colors.grey[600],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Text(
+                    _selectedBirthDate != null
+                        ? '${_selectedBirthDate!.day}/${_selectedBirthDate!.month}/${_selectedBirthDate!.year}'
+                        : l10n.getString('select_date'),
+                    style: TextStyle(
+                      fontSize: isTablet ? 14 : 13,
+                      color: _selectedBirthDate != null
+                          ? AppTheme.primaryBlack
+                          : Colors.grey[500],
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRoleFilter(AppLocalizations l10n, bool isTablet) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: _selectedRole != null
+              ? AppTheme.primaryBlue
+              : Colors.grey.withValues(alpha: 0.2),
+          width: 1,
+        ),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String?>(
+          value: _selectedRole,
+          hint: Padding(
+            padding: EdgeInsets.all(isTablet ? 12 : 10),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.work,
+                  color: Colors.grey[600],
+                  size: isTablet ? 20 : 18,
+                ),
+                SizedBox(width: 8),
+                Text(
+                  l10n.getString('role'),
+                  style: TextStyle(
+                    fontSize: isTablet ? 14 : 13,
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          items: [
+            DropdownMenuItem<String?>(
+              value: null,
+              child: Text(l10n.getString('all_roles')),
+            ),
+            ..._availableRoles.map(
+              (role) =>
+                  DropdownMenuItem<String>(value: role, child: Text(role)),
+            ),
+          ],
+          onChanged: (value) {
+            setState(() {
+              _selectedRole = value;
+            });
+            _applyFilters();
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCityFilter(AppLocalizations l10n, bool isTablet) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: _selectedCity != null
+              ? AppTheme.primaryBlue
+              : Colors.grey.withValues(alpha: 0.2),
+          width: 1,
+        ),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String?>(
+          value: _selectedCity,
+          hint: Padding(
+            padding: EdgeInsets.all(isTablet ? 12 : 10),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.location_on,
+                  color: Colors.grey[600],
+                  size: isTablet ? 20 : 18,
+                ),
+                SizedBox(width: 8),
+                Text(
+                  l10n.getString('city'),
+                  style: TextStyle(
+                    fontSize: isTablet ? 14 : 13,
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          items: [
+            DropdownMenuItem<String?>(
+              value: null,
+              child: Text(l10n.getString('all_cities')),
+            ),
+            ..._availableCities.map(
+              (city) =>
+                  DropdownMenuItem<String>(value: city, child: Text(city)),
+            ),
+          ],
+          onChanged: (value) {
+            setState(() {
+              _selectedCity = value;
+            });
+            _applyFilters();
+          },
+        ),
+      ),
     );
   }
 
@@ -233,224 +651,359 @@ class _CertifiersContentState extends State<CertifiersContent> {
       print('   - Email: ${user.email}');
     }
 
-    return EnterpriseCard(
-      child: Padding(
-        padding: EdgeInsets.all(isTablet ? 20 : 16),
-        child: Row(
-          children: [
-            // Avatar
-            Container(
-              width: isTablet ? 60 : 50,
-              height: isTablet ? 60 : 50,
-              decoration: BoxDecoration(
-                color: certifier.active
-                    ? AppTheme.primaryBlue.withValues(alpha: 0.1)
-                    : AppTheme.neutralGrey.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(isTablet ? 30 : 25),
-              ),
-              child: user != null
-                  ? Center(
-                      child: Text(
-                        certifierWithUser.initials,
-                        style: TextStyle(
-                          color: certifier.active
-                              ? AppTheme.primaryBlue
-                              : AppTheme.textSecondary,
-                          fontSize: isTablet ? 18 : 16,
-                          fontWeight: FontWeight.w600,
+    return Container(
+      margin: EdgeInsets.only(bottom: isTablet ? 20 : 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+            spreadRadius: 0,
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+            spreadRadius: 0,
+          ),
+        ],
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.1), width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header con avatar e info principale
+          Padding(
+            padding: EdgeInsets.all(isTablet ? 24 : 20),
+            child: Row(
+              children: [
+                // Avatar moderno
+                Container(
+                  width: isTablet ? 72 : 60,
+                  height: isTablet ? 72 : 60,
+                  decoration: BoxDecoration(
+                    gradient: certifier.active
+                        ? LinearGradient(
+                            colors: [
+                              AppTheme.primaryBlue,
+                              AppTheme.primaryBlue.withValues(alpha: 0.8),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          )
+                        : LinearGradient(
+                            colors: [
+                              AppTheme.neutralGrey,
+                              AppTheme.neutralGrey.withValues(alpha: 0.8),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color:
+                            (certifier.active
+                                    ? AppTheme.primaryBlue
+                                    : AppTheme.neutralGrey)
+                                .withValues(alpha: 0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: user != null
+                      ? Center(
+                          child: Text(
+                            certifierWithUser.initials,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: isTablet ? 22 : 18,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        )
+                      : Icon(
+                          Icons.person,
+                          color: Colors.white,
+                          size: isTablet ? 32 : 28,
                         ),
-                      ),
-                    )
-                  : Icon(
-                      Icons.person,
-                      color: certifier.active
-                          ? AppTheme.primaryBlue
-                          : AppTheme.textSecondary,
-                      size: isTablet ? 28 : 24,
-                    ),
-            ),
-            SizedBox(width: isTablet ? 16 : 12),
+                ),
+                SizedBox(width: isTablet ? 20 : 16),
 
-            // Info
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // First Name - sempre mostrato
-                  if (user != null) ...[
-                    Text(
-                      user.firstName?.isNotEmpty == true
-                          ? user.firstName!
-                          : 'N/A',
-                      style: TextStyle(
-                        fontSize: isTablet ? 16 : 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.primaryBlack,
-                      ),
-                    ),
-                    // Last Name - sempre mostrato
-                    Text(
-                      user.lastName?.isNotEmpty == true &&
-                              user.lastName != 'N/A'
-                          ? user.lastName!
-                          : 'N/A',
-                      style: TextStyle(
-                        fontSize: isTablet ? 16 : 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.primaryBlack,
-                      ),
-                    ),
-                    // Email - sempre mostrata
-                    SizedBox(height: 2),
-                    Text(
-                      user.email?.isNotEmpty == true ? user.email! : 'N/A',
-                      style: TextStyle(
-                        fontSize: isTablet ? 13 : 11,
-                        color: AppTheme.textSecondary,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                  ] else ...[
-                    Text(
-                      'Invito in sospeso',
-                      style: TextStyle(
-                        fontSize: isTablet ? 16 : 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.primaryBlack,
-                      ),
-                    ),
-                  ],
-
-                  // Data di nascita
-                  if (user != null && user.dateOfBirth != null) ...[
-                    SizedBox(height: 2),
-                    Text(
-                      'Nato il ${certifierWithUser.dateOfBirthFormatted}',
-                      style: TextStyle(
-                        fontSize: isTablet ? 12 : 10,
-                        color: AppTheme.textSecondary,
-                      ),
-                    ),
-                  ],
-
-                  // Ruolo
-                  if (certifier.role != null) ...[
-                    SizedBox(height: 4),
-                    Text(
-                      certifier.role!,
-                      style: TextStyle(
-                        fontSize: isTablet ? 14 : 12,
-                        color: AppTheme.textSecondary,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-
-                  // Città
-                  if (user != null && user.city != null) ...[
-                    SizedBox(height: 2),
-                    Text(
-                      user.city!,
-                      style: TextStyle(
-                        fontSize: isTablet ? 12 : 10,
-                        color: AppTheme.textSecondary,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                  ],
-
-                  SizedBox(height: 8),
-                  Row(
+                // Info principale
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Status badge
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: isTablet ? 12 : 8,
-                          vertical: isTablet ? 6 : 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: certifier.active
-                              ? AppTheme.successGreen.withValues(alpha: 0.1)
-                              : AppTheme.neutralGrey.withValues(alpha: 0.3),
-                          borderRadius: BorderRadius.circular(
-                            isTablet ? 16 : 12,
-                          ),
-                        ),
-                        child: Text(
-                          certifier.active
-                              ? l10n.getString('active')
-                              : l10n.getString('inactive'),
+                      if (user != null) ...[
+                        // Nome completo
+                        Text(
+                          '${user.firstName?.isNotEmpty == true ? user.firstName! : 'N/A'} ${user.lastName?.isNotEmpty == true && user.lastName != 'N/A' ? user.lastName! : 'N/A'}',
                           style: TextStyle(
-                            fontSize: isTablet ? 12 : 10,
+                            fontSize: isTablet ? 20 : 18,
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.primaryBlack,
+                            height: 1.2,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        // Email
+                        Text(
+                          user.email?.isNotEmpty == true ? user.email! : 'N/A',
+                          style: TextStyle(
+                            fontSize: isTablet ? 14 : 13,
+                            color: AppTheme.textSecondary,
                             fontWeight: FontWeight.w500,
-                            color: certifier.active
-                                ? AppTheme.successGreen
-                                : AppTheme.textSecondary,
                           ),
                         ),
-                      ),
-                      SizedBox(width: 8),
-                      if (certifier.kycPassed == true) ...[
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: isTablet ? 12 : 8,
-                            vertical: isTablet ? 6 : 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppTheme.primaryBlue.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(
-                              isTablet ? 16 : 12,
-                            ),
-                          ),
-                          child: Text(
-                            l10n.getString('kyc_verified'),
-                            style: TextStyle(
-                              fontSize: isTablet ? 12 : 10,
-                              fontWeight: FontWeight.w500,
-                              color: AppTheme.primaryBlue,
-                            ),
+                      ] else ...[
+                        Text(
+                          'Invito in sospeso',
+                          style: TextStyle(
+                            fontSize: isTablet ? 20 : 18,
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.primaryBlack,
                           ),
                         ),
-                      ] else if (certifier.kycPassed == false) ...[
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: isTablet ? 12 : 8,
-                            vertical: isTablet ? 6 : 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppTheme.errorRed.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(
-                              isTablet ? 16 : 12,
-                            ),
-                          ),
-                          child: Text(
-                            l10n.getString('kyc_failed'),
-                            style: TextStyle(
-                              fontSize: isTablet ? 12 : 10,
-                              fontWeight: FontWeight.w500,
-                              color: AppTheme.errorRed,
-                            ),
+                        SizedBox(height: 4),
+                        Text(
+                          'In attesa di registrazione',
+                          style: TextStyle(
+                            fontSize: isTablet ? 14 : 13,
+                            color: AppTheme.textSecondary,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],
                     ],
                   ),
+                ),
+
+                // Menu azioni
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.more_vert,
+                      color: AppTheme.textSecondary,
+                      size: isTablet ? 24 : 20,
+                    ),
+                    onPressed: () => _showCertifierActions(certifierWithUser),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Separatore
+          Container(
+            height: 1,
+            margin: EdgeInsets.symmetric(horizontal: isTablet ? 24 : 20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.transparent,
+                  Colors.grey.withValues(alpha: 0.2),
+                  Colors.transparent,
                 ],
               ),
             ),
+          ),
 
-            // Actions
-            IconButton(
-              icon: Icon(
-                Icons.more_vert,
-                color: AppTheme.textSecondary,
-                size: isTablet ? 24 : 20,
-              ),
-              onPressed: () => _showCertifierActions(certifierWithUser),
+          // Dettagli e badge
+          Padding(
+            padding: EdgeInsets.all(isTablet ? 24 : 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Informazioni aggiuntive
+                if (user != null) ...[
+                  if (user.dateOfBirth != null) ...[
+                    _buildInfoRow(
+                      Icons.cake,
+                      'Nato il ${certifierWithUser.dateOfBirthFormatted}',
+                      isTablet,
+                    ),
+                    SizedBox(height: isTablet ? 12 : 8),
+                  ],
+                  if (certifier.role != null) ...[
+                    _buildInfoRow(Icons.work, certifier.role!, isTablet),
+                    SizedBox(height: isTablet ? 12 : 8),
+                  ],
+                  if (user.city != null) ...[
+                    _buildInfoRow(Icons.location_on, user.city!, isTablet),
+                    SizedBox(height: isTablet ? 16 : 12),
+                  ],
+                ],
+
+                // Badge di stato
+                Row(
+                  children: [
+                    // Status badge
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isTablet ? 16 : 12,
+                        vertical: isTablet ? 8 : 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: certifier.active
+                            ? AppTheme.successGreen.withValues(alpha: 0.1)
+                            : AppTheme.neutralGrey.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: certifier.active
+                              ? AppTheme.successGreen.withValues(alpha: 0.3)
+                              : AppTheme.neutralGrey.withValues(alpha: 0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: certifier.active
+                                  ? AppTheme.successGreen
+                                  : AppTheme.neutralGrey,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            certifier.active
+                                ? l10n.getString('active')
+                                : l10n.getString('inactive'),
+                            style: TextStyle(
+                              fontSize: isTablet ? 13 : 12,
+                              fontWeight: FontWeight.w600,
+                              color: certifier.active
+                                  ? AppTheme.successGreen
+                                  : AppTheme.neutralGrey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: 12),
+
+                    // KYC badge
+                    if (certifier.kycPassed == true) ...[
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isTablet ? 16 : 12,
+                          vertical: isTablet ? 8 : 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: AppTheme.primaryBlue.withValues(alpha: 0.3),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.verified,
+                              color: AppTheme.primaryBlue,
+                              size: 16,
+                            ),
+                            SizedBox(width: 6),
+                            Text(
+                              l10n.getString('kyc_verified'),
+                              style: TextStyle(
+                                fontSize: isTablet ? 13 : 12,
+                                fontWeight: FontWeight.w600,
+                                color: AppTheme.primaryBlue,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ] else if (certifier.kycPassed == false) ...[
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isTablet ? 16 : 12,
+                          vertical: isTablet ? 8 : 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppTheme.errorRed.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: AppTheme.errorRed.withValues(alpha: 0.3),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.error_outline,
+                              color: AppTheme.errorRed,
+                              size: 16,
+                            ),
+                            SizedBox(width: 6),
+                            Text(
+                              l10n.getString('kyc_failed'),
+                              style: TextStyle(
+                                fontSize: isTablet ? 13 : 12,
+                                fontWeight: FontWeight.w600,
+                                color: AppTheme.errorRed,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String text, bool isTablet) {
+    return Row(
+      children: [
+        Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            icon,
+            color: AppTheme.primaryBlue,
+            size: isTablet ? 18 : 16,
+          ),
+        ),
+        SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: isTablet ? 14 : 13,
+              color: AppTheme.textSecondary,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ],
     );
   }
 

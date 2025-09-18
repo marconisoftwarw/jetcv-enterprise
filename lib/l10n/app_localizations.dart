@@ -107,8 +107,12 @@ class AppLocalizations {
 
       'filters': 'Filtri',
       'all_roles': 'Tutti i ruoli',
+      'all_cities': 'Tutte le città',
+      'birth_date': 'Data di nascita',
+      'select_date': 'Seleziona data',
       'certifier': 'Certificatore',
       'certifiers': 'Certificatori',
+      'certifiers_found': 'certificatori trovati',
       'senior_certifier': 'Senior Certificatore',
       'lead_certifier': 'Lead Certificatore',
       'active_only': 'Solo attivi',
@@ -705,6 +709,10 @@ class AppLocalizations {
 
       'filters': 'Filters',
       'all_roles': 'All roles',
+      'all_cities': 'All cities',
+      'birth_date': 'Birth date',
+      'select_date': 'Select date',
+      'certifiers_found': 'certifiers found',
       'certifier': 'Certifier',
       'certifiers': 'Certifiers',
       'senior_certifier': 'Senior Certifier',
