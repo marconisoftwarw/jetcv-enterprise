@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:provider/provider.dart';
-import 'dart:html' as html;
 import '../../models/pricing.dart';
 import '../../models/user.dart' show AppUser;
 import '../../models/legal_entity.dart';
@@ -156,8 +155,8 @@ class _LegalEntityPublicRegistrationScreenState
         // Prova anche a estrarre dall'URL del browser direttamente
         if (additionalParams.isEmpty) {
           try {
-            // Usa dart:html per accedere all'URL del browser (solo per web)
-            final browserUrl = html.window.location.href;
+            // Usa Uri.base per accedere all'URL del browser (compatibile con tutte le piattaforme)
+            final browserUrl = Uri.base.toString();
             print('🔍 Browser URL: $browserUrl');
             final browserUri = Uri.parse(browserUrl);
             if (browserUri.queryParameters.isNotEmpty) {
