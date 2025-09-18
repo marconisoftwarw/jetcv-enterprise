@@ -206,12 +206,81 @@ class CertifierService {
   // Crea un nuovo certificatore
   Future<bool> createCertifier(Certifier certifier) async {
     try {
-      // TODO: Implementare chiamata al database
-      print('Creating certifier: ${certifier.idCertifier}');
-      return true;
+      print('🔍 Creating certifier: ${certifier.idCertifier}');
+
+      final response = await http.post(
+        Uri.parse('$_baseUrl/functions/v1/certifier-crud'),
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': _apiKey,
+          'Authorization': 'Bearer $_apiKey',
+          'Origin': 'http://localhost:8080',
+        },
+        body: json.encode({'operation': 'create', 'data': certifier.toJson()}),
+      );
+
+      print(
+        '📊 Create certifier response: ${response.statusCode} - ${response.body}',
+      );
+
+      if (response.statusCode == 201) {
+        final data = json.decode(response.body);
+        print('✅ Certifier created successfully via Edge Function');
+        return data['ok'] == true;
+      } else {
+        print(
+          '❌ Error creating certifier: ${response.statusCode} - ${response.body}',
+        );
+        return false;
+      }
     } catch (e) {
-      print('Error creating certifier: $e');
+      print('❌ Error creating certifier: $e');
       return false;
+    }
+  }
+
+  // Crea un certificatore con dati utente associato
+  Future<Map<String, dynamic>?> createCertifierWithUser({
+    required Map<String, dynamic> userData,
+    required Certifier certifier,
+  }) async {
+    try {
+      print('🔍 Creating certifier with user data');
+
+      final response = await http.post(
+        Uri.parse('$_baseUrl/functions/v1/certifier-crud'),
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': _apiKey,
+          'Authorization': 'Bearer $_apiKey',
+          'Origin': 'http://localhost:8080',
+        },
+        body: json.encode({
+          'operation': 'create_with_user',
+          'userData': userData,
+          'certifierData': certifier.toJson(),
+        }),
+      );
+
+      print(
+        '📊 Create certifier with user response: ${response.statusCode} - ${response.body}',
+      );
+
+      if (response.statusCode == 201) {
+        final data = json.decode(response.body);
+        if (data['ok'] == true) {
+          print('✅ Certifier with user created successfully via Edge Function');
+          return data['data']; // Returns both user and certifier data
+        }
+      }
+
+      print(
+        '❌ Error creating certifier with user: ${response.statusCode} - ${response.body}',
+      );
+      return null;
+    } catch (e) {
+      print('❌ Error creating certifier with user: $e');
+      return null;
     }
   }
 

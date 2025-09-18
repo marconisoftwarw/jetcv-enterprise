@@ -20,19 +20,20 @@ class UserSearchService {
           'apikey': _apiKey,
           'Authorization': 'Bearer $_apiKey',
         },
-        body: json.encode({
-          'search_term': query,
-          'limit_count': 10,
-        }),
+        body: json.encode({'search_term': query, 'limit_count': 10}),
       );
 
-      print('📊 User search response: ${response.statusCode} - ${response.body}');
+      print(
+        '📊 User search response: ${response.statusCode} - ${response.body}',
+      );
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         return data.map((userData) => User.fromJson(userData)).toList();
       } else {
-        print('❌ Error searching users: ${response.statusCode} - ${response.body}');
+        print(
+          '❌ Error searching users: ${response.statusCode} - ${response.body}',
+        );
         return [];
       }
     } catch (e) {
@@ -55,7 +56,9 @@ class UserSearchService {
         },
       );
 
-      print('📊 User by email response: ${response.statusCode} - ${response.body}');
+      print(
+        '📊 User by email response: ${response.statusCode} - ${response.body}',
+      );
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
@@ -64,7 +67,9 @@ class UserSearchService {
         }
         return null;
       } else {
-        print('❌ Error getting user by email: ${response.statusCode} - ${response.body}');
+        print(
+          '❌ Error getting user by email: ${response.statusCode} - ${response.body}',
+        );
         return null;
       }
     } catch (e) {
@@ -87,7 +92,9 @@ class UserSearchService {
         },
       );
 
-      print('📊 User by ID response: ${response.statusCode} - ${response.body}');
+      print(
+        '📊 User by ID response: ${response.statusCode} - ${response.body}',
+      );
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
@@ -96,7 +103,9 @@ class UserSearchService {
         }
         return null;
       } else {
-        print('❌ Error getting user by ID: ${response.statusCode} - ${response.body}');
+        print(
+          '❌ Error getting user by ID: ${response.statusCode} - ${response.body}',
+        );
         return null;
       }
     } catch (e) {
@@ -114,7 +123,9 @@ class UserSearchService {
       print('🔍 Getting all users with offset: $offset, limit: $limit');
 
       final response = await http.get(
-        Uri.parse('$_baseUrl/rest/v1/user?select=*&offset=$offset&limit=$limit&order=created_at.desc'),
+        Uri.parse(
+          '$_baseUrl/rest/v1/user?select=*&offset=$offset&limit=$limit&order=created_at.desc',
+        ),
         headers: {
           'Content-Type': 'application/json',
           'apikey': _apiKey,
@@ -128,7 +139,9 @@ class UserSearchService {
         final List<dynamic> data = json.decode(response.body);
         return data.map((userData) => User.fromJson(userData)).toList();
       } else {
-        print('❌ Error getting all users: ${response.statusCode} - ${response.body}');
+        print(
+          '❌ Error getting all users: ${response.statusCode} - ${response.body}',
+        );
         return [];
       }
     } catch (e) {

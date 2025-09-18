@@ -5,10 +5,7 @@ class CertifierWithUser {
   final Certifier certifier;
   final User? user;
 
-  CertifierWithUser({
-    required this.certifier,
-    this.user,
-  });
+  CertifierWithUser({required this.certifier, this.user});
 
   factory CertifierWithUser.fromJson(Map<String, dynamic> json) {
     return CertifierWithUser(

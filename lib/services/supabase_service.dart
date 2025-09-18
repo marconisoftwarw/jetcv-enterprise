@@ -1001,7 +1001,7 @@ class SupabaseService {
         }
 
         final data = response.data;
-        
+
         // Handle direct array response from get-legal-entities-by-user
         List<dynamic> entitiesList;
         if (data is List) {
@@ -1096,7 +1096,7 @@ class SupabaseService {
         }
 
         final data = jsonDecode(response.body);
-        
+
         // Handle direct array response from get-legal-entities-by-user
         List<dynamic> entitiesList;
         if (data is List) {
@@ -1106,9 +1106,7 @@ class SupabaseService {
           // Wrapped response format
           entitiesList = data['data'] as List;
         } else {
-          print(
-            '❌ HTTP fallback error: Unexpected response format',
-          );
+          print('❌ HTTP fallback error: Unexpected response format');
           return [];
         }
         print('🔍 HTTP fallback returned ${entitiesList.length} entities');
@@ -1173,7 +1171,7 @@ class SupabaseService {
         }
 
         final data = response.data;
-        
+
         // Handle direct array response from get-legal-entities-by-user
         List<dynamic> entitiesList;
         if (data is List) {
@@ -1257,7 +1255,7 @@ class SupabaseService {
         }
 
         final data = jsonDecode(response.body);
-        
+
         // Handle direct array response from get-legal-entities-by-user
         List<dynamic> entitiesList;
         if (data is List) {
@@ -1267,9 +1265,7 @@ class SupabaseService {
           // Wrapped response format
           entitiesList = data['data'] as List;
         } else {
-          print(
-            '❌ HTTP fallback error: Unexpected response format',
-          );
+          print('❌ HTTP fallback error: Unexpected response format');
           return null;
         }
         print('🔍 HTTP fallback returned ${entitiesList.length} entities');

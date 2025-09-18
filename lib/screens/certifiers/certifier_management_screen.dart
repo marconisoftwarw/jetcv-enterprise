@@ -16,7 +16,8 @@ class CertifierManagementScreen extends StatefulWidget {
   const CertifierManagementScreen({super.key});
 
   @override
-  State<CertifierManagementScreen> createState() => _CertifierManagementScreenState();
+  State<CertifierManagementScreen> createState() =>
+      _CertifierManagementScreenState();
 }
 
 class _CertifierManagementScreenState extends State<CertifierManagementScreen>
@@ -28,7 +29,7 @@ class _CertifierManagementScreenState extends State<CertifierManagementScreen>
   // Form controllers
   final _userSearchController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  
+
   // State
   bool _isCreating = false;
   String? _errorMessage;
@@ -70,7 +71,7 @@ class _CertifierManagementScreenState extends State<CertifierManagementScreen>
   Future<void> _loadData() async {
     final certifierProvider = context.read<CertifierProvider>();
     final legalEntityProvider = context.read<LegalEntityProvider>();
-    
+
     await Future.wait([
       certifierProvider.loadAllCertifiers(),
       legalEntityProvider.loadLegalEntities(),
@@ -96,9 +97,7 @@ class _CertifierManagementScreenState extends State<CertifierManagementScreen>
         child: Column(
           children: [
             _buildHeader(l10n, isTablet),
-            Expanded(
-              child: _buildContent(l10n, isTablet),
-            ),
+            Expanded(child: _buildContent(l10n, isTablet)),
           ],
         ),
       ),
@@ -174,7 +173,12 @@ class _CertifierManagementScreenState extends State<CertifierManagementScreen>
     );
   }
 
-  Widget _buildStatCard(String title, String value, IconData icon, bool isTablet) {
+  Widget _buildStatCard(
+    String title,
+    String value,
+    IconData icon,
+    bool isTablet,
+  ) {
     return Expanded(
       child: Container(
         padding: EdgeInsets.all(isTablet ? 16 : 12),
@@ -184,11 +188,7 @@ class _CertifierManagementScreenState extends State<CertifierManagementScreen>
         ),
         child: Column(
           children: [
-            Icon(
-              icon,
-              color: Colors.white,
-              size: isTablet ? 24 : 20,
-            ),
+            Icon(icon, color: Colors.white, size: isTablet ? 24 : 20),
             SizedBox(height: isTablet ? 8 : 4),
             Text(
               value,
@@ -240,7 +240,9 @@ class _CertifierManagementScreenState extends State<CertifierManagementScreen>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   CircularProgressIndicator(
-                    valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.primaryBlue),
+                    valueColor: const AlwaysStoppedAnimation<Color>(
+                      AppTheme.primaryBlue,
+                    ),
                     strokeWidth: isTablet ? 4 : 3,
                   ),
                   SizedBox(height: isTablet ? 24 : 16),
@@ -302,7 +304,11 @@ class _CertifierManagementScreenState extends State<CertifierManagementScreen>
     );
   }
 
-  Widget _buildCertifiersList(CertifierProvider provider, AppLocalizations l10n, bool isTablet) {
+  Widget _buildCertifiersList(
+    CertifierProvider provider,
+    AppLocalizations l10n,
+    bool isTablet,
+  ) {
     final certifiers = provider.filteredCertifiers;
 
     if (certifiers.isEmpty) {
@@ -355,7 +361,11 @@ class _CertifierManagementScreenState extends State<CertifierManagementScreen>
     );
   }
 
-  Widget _buildCertifierCard(dynamic certifier, AppLocalizations l10n, bool isTablet) {
+  Widget _buildCertifierCard(
+    dynamic certifier,
+    AppLocalizations l10n,
+    bool isTablet,
+  ) {
     return Container(
       margin: EdgeInsets.only(bottom: isTablet ? 16 : 12),
       child: EnterpriseCard(
@@ -401,7 +411,10 @@ class _CertifierManagementScreenState extends State<CertifierManagementScreen>
                       ],
                     ),
                   ),
-                  _buildStatusChip(certifier.active ? 'active' : 'inactive', isTablet),
+                  _buildStatusChip(
+                    certifier.active ? 'active' : 'inactive',
+                    isTablet,
+                  ),
                 ],
               ),
               SizedBox(height: isTablet ? 16 : 12),
@@ -441,7 +454,7 @@ class _CertifierManagementScreenState extends State<CertifierManagementScreen>
   Widget _buildStatusChip(String status, bool isTablet) {
     Color color;
     String text;
-    
+
     switch (status) {
       case 'active':
         color = AppTheme.successGreen;
@@ -535,17 +548,11 @@ class _CertifierManagementScreenState extends State<CertifierManagementScreen>
               ),
               title: Row(
                 children: [
-                  const Icon(
-                    Icons.person_add,
-                    color: AppTheme.primaryBlue,
-                  ),
+                  const Icon(Icons.person_add, color: AppTheme.primaryBlue),
                   const SizedBox(width: 12),
                   const Text(
                     'Aggiungi Certificatore',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
@@ -716,9 +723,7 @@ class _CertifierManagementScreenState extends State<CertifierManagementScreen>
             decoration: BoxDecoration(
               color: AppTheme.successGreen.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: AppTheme.successGreen.withOpacity(0.3),
-              ),
+              border: Border.all(color: AppTheme.successGreen.withOpacity(0.3)),
             ),
             child: Row(
               children: [
@@ -778,10 +783,7 @@ class _CertifierManagementScreenState extends State<CertifierManagementScreen>
           items: legalEntities.map((entity) {
             return DropdownMenuItem<String>(
               value: entity.idLegalEntity,
-              child: Text(
-                entity.legalName,
-                overflow: TextOverflow.ellipsis,
-              ),
+              child: Text(entity.legalName, overflow: TextOverflow.ellipsis),
             );
           }).toList(),
           onChanged: (value) {
@@ -858,7 +860,7 @@ class _CertifierManagementScreenState extends State<CertifierManagementScreen>
         setState(() {
           _successMessage = 'Certificatore creato con successo!';
         });
-        
+
         // Chiudi il dialog dopo 2 secondi
         Future.delayed(const Duration(seconds: 2), () {
           if (mounted) {
@@ -911,7 +913,9 @@ class _CertifierManagementScreenState extends State<CertifierManagementScreen>
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Conferma eliminazione'),
-          content: const Text('Sei sicuro di voler eliminare questo certificatore?'),
+          content: const Text(
+            'Sei sicuro di voler eliminare questo certificatore?',
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
@@ -919,9 +923,7 @@ class _CertifierManagementScreenState extends State<CertifierManagementScreen>
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
-              style: TextButton.styleFrom(
-                foregroundColor: AppTheme.errorRed,
-              ),
+              style: TextButton.styleFrom(foregroundColor: AppTheme.errorRed),
               child: const Text('Elimina'),
             ),
           ],

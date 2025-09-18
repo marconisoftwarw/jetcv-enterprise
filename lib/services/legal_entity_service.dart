@@ -29,7 +29,7 @@ class LegalEntityService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        
+
         // Handle direct array response from get-legal-entities-by-user
         List<dynamic> legalEntitiesData;
         if (data is List) {
@@ -42,7 +42,7 @@ class LegalEntityService {
           print('❌ Unexpected response format: $data');
           return [];
         }
-        
+
         return legalEntitiesData
             .map((item) => LegalEntityInfo.fromJson(item))
             .toList();

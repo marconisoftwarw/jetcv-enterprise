@@ -3,11 +3,12 @@ import 'package:provider/provider.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/app_theme.dart';
 import '../models/certifier.dart';
+import '../models/legal_entity.dart';
+import '../models/user.dart';
 import '../services/certifier_service.dart';
 import '../providers/auth_provider.dart';
 import '../providers/legal_entity_provider.dart';
 import '../services/user_type_service.dart';
-import '../widgets/enterprise_card.dart';
 import '../widgets/modern_loader.dart';
 
 class CertifiersContent extends StatefulWidget {
@@ -236,6 +237,33 @@ class _CertifiersContentState extends State<CertifiersContent> {
                   ),
                 ),
                 Spacer(),
+                // Add certifier button
+                Container(
+                  margin: EdgeInsets.only(right: 8),
+                  child: ElevatedButton.icon(
+                    onPressed: _showAddCertifierDialog,
+                    icon: Icon(Icons.add, size: isTablet ? 20 : 18),
+                    label: Text(
+                      l10n.getString('add_certifier'),
+                      style: TextStyle(
+                        fontSize: isTablet ? 14 : 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primaryBlue,
+                      foregroundColor: AppTheme.pureWhite,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isTablet ? 16 : 12,
+                        vertical: isTablet ? 12 : 8,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 2,
+                    ),
+                  ),
+                ),
                 IconButton(
                   onPressed: _loadCertifiers,
                   icon: Icon(Icons.refresh, size: isTablet ? 24 : 20),
@@ -302,6 +330,33 @@ class _CertifiersContentState extends State<CertifiersContent> {
                 ),
               ),
               const Spacer(),
+              // Add certifier button
+              Container(
+                margin: EdgeInsets.only(right: 8),
+                child: ElevatedButton.icon(
+                  onPressed: _showAddCertifierDialog,
+                  icon: Icon(Icons.add, size: isTablet ? 20 : 18),
+                  label: Text(
+                    l10n.getString('add_certifier'),
+                    style: TextStyle(
+                      fontSize: isTablet ? 14 : 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryBlue,
+                    foregroundColor: AppTheme.pureWhite,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isTablet ? 16 : 12,
+                      vertical: isTablet ? 12 : 8,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 2,
+                  ),
+                ),
+              ),
               IconButton(
                 icon: Icon(Icons.refresh, color: AppTheme.primaryBlue),
                 onPressed: _loadCertifiers,
@@ -774,8 +829,8 @@ class _CertifiersContentState extends State<CertifiersContent> {
   ) {
     final certifier = certifierWithUser.certifier;
     final user = certifierWithUser.user;
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final isAdmin = authProvider.userType == AppUserType.admin;
+    // final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    // final isAdmin = authProvider.userType == AppUserType.admin;
 
     // Debug logging
     print('🔍 Building certifier card:');
@@ -1325,6 +1380,558 @@ class _CertifiersContentState extends State<CertifiersContent> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showAddCertifierDialog() {
+    final l10n = AppLocalizations.of(context);
+    final isTablet = MediaQuery.of(context).size.width > 768;
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final legalEntityProvider = Provider.of<LegalEntityProvider>(
+      context,
+      listen: false,
+    );
+    final isAdmin = authProvider.userType == AppUserType.admin;
+
+    // Form controllers
+    final firstNameController = TextEditingController();
+    final lastNameController = TextEditingController();
+    final emailController = TextEditingController();
+    final phoneController = TextEditingController();
+    final roleController = TextEditingController();
+    final cityController = TextEditingController();
+    final addressController = TextEditingController();
+
+    LegalEntity? selectedLegalEntity = isAdmin
+        ? null
+        : legalEntityProvider.selectedLegalEntity;
+    bool isLoading = false;
+
+    // Load legal entities if admin and not already loaded
+    if (isAdmin && legalEntityProvider.legalEntities.isEmpty) {
+      legalEntityProvider.loadLegalEntities(status: 'approved');
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: Row(
+            children: [
+              Icon(Icons.person_add, color: AppTheme.primaryBlue),
+              SizedBox(width: 8),
+              Text(l10n.getString('new_certifier')),
+            ],
+          ),
+          content: Container(
+            width: isTablet ? 500 : double.maxFinite,
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.8,
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Legal Entity Selector (only for admin)
+                  if (isAdmin) ...[
+                    Text(
+                      l10n.getString('select_legal_entity'),
+                      style: TextStyle(
+                        fontSize: isTablet ? 14 : 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.primaryBlack,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: selectedLegalEntity != null
+                              ? AppTheme.primaryBlue
+                              : Colors.grey.withValues(alpha: 0.3),
+                          width: selectedLegalEntity != null ? 2 : 1,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<LegalEntity>(
+                          value: selectedLegalEntity,
+                          hint: Text(
+                            l10n.getString('select_legal_entity'),
+                            style: TextStyle(
+                              color: Colors.grey[500],
+                              fontSize: isTablet ? 14 : 13,
+                            ),
+                          ),
+                          isExpanded: true,
+                          items: legalEntityProvider.approvedLegalEntities
+                              .map(
+                                (entity) => DropdownMenuItem<LegalEntity>(
+                                  value: entity,
+                                  child: Text(
+                                    entity.legalName ?? 'Nome non disponibile',
+                                    style: TextStyle(
+                                      fontSize: isTablet ? 14 : 13,
+                                      color: AppTheme.primaryBlack,
+                                    ),
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (LegalEntity? value) {
+                            setState(() {
+                              selectedLegalEntity = value;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 24),
+                  ] else ...[
+                    // Show selected legal entity for non-admin users
+                    if (selectedLegalEntity != null) ...[
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: AppTheme.primaryBlue.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.business,
+                              color: AppTheme.primaryBlue,
+                              size: 20,
+                            ),
+                            SizedBox(width: 8),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Entità Legale:',
+                                    style: TextStyle(
+                                      fontSize: isTablet ? 12 : 11,
+                                      color: AppTheme.primaryBlue,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  Text(
+                                    selectedLegalEntity!.legalName ??
+                                        'Nome non disponibile',
+                                    style: TextStyle(
+                                      fontSize: isTablet ? 14 : 13,
+                                      color: AppTheme.primaryBlue,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 24),
+                    ],
+                  ],
+
+                  // Personal Data Section
+                  _buildSectionHeader(
+                    l10n.getString('personal_data'),
+                    Icons.person,
+                    isTablet,
+                  ),
+                  SizedBox(height: 12),
+
+                  // First Name and Last Name Row
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildTextField(
+                          controller: firstNameController,
+                          label: l10n.getString('first_name'),
+                          hint: l10n.getString('first_name'),
+                          isTablet: isTablet,
+                        ),
+                      ),
+                      SizedBox(width: 16),
+                      Expanded(
+                        child: _buildTextField(
+                          controller: lastNameController,
+                          label: l10n.getString('last_name'),
+                          hint: l10n.getString('last_name'),
+                          isTablet: isTablet,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+
+                  // Contact Information Section
+                  _buildSectionHeader(
+                    l10n.getString('contact_information'),
+                    Icons.contact_mail,
+                    isTablet,
+                  ),
+                  SizedBox(height: 12),
+
+                  // Email
+                  _buildTextField(
+                    controller: emailController,
+                    label: l10n.getString('email'),
+                    hint: l10n.getString('email'),
+                    keyboardType: TextInputType.emailAddress,
+                    isTablet: isTablet,
+                  ),
+                  SizedBox(height: 16),
+
+                  // Phone
+                  _buildTextField(
+                    controller: phoneController,
+                    label: l10n.getString('phone'),
+                    hint: l10n.getString('phone'),
+                    keyboardType: TextInputType.phone,
+                    isTablet: isTablet,
+                    required: false,
+                  ),
+                  SizedBox(height: 16),
+
+                  // Address Information
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: _buildTextField(
+                          controller: addressController,
+                          label: l10n.getString('address'),
+                          hint: l10n.getString('address'),
+                          isTablet: isTablet,
+                          required: false,
+                        ),
+                      ),
+                      SizedBox(width: 16),
+                      Expanded(
+                        child: _buildTextField(
+                          controller: cityController,
+                          label: l10n.getString('city'),
+                          hint: l10n.getString('city'),
+                          isTablet: isTablet,
+                          required: false,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 24),
+
+                  // Certifier Role Section
+                  _buildSectionHeader(
+                    l10n.getString('certifier_role'),
+                    Icons.work,
+                    isTablet,
+                  ),
+                  SizedBox(height: 12),
+
+                  _buildTextField(
+                    controller: roleController,
+                    label: l10n.getString('certifier_role'),
+                    hint: l10n.getString('enter_role'),
+                    isTablet: isTablet,
+                  ),
+                  SizedBox(height: 20),
+
+                  // Info Container
+                  Container(
+                    padding: EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: AppTheme.primaryBlue.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.info_outline,
+                          color: AppTheme.primaryBlue,
+                          size: 24,
+                        ),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'Verranno creati sia l\'utente che il certificatore associato. L\'utente potrà accedere al sistema con le credenziali fornite.',
+                            style: TextStyle(
+                              fontSize: isTablet ? 14 : 13,
+                              color: AppTheme.primaryBlue,
+                              height: 1.4,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: isLoading ? null : () => Navigator.pop(context),
+              child: Text(l10n.getString('cancel')),
+            ),
+            ElevatedButton(
+              onPressed: isLoading
+                  ? null
+                  : () async {
+                      // Validazione campi obbligatori
+                      if (firstNameController.text.trim().isEmpty) {
+                        _showError(l10n.getString('first_name_required'));
+                        return;
+                      }
+
+                      if (lastNameController.text.trim().isEmpty) {
+                        _showError(l10n.getString('last_name_required'));
+                        return;
+                      }
+
+                      if (emailController.text.trim().isEmpty) {
+                        _showError(l10n.getString('email_required'));
+                        return;
+                      }
+
+                      if (!_isValidEmail(emailController.text.trim())) {
+                        _showError(l10n.getString('email_invalid'));
+                        return;
+                      }
+
+                      if (roleController.text.trim().isEmpty) {
+                        _showError(l10n.getString('enter_role'));
+                        return;
+                      }
+
+                      if (selectedLegalEntity == null) {
+                        _showError(l10n.getString('legal_entity_required'));
+                        return;
+                      }
+
+                      setState(() => isLoading = true);
+
+                      try {
+                        // Prepara i dati utente
+                        final userData = {
+                          'firstName': firstNameController.text.trim(),
+                          'lastName': lastNameController.text.trim(),
+                          'email': emailController.text.trim(),
+                          'phone': phoneController.text.trim().isNotEmpty
+                              ? phoneController.text.trim()
+                              : null,
+                          'city': cityController.text.trim().isNotEmpty
+                              ? cityController.text.trim()
+                              : null,
+                          'address': addressController.text.trim().isNotEmpty
+                              ? addressController.text.trim()
+                              : null,
+                          'type': 'certifier',
+                          'fullName':
+                              '${firstNameController.text.trim()} ${lastNameController.text.trim()}',
+                          'profileCompleted': true,
+                          'languageCode': 'it',
+                        };
+
+                        // Prepara i dati certificatore
+                        final newCertifier = Certifier(
+                          idLegalEntity: selectedLegalEntity!.idLegalEntity,
+                          role: roleController.text.trim(),
+                          active: true,
+                        );
+
+                        // Crea utente e certificatore insieme usando la nuova Edge Function
+                        print(
+                          '🚀 Calling createCertifierWithUser with certifier-crud edge function',
+                        );
+                        final result = await _certifierService
+                            .createCertifierWithUser(
+                              userData: userData,
+                              certifier: newCertifier,
+                            );
+                        print('🚀 createCertifierWithUser result: $result');
+
+                        if (result == null) {
+                          throw Exception(
+                            'Errore nella creazione del certificatore e utente',
+                          );
+                        }
+
+                        if (mounted) {
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                l10n.getString(
+                                  'certifier_created_successfully',
+                                ),
+                              ),
+                              backgroundColor: AppTheme.successGreen,
+                              duration: Duration(seconds: 4),
+                            ),
+                          );
+                          _loadCertifiers(); // Ricarica la lista
+                        }
+                      } catch (e) {
+                        if (mounted) {
+                          _showError(
+                            '${l10n.getString('error_creating_certifier')}: $e',
+                          );
+                        }
+                      } finally {
+                        if (mounted) {
+                          setState(() => isLoading = false);
+                        }
+                      }
+                    },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primaryBlue,
+                foregroundColor: AppTheme.pureWhite,
+              ),
+              child: isLoading
+                  ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppTheme.pureWhite,
+                        ),
+                      ),
+                    )
+                  : Text(l10n.getString('create_certifier')),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title, IconData icon, bool isTablet) {
+    return Row(
+      children: [
+        Container(
+          padding: EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            icon,
+            color: AppTheme.primaryBlue,
+            size: isTablet ? 20 : 18,
+          ),
+        ),
+        SizedBox(width: 12),
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: isTablet ? 16 : 15,
+            fontWeight: FontWeight.w600,
+            color: AppTheme.primaryBlack,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    required bool isTablet,
+    TextInputType? keyboardType,
+    bool required = true,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: isTablet ? 14 : 13,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.primaryBlack,
+              ),
+            ),
+            if (required) ...[
+              SizedBox(width: 4),
+              Text(
+                '*',
+                style: TextStyle(
+                  color: AppTheme.errorRed,
+                  fontSize: isTablet ? 14 : 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ],
+        ),
+        SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          keyboardType: keyboardType,
+          decoration: InputDecoration(
+            hintText: hint,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.3)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.3)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: AppTheme.primaryBlue, width: 2),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: AppTheme.errorRed, width: 2),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: AppTheme.errorRed, width: 2),
+            ),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            filled: true,
+            fillColor: Colors.grey.withValues(alpha: 0.05),
+          ),
+        ),
+      ],
+    );
+  }
+
+  bool _isValidEmail(String email) {
+    return RegExp(
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+    ).hasMatch(email);
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: AppTheme.errorRed,
+        duration: Duration(seconds: 3),
       ),
     );
   }
