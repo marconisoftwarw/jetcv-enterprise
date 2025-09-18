@@ -216,204 +216,496 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.backgroundGrey,
-      appBar: AppBar(
-        backgroundColor: AppTheme.pureWhite,
-        foregroundColor: AppTheme.primaryBlack,
-        elevation: 0,
-        title: Text(
-          'Dashboard Certificatori',
-          style: TextStyle(
-            color: AppTheme.primaryBlack,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
+      backgroundColor: const Color(0xFF0A0E27),
+      extendBodyBehindAppBar: true,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(200),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                const Color(0xFF1A1D3A),
+                const Color(0xFF2D3561),
+                const Color(0xFF3B82F6).withValues(alpha: 0.8),
+              ],
+            ),
+          ),
+          child: ClipRRect(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.white.withValues(alpha: 0.1),
+                    Colors.white.withValues(alpha: 0.05),
+                  ],
+                ),
+                border: Border(
+                  bottom: BorderSide(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    width: 1,
+                  ),
+                ),
+              ),
+              child: SafeArea(
+                child: Column(
+                  children: [
+                    // Header principale
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              color: Colors.white.withValues(alpha: 0.2),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.3),
+                                width: 1,
+                              ),
+                            ),
+                            child: IconButton(
+                              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 18),
+                              onPressed: () => Navigator.pop(context),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Dashboard',
+                                  style: TextStyle(
+                                    color: Colors.white.withValues(alpha: 0.8),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const Text(
+                                  'Certificatori',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: -0.5,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(22),
+                              gradient: LinearGradient(
+                                colors: [
+                                  const Color(0xFF3B82F6),
+                                  const Color(0xFF8B5CF6),
+                                ],
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFF3B82F6).withValues(alpha: 0.4),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: const Icon(Icons.person, color: Colors.white, size: 20),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    // Statistiche rapide
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: _buildQuickStat(
+                              'Emesse',
+                              '${_issuedCertifications.length}',
+                              const Color(0xFF10B981),
+                              Icons.verified,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: _buildQuickStat(
+                              'In Bozza',
+                              '${_draftCertifications.length}',
+                              const Color(0xFFF59E0B),
+                              Icons.edit_document,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: _buildQuickStat(
+                              'Totale',
+                              '${_issuedCertifications.length + _draftCertifications.length}',
+                              const Color(0xFF8B5CF6),
+                              Icons.workspace_premium,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    // Tab Bar moderna
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        color: Colors.white.withValues(alpha: 0.1),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          width: 1,
+                        ),
+                      ),
+                      child: TabBar(
+                        controller: _tabController,
+                        indicator: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.white.withValues(alpha: 0.3),
+                              Colors.white.withValues(alpha: 0.1),
+                            ],
+                          ),
+                        ),
+                        indicatorSize: TabBarIndicatorSize.tab,
+                        labelColor: Colors.white,
+                        unselectedLabelColor: Colors.white.withValues(alpha: 0.6),
+                        labelStyle: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                        unselectedLabelStyle: const TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                        ),
+                        tabs: const [
+                          Tab(text: 'Certificazioni Emesse'),
+                          Tab(text: 'Bozze e In Corso'),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppTheme.primaryBlack),
-          onPressed: () => Navigator.pop(context),
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              const Color(0xFF0A0E27),
+              const Color(0xFF151B3B),
+              const Color(0xFF1F2347),
+            ],
+          ),
         ),
-        bottom: TabBar(
+        child: TabBarView(
           controller: _tabController,
-          indicatorColor: AppTheme.primaryBlack,
-          labelColor: AppTheme.primaryBlack,
-          unselectedLabelColor: AppTheme.textSecondary,
-          labelStyle: TextStyle(fontWeight: FontWeight.w600),
-          tabs: const [
-            Tab(text: 'Certificazioni Emesse'),
-            Tab(text: 'Bozze e In Corso'),
+          children: [_buildIssuedCertificationsTab(), _buildDraftsTab()],
+        ),
+      ),
+      floatingActionButton: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(28),
+          gradient: LinearGradient(
+            colors: [
+              const Color(0xFF3B82F6),
+              const Color(0xFF8B5CF6),
+            ],
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF3B82F6).withValues(alpha: 0.4),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
           ],
         ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [_buildIssuedCertificationsTab(), _buildDraftsTab()],
-      ),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          FloatingActionButton(
-            onPressed: () {
-              print('🧪 Direct API test button pressed');
-              _testDirectApiCall();
-            },
-            backgroundColor: AppTheme.errorRed,
-            foregroundColor: AppTheme.pureWhite,
-            elevation: 8,
-            heroTag: "direct",
-            child: const Icon(Icons.api),
+        child: FloatingActionButton.extended(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const CreateCertificationScreen(),
+              ),
+            );
+          },
+          backgroundColor: Colors.transparent,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          icon: const Icon(Icons.add_rounded, size: 24),
+          label: const Text(
+            'Nuova Certificazione',
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 16,
+            ),
           ),
-          const SizedBox(height: 8),
-          FloatingActionButton(
-            onPressed: () {
-              print('🧪 Manual test button pressed');
-              _loadCertifications();
-            },
-            backgroundColor: AppTheme.warningOrange,
-            foregroundColor: AppTheme.pureWhite,
-            elevation: 8,
-            heroTag: "test",
-            child: const Icon(Icons.refresh),
-          ),
-          const SizedBox(height: 8),
-          FloatingActionButton.extended(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const CreateCertificationScreen(),
-                ),
-              );
-            },
-            backgroundColor: AppTheme.primaryBlack,
-            foregroundColor: AppTheme.pureWhite,
-            elevation: 8,
-            icon: const Icon(Icons.add),
-            label: const Text('Nuova Certificazione'),
-          ),
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildIssuedCertificationsTab() {
-    // final l10n = AppLocalizations.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 768;
 
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (_errorMessage != null) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 64, color: AppTheme.errorRed),
-            const SizedBox(height: 16),
-            Text('Errore nel caricamento', style: AppTheme.title2),
-            const SizedBox(height: 8),
-            Text(
-              _errorMessage!,
-              style: AppTheme.body2,
-              textAlign: TextAlign.center,
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(30),
+                gradient: LinearGradient(
+                  colors: [
+                    const Color(0xFF3B82F6),
+                    const Color(0xFF8B5CF6),
+                  ],
+                ),
+              ),
+              child: const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                strokeWidth: 3,
+              ),
             ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _loadCertifications,
-              child: const Text('Riprova'),
+            const SizedBox(height: 24),
+            const Text(
+              'Caricamento...',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ],
         ),
       );
     }
 
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(isTablet ? 24 : 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Management Cards
-          Text(
-            'Gestione',
-            style: TextStyle(
-              fontSize: isTablet ? 22 : 20,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.primaryBlack,
+    if (_errorMessage != null) {
+      return Center(
+        child: Container(
+          margin: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            color: Colors.white.withValues(alpha: 0.1),
+            border: Border.all(
+              color: Colors.red.withValues(alpha: 0.3),
+              width: 1,
             ),
           ),
-          SizedBox(height: isTablet ? 16 : 12),
-
-          Row(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Expanded(
-                child: _buildManagementCard(
-                  'Categorie',
-                  'Gestisci le categorie di certificazione',
-                  Icons.category_outlined,
-                  AppTheme.primaryBlue,
-                  () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            const CertificationCategoryManagementScreen(
-                              idLegalEntity:
-                                  'placeholder', // TODO: Get from context
-                            ),
-                      ),
-                    );
-                  },
-                  isTablet,
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(32),
+                  color: Colors.red.withValues(alpha: 0.2),
+                ),
+                child: const Icon(Icons.error_outline, size: 32, color: Colors.red),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Errore nel caricamento',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-              SizedBox(width: isTablet ? 16 : 12),
-              Expanded(
-                child: _buildManagementCard(
-                  'Informazioni',
-                  'Gestisci i campi di informazione',
-                  Icons.info_outline,
-                  AppTheme.successGreen,
-                  () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            const CertificationInformationManagementScreen(
-                              idLegalEntity:
-                                  'placeholder', // TODO: Get from context
-                            ),
-                      ),
-                    );
-                  },
-                  isTablet,
+              const SizedBox(height: 8),
+              Text(
+                _errorMessage!,
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.7),
+                  fontSize: 14,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  gradient: LinearGradient(
+                    colors: [
+                      const Color(0xFF3B82F6),
+                      const Color(0xFF8B5CF6),
+                    ],
+                  ),
+                ),
+                child: ElevatedButton(
+                  onPressed: _loadCertifications,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    'Riprova',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ),
             ],
           ),
+        ),
+      );
+    }
 
-          SizedBox(height: isTablet ? 32 : 24),
-
-          // Certifications List
-          Text(
-            'Certificazioni Emesse (${_issuedCertifications.length})',
+    return SingleChildScrollView(
+      padding: EdgeInsets.only(
+        left: isTablet ? 24 : 16,
+        right: isTablet ? 24 : 16,
+        top: 20,
+        bottom: 100,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Management Cards con layout moderno
+          const Text(
+            'Gestione Rapida',
             style: TextStyle(
-              fontSize: isTablet ? 22 : 20,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.primaryBlack,
+              fontSize: 24,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+              letterSpacing: -0.5,
             ),
           ),
-          SizedBox(height: isTablet ? 16 : 12),
+          const SizedBox(height: 20),
+
+          // Layout asimmetrico per le card
+          Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: _buildModernManagementCard(
+                      'Categorie',
+                      'Gestisci le categorie\ndi certificazione',
+                      Icons.category_rounded,
+                      const Color(0xFF3B82F6),
+                      () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const CertificationCategoryManagementScreen(
+                                  idLegalEntity: 'placeholder',
+                                ),
+                          ),
+                        );
+                      },
+                      120,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    flex: 1,
+                    child: _buildModernManagementCard(
+                      'Info',
+                      'Campi',
+                      Icons.info_rounded,
+                      const Color(0xFF10B981),
+                      () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const CertificationInformationManagementScreen(
+                                  idLegalEntity: 'placeholder',
+                                ),
+                          ),
+                        );
+                      },
+                      80,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 40),
+
+          // Sezione certificazioni
+          Row(
+            children: [
+              const Text(
+                'Certificazioni Emesse',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  gradient: LinearGradient(
+                    colors: [
+                      const Color(0xFF3B82F6).withValues(alpha: 0.2),
+                      const Color(0xFF8B5CF6).withValues(alpha: 0.2),
+                    ],
+                  ),
+                  border: Border.all(
+                    color: const Color(0xFF3B82F6).withValues(alpha: 0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Text(
+                  '${_issuedCertifications.length}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
 
           if (_issuedCertifications.isEmpty)
-            _buildEmptyState(
+            _buildModernEmptyState(
               'Nessuna certificazione emessa',
               'Le certificazioni completate appariranno qui',
+              Icons.workspace_premium_rounded,
             )
           else
-            ..._buildCertificationsList(_issuedCertifications, isTablet),
+            ..._buildModernCertificationsList(_issuedCertifications, isTablet),
         ],
       ),
     );
@@ -512,56 +804,174 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
     final isTablet = screenWidth > 768;
 
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (_errorMessage != null) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 64, color: AppTheme.errorRed),
-            const SizedBox(height: 16),
-            Text('Errore nel caricamento', style: AppTheme.title2),
-            const SizedBox(height: 8),
-            Text(
-              _errorMessage!,
-              style: AppTheme.body2,
-              textAlign: TextAlign.center,
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(30),
+                gradient: LinearGradient(
+                  colors: [
+                    const Color(0xFF3B82F6),
+                    const Color(0xFF8B5CF6),
+                  ],
+                ),
+              ),
+              child: const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                strokeWidth: 3,
+              ),
             ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _loadCertifications,
-              child: const Text('Riprova'),
+            const SizedBox(height: 24),
+            const Text(
+              'Caricamento...',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ],
         ),
       );
     }
 
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(isTablet ? 24 : 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'Bozze e In Corso (${_draftCertifications.length})',
-            style: TextStyle(
-              fontSize: isTablet ? 22 : 20,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.primaryBlack,
+    if (_errorMessage != null) {
+      return Center(
+        child: Container(
+          margin: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            color: Colors.white.withValues(alpha: 0.1),
+            border: Border.all(
+              color: Colors.red.withValues(alpha: 0.3),
+              width: 1,
             ),
           ),
-          SizedBox(height: isTablet ? 16 : 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(32),
+                  color: Colors.red.withValues(alpha: 0.2),
+                ),
+                child: const Icon(Icons.error_outline, size: 32, color: Colors.red),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Errore nel caricamento',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                _errorMessage!,
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.7),
+                  fontSize: 14,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  gradient: LinearGradient(
+                    colors: [
+                      const Color(0xFF3B82F6),
+                      const Color(0xFF8B5CF6),
+                    ],
+                  ),
+                ),
+                child: ElevatedButton(
+                  onPressed: _loadCertifications,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    'Riprova',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return SingleChildScrollView(
+      padding: EdgeInsets.only(
+        left: isTablet ? 24 : 16,
+        right: isTablet ? 24 : 16,
+        top: 20,
+        bottom: 100,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Text(
+                'Bozze e In Corso',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  gradient: LinearGradient(
+                    colors: [
+                      const Color(0xFFF59E0B).withValues(alpha: 0.2),
+                      const Color(0xFFEF4444).withValues(alpha: 0.2),
+                    ],
+                  ),
+                  border: Border.all(
+                    color: const Color(0xFFF59E0B).withValues(alpha: 0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Text(
+                  '${_draftCertifications.length}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
 
           if (_draftCertifications.isEmpty)
-            _buildEmptyState(
+            _buildModernEmptyState(
               'Nessuna bozza disponibile',
               'Le tue bozze e certificazioni in corso appariranno qui',
+              Icons.edit_document,
             )
           else
-            ..._buildCertificationsList(_draftCertifications, isTablet),
+            ..._buildModernCertificationsList(_draftCertifications, isTablet),
         ],
       ),
     );
@@ -724,6 +1134,396 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
         return 'Bozza';
       default:
         return 'Sconosciuto';
+    }
+  }
+
+  Widget _buildQuickStat(String label, String value, Color color, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        color: Colors.white.withValues(alpha: 0.1),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.2),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: color.withValues(alpha: 0.2),
+            ),
+            child: Icon(icon, color: color, size: 20),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          Text(
+            label,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.7),
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModernManagementCard(
+    String title,
+    String description,
+    IconData icon,
+    Color color,
+    VoidCallback onTap,
+    double height,
+  ) {
+    return Container(
+      height: height,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            color.withValues(alpha: 0.2),
+            color.withValues(alpha: 0.05),
+          ],
+        ),
+        border: Border.all(
+          color: color.withValues(alpha: 0.3),
+          width: 1,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(24),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    gradient: LinearGradient(
+                      colors: [color, color.withValues(alpha: 0.7)],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: color.withValues(alpha: 0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Icon(icon, color: Colors.white, size: 24),
+                ),
+                const Spacer(),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  description,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.white.withValues(alpha: 0.7),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModernEmptyState(String title, String subtitle, IconData icon) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(48),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        color: Colors.white.withValues(alpha: 0.05),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.1),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(40),
+              gradient: LinearGradient(
+                colors: [
+                  Colors.white.withValues(alpha: 0.1),
+                  Colors.white.withValues(alpha: 0.05),
+                ],
+              ),
+            ),
+            child: Icon(
+              icon,
+              size: 40,
+              color: Colors.white.withValues(alpha: 0.4),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            subtitle,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.white.withValues(alpha: 0.6),
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _buildModernCertificationsList(
+    List<Map<String, dynamic>> certifications,
+    bool isTablet,
+  ) {
+    return certifications.asMap().entries.map((entry) {
+      int index = entry.key;
+      Map<String, dynamic> cert = entry.value;
+      
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 20),
+        child: _buildModernCertificationCard(cert, isTablet, index),
+      );
+    }).toList();
+  }
+
+  Widget _buildModernCertificationCard(Map<String, dynamic> cert, bool isTablet, int index) {
+    final status = cert['status'] ?? 'draft';
+    final statusColor = _getModernStatusColor(status);
+    final statusText = _getStatusText(status);
+    final createdAt = DateTime.tryParse(cert['created_at'] ?? '') ?? DateTime.now();
+    final nUsers = cert['n_users'] ?? 0;
+
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.white.withValues(alpha: 0.1),
+            Colors.white.withValues(alpha: 0.05),
+          ],
+        ),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.2),
+          width: 1,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            // TODO: Navigate to certification details
+          },
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        gradient: LinearGradient(
+                          colors: [
+                            statusColor,
+                            statusColor.withValues(alpha: 0.7),
+                          ],
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: statusColor.withValues(alpha: 0.3),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.workspace_premium_rounded,
+                        color: Colors.white,
+                        size: 28,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Certificazione ${cert['serial_number'] ?? 'N/A'}',
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            cert['id_certification_category'] ?? 'N/A',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.white.withValues(alpha: 0.7),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        color: statusColor.withValues(alpha: 0.2),
+                        border: Border.all(
+                          color: statusColor.withValues(alpha: 0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: Text(
+                        statusText,
+                        style: TextStyle(
+                          color: statusColor,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    color: Colors.white.withValues(alpha: 0.05),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.1),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Utenti',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.white.withValues(alpha: 0.6),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            Text(
+                              '$nUsers',
+                              style: const TextStyle(
+                                fontSize: 18,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        width: 1,
+                        height: 30,
+                        color: Colors.white.withValues(alpha: 0.1),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Data Creazione',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.white.withValues(alpha: 0.6),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            Text(
+                              '${createdAt.day}/${createdAt.month}/${createdAt.year}',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Color _getModernStatusColor(String status) {
+    switch (status) {
+      case 'sent':
+        return const Color(0xFF10B981);
+      case 'closed':
+        return const Color(0xFF6B7280);
+      case 'draft':
+        return const Color(0xFFF59E0B);
+      default:
+        return const Color(0xFF8B5CF6);
     }
   }
 }
