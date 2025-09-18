@@ -1830,7 +1830,7 @@ class _CertifiersContentState extends State<CertifiersContent> {
                         // 2. Crea il certificatore associato
                         print('🚀 Creating certifier...');
                         final certifierResult = await _certifierService.createCertifier(
-                          certifier: newCertifier.copyWith(
+                          newCertifier.copyWith(
                             idUser: authResponse.user!.id,
                           ),
                         );
