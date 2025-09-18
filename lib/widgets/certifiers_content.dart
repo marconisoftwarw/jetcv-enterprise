@@ -6,6 +6,7 @@ import '../models/certifier.dart';
 import '../models/legal_entity.dart';
 import '../services/certifier_service.dart';
 import '../services/email_service.dart';
+import '../services/supabase_service.dart';
 import '../providers/auth_provider.dart';
 import '../providers/legal_entity_provider.dart';
 import '../services/user_type_service.dart';
@@ -1755,6 +1756,26 @@ class _CertifiersContentState extends State<CertifiersContent> {
                         return;
                       }
 
+                      if (passwordController.text.trim().isEmpty) {
+                        _showError(l10n.getString('password_required'));
+                        return;
+                      }
+
+                      if (passwordController.text.trim().length < 6) {
+                        _showError(l10n.getString('password_min_length'));
+                        return;
+                      }
+
+                      if (confirmPasswordController.text.trim().isEmpty) {
+                        _showError(l10n.getString('confirm_password_required'));
+                        return;
+                      }
+
+                      if (passwordController.text.trim() != confirmPasswordController.text.trim()) {
+                        _showError(l10n.getString('passwords_do_not_match'));
+                        return;
+                      }
+
                       if (selectedLegalEntity == null) {
                         _showError(l10n.getString('legal_entity_required'));
                         return;
@@ -1763,7 +1784,7 @@ class _CertifiersContentState extends State<CertifiersContent> {
                       setState(() => isLoading = true);
 
                       try {
-                        // Prepara i dati utente
+                        // Prepara i dati utente per la signup
                         final userData = {
                           'firstName': firstNameController.text.trim(),
                           'lastName': lastNameController.text.trim(),
@@ -1791,60 +1812,41 @@ class _CertifiersContentState extends State<CertifiersContent> {
                           active: true,
                         );
 
-                        // Crea utente e certificatore insieme usando la nuova Edge Function
-                        print(
-                          '🚀 Calling createCertifierWithUser with certifier-crud edge function',
+                        // 1. Crea l'utente con signup completo (inclusa password)
+                        print('🚀 Creating user with signup...');
+                        final supabaseService = SupabaseService();
+                        final authResponse = await supabaseService.signUpWithEmail(
+                          email: emailController.text.trim(),
+                          password: passwordController.text.trim(),
+                          userData: userData,
                         );
-                        final result = await _certifierService
-                            .createCertifierWithUser(
-                              userData: userData,
-                              certifier: newCertifier,
-                            );
-                             final emailSent = await _emailService
-                                .sendPasswordSetupEmail(
-                                  email: userData['email'] as String,
-                                  firstName: userData['firstName'] as String,
-                                  lastName: userData['lastName'] as String,
-                                  passwordSetupToken: "tokentemp",
-                                );
-                        print('🚀 createCertifierWithUser result: $result');
 
-                        if (result == null) {
-                          throw Exception(
-                            'Errore nella creazione del certificatore e utente',
-                          );
+                        if (authResponse.user == null) {
+                          throw Exception('Errore nella creazione dell\'utente');
                         }
 
-                        // Debug: stampa il risultato completo
-                        print('🔍 Full result from createCertifierWithUser: $result');
-                        print('🔍 Result keys: ${result.keys.toList()}');
-                        
-                          print('📧 Sending password setup email...');
-                          print('📧 Email: ${userData['email']}');
-                          print('📧 Name: ${userData['firstName']} ${userData['lastName']}');
-                          
-                          try {
-                           
+                        print('✅ User created successfully: ${authResponse.user!.id}');
 
-                            if (emailSent) {
-                              print('✅ Password setup email sent successfully');
-                            } else {
-                              print('⚠️ Failed to send password setup email');
-                            }
-                          } catch (emailError) {
-                            print(
-                              '❌ Error sending password setup email: $emailError',
-                            );
-                            // Non bloccare l'operazione se l'email fallisce
-                          }
-                       
+                        // 2. Crea il certificatore associato
+                        print('🚀 Creating certifier...');
+                        final certifierResult = await _certifierService.createCertifier(
+                          certifier: newCertifier.copyWith(
+                            idUser: authResponse.user!.id,
+                          ),
+                        );
+
+                        if (certifierResult == null) {
+                          throw Exception('Errore nella creazione del certificatore');
+                        }
+
+                        print('✅ Certifier created successfully');
 
                         if (mounted) {
                           Navigator.pop(context);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                '${l10n.getString('certifier_created_successfully')} - Email di impostazione password inviata',
+                                '${l10n.getString('certifier_created_successfully')} - L\'utente può ora accedere con le credenziali fornite',
                               ),
                               backgroundColor: AppTheme.successGreen,
                               duration: Duration(seconds: 4),
