@@ -249,9 +249,15 @@ class _CVListScreenState extends State<CVListScreen> {
                     ),
                   ),
                   items: const [
-                    DropdownMenuItem(value: 'recent', child: Text('Più recenti')),
+                    DropdownMenuItem(
+                      value: 'recent',
+                      child: Text('Più recenti'),
+                    ),
                     DropdownMenuItem(value: 'name', child: Text('Nome')),
-                    DropdownMenuItem(value: 'location', child: Text('Località')),
+                    DropdownMenuItem(
+                      value: 'location',
+                      child: Text('Località'),
+                    ),
                     DropdownMenuItem(
                       value: 'verified',
                       child: Text('Verificati'),

@@ -17,7 +17,7 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
   late AnimationController _heroAnimationController;
   late AnimationController _floatingAnimationController;
   late AnimationController _particleAnimationController;
-  
+
   late Animation<double> _heroFadeAnimation;
   late Animation<Offset> _heroSlideAnimation;
   late Animation<double> _floatingAnimation;
@@ -26,19 +26,19 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
   @override
   void initState() {
     super.initState();
-    
+
     // Hero animation (fade in + slide up)
     _heroAnimationController = AnimationController(
       duration: const Duration(milliseconds: 1200),
       vsync: this,
     );
-    
+
     // Floating animation for cards
     _floatingAnimationController = AnimationController(
       duration: const Duration(seconds: 3),
       vsync: this,
     );
-    
+
     // Particle animation for background
     _particleAnimationController = AnimationController(
       duration: const Duration(seconds: 8),
@@ -52,15 +52,13 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
       ),
     );
 
-    _heroSlideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _heroAnimationController,
-        curve: const Interval(0.2, 0.8, curve: Curves.easeOutCubic),
-      ),
-    );
+    _heroSlideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _heroAnimationController,
+            curve: const Interval(0.2, 0.8, curve: Curves.easeOutCubic),
+          ),
+        );
 
     _floatingAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
@@ -68,7 +66,7 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
         curve: Curves.easeInOutSine,
       ),
     );
-    
+
     _particleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _particleAnimationController,
@@ -212,10 +210,10 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
             children: [
               // Animated Particles Background
               _buildParticleBackground(),
-              
+
               // Glassmorphic Navigation Bar
               _buildGlassmorphicNavBar(context, l10n, isDesktop),
-              
+
               // Main Hero Content
               SafeArea(
                 child: Padding(
@@ -232,7 +230,11 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
                         children: [
                           // Floating Brand Icon with Glow
                           Transform.translate(
-                            offset: Offset(0, math.sin(_floatingAnimation.value * 2 * math.pi) * 8),
+                            offset: Offset(
+                              0,
+                              math.sin(_floatingAnimation.value * 2 * math.pi) *
+                                  8,
+                            ),
                             child: Container(
                               width: isDesktop ? 140 : 120,
                               height: isDesktop ? 140 : 120,
@@ -247,13 +249,17 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
                                 borderRadius: BorderRadius.circular(32),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(0xFF06B6D4).withValues(alpha: 0.4),
+                                    color: const Color(
+                                      0xFF06B6D4,
+                                    ).withValues(alpha: 0.4),
                                     blurRadius: 40,
                                     spreadRadius: 0,
                                     offset: const Offset(0, 20),
                                   ),
                                   BoxShadow(
-                                    color: const Color(0xFF8B5CF6).withValues(alpha: 0.3),
+                                    color: const Color(
+                                      0xFF8B5CF6,
+                                    ).withValues(alpha: 0.3),
                                     blurRadius: 60,
                                     spreadRadius: 0,
                                     offset: const Offset(0, 40),
@@ -281,13 +287,16 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
                             ).createShader(bounds),
                             child: Text(
                               AppConfig.appName,
-                              style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: -2.0,
-                                fontSize: isDesktop ? 72 : (isTablet ? 56 : 42),
-                                height: 1.1,
-                              ),
+                              style: Theme.of(context).textTheme.displayLarge
+                                  ?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: -2.0,
+                                    fontSize: isDesktop
+                                        ? 72
+                                        : (isTablet ? 56 : 42),
+                                    height: 1.1,
+                                  ),
                               textAlign: TextAlign.center,
                             ),
                           ),
@@ -296,16 +305,21 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
 
                           // Modern Subtitle with Typewriter Effect
                           Container(
-                            constraints: BoxConstraints(maxWidth: isDesktop ? 800 : 600),
+                            constraints: BoxConstraints(
+                              maxWidth: isDesktop ? 800 : 600,
+                            ),
                             child: Text(
-                              l10n.getString('enterprise_certification_platform'),
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                color: Colors.white.withValues(alpha: 0.9),
-                                fontWeight: FontWeight.w400,
-                                fontSize: isDesktop ? 24 : 20,
-                                height: 1.5,
-                                letterSpacing: 0.5,
+                              l10n.getString(
+                                'enterprise_certification_platform',
                               ),
+                              style: Theme.of(context).textTheme.titleLarge
+                                  ?.copyWith(
+                                    color: Colors.white.withValues(alpha: 0.9),
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: isDesktop ? 24 : 20,
+                                    height: 1.5,
+                                    letterSpacing: 0.5,
+                                  ),
                               textAlign: TextAlign.center,
                             ),
                           ),
@@ -320,20 +334,27 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
                                 _buildModernCTAButton(
                                   context,
                                   l10n.getString('register_company'),
-                                  () => Navigator.pushNamed(context, '/legal-entity/register'),
+                                  () => Navigator.pushNamed(
+                                    context,
+                                    '/legal-entity/register',
+                                  ),
                                   isPrimary: true,
                                 ),
                                 const SizedBox(width: 24),
                                 _buildModernCTAButton(
                                   context,
                                   l10n.getString('view_pricing'),
-                                  () => Navigator.pushNamed(context, '/legal-entity/pricing'),
+                                  () => Navigator.pushNamed(
+                                    context,
+                                    '/legal-entity/pricing',
+                                  ),
                                 ),
                                 const SizedBox(width: 24),
                                 _buildModernCTAButton(
                                   context,
                                   l10n.getString('explore_cvs'),
-                                  () => Navigator.pushNamed(context, '/cv-list'),
+                                  () =>
+                                      Navigator.pushNamed(context, '/cv-list'),
                                   isSecondary: true,
                                 ),
                               ],
@@ -344,7 +365,10 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
                                 _buildModernCTAButton(
                                   context,
                                   l10n.getString('register_company'),
-                                  () => Navigator.pushNamed(context, '/legal-entity/register'),
+                                  () => Navigator.pushNamed(
+                                    context,
+                                    '/legal-entity/register',
+                                  ),
                                   isPrimary: true,
                                   isFullWidth: true,
                                 ),
@@ -355,7 +379,10 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
                                       child: _buildModernCTAButton(
                                         context,
                                         l10n.getString('view_pricing'),
-                                        () => Navigator.pushNamed(context, '/legal-entity/pricing'),
+                                        () => Navigator.pushNamed(
+                                          context,
+                                          '/legal-entity/pricing',
+                                        ),
                                       ),
                                     ),
                                     const SizedBox(width: 16),
@@ -363,7 +390,10 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
                                       child: _buildModernCTAButton(
                                         context,
                                         l10n.getString('explore_cvs'),
-                                        () => Navigator.pushNamed(context, '/cv-list'),
+                                        () => Navigator.pushNamed(
+                                          context,
+                                          '/cv-list',
+                                        ),
                                         isSecondary: true,
                                       ),
                                     ),
@@ -393,9 +423,7 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
   // Animated Particle Background
   Widget _buildParticleBackground() {
     return Positioned.fill(
-      child: CustomPaint(
-        painter: ParticlePainter(_particleAnimation.value),
-      ),
+      child: CustomPaint(painter: ParticlePainter(_particleAnimation.value)),
     );
   }
 
@@ -424,9 +452,7 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
               ],
             ),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.2),
-            ),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.1),
@@ -467,7 +493,7 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
                   ),
                 ],
               ),
-              
+
               // Navigation Items
               if (isDesktop)
                 Row(
@@ -479,7 +505,8 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
                     const SizedBox(width: 8),
                     _buildGlassNavItem(
                       l10n.getString('pricing'),
-                      () => Navigator.pushNamed(context, '/legal-entity/pricing'),
+                      () =>
+                          Navigator.pushNamed(context, '/legal-entity/pricing'),
                     ),
                     const SizedBox(width: 16),
                     _buildGlassNavButton(
@@ -577,13 +604,13 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
                     colors: [Color(0xFF06B6D4), Color(0xFF3B82F6)],
                   )
                 : isSecondary
-                    ? null
-                    : LinearGradient(
-                        colors: [
-                          Colors.white.withValues(alpha: 0.1),
-                          Colors.white.withValues(alpha: 0.05),
-                        ],
-                      ),
+                ? null
+                : LinearGradient(
+                    colors: [
+                      Colors.white.withValues(alpha: 0.1),
+                      Colors.white.withValues(alpha: 0.05),
+                    ],
+                  ),
             border: isSecondary
                 ? Border.all(color: Colors.white.withValues(alpha: 0.3))
                 : null,
@@ -1070,25 +1097,25 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
         'number': '10K+',
         'label': l10n.getString('certifications_issued'),
         'icon': Icons.verified_rounded,
-        'color': const Color(0xFF06B6D4)
+        'color': const Color(0xFF06B6D4),
       },
       {
         'number': '500+',
         'label': l10n.getString('companies_verified'),
         'icon': Icons.business_rounded,
-        'color': const Color(0xFF3B82F6)
+        'color': const Color(0xFF3B82F6),
       },
       {
         'number': '99.9%',
         'label': l10n.getString('uptime_guarantee'),
         'icon': Icons.trending_up_rounded,
-        'color': const Color(0xFF10B981)
+        'color': const Color(0xFF10B981),
       },
       {
         'number': '24/7',
         'label': l10n.getString('support_available'),
         'icon': Icons.support_agent_rounded,
-        'color': const Color(0xFF8B5CF6)
+        'color': const Color(0xFF8B5CF6),
       },
     ];
 
@@ -1101,11 +1128,7 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
             gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [
-                Color(0xFF0A0E27),
-                Color(0xFF1A1F3A),
-                Color(0xFF2D1B69),
-              ],
+              colors: [Color(0xFF0A0E27), Color(0xFF1A1F3A), Color(0xFF2D1B69)],
             ),
             borderRadius: BorderRadius.circular(32),
             boxShadow: [
@@ -1133,7 +1156,7 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
                   borderRadius: BorderRadius.circular(32),
                 ),
               ),
-              
+
               // Content
               Padding(
                 padding: EdgeInsets.all(isDesktop ? 80 : 48),
@@ -1150,13 +1173,14 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
                       ).createShader(bounds),
                       child: Text(
                         l10n.getString('trusted_by_thousands'),
-                        style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w800,
-                          fontSize: isDesktop ? 48 : 32,
-                          letterSpacing: -1.0,
-                          height: 1.2,
-                        ),
+                        style: Theme.of(context).textTheme.headlineLarge
+                            ?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                              fontSize: isDesktop ? 48 : 32,
+                              letterSpacing: -1.0,
+                              height: 1.2,
+                            ),
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -1171,7 +1195,10 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
                           return Expanded(
                             child: Padding(
                               padding: EdgeInsets.symmetric(
-                                horizontal: index == 0 || index == stats.length - 1 ? 0 : 12,
+                                horizontal:
+                                    index == 0 || index == stats.length - 1
+                                    ? 0
+                                    : 12,
                               ),
                               child: _buildModernStatCard(
                                 context,
@@ -1288,11 +1315,7 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
                   ),
                 ],
               ),
-              child: Icon(
-                icon,
-                color: Colors.white,
-                size: isDesktop ? 32 : 28,
-              ),
+              child: Icon(icon, color: Colors.white, size: isDesktop ? 32 : 28),
             ),
 
             SizedBox(height: isDesktop ? 24 : 20),
@@ -1592,26 +1615,25 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
 // Particle Painter for animated background
 class ParticlePainter extends CustomPainter {
   final double animationValue;
-  
+
   ParticlePainter(this.animationValue);
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..style = PaintingStyle.fill;
+    final paint = Paint()..style = PaintingStyle.fill;
 
     // Create animated particles
     for (int i = 0; i < 50; i++) {
       final x = (i * 37.0 + animationValue * 50) % size.width;
       final y = (i * 23.0 + animationValue * 30) % size.height;
       final radius = (math.sin(animationValue * 2 * math.pi + i) * 2 + 3).abs();
-      
+
       paint.color = [
         const Color(0xFF06B6D4).withValues(alpha: 0.1),
         const Color(0xFF3B82F6).withValues(alpha: 0.1),
         const Color(0xFF8B5CF6).withValues(alpha: 0.1),
       ][i % 3];
-      
+
       canvas.drawCircle(Offset(x, y), radius, paint);
     }
 
@@ -1620,12 +1642,12 @@ class ParticlePainter extends CustomPainter {
       final x = (i * 200.0 + animationValue * 20) % size.width;
       final y = (i * 150.0 + animationValue * 15) % size.height;
       final radius = 30.0 + math.sin(animationValue * math.pi + i) * 10;
-      
+
       paint.color = [
         const Color(0xFF06B6D4).withValues(alpha: 0.05),
         const Color(0xFF8B5CF6).withValues(alpha: 0.05),
       ][i % 2];
-      
+
       canvas.drawCircle(Offset(x, y), radius, paint);
     }
   }
