@@ -205,35 +205,69 @@ class _CertifiersContentState extends State<CertifiersContent> {
     }
 
     if (_filteredCertifiers.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.people_outline,
-              size: isTablet ? 64 : 48,
-              color: AppTheme.textSecondary,
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header con titolo e pulsante refresh
+          Padding(
+            padding: EdgeInsets.all(isTablet ? 24 : 16),
+            child: Row(
+              children: [
+                Text(
+                  l10n.getString('certifiers'),
+                  style: TextStyle(
+                    fontSize: isTablet ? 24 : 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.primaryBlack,
+                  ),
+                ),
+                Spacer(),
+                IconButton(
+                  onPressed: _loadCertifiers,
+                  icon: Icon(Icons.refresh, size: isTablet ? 24 : 20),
+                  tooltip: l10n.getString('refresh'),
+                ),
+              ],
             ),
-            SizedBox(height: isTablet ? 16 : 12),
-            Text(
-              l10n.getString('no_certifiers_found'),
-              style: TextStyle(
-                fontSize: isTablet ? 18 : 16,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.primaryBlack,
+          ),
+
+          // Sezione filtri (sempre visibile)
+          _buildFiltersSection(l10n, isTablet),
+
+          // Messaggio nessun certificatore trovato
+          Expanded(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.people_outline,
+                    size: isTablet ? 64 : 48,
+                    color: AppTheme.textSecondary,
+                  ),
+                  SizedBox(height: isTablet ? 16 : 12),
+                  Text(
+                    l10n.getString('no_certifiers_found'),
+                    style: TextStyle(
+                      fontSize: isTablet ? 18 : 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.primaryBlack,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    l10n.getString('no_certifiers_for_entity'),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: isTablet ? 14 : 12,
+                      color: AppTheme.textSecondary,
+                    ),
+                  ),
+                ],
               ),
             ),
-            SizedBox(height: 8),
-            Text(
-              l10n.getString('no_certifiers_for_entity'),
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: isTablet ? 14 : 12,
-                color: AppTheme.textSecondary,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       );
     }
 
