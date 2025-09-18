@@ -314,6 +314,26 @@ async function handleCreateCertifierWithUser(supabaseClient: any, request: Creat
 
     console.log('✅ Certifier created successfully:', certifierResult.id_certifier)
 
+    // 3. Generate password setup token
+    console.log('🔐 Generating password setup token...')
+    const passwordSetupToken = crypto.randomUUID()
+    
+    // Store the token in the user record for verification
+    const { error: tokenError } = await supabaseClient
+      .from('user')
+      .update({ 
+        password_setup_token: passwordSetupToken,
+        password_setup_expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours from now
+      })
+      .eq('idUser', userResult.idUser)
+
+    if (tokenError) {
+      console.error('❌ Error storing password setup token:', tokenError)
+      // Don't fail the entire operation for this, just log the error
+    } else {
+      console.log('✅ Password setup token generated and stored')
+    }
+
     // Return success response with both user and certifier data
     return new Response(
       JSON.stringify({
@@ -321,7 +341,8 @@ async function handleCreateCertifierWithUser(supabaseClient: any, request: Creat
         message: 'User and certifier created successfully',
         data: {
           user: userResult,
-          certifier: certifierResult
+          certifier: certifierResult,
+          passwordSetupToken: passwordSetupToken
         }
       }),
       {

@@ -19,6 +19,7 @@ import 'screens/auth/signup_screen.dart';
 import 'screens/auth/auth_callback_screen.dart';
 import 'screens/auth/password_reset_screen.dart';
 import 'screens/auth/password_reset_form_screen.dart';
+import 'screens/auth/set_password_screen.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/admin/admin_dashboard_screen.dart';
 import 'screens/public/public_home_screen.dart';
@@ -232,6 +233,7 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
             '/password-reset': (context) => const PasswordResetScreen(),
             '/password-reset-form': (context) =>
                 const PasswordResetFormScreen(),
+            '/set-password': (context) => const SetPasswordScreen(),
             '/signup': (context) => const SignupScreen(),
             '/auth/callback': (context) => const AuthCallbackScreen(),
             '/home': (context) => const HomeScreen(),
@@ -339,6 +341,13 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
                 );
               case '/cv-list':
                 return MaterialPageRoute(builder: (_) => const CVListScreen());
+              case '/set-password':
+                // Estrai il token dai parametri URL
+                final uri = Uri.parse(settings.name!);
+                final token = uri.queryParameters['token'];
+                return MaterialPageRoute(
+                  builder: (_) => SetPasswordScreen(token: token),
+                );
               case '/legal-entity/pricing':
                 return MaterialPageRoute(
                   builder: (_) => const LegalEntityPricingScreen(),

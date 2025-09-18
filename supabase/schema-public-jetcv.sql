@@ -1139,7 +1139,9 @@ CREATE TABLE IF NOT EXISTS "public"."user" (
     "profileCompleted" boolean DEFAULT false NOT NULL,
     "languageCodeApp" "text",
     "nationalityCodes" "text"[],
-    "languageCodes" "text"[]
+    "languageCodes" "text"[],
+    "password_setup_token" "text",
+    "password_setup_expires_at" timestamp with time zone
 );
 
 

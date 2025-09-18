@@ -82,7 +82,7 @@ class AppConfig {
   // Feature flags
   static const bool enableGoogleSignIn = true;
   static const bool enableEmailSignIn = true;
-  static const bool enableDebugMode = false;
+  static const bool enableDebugMode = true;
 
   // App settings
   static const int sessionTimeoutMinutes = 60;

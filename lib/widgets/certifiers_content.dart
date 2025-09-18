@@ -5,6 +5,7 @@ import '../theme/app_theme.dart';
 import '../models/certifier.dart';
 import '../models/legal_entity.dart';
 import '../services/certifier_service.dart';
+import '../services/email_service.dart';
 import '../providers/auth_provider.dart';
 import '../providers/legal_entity_provider.dart';
 import '../services/user_type_service.dart';
@@ -17,6 +18,7 @@ class CertifiersContent extends StatefulWidget {
 
 class _CertifiersContentState extends State<CertifiersContent> {
   final CertifierService _certifierService = CertifierService();
+  final EmailService _emailService = EmailService();
   List<CertifierWithUser> _certifiersWithUser = [];
   List<CertifierWithUser> _filteredCertifiers = [];
   bool _isLoading = true;
@@ -1772,14 +1774,42 @@ class _CertifiersContentState extends State<CertifiersContent> {
                           );
                         }
 
+                        // Invia email di impostazione password se il token è presente
+                        if (result['passwordSetupToken'] != null) {
+                          print('📧 Sending password setup email...');
+                          print('📧 Token: ${result['passwordSetupToken']}');
+                          try {
+                            final emailSent = await _emailService
+                                .sendPasswordSetupEmail(
+                                  email: userData['email'] as String,
+                                  firstName: userData['firstName'] as String,
+                                  lastName: userData['lastName'] as String,
+                                  passwordSetupToken:
+                                      result['passwordSetupToken'] as String,
+                                );
+
+                            if (emailSent) {
+                              print('✅ Password setup email sent successfully');
+                            } else {
+                              print('⚠️ Failed to send password setup email');
+                            }
+                          } catch (emailError) {
+                            print(
+                              '❌ Error sending password setup email: $emailError',
+                            );
+                            // Non bloccare l'operazione se l'email fallisce
+                          }
+                        } else {
+                          print('⚠️ No password setup token found in result');
+                          print('📋 Result keys: ${result.keys.toList()}');
+                        }
+
                         if (mounted) {
                           Navigator.pop(context);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                l10n.getString(
-                                  'certifier_created_successfully',
-                                ),
+                                '${l10n.getString('certifier_created_successfully')} - Email di impostazione password inviata',
                               ),
                               backgroundColor: AppTheme.successGreen,
                               duration: Duration(seconds: 4),

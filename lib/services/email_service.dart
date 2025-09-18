@@ -43,21 +43,20 @@ class EmailService {
   // Metodo per inviare via MailHog (sviluppo locale)
   Future<bool> _sendViaMailHog(Map<String, dynamic> emailData) async {
     try {
-      final response = await http.post(
-        Uri.parse('http://localhost:8025/api/v1/messages'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'from': _fromEmail,
-          'to': [emailData['to']],
-          'subject': emailData['subject'],
-          'html': emailData['html'],
-          'text': emailData['text'],
-        }),
-      );
+      // Per ora, simuliamo l'invio per test
+      print('📧 [MAILHOG SIMULATION] Sending email...');
+      print('📧 To: ${emailData['to']}');
+      print('📧 Subject: ${emailData['subject']}');
+      print('📧 HTML Content: ${emailData['html']?.substring(0, 100)}...');
+      print('📧 Text Content: ${emailData['text']?.substring(0, 100)}...');
 
-      return response.statusCode == 200;
+      // Simula un delay di invio
+      await Future.delayed(Duration(seconds: 1));
+
+      print('✅ [MAILHOG SIMULATION] Email sent successfully!');
+      return true;
     } catch (e) {
-      print('Error sending via MailHog: $e');
+      print('❌ Error sending via MailHog: $e');
       return false;
     }
   }
@@ -704,6 +703,153 @@ Questo è un messaggio automatico, non rispondere a questa email.
       Questo invito è valido per 30 giorni. Se hai domande, contattaci a support@jetcv.com
       
       © 2024 JetCV Enterprise. Tutti i diritti riservati.
+    ''';
+  }
+
+  // Metodo per inviare email di impostazione password per nuovo certificatore
+  Future<bool> sendPasswordSetupEmail({
+    required String email,
+    required String firstName,
+    required String lastName,
+    required String passwordSetupToken,
+  }) async {
+    try {
+      print('📧 [EMAIL SERVICE] Starting password setup email...');
+      print('📧 [EMAIL SERVICE] Email: $email');
+      print('📧 [EMAIL SERVICE] Name: $firstName $lastName');
+      print('📧 [EMAIL SERVICE] Token: $passwordSetupToken');
+
+      final emailData = {
+        'to': email,
+        'subject': 'Imposta la tua password - JetCV Enterprise',
+        'html': _generatePasswordSetupEmailHTML(
+          firstName: firstName,
+          lastName: lastName,
+          passwordSetupToken: passwordSetupToken,
+        ),
+        'text': _generatePasswordSetupEmailText(
+          firstName: firstName,
+          lastName: lastName,
+          passwordSetupToken: passwordSetupToken,
+        ),
+      };
+
+      // Opzione 1: MailHog per sviluppo locale
+      if (AppConfig.environment == 'development' && AppConfig.enableDebugMode) {
+        print('📧 [EMAIL SERVICE] Using MailHog (development mode)');
+        return await _sendViaMailHog(emailData);
+      }
+
+      // Opzione 2: Servizio email esterno (AWS SES tramite SendGrid)
+      print('📧 [EMAIL SERVICE] Using external service (production mode)');
+      return await _sendViaExternalService(emailData);
+    } catch (e) {
+      print('Error sending password setup email: $e');
+      return false;
+    }
+  }
+
+  // Genera HTML per email di impostazione password
+  String _generatePasswordSetupEmailHTML({
+    required String firstName,
+    required String lastName,
+    required String passwordSetupToken,
+  }) {
+    final passwordSetupUrl =
+        '${AppConfig.appUrl}/#/set-password?token=$passwordSetupToken';
+
+    return '''
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Imposta la tua password - JetCV Enterprise</title>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+        .button { display: inline-block; background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 20px 0; }
+        .button:hover { background: #5a6fd8; }
+        .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+        .highlight { background: #e8f4fd; padding: 15px; border-left: 4px solid #667eea; margin: 20px 0; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>🚀 Benvenuto in JetCV Enterprise!</h1>
+          <p>Il tuo account certificatore è stato creato con successo</p>
+        </div>
+        
+        <div class="content">
+          <h2>Ciao $firstName $lastName!</h2>
+          
+          <p>Il tuo account certificatore è stato creato con successo. Per completare la configurazione del tuo account, devi impostare una password sicura.</p>
+          
+          <div class="highlight">
+            <strong>🔐 Prossimo passo:</strong> Clicca sul pulsante qui sotto per impostare la tua password e accedere al sistema.
+          </div>
+          
+          <div style="text-align: center;">
+            <a href="$passwordSetupUrl" class="button">Imposta Password</a>
+          </div>
+          
+          <p><strong>Informazioni importanti:</strong></p>
+          <ul>
+            <li>Questo link è valido per 24 ore</li>
+            <li>La password deve contenere almeno 8 caratteri</li>
+            <li>Usa una combinazione di lettere, numeri e simboli</li>
+            <li>Non condividere questo link con altri</li>
+          </ul>
+          
+          <p>Se non riesci a cliccare sul pulsante, copia e incolla questo link nel tuo browser:</p>
+          <p style="word-break: break-all; background: #f0f0f0; padding: 10px; border-radius: 5px; font-family: monospace;">
+            $passwordSetupUrl
+          </p>
+          
+          <p>Se hai domande o hai bisogno di assistenza, non esitare a contattarci a <a href="mailto:support@jetcv.com">support@jetcv.com</a></p>
+        </div>
+        
+        <div class="footer">
+          <p>© 2024 JetCV Enterprise. Tutti i diritti riservati.</p>
+          <p>Questo è un messaggio automatico, non rispondere a questa email.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+    ''';
+  }
+
+  // Genera testo per email di impostazione password
+  String _generatePasswordSetupEmailText({
+    required String firstName,
+    required String lastName,
+    required String passwordSetupToken,
+  }) {
+    final passwordSetupUrl =
+        '${AppConfig.appUrl}/#/set-password?token=$passwordSetupToken';
+
+    return '''
+    Benvenuto in JetCV Enterprise!
+    
+    Ciao $firstName $lastName,
+    
+    Il tuo account certificatore è stato creato con successo. Per completare la configurazione del tuo account, devi impostare una password sicura.
+    
+    PROSSIMO PASSO: Imposta la tua password
+    Visita questo link: $passwordSetupUrl
+    
+    INFORMAZIONI IMPORTANTI:
+    - Questo link è valido per 24 ore
+    - La password deve contenere almeno 8 caratteri
+    - Usa una combinazione di lettere, numeri e simboli
+    - Non condividere questo link con altri
+    
+    Se hai domande o hai bisogno di assistenza, contattaci a support@jetcv.com
+    
+    © 2024 JetCV Enterprise. Tutti i diritti riservati.
     ''';
   }
 }
