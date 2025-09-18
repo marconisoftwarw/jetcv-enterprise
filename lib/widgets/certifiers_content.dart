@@ -4,7 +4,6 @@ import '../l10n/app_localizations.dart';
 import '../theme/app_theme.dart';
 import '../models/certifier.dart';
 import '../models/legal_entity.dart';
-import '../models/user.dart';
 import '../services/certifier_service.dart';
 import '../providers/auth_provider.dart';
 import '../providers/legal_entity_provider.dart';

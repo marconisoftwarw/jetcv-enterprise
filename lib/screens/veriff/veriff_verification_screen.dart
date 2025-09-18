@@ -75,30 +75,47 @@ class _VeriffVerificationScreenState extends State<VeriffVerificationScreen> {
 
       // Estrai l'URL di verifica e l'ID della sessione dalla nuova struttura
       if (response['success'] == true) {
-        // Nuova struttura response
-        _veriffUrl = response['verificationUrl'] as String?;
-        _sessionId = response['sessionId'] as String?;
+        print('🔍 Full response structure: $response');
 
-        print('🔍 Initial _veriffUrl: $_veriffUrl');
-        print('🔍 Initial _sessionId: $_sessionId');
-
-        // Se non c'è verificationUrl, prova con la struttura nested
-        if (_veriffUrl == null &&
-            response['response']?['verification']?['url'] != null) {
+        // PRIORITÀ 1: Usa l'URL di alchemy.veriff.com da response.verification.url
+        if (response['response']?['verification']?['url'] != null) {
           _veriffUrl = response['response']['verification']['url'] as String;
-          print('🔍 Found nested _veriffUrl: $_veriffUrl');
+          print('🔍 Found PRIORITY alchemy URL: $_veriffUrl');
         }
 
-        // Se non c'è URL, prova con la struttura diretta
+        // PRIORITÀ 2: Se non c'è il nested, prova con la struttura diretta
         if (_veriffUrl == null && response['verification']?['url'] != null) {
           _veriffUrl = response['verification']['url'] as String;
-          print('🔍 Found direct _veriffUrl: $_veriffUrl');
+          print('🔍 Found direct verification URL: $_veriffUrl');
         }
 
-        // Se non c'è URL, prova con verificationUrl
+        // PRIORITÀ 3: Fallback su verificationUrl (livello root - station.veriff.com)
         if (_veriffUrl == null && response['verificationUrl'] != null) {
           _veriffUrl = response['verificationUrl'] as String;
-          print('🔍 Found verificationUrl: $_veriffUrl');
+          print('🔍 Found root verificationUrl (fallback): $_veriffUrl');
+        }
+
+        // PRIORITÀ 4: Ultimo fallback su sessionUrl
+        if (_veriffUrl == null && response['sessionUrl'] != null) {
+          _veriffUrl = response['sessionUrl'] as String;
+          print('🔍 Found sessionUrl (last fallback): $_veriffUrl');
+        }
+
+        // Estrai sessionId
+        _sessionId = response['sessionId'] as String?;
+        print('🔍 Initial _sessionId: $_sessionId');
+
+        // Debug finale per vedere quale URL abbiamo trovato
+        print('🔍 Final _veriffUrl: $_veriffUrl');
+        print('🔍 Final _sessionId: $_sessionId');
+
+        // Se abbiamo trovato l'URL, logga quale tipo
+        if (_veriffUrl != null) {
+          if (_veriffUrl!.contains('station.veriff.com')) {
+            print('🔍 Using station.veriff.com URL (SDK)');
+          } else if (_veriffUrl!.contains('alchemy.veriff.com')) {
+            print('🔍 Using alchemy.veriff.com URL (Direct)');
+          }
         }
 
         // Se non c'è sessionId, prova con la struttura nested
@@ -292,7 +309,11 @@ class _VeriffVerificationScreenState extends State<VeriffVerificationScreen> {
                     ),
                     const SizedBox(height: 32),
                     LinkedInButton(
-                      onPressed: _openVeriffInNewTab,
+                      onPressed: () {
+                        print('🔘 Apri Verifica button clicked!');
+                        print('🔘 Current _veriffUrl: $_veriffUrl');
+                        _openVeriffInNewTab();
+                      },
                       text: 'Apri Verifica',
                       icon: Icons.open_in_new,
                       variant: LinkedInButtonVariant.primary,
@@ -444,6 +465,8 @@ class _VeriffVerificationScreenState extends State<VeriffVerificationScreen> {
   Future<void> _openVeriffInNewTab() async {
     print('🔍 _openVeriffInNewTab called');
     print('🔍 _veriffUrl: $_veriffUrl');
+    print('🔍 URL is null: ${_veriffUrl == null}');
+    print('🔍 URL is empty: ${_veriffUrl?.isEmpty}');
 
     if (_veriffUrl != null) {
       try {
