@@ -429,6 +429,8 @@ class _CertifiersContentState extends State<CertifiersContent> {
 
   Widget _buildDateFilter(AppLocalizations l10n, bool isTablet) {
     return Container(
+      width: isTablet ? 200 : 160,
+      height: isTablet ? 85 : 75,
       decoration: BoxDecoration(
         color: Colors.grey.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
@@ -471,41 +473,32 @@ class _CertifiersContentState extends State<CertifiersContent> {
         child: Padding(
           padding: EdgeInsets.all(isTablet ? 12 : 10),
           child: Row(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Icon(
-                Icons.cake,
-                color: _selectedBirthDate != null
-                    ? AppTheme.primaryBlue
-                    : Colors.grey[600],
-                size: isTablet ? 20 : 18,
+              Text(
+                l10n.getString('birth_date'),
+                style: TextStyle(
+                  fontSize: isTablet ? 11 : 10,
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-              SizedBox(width: 8),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    l10n.getString('birth_date'),
-                    style: TextStyle(
-                      fontSize: isTablet ? 12 : 11,
-                      color: Colors.grey[600],
-                      fontWeight: FontWeight.w500,
-                    ),
+              Flexible(
+                child: Text(
+                  _selectedBirthDate != null
+                      ? '${_selectedBirthDate!.day}/${_selectedBirthDate!.month}/${_selectedBirthDate!.year}'
+                      : l10n.getString('select_date'),
+                  style: TextStyle(
+                    fontSize: isTablet ? 13 : 12,
+                    color: _selectedBirthDate != null
+                        ? AppTheme.primaryBlack
+                        : Colors.grey[500],
+                    fontWeight: FontWeight.w600,
                   ),
-                  Text(
-                    _selectedBirthDate != null
-                        ? '${_selectedBirthDate!.day}/${_selectedBirthDate!.month}/${_selectedBirthDate!.year}'
-                        : l10n.getString('select_date'),
-                    style: TextStyle(
-                      fontSize: isTablet ? 14 : 13,
-                      color: _selectedBirthDate != null
-                          ? AppTheme.primaryBlack
-                          : Colors.grey[500],
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.right,
+                ),
               ),
             ],
           ),
@@ -516,6 +509,8 @@ class _CertifiersContentState extends State<CertifiersContent> {
 
   Widget _buildRoleFilter(AppLocalizations l10n, bool isTablet) {
     return Container(
+      width: isTablet ? 200 : 160,
+      height: isTablet ? 85 : 75,
       decoration: BoxDecoration(
         color: Colors.grey.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
@@ -527,46 +522,90 @@ class _CertifiersContentState extends State<CertifiersContent> {
         ),
       ),
       child: DropdownButtonHideUnderline(
-        child: DropdownButton<String?>(
-          value: _selectedRole,
-          hint: Padding(
-            padding: EdgeInsets.all(isTablet ? 12 : 10),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.work,
-                  color: Colors.grey[600],
-                  size: isTablet ? 20 : 18,
-                ),
-                SizedBox(width: 8),
-                Text(
-                  l10n.getString('role'),
-                  style: TextStyle(
-                    fontSize: isTablet ? 14 : 13,
-                    color: Colors.grey[600],
-                    fontWeight: FontWeight.w600,
+        child: ButtonTheme(
+          alignedDropdown: true,
+          child: DropdownButton<String?>(
+            value: _selectedRole,
+            isExpanded: true,
+            hint: Padding(
+              padding: EdgeInsets.all(isTablet ? 12 : 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    l10n.getString('role'),
+                    style: TextStyle(
+                      fontSize: isTablet ? 11 : 10,
+                      color: Colors.grey[600],
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                ),
-              ],
+                  Flexible(
+                    child: Text(
+                      l10n.getString('all_roles'),
+                      style: TextStyle(
+                        fontSize: isTablet ? 13 : 12,
+                        color: Colors.grey[500],
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.right,
+                    ),
+                  ),
+                ],
+              ),
             ),
+            selectedItemBuilder: (BuildContext context) {
+              return _availableRoles.map<Widget>((String? role) {
+                return Padding(
+                  padding: EdgeInsets.all(isTablet ? 12 : 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        l10n.getString('role'),
+                        style: TextStyle(
+                          fontSize: isTablet ? 11 : 10,
+                          color: Colors.grey[600],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      Flexible(
+                        child: Text(
+                          role ?? l10n.getString('all_roles'),
+                          style: TextStyle(
+                            fontSize: isTablet ? 13 : 12,
+                            color: AppTheme.primaryBlack,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.right,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList();
+            },
+            items: [
+              DropdownMenuItem<String?>(
+                value: null,
+                child: Text(l10n.getString('all_roles')),
+              ),
+              ..._availableRoles.map(
+                (role) =>
+                    DropdownMenuItem<String>(value: role, child: Text(role)),
+              ),
+            ],
+            onChanged: (value) {
+              setState(() {
+                _selectedRole = value;
+              });
+              _applyFilters();
+            },
           ),
-          items: [
-            DropdownMenuItem<String?>(
-              value: null,
-              child: Text(l10n.getString('all_roles')),
-            ),
-            ..._availableRoles.map(
-              (role) =>
-                  DropdownMenuItem<String>(value: role, child: Text(role)),
-            ),
-          ],
-          onChanged: (value) {
-            setState(() {
-              _selectedRole = value;
-            });
-            _applyFilters();
-          },
         ),
       ),
     );
@@ -574,6 +613,8 @@ class _CertifiersContentState extends State<CertifiersContent> {
 
   Widget _buildCityFilter(AppLocalizations l10n, bool isTablet) {
     return Container(
+      width: isTablet ? 200 : 160,
+      height: isTablet ? 85 : 75,
       decoration: BoxDecoration(
         color: Colors.grey.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
@@ -585,46 +626,90 @@ class _CertifiersContentState extends State<CertifiersContent> {
         ),
       ),
       child: DropdownButtonHideUnderline(
-        child: DropdownButton<String?>(
-          value: _selectedCity,
-          hint: Padding(
-            padding: EdgeInsets.all(isTablet ? 12 : 10),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.location_on,
-                  color: Colors.grey[600],
-                  size: isTablet ? 20 : 18,
-                ),
-                SizedBox(width: 8),
-                Text(
-                  l10n.getString('city'),
-                  style: TextStyle(
-                    fontSize: isTablet ? 14 : 13,
-                    color: Colors.grey[600],
-                    fontWeight: FontWeight.w600,
+        child: ButtonTheme(
+          alignedDropdown: true,
+          child: DropdownButton<String?>(
+            value: _selectedCity,
+            isExpanded: true,
+            hint: Padding(
+              padding: EdgeInsets.all(isTablet ? 12 : 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    l10n.getString('city'),
+                    style: TextStyle(
+                      fontSize: isTablet ? 11 : 10,
+                      color: Colors.grey[600],
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                ),
-              ],
+                  Flexible(
+                    child: Text(
+                      l10n.getString('all_cities'),
+                      style: TextStyle(
+                        fontSize: isTablet ? 13 : 12,
+                        color: Colors.grey[500],
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.right,
+                    ),
+                  ),
+                ],
+              ),
             ),
+            selectedItemBuilder: (BuildContext context) {
+              return _availableCities.map<Widget>((String? city) {
+                return Padding(
+                  padding: EdgeInsets.all(isTablet ? 12 : 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        l10n.getString('city'),
+                        style: TextStyle(
+                          fontSize: isTablet ? 11 : 10,
+                          color: Colors.grey[600],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      Flexible(
+                        child: Text(
+                          city ?? l10n.getString('all_cities'),
+                          style: TextStyle(
+                            fontSize: isTablet ? 13 : 12,
+                            color: AppTheme.primaryBlack,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.right,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList();
+            },
+            items: [
+              DropdownMenuItem<String?>(
+                value: null,
+                child: Text(l10n.getString('all_cities')),
+              ),
+              ..._availableCities.map(
+                (city) =>
+                    DropdownMenuItem<String>(value: city, child: Text(city)),
+              ),
+            ],
+            onChanged: (value) {
+              setState(() {
+                _selectedCity = value;
+              });
+              _applyFilters();
+            },
           ),
-          items: [
-            DropdownMenuItem<String?>(
-              value: null,
-              child: Text(l10n.getString('all_cities')),
-            ),
-            ..._availableCities.map(
-              (city) =>
-                  DropdownMenuItem<String>(value: city, child: Text(city)),
-            ),
-          ],
-          onChanged: (value) {
-            setState(() {
-              _selectedCity = value;
-            });
-            _applyFilters();
-          },
         ),
       ),
     );
