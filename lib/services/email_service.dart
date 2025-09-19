@@ -569,6 +569,196 @@ Questo è un messaggio automatico, non rispondere a questa email.
     }
   }
 
+  // Metodo per inviare email di conferma creazione account certificatore
+  Future<bool> sendCertifierAccountConfirmationEmail({
+    required String to,
+    required String certifierName,
+    required String legalEntityName,
+  }) async {
+    try {
+      final subject = 'JetCV Enterprise - Conferma Creazione Account Certificatore';
+      final htmlContent = _generateCertifierConfirmationEmailHtml(
+        to,
+        certifierName,
+        legalEntityName,
+      );
+      final textContent = _generateCertifierConfirmationEmailText(
+        to,
+        certifierName,
+        legalEntityName,
+      );
+
+      final emailData = {
+        'to': to,
+        'subject': subject,
+        'html': htmlContent,
+        'text': textContent,
+      };
+
+      if (AppConfig.environment == 'development' && AppConfig.enableDebugMode) {
+        return await _sendViaMailHog(emailData);
+      } else {
+        return await _sendViaExternalService(emailData);
+      }
+    } catch (e) {
+      print('Error sending certifier account confirmation email: $e');
+      return false;
+    }
+  }
+
+  // Genera HTML per l'email di conferma account certificatore
+  String _generateCertifierConfirmationEmailHtml(
+    String email,
+    String certifierName,
+    String legalEntityName,
+  ) {
+    return '''
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conferma Creazione Account Certificatore</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #2563EB;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2563EB;
+            margin-bottom: 10px;
+        }
+        .title {
+            font-size: 24px;
+            color: #1f2937;
+            margin-bottom: 20px;
+        }
+        .content {
+            margin-bottom: 30px;
+        }
+        .highlight {
+            background-color: #f0f9ff;
+            padding: 15px;
+            border-left: 4px solid #2563EB;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            color: #6b7280;
+            font-size: 14px;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 20px;
+        }
+        .button {
+            display: inline-block;
+            background-color: #2563EB;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">JetCV Enterprise</div>
+            <h1 class="title">Account Certificatore Creato con Successo</h1>
+        </div>
+        
+        <div class="content">
+            <p>Ciao <strong>$certifierName</strong>,</p>
+            
+            <p>Il tuo account come certificatore è stato creato con successo su JetCV Enterprise!</p>
+            
+            <div class="highlight">
+                <h3>📋 Dettagli Account:</h3>
+                <ul>
+                    <li><strong>Nome:</strong> $certifierName</li>
+                    <li><strong>Email:</strong> $email</li>
+                    <li><strong>Entità Legale:</strong> $legalEntityName</li>
+                    <li><strong>Ruolo:</strong> Certificatore</li>
+                </ul>
+            </div>
+            
+            <p>Ora puoi accedere alla piattaforma e iniziare a gestire le certificazioni per <strong>$legalEntityName</strong>.</p>
+            
+            <p>Le tue funzionalità includono:</p>
+            <ul>
+                <li>✅ Gestione delle certificazioni</li>
+                <li>✅ Verifica dei documenti</li>
+                <li>✅ Approvazione delle richieste</li>
+                <li>✅ Dashboard personalizzata</li>
+            </ul>
+            
+            <p>Se hai domande o hai bisogno di assistenza, non esitare a contattare il supporto tecnico.</p>
+        </div>
+        
+        <div class="footer">
+            <p>© 2024 JetCV Enterprise. Tutti i diritti riservati.</p>
+            <p>Questo è un messaggio automatico, non rispondere a questa email.</p>
+        </div>
+    </div>
+</body>
+</html>
+    ''';
+  }
+
+  // Genera testo per l'email di conferma account certificatore
+  String _generateCertifierConfirmationEmailText(
+    String email,
+    String certifierName,
+    String legalEntityName,
+  ) {
+    return '''
+JetCV Enterprise - Conferma Creazione Account Certificatore
+
+Ciao $certifierName,
+
+Il tuo account come certificatore è stato creato con successo su JetCV Enterprise!
+
+📋 Dettagli Account:
+- Nome: $certifierName
+- Email: $email
+- Entità Legale: $legalEntityName
+- Ruolo: Certificatore
+
+Ora puoi accedere alla piattaforma e iniziare a gestire le certificazioni per $legalEntityName.
+
+Le tue funzionalità includono:
+✅ Gestione delle certificazioni
+✅ Verifica dei documenti
+✅ Approvazione delle richieste
+✅ Dashboard personalizzata
+
+Se hai domande o hai bisogno di assistenza, non esitare a contattare il supporto tecnico.
+
+© 2024 JetCV Enterprise. Tutti i diritti riservati.
+Questo è un messaggio automatico, non rispondere a questa email.
+    ''';
+  }
+
   // Metodo pubblico per testare la generazione del link di invito
   String generateTestInvitationLink(
     LegalEntityInvitation invitation,

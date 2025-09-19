@@ -3,6 +3,7 @@ import '../../l10n/app_localizations.dart';
 import '../../theme/app_theme.dart';
 import '../../models/certifier.dart';
 import '../../services/certifier_service.dart';
+import '../../services/email_service.dart';
 import '../../providers/legal_entity_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/user_type_service.dart';
@@ -668,18 +669,111 @@ class _CertifiersScreenState extends State<CertifiersScreen>
             ),
 
             // Actions
-            IconButton(
-              icon: Icon(
-                Icons.more_vert,
-                color: AppTheme.textSecondary,
-                size: isTablet ? 24 : 20,
-              ),
-              onPressed: () => _showCertifierActions(certifierWithUser),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Email confirmation button
+                if (user != null && user.email != null && user.email!.isNotEmpty)
+                  IconButton(
+                    icon: Icon(
+                      Icons.email_outlined,
+                      color: AppTheme.primaryBlue,
+                      size: isTablet ? 24 : 20,
+                    ),
+                    tooltip: l10n.getString('send_account_confirmation'),
+                    onPressed: () => _sendAccountConfirmationEmail(certifierWithUser),
+                  ),
+                // More actions button
+                IconButton(
+                  icon: Icon(
+                    Icons.more_vert,
+                    color: AppTheme.textSecondary,
+                    size: isTablet ? 24 : 20,
+                  ),
+                  onPressed: () => _showCertifierActions(certifierWithUser),
+                ),
+              ],
             ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _sendAccountConfirmationEmail(CertifierWithUser certifierWithUser) async {
+    final user = certifierWithUser.user;
+    final l10n = AppLocalizations.of(context);
+    
+    if (user == null || user.email == null || user.email!.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Email non disponibile per questo certificatore'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    try {
+      // Mostra loading
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 16),
+              Text('Invio email in corso...'),
+            ],
+          ),
+        ),
+      );
+
+      // Ottieni il nome dell'entità legale
+      final legalEntityProvider = Provider.of<LegalEntityProvider>(context, listen: false);
+      final selectedLegalEntity = legalEntityProvider.selectedLegalEntity;
+      final legalEntityName = selectedLegalEntity?.legalName ?? 'Entità Legale';
+
+      // Invia email di conferma
+      final emailService = EmailService();
+      final success = await emailService.sendCertifierAccountConfirmationEmail(
+        to: user.email!,
+        certifierName: '${user.firstName ?? ''} ${user.lastName ?? ''}'.trim(),
+        legalEntityName: legalEntityName,
+      );
+
+      // Chiudi loading
+      Navigator.of(context).pop();
+
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.getString('account_confirmation_sent')),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.getString('account_confirmation_error')),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      // Chiudi loading se presente
+      if (Navigator.of(context).canPop()) {
+        Navigator.of(context).pop();
+      }
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${l10n.getString('account_confirmation_error')}: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void _showCertifierActions(CertifierWithUser certifierWithUser) {

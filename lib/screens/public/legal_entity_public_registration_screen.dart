@@ -116,16 +116,9 @@ class _LegalEntityPublicRegistrationScreenState
 
   void _loadUrlParameters() {
     try {
-      print('🔍 Loading URL parameters for legal entity registration...');
-
       // Estrai parametri dall'URL corrente (per inviti via email)
       final uri = Uri.base;
       final queryParams = uri.queryParameters;
-
-      print('🔍 Current URL: ${uri.toString()}');
-      print('🔍 Query parameters: $queryParams');
-      print('🔍 Hash fragment: ${uri.fragment}');
-      print('🔍 Full URI: $uri');
 
       // Controlla anche i parametri del route (per navigazione interna)
       final Map<String, String>? routeParams =
@@ -141,14 +134,10 @@ class _LegalEntityPublicRegistrationScreenState
         if (queryParams.isEmpty) {
           final currentLocation = ModalRoute.of(context)?.settings.name;
           if (currentLocation != null) {
-            print(
-              '🔍 Trying to extract from current location: $currentLocation',
-            );
             final locationUri = Uri.parse(currentLocation);
             additionalParams = Map<String, String>.from(
               locationUri.queryParameters,
             );
-            print('🔍 Additional params from location: $additionalParams');
           }
         }
 

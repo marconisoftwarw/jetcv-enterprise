@@ -6,6 +6,7 @@ import '../../models/certifier.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/linkedin_metric_card.dart';
 import '../../services/certification_edge_service.dart';
+import '../../services/email_service.dart';
 import '../../l10n/app_localizations.dart';
 import 'invite_certifier_screen.dart';
 
@@ -380,6 +381,15 @@ class _AdminCertifierDashboardScreenState
           onSelected: (value) =>
               _handleCertifierAction(value, certifier, provider),
           itemBuilder: (context) => [
+            if (certifier.hasUser)
+              PopupMenuItem(
+                value: 'send_confirmation',
+                child: Text(
+                  AppLocalizations.of(
+                    context,
+                  ).getString('send_account_confirmation_short'),
+                ),
+              ),
             if (certifier.hasInvitationToken)
               PopupMenuItem(
                 value: 'resend',
@@ -431,6 +441,9 @@ class _AdminCertifierDashboardScreenState
     CertifierProvider provider,
   ) {
     switch (action) {
+      case 'send_confirmation':
+        _sendAccountConfirmationEmail(certifier);
+        break;
       case 'resend':
         _resendInvitation(certifier, provider);
         break;
@@ -509,6 +522,77 @@ class _AdminCertifierDashboardScreenState
         ],
       ),
     );
+  }
+
+  Future<void> _sendAccountConfirmationEmail(Certifier certifier) async {
+    final l10n = AppLocalizations.of(context);
+    
+    if (!certifier.hasUser || certifier.idUser == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Certificatore non ha un account utente associato'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    try {
+      // Mostra loading
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 16),
+              Text('Invio email in corso...'),
+            ],
+          ),
+        ),
+      );
+
+      // Per ora usiamo dati mock, in un'implementazione reale dovresti
+      // recuperare i dati dell'utente dal database
+      final emailService = EmailService();
+      final success = await emailService.sendCertifierAccountConfirmationEmail(
+        to: 'certifier@example.com', // Dovrebbe essere l'email dell'utente
+        certifierName: certifier.roleDisplayName,
+        legalEntityName: 'Entità Legale', // Dovrebbe essere il nome dell'entità legale
+      );
+
+      // Chiudi loading
+      Navigator.of(context).pop();
+
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.getString('account_confirmation_sent')),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.getString('account_confirmation_error')),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      // Chiudi loading se presente
+      if (Navigator.of(context).canPop()) {
+        Navigator.of(context).pop();
+      }
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${l10n.getString('account_confirmation_error')}: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void _showInviteCertifierDialog(BuildContext context) {
