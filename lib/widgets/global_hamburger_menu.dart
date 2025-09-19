@@ -31,11 +31,16 @@ class GlobalHamburgerMenu extends StatelessWidget {
     final isDesktop = screenWidth > 1200;
 
     // Su desktop, il menu è sempre aperto
-    // Su mobile molto piccolo (< 480px), forza sempre espansione quando aperto
+    // Su schermi piccoli, forza sempre espansione per leggibilità
     final isMobile = screenWidth < 480;
+    final isSmallTablet = screenWidth >= 480 && screenWidth <= 768;
+    final isVerySmall = screenWidth < 600; // Schermi molto piccoli
+
     final shouldBeExpanded = isDesktop
         ? true
-        : (isMobile ? isExpanded : isExpanded);
+        : (isVerySmall
+              ? true
+              : isExpanded); // Forza espansione su schermi piccoli
 
     // Calcola la larghezza appropriata per il dispositivo
     double menuWidth;
@@ -44,12 +49,20 @@ class GlobalHamburgerMenu extends StatelessWidget {
         menuWidth = 280;
       } else if (isTablet) {
         menuWidth = 260;
+      } else if (isVerySmall) {
+        // Per schermi molto piccoli, usa la larghezza dello schermo
+        menuWidth = screenWidth;
+      } else if (isSmallTablet) {
+        // Per tablet piccoli, usa una larghezza minima per leggibilità
+        menuWidth = screenWidth * 0.6; // 60% della larghezza schermo
+        if (menuWidth < 200) menuWidth = 200; // Larghezza minima
       } else if (isMobile) {
         menuWidth = screenWidth * 0.75; // 75% della larghezza schermo su mobile
       } else {
         menuWidth = 240;
       }
     } else {
+      // Quando è collassato, mantieni una larghezza minima per l'icona
       menuWidth = 72;
     }
 
@@ -179,7 +192,7 @@ class GlobalHamburgerMenu extends StatelessWidget {
                                     color: Colors.white,
                                     size: 32,
                                   ),
-                                  if (!isDesktop)
+                                  if (!isDesktop && !isVerySmall)
                                     IconButton(
                                       icon: Icon(
                                         Icons.close,
@@ -220,8 +233,12 @@ class GlobalHamburgerMenu extends StatelessWidget {
                                     color: Colors.white,
                                     size: 22,
                                   ),
-                                  onPressed: () => onExpansionChanged(true),
-                                  tooltip: l10n.getString('open_menu'),
+                                  onPressed: isVerySmall
+                                      ? null
+                                      : () => onExpansionChanged(true),
+                                  tooltip: isVerySmall
+                                      ? null
+                                      : l10n.getString('open_menu'),
                                   padding: EdgeInsets.all(2),
                                   constraints: BoxConstraints(
                                     minHeight: 32,

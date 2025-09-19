@@ -576,7 +576,8 @@ Questo è un messaggio automatico, non rispondere a questa email.
     required String legalEntityName,
   }) async {
     try {
-      final subject = 'JetCV Enterprise - Conferma Creazione Account Certificatore';
+      final subject =
+          'JetCV Enterprise - Conferma Creazione Account Certificatore';
       final htmlContent = _generateCertifierConfirmationEmailHtml(
         to,
         certifierName,

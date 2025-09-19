@@ -983,7 +983,9 @@ class _CertifiersContentState extends State<CertifiersContent> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     // Email confirmation button
-                    if (user != null && user.email != null && user.email!.isNotEmpty)
+                    if (user != null &&
+                        user.email != null &&
+                        user.email!.isNotEmpty)
                       Container(
                         decoration: BoxDecoration(
                           color: AppTheme.primaryBlue.withValues(alpha: 0.1),
@@ -996,7 +998,8 @@ class _CertifiersContentState extends State<CertifiersContent> {
                             size: isTablet ? 24 : 20,
                           ),
                           tooltip: l10n.getString('send_account_confirmation'),
-                          onPressed: () => _sendAccountConfirmationEmail(certifierWithUser),
+                          onPressed: () =>
+                              _sendAccountConfirmationEmail(certifierWithUser),
                         ),
                       ),
                     SizedBox(width: 8),
@@ -1012,7 +1015,8 @@ class _CertifiersContentState extends State<CertifiersContent> {
                           color: AppTheme.textSecondary,
                           size: isTablet ? 24 : 20,
                         ),
-                        onPressed: () => _showCertifierActions(certifierWithUser),
+                        onPressed: () =>
+                            _showCertifierActions(certifierWithUser),
                       ),
                     ),
                   ],
@@ -1266,10 +1270,12 @@ class _CertifiersContentState extends State<CertifiersContent> {
     );
   }
 
-  Future<void> _sendAccountConfirmationEmail(CertifierWithUser certifierWithUser) async {
+  Future<void> _sendAccountConfirmationEmail(
+    CertifierWithUser certifierWithUser,
+  ) async {
     final user = certifierWithUser.user;
     final l10n = AppLocalizations.of(context);
-    
+
     if (user == null || user.email == null || user.email!.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -1297,7 +1303,10 @@ class _CertifiersContentState extends State<CertifiersContent> {
       );
 
       // Ottieni il nome dell'entità legale
-      final legalEntityProvider = Provider.of<LegalEntityProvider>(context, listen: false);
+      final legalEntityProvider = Provider.of<LegalEntityProvider>(
+        context,
+        listen: false,
+      );
       final selectedLegalEntity = legalEntityProvider.selectedLegalEntity;
       final legalEntityName = selectedLegalEntity?.legalName ?? 'Entità Legale';
 
@@ -1331,7 +1340,7 @@ class _CertifiersContentState extends State<CertifiersContent> {
       if (Navigator.of(context).canPop()) {
         Navigator.of(context).pop();
       }
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('${l10n.getString('account_confirmation_error')}: $e'),
@@ -1870,7 +1879,8 @@ class _CertifiersContentState extends State<CertifiersContent> {
                         return;
                       }
 
-                      if (passwordController.text.trim() != confirmPasswordController.text.trim()) {
+                      if (passwordController.text.trim() !=
+                          confirmPasswordController.text.trim()) {
                         _showError(l10n.getString('passwords_do_not_match'));
                         return;
                       }
@@ -1914,28 +1924,36 @@ class _CertifiersContentState extends State<CertifiersContent> {
                         // 1. Crea l'utente con signup completo (inclusa password)
                         print('🚀 Creating user with signup...');
                         final supabaseService = SupabaseService();
-                        final authResponse = await supabaseService.signUpWithEmail(
-                          email: emailController.text.trim(),
-                          password: passwordController.text.trim(),
-                          userData: userData,
-                        );
+                        final authResponse = await supabaseService
+                            .signUpWithEmail(
+                              email: emailController.text.trim(),
+                              password: passwordController.text.trim(),
+                              userData: userData,
+                            );
 
                         if (authResponse.user == null) {
-                          throw Exception('Errore nella creazione dell\'utente');
+                          throw Exception(
+                            'Errore nella creazione dell\'utente',
+                          );
                         }
 
-                        print('✅ User created successfully: ${authResponse.user!.id}');
+                        print(
+                          '✅ User created successfully: ${authResponse.user!.id}',
+                        );
 
                         // 2. Crea il certificatore associato
                         print('🚀 Creating certifier...');
-                        final certifierResult = await _certifierService.createCertifier(
-                          newCertifier.copyWith(
-                            idUser: authResponse.user!.id,
-                          ),
-                        );
+                        final certifierResult = await _certifierService
+                            .createCertifier(
+                              newCertifier.copyWith(
+                                idUser: authResponse.user!.id,
+                              ),
+                            );
 
                         if (certifierResult == null) {
-                          throw Exception('Errore nella creazione del certificatore');
+                          throw Exception(
+                            'Errore nella creazione del certificatore',
+                          );
                         }
 
                         print('✅ Certifier created successfully');

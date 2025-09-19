@@ -526,7 +526,7 @@ class _AdminCertifierDashboardScreenState
 
   Future<void> _sendAccountConfirmationEmail(Certifier certifier) async {
     final l10n = AppLocalizations.of(context);
-    
+
     if (!certifier.hasUser || certifier.idUser == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -559,7 +559,8 @@ class _AdminCertifierDashboardScreenState
       final success = await emailService.sendCertifierAccountConfirmationEmail(
         to: 'certifier@example.com', // Dovrebbe essere l'email dell'utente
         certifierName: certifier.roleDisplayName,
-        legalEntityName: 'Entità Legale', // Dovrebbe essere il nome dell'entità legale
+        legalEntityName:
+            'Entità Legale', // Dovrebbe essere il nome dell'entità legale
       );
 
       // Chiudi loading
@@ -585,7 +586,7 @@ class _AdminCertifierDashboardScreenState
       if (Navigator.of(context).canPop()) {
         Navigator.of(context).pop();
       }
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('${l10n.getString('account_confirmation_error')}: $e'),

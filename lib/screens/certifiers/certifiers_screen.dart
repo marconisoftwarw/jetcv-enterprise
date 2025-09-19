@@ -673,7 +673,9 @@ class _CertifiersScreenState extends State<CertifiersScreen>
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Email confirmation button
-                if (user != null && user.email != null && user.email!.isNotEmpty)
+                if (user != null &&
+                    user.email != null &&
+                    user.email!.isNotEmpty)
                   IconButton(
                     icon: Icon(
                       Icons.email_outlined,
@@ -681,7 +683,8 @@ class _CertifiersScreenState extends State<CertifiersScreen>
                       size: isTablet ? 24 : 20,
                     ),
                     tooltip: l10n.getString('send_account_confirmation'),
-                    onPressed: () => _sendAccountConfirmationEmail(certifierWithUser),
+                    onPressed: () =>
+                        _sendAccountConfirmationEmail(certifierWithUser),
                   ),
                 // More actions button
                 IconButton(
@@ -700,10 +703,12 @@ class _CertifiersScreenState extends State<CertifiersScreen>
     );
   }
 
-  Future<void> _sendAccountConfirmationEmail(CertifierWithUser certifierWithUser) async {
+  Future<void> _sendAccountConfirmationEmail(
+    CertifierWithUser certifierWithUser,
+  ) async {
     final user = certifierWithUser.user;
     final l10n = AppLocalizations.of(context);
-    
+
     if (user == null || user.email == null || user.email!.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -731,7 +736,10 @@ class _CertifiersScreenState extends State<CertifiersScreen>
       );
 
       // Ottieni il nome dell'entità legale
-      final legalEntityProvider = Provider.of<LegalEntityProvider>(context, listen: false);
+      final legalEntityProvider = Provider.of<LegalEntityProvider>(
+        context,
+        listen: false,
+      );
       final selectedLegalEntity = legalEntityProvider.selectedLegalEntity;
       final legalEntityName = selectedLegalEntity?.legalName ?? 'Entità Legale';
 
@@ -766,7 +774,7 @@ class _CertifiersScreenState extends State<CertifiersScreen>
       if (Navigator.of(context).canPop()) {
         Navigator.of(context).pop();
       }
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('${l10n.getString('account_confirmation_error')}: $e'),

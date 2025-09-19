@@ -96,7 +96,8 @@ class AppLocalizations {
       'send_account_confirmation': 'Invia Conferma Account',
       'send_account_confirmation_short': 'Conferma',
       'account_confirmation_sent': 'Email di conferma inviata con successo',
-      'account_confirmation_error': 'Errore nell\'invio dell\'email di conferma',
+      'account_confirmation_error':
+          'Errore nell\'invio dell\'email di conferma',
       'error_sending_invitation': 'Errore nell\'invio dell\'invito',
 
       // Identity Verification
@@ -754,7 +755,8 @@ class AppLocalizations {
       'send_email_invitation': 'Send Email Invitation',
       'send_account_confirmation': 'Send Account Confirmation',
       'send_account_confirmation_short': 'Confirm',
-      'account_confirmation_sent': 'Account confirmation email sent successfully',
+      'account_confirmation_sent':
+          'Account confirmation email sent successfully',
       'account_confirmation_error': 'Error sending confirmation email',
       'enter_valid_email': 'Enter a valid email',
       'error_sending_invitation': 'Error sending invitation',
@@ -1619,8 +1621,10 @@ class AppLocalizations {
       'send_email_invitation_short': 'E-Mail-Einladung senden',
       'send_account_confirmation': 'Kontobestätigung senden',
       'send_account_confirmation_short': 'Bestätigen',
-      'account_confirmation_sent': 'Kontobestätigungs-E-Mail erfolgreich gesendet',
-      'account_confirmation_error': 'Fehler beim Senden der Bestätigungs-E-Mail',
+      'account_confirmation_sent':
+          'Kontobestätigungs-E-Mail erfolgreich gesendet',
+      'account_confirmation_error':
+          'Fehler beim Senden der Bestätigungs-E-Mail',
       'send_registration_link_short': 'Registrierungslink senden',
       'send_registration_link': 'Registrierungslink senden',
       'enter_email_for_registration_link':
@@ -2109,8 +2113,10 @@ class AppLocalizations {
       'send_email_invitation_short': 'Envoyer une invitation par e-mail',
       'send_account_confirmation': 'Envoyer la confirmation de compte',
       'send_account_confirmation_short': 'Confirmer',
-      'account_confirmation_sent': 'E-mail de confirmation de compte envoyée avec succès',
-      'account_confirmation_error': 'Erreur lors de l\'envoi de l\'e-mail de confirmation',
+      'account_confirmation_sent':
+          'E-mail de confirmation de compte envoyée avec succès',
+      'account_confirmation_error':
+          'Erreur lors de l\'envoi de l\'e-mail de confirmation',
       'send_registration_link_short': 'Envoyer le lien d\'inscription',
       'send_registration_link': 'Envoyer le lien d\'inscription',
       'enter_email_for_registration_link':

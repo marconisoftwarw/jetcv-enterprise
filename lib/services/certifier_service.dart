@@ -279,8 +279,9 @@ class CertifierService {
         print('⚠️ Edge function failed, using fallback for testing...');
         print('⚠️ Response status: ${response.statusCode}');
         print('⚠️ Response body: ${response.body}');
-        
-        final fallbackToken = 'test-token-${DateTime.now().millisecondsSinceEpoch}';
+
+        final fallbackToken =
+            'test-token-${DateTime.now().millisecondsSinceEpoch}';
         return {
           'user': {
             'idUser': 'test-user-${DateTime.now().millisecondsSinceEpoch}',
@@ -289,7 +290,8 @@ class CertifierService {
             'email': userData['email'],
           },
           'certifier': {
-            'idCertifier': 'test-certifier-${DateTime.now().millisecondsSinceEpoch}',
+            'idCertifier':
+                'test-certifier-${DateTime.now().millisecondsSinceEpoch}',
             'role': certifier.role,
             'active': true,
             'idUser': 'test-user-${DateTime.now().millisecondsSinceEpoch}',
@@ -306,8 +308,9 @@ class CertifierService {
     } catch (e) {
       print('❌ Error creating certifier with user: $e');
       print('⚠️ Using fallback for testing...');
-      
-      final fallbackToken = 'test-token-${DateTime.now().millisecondsSinceEpoch}';
+
+      final fallbackToken =
+          'test-token-${DateTime.now().millisecondsSinceEpoch}';
       return {
         'user': {
           'idUser': 'test-user-${DateTime.now().millisecondsSinceEpoch}',
@@ -316,7 +319,8 @@ class CertifierService {
           'email': userData['email'],
         },
         'certifier': {
-          'idCertifier': 'test-certifier-${DateTime.now().millisecondsSinceEpoch}',
+          'idCertifier':
+              'test-certifier-${DateTime.now().millisecondsSinceEpoch}',
           'role': certifier.role,
           'active': true,
           'idUser': 'test-user-${DateTime.now().millisecondsSinceEpoch}',
