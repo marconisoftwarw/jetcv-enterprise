@@ -54,18 +54,28 @@ class SupabaseService {
     required String email,
     required String password,
     Map<String, dynamic>? userData,
+    bool createUserRecord = true,
   }) async {
     try {
+      print(
+        '🔍 signUpWithEmail called with createUserRecord: $createUserRecord',
+      );
+
       final response = await _auth.signUp(
         email: email,
         password: password,
         data: userData,
       );
 
-      if (response.user != null && userData != null) {
-        // Crea il record utente nella tabella users
+      if (response.user != null && userData != null && createUserRecord) {
+        // Usa sempre l'Edge Function per creare il record utente
+        print('🔍 Creating user record via _createUserRecord...');
         await _createUserRecord(response.user!, userData);
-        print('User registration completed successfully');
+        print('User record created successfully');
+      } else {
+        print(
+          '🔍 Skipping user record creation (createUserRecord: $createUserRecord)',
+        );
       }
 
       return response;
@@ -301,7 +311,8 @@ class SupabaseService {
     try {
       // Durante la registrazione, non serve verificare se l'utente esiste già
       // perché stiamo appena creando l'account
-      print('Creating new user record for ID: ${user.id}');
+      print('🔍 _createUserRecord called for ID: ${user.id}');
+      print('🔍 User data: $userData');
 
       final recordData = {
         'idUser': user.id,
@@ -312,12 +323,13 @@ class SupabaseService {
         'email': userData['email'] ?? user.email ?? '',
         'type': userData['type'] ?? 'user',
         'idUserHash': _generateUserHash(user.id),
-        'profileCompleted': false,
+        'profileCompleted': userData['profileCompleted'] ?? false,
         'languageCode': userData['languageCode'] ?? 'it',
         'createdAt': DateTime.now().toIso8601String(),
       };
 
       // Use Edge Function to bypass RLS and 403/42501 errors
+      print('🔍 Calling create-user Edge Function with data: $recordData');
       final response = await _client.functions.invoke(
         'create-user',
         body: recordData,

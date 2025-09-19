@@ -698,6 +698,7 @@ Questo è un messaggio automatico, non rispondere a questa email.
                 <ul>
                     <li><strong>Nome:</strong> $certifierName</li>
                     <li><strong>Email:</strong> $email</li>
+                    <li><strong>Password:</strong> $email (uguale all'email)</li>
                     <li><strong>Entità Legale:</strong> $legalEntityName</li>
                     <li><strong>Ruolo:</strong> Certificatore</li>
                 </ul>
@@ -739,11 +740,12 @@ Ciao $certifierName,
 
 Il tuo account come certificatore è stato creato con successo su JetCV Enterprise!
 
-📋 Dettagli Account:
-- Nome: $certifierName
-- Email: $email
-- Entità Legale: $legalEntityName
-- Ruolo: Certificatore
+    📋 Dettagli Account:
+    - Nome: $certifierName
+    - Email: $email
+    - Password: $email (uguale all'email)
+    - Entità Legale: $legalEntityName
+    - Ruolo: Certificatore
 
 Ora puoi accedere alla piattaforma e iniziare a gestire le certificazioni per $legalEntityName.
 
