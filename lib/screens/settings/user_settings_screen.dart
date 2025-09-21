@@ -6,6 +6,7 @@ import '../../providers/theme_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/enterprise_card.dart';
 import '../../widgets/neon_button.dart';
+import '../../widgets/appbar_language_dropdown.dart';
 import '../../widgets/global_hamburger_menu.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -86,6 +87,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
                 ),
               ),
               actions: [
+                const AppBarLanguageDropdown(),
                 IconButton(
                   icon: Icon(Icons.save, color: AppTheme.primaryBlue),
                   onPressed: _saveSettings,

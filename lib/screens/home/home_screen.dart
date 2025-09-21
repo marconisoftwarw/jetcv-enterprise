@@ -8,6 +8,7 @@ import '../../theme/app_theme.dart';
 import '../../widgets/enterprise_card.dart';
 import '../../widgets/neon_button.dart';
 import '../../widgets/global_hamburger_menu.dart';
+import '../../widgets/appbar_language_dropdown.dart';
 import '../../services/user_type_service.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -208,6 +209,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                  actions: [const AppBarLanguageDropdown()],
                 )
               : null,
           body: Stack(

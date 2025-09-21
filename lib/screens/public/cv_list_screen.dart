@@ -5,6 +5,7 @@ import '../../theme/app_theme.dart';
 import '../../widgets/linkedin_card.dart';
 import '../../widgets/linkedin_button.dart';
 import '../../widgets/linkedin_text_field.dart';
+import '../../widgets/appbar_language_dropdown.dart';
 
 class CVListScreen extends StatefulWidget {
   const CVListScreen({super.key});
@@ -183,6 +184,7 @@ class _CVListScreenState extends State<CVListScreen> {
         foregroundColor: AppTheme.white,
         elevation: 0,
         actions: [
+          const AppBarLanguageDropdown(),
           IconButton(
             onPressed: _loadCVs,
             icon: const Icon(Icons.refresh),

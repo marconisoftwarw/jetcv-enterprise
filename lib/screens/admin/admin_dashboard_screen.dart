@@ -6,6 +6,7 @@ import '../../models/legal_entity.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/global_hamburger_menu.dart';
+import '../../widgets/appbar_language_dropdown.dart';
 import '../../l10n/app_localizations.dart';
 
 import 'create_legal_entity_screen.dart';
@@ -56,6 +57,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 ),
               ),
               actions: [
+                const AppBarLanguageDropdown(),
                 IconButton(
                   onPressed: () => _showProfileMenu(context),
                   icon: const Icon(Icons.account_circle),
@@ -76,6 +78,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               foregroundColor: Colors.black,
               elevation: 0,
               actions: [
+                const AppBarLanguageDropdown(),
                 IconButton(
                   onPressed: () => _showProfileMenu(context),
                   icon: const Icon(Icons.account_circle),

@@ -12,6 +12,7 @@ import '../../providers/auth_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../widgets/enterprise_card.dart';
 import '../../widgets/neon_button.dart';
+import '../../widgets/appbar_language_dropdown.dart';
 import '../../theme/app_theme.dart';
 import '../../config/app_config.dart';
 import 'create_certification_screen.dart';

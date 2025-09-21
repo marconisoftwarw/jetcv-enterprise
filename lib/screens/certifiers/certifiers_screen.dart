@@ -8,6 +8,7 @@ import '../../providers/legal_entity_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/user_type_service.dart';
 import '../../widgets/enterprise_card.dart';
+import '../../widgets/appbar_language_dropdown.dart';
 import 'package:provider/provider.dart';
 
 class CertifiersScreen extends StatefulWidget {
@@ -143,6 +144,7 @@ class _CertifiersScreenState extends State<CertifiersScreen>
           ),
         ),
         actions: [
+          const AppBarLanguageDropdown(),
           IconButton(
             icon: Icon(Icons.refresh, color: AppTheme.primaryBlue),
             onPressed: _loadCertifiers,
