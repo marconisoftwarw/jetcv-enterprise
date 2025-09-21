@@ -55,7 +55,7 @@ class _VeriffVerificationScreenState extends State<VeriffVerificationScreen> {
       );
 
       // URL di callback per ricevere i risultati - punta alla home del progetto
-      final callbackUrl = '${AppConfig.appUrl}/home';
+      final callbackUrl = 'https://jectcv.netlify.app/home';
       print('🔍 VeriffVerificationScreen: Callback URL: $callbackUrl');
 
       // Richiedi sessione Veriff
