@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ThemeProvider extends ChangeNotifier {
   static const String _themeKey = 'theme_mode';
 
-  ThemeMode _themeMode = ThemeMode.system;
+  ThemeMode _themeMode = ThemeMode.light; // Forzato su light mode
   bool _isDarkMode = false;
 
   ThemeMode get themeMode => _themeMode;
@@ -18,9 +18,8 @@ class ThemeProvider extends ChangeNotifier {
 
   Future<void> _loadTheme() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final themeIndex = prefs.getInt(_themeKey) ?? 0;
-      _themeMode = ThemeMode.values[themeIndex];
+      // Forza sempre la light mode - dark mode disabilitata
+      _themeMode = ThemeMode.light;
       _updateDarkMode();
     } catch (e) {
       print('Error loading theme: $e');
@@ -28,14 +27,16 @@ class ThemeProvider extends ChangeNotifier {
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {
-    if (_themeMode == mode) return;
+    // Dark mode disabilitata - ignora qualsiasi tentativo di cambiare il tema
+    // Forza sempre la light mode
+    if (_themeMode == ThemeMode.light) return;
 
-    _themeMode = mode;
+    _themeMode = ThemeMode.light;
     _updateDarkMode();
 
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt(_themeKey, mode.index);
+      await prefs.setInt(_themeKey, ThemeMode.light.index);
     } catch (e) {
       print('Error saving theme: $e');
     }
@@ -64,10 +65,10 @@ class ThemeProvider extends ChangeNotifier {
     }
   }
 
-  // Convenience methods
+  // Convenience methods - Dark mode disabilitata
   Future<void> toggleTheme() async {
-    final newMode = _isDarkMode ? ThemeMode.light : ThemeMode.dark;
-    await setThemeMode(newMode);
+    // Dark mode disabilitata - non fa nulla
+    return;
   }
 
   Future<void> setLightMode() async {
@@ -75,11 +76,13 @@ class ThemeProvider extends ChangeNotifier {
   }
 
   Future<void> setDarkMode() async {
-    await setThemeMode(ThemeMode.dark);
+    // Dark mode disabilitata - forza light mode
+    await setThemeMode(ThemeMode.light);
   }
 
   Future<void> setSystemMode() async {
-    await setThemeMode(ThemeMode.system);
+    // Dark mode disabilitata - forza light mode
+    await setThemeMode(ThemeMode.light);
   }
 
   void _safeNotifyListeners() {

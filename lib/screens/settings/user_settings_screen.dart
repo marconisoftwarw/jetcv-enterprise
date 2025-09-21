@@ -288,43 +288,44 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
             ],
           ),
           const SizedBox(height: 20),
-          Consumer<ThemeProvider>(
-            builder: (context, themeProvider, child) {
-              return Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l10n.getString('dark_mode'),
-                          style: Theme.of(context).textTheme.bodyLarge
-                              ?.copyWith(fontWeight: FontWeight.w600),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          l10n.getString('dark_mode_description'),
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: Colors.grey[600]),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Switch(
-                    value: themeProvider.isDarkMode,
-                    onChanged: (value) {
-                      themeProvider.toggleTheme();
-                    },
-                    activeColor: AppTheme.primaryBlue,
-                    activeTrackColor: AppTheme.primaryBlue.withValues(
-                      alpha: 0.3,
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
+          // Dark mode disabilitata - sezione nascosta
+          // Consumer<ThemeProvider>(
+          //   builder: (context, themeProvider, child) {
+          //     return Row(
+          //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //       children: [
+          //         Expanded(
+          //           child: Column(
+          //             crossAxisAlignment: CrossAxisAlignment.start,
+          //             children: [
+          //               Text(
+          //                 l10n.getString('dark_mode'),
+          //                 style: Theme.of(context).textTheme.bodyLarge
+          //                     ?.copyWith(fontWeight: FontWeight.w600),
+          //               ),
+          //               const SizedBox(height: 4),
+          //               Text(
+          //                 l10n.getString('dark_mode_description'),
+          //                 style: Theme.of(context).textTheme.bodySmall
+          //                     ?.copyWith(color: Colors.grey[600]),
+          //               ),
+          //             ],
+          //           ),
+          //         ),
+          //         Switch(
+          //           value: themeProvider.isDarkMode,
+          //           onChanged: (value) {
+          //             themeProvider.toggleTheme();
+          //           },
+          //           activeColor: AppTheme.primaryBlue,
+          //           activeTrackColor: AppTheme.primaryBlue.withValues(
+          //             alpha: 0.3,
+          //           ),
+          //         ),
+          //       ],
+          //     );
+          //   },
+          // ),
         ],
       ),
     );
