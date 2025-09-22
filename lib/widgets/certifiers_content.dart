@@ -6,7 +6,6 @@ import '../models/certifier.dart';
 import '../models/legal_entity.dart';
 import '../services/certifier_service.dart';
 import '../services/email_service.dart';
-import '../services/supabase_service.dart';
 import '../providers/auth_provider.dart';
 import '../providers/legal_entity_provider.dart';
 import '../services/user_type_service.dart';
@@ -982,27 +981,6 @@ class _CertifiersContentState extends State<CertifiersContent> {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Email confirmation button
-                    if (user != null &&
-                        user.email != null &&
-                        user.email!.isNotEmpty)
-                      Container(
-                        decoration: BoxDecoration(
-                          color: AppTheme.primaryBlue.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: IconButton(
-                          icon: Icon(
-                            Icons.email_outlined,
-                            color: AppTheme.primaryBlue,
-                            size: isTablet ? 24 : 20,
-                          ),
-                          tooltip: l10n.getString('send_account_confirmation'),
-                          onPressed: () =>
-                              _sendAccountConfirmationEmail(certifierWithUser),
-                        ),
-                      ),
-                    SizedBox(width: 8),
                     // More actions button
                     Container(
                       decoration: BoxDecoration(
@@ -1270,85 +1248,6 @@ class _CertifiersContentState extends State<CertifiersContent> {
     );
   }
 
-  Future<void> _sendAccountConfirmationEmail(
-    CertifierWithUser certifierWithUser,
-  ) async {
-    final user = certifierWithUser.user;
-    final l10n = AppLocalizations.of(context);
-
-    if (user == null || user.email == null || user.email!.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Email non disponibile per questo certificatore'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    try {
-      // Mostra loading
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => AlertDialog(
-          content: Row(
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(width: 16),
-              Text('Invio email in corso...'),
-            ],
-          ),
-        ),
-      );
-
-      // Ottieni il nome dell'entità legale
-      final legalEntityProvider = Provider.of<LegalEntityProvider>(
-        context,
-        listen: false,
-      );
-      final selectedLegalEntity = legalEntityProvider.selectedLegalEntity;
-      final legalEntityName = selectedLegalEntity?.legalName ?? 'Entità Legale';
-
-      // Invia email di conferma
-      final success = await _emailService.sendCertifierAccountConfirmationEmail(
-        to: user.email!,
-        certifierName: '${user.firstName ?? ''} ${user.lastName ?? ''}'.trim(),
-        legalEntityName: legalEntityName,
-      );
-
-      // Chiudi loading
-      Navigator.of(context).pop();
-
-      if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.getString('account_confirmation_sent')),
-            backgroundColor: Colors.green,
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.getString('account_confirmation_error')),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } catch (e) {
-      // Chiudi loading se presente
-      if (Navigator.of(context).canPop()) {
-        Navigator.of(context).pop();
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${l10n.getString('account_confirmation_error')}: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
 
   void _showCertifierDetails(
     CertifierWithUser certifierWithUser,
