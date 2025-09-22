@@ -770,8 +770,6 @@ Questo è un messaggio automatico, non rispondere a questa email.
     return _generateInvitationLink(invitation, legalEntityData);
   }
 
-
-
   // Metodo per inviare email di impostazione password per nuovo certificatore
   Future<bool> sendPasswordSetupEmail({
     required String email,
@@ -928,7 +926,7 @@ Questo è un messaggio automatico, non rispondere a questa email.
     required String legalEntityName,
   }) async {
     try {
-      final signupUrl = '${AppConfig.appUrl}/#/signup?email=${Uri.encodeComponent(email)}';
+      final signupUrl = '${AppConfig.appUrl}/#/signup';
 
       final emailData = {
         'to': email,

@@ -203,38 +203,76 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
               ],
             );
           },
-          home: FutureBuilder(
-            future: _initializationFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const SplashScreen();
-              }
-
-              if (snapshot.hasError) {
-                return const SplashScreen();
-              }
-
-              // Se l'utente è autenticato e ha un utente valido, mostra la schermata appropriata
-              if (authProvider.isAuthenticated &&
-                  authProvider.currentUser != null) {
-                // Check if user is admin
-                if (authProvider.currentUser?.type == UserType.admin) {
-                  return const AdminDashboardScreen();
-                }
-                return const HomeScreen();
-              }
-
-              // Se l'utente non è autenticato, mostra la home pubblica
-              return const PublicHomeScreen();
-            },
-          ),
+          initialRoute: '/',
           routes: {
+            '/': (context) => FutureBuilder(
+              future: _initializationFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const SplashScreen();
+                }
+
+                if (snapshot.hasError) {
+                  return const SplashScreen();
+                }
+
+                // Se l'utente è autenticato e ha un utente valido, mostra la schermata appropriata
+                if (authProvider.isAuthenticated &&
+                    authProvider.currentUser != null) {
+                  // Check if user is admin
+                  if (authProvider.currentUser?.type == UserType.admin) {
+                    return const AdminDashboardScreen();
+                  }
+                  return const HomeScreen();
+                }
+
+                // Se l'utente non è autenticato, mostra la home pubblica
+                return const PublicHomeScreen();
+              },
+            ),
+            '/#/': (context) => FutureBuilder(
+              future: _initializationFuture,
+              builder: (context, snapshot) {
+                // Se l'utente è autenticato e ha un utente valido, mostra la schermata appropriata
+                if (authProvider.isAuthenticated &&
+                    authProvider.currentUser != null) {
+                  // Check if user is admin
+                  if (authProvider.currentUser?.type == UserType.admin) {
+                    return const AdminDashboardScreen();
+                  }
+                  return const HomeScreen();
+                }
+
+                // Se l'utente non è autenticato, mostra la home pubblica
+                return const PublicHomeScreen();
+              },
+            ),
             '/login': (context) => const LoginScreen(),
             '/password-reset': (context) => const PasswordResetScreen(),
             '/password-reset-form': (context) =>
                 const PasswordResetFormScreen(),
             '/set-password': (context) => const SetPasswordScreen(),
-            '/signup': (context) => const SignupScreen(),
+            '/signup': (context) {
+              // Estrai parametri URL per signup (es. email precompilata)
+              print('🔍 Handling /signup route in static routes');
+
+              // Estrai parametri URL dall'URL corrente
+              Map<String, String>? urlParams;
+              try {
+                final currentUri = Uri.base;
+                if (currentUri.queryParameters.isNotEmpty) {
+                  urlParams = Map<String, String>.from(
+                    currentUri.queryParameters,
+                  );
+                  print('🔍 Extracted URL params from current URI: $urlParams');
+                }
+              } catch (e) {
+                print('🔍 Error extracting params from current URI: $e');
+              }
+
+              return SignupScreen(urlParameters: urlParams);
+            },
+            '/#/signup': (context) => const SignupScreen(),
             '/auth/callback': (context) => const AuthCallbackScreen(),
             '/home': (context) => const HomeScreen(),
             '/admin': (context) => const AdminDashboardScreen(),
@@ -278,14 +316,120 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
               print('🔒 Protected route detected: ${settings.name}');
             }
 
+            // Gestisci hash routing speciale
+            if (settings.name?.startsWith('/#/') == true) {
+              print('🔍 Handling hash routing: ${settings.name}');
+              
+              // Estrai parametri URL dall'URL corrente per hash routing
+              Map<String, String>? urlParams;
+              try {
+                final currentUri = Uri.base;
+                if (currentUri.queryParameters.isNotEmpty) {
+                  urlParams = Map<String, String>.from(
+                    currentUri.queryParameters,
+                  );
+                  print('🔍 Extracted URL params from current URI: $urlParams');
+                }
+              } catch (e) {
+                print('🔍 Error extracting params from current URI: $e');
+              }
+
+              // Gestisci le rotte hash specifiche
+              if (settings.name == '/#/signup') {
+                return MaterialPageRoute(
+                  builder: (_) => SignupScreen(urlParameters: urlParams),
+                  settings: settings,
+                );
+              } else if (settings.name?.startsWith('/#/signup?') == true) {
+                // Gestisci hash routing con parametri URL
+                print('🔍 Handling hash routing with params: ${settings.name}');
+                
+                // Estrai parametri dall'hash
+                final hashPart = settings.name!.substring(2); // Rimuovi '/#'
+                final uri = Uri.parse('http://localhost$hashPart');
+                if (uri.queryParameters.isNotEmpty) {
+                  urlParams = Map<String, String>.from(uri.queryParameters);
+                  print('🔍 Extracted URL params from hash: $urlParams');
+                }
+                
+                return MaterialPageRoute(
+                  builder: (_) => SignupScreen(urlParameters: urlParams),
+                  settings: settings,
+                );
+              } else if (settings.name == '/#/login') {
+                return MaterialPageRoute(builder: (_) => const LoginScreen());
+              } else if (settings.name == '/#/') {
+                return MaterialPageRoute(
+                  builder: (_) => FutureBuilder(
+                    future: _initializationFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const SplashScreen();
+                      }
+
+                      if (snapshot.hasError) {
+                        return const SplashScreen();
+                      }
+
+                      // Se l'utente è autenticato e ha un utente valido, mostra la schermata appropriata
+                      if (authProvider.isAuthenticated &&
+                          authProvider.currentUser != null) {
+                        // Check if user is admin
+                        if (authProvider.currentUser?.type == UserType.admin) {
+                          return const AdminDashboardScreen();
+                        }
+                        return const HomeScreen();
+                      }
+
+                      // Se l'utente non è autenticato, mostra la home pubblica
+                      return const PublicHomeScreen();
+                    },
+                  ),
+                );
+              }
+            }
+
             // Return the appropriate route
             switch (settings.name) {
               case '/login':
-              case '/#/login':
                 return MaterialPageRoute(builder: (_) => const LoginScreen());
               case '/signup':
-              case '/#/signup':
-                return MaterialPageRoute(builder: (_) => const SignupScreen());
+                // Gestisci parametri URL per signup (es. email precompilata)
+                print('🔍 Handling /signup route');
+                print('🔍 Route settings: ${settings.toString()}');
+                print('🔍 Route arguments: ${settings.arguments}');
+
+                // Estrai parametri URL se disponibili
+                Map<String, String>? urlParams;
+                if (settings.name != null) {
+                  final uri = Uri.parse(settings.name!);
+                  if (uri.queryParameters.isNotEmpty) {
+                    urlParams = Map<String, String>.from(uri.queryParameters);
+                    print('🔍 Extracted URL params from settings: $urlParams');
+                  }
+                }
+
+                // Se non ci sono parametri nelle settings, prova a estrarre dall'URL corrente
+                if (urlParams == null || urlParams.isEmpty) {
+                  try {
+                    final currentUri = Uri.base;
+                    if (currentUri.queryParameters.isNotEmpty) {
+                      urlParams = Map<String, String>.from(
+                        currentUri.queryParameters,
+                      );
+                      print(
+                        '🔍 Extracted URL params from current URI: $urlParams',
+                      );
+                    }
+                  } catch (e) {
+                    print('🔍 Error extracting params from current URI: $e');
+                  }
+                }
+
+                return MaterialPageRoute(
+                  builder: (_) => SignupScreen(urlParameters: urlParams),
+                  settings: settings,
+                );
               case '/password-reset':
                 return MaterialPageRoute(
                   builder: (_) => const PasswordResetScreen(),

@@ -38,7 +38,6 @@ class _LegalEntityPublicRegistrationScreenState
   // Pricing
   Pricing? _selectedPricing;
 
-
   // Personal information
   final _personalNameController = TextEditingController();
   final _personalEmailController = TextEditingController();
@@ -333,10 +332,7 @@ class _LegalEntityPublicRegistrationScreenState
             Expanded(
               child: IndexedStack(
                 index: _currentStep,
-                children: [
-                  _buildPricingStep(),
-                  _buildPersonalInfoStep(),
-                ],
+                children: [_buildPricingStep(), _buildPersonalInfoStep()],
               ),
             ),
 
@@ -382,7 +378,9 @@ class _LegalEntityPublicRegistrationScreenState
                   Text(
                     index == 0
                         ? AppLocalizations.of(context).getString('pricing')
-                        : AppLocalizations.of(context).getString('legal_entity'),
+                        : AppLocalizations.of(
+                            context,
+                          ).getString('legal_entity'),
                     style: TextStyle(
                       fontSize: 12,
                       color: isActive ? Colors.blue : Colors.grey,
@@ -830,7 +828,6 @@ class _LegalEntityPublicRegistrationScreenState
       ),
     );
   }
-
 
   Widget _buildNavigationButtons() {
     return Container(

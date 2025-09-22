@@ -383,7 +383,8 @@ class CertifierService {
         firstName: '', // Will be filled by the certifier during registration
         lastName: '', // Will be filled by the certifier during registration
         role: role ?? 'Certificatore',
-        legalEntityName: 'Entità Legale', // This should be fetched from legal entity data
+        legalEntityName:
+            'Entità Legale', // This should be fetched from legal entity data
       );
 
       return emailSent;

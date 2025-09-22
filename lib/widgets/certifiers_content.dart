@@ -1717,7 +1717,6 @@ class _CertifiersContentState extends State<CertifiersContent> {
                   ),
                   SizedBox(height: 16),
 
-
                   // Address Information
                   Row(
                     children: [
@@ -1890,7 +1889,9 @@ class _CertifiersContentState extends State<CertifiersContent> {
                             firstName: firstNameController.text.trim(),
                             lastName: lastNameController.text.trim(),
                             role: roleController.text.trim(),
-                            legalEntityName: selectedLegalEntity!.legalName ?? 'Entità Legale',
+                            legalEntityName:
+                                selectedLegalEntity!.legalName ??
+                                'Entità Legale',
                           );
                           print('✅ Invitation email sent successfully');
                         } catch (e) {

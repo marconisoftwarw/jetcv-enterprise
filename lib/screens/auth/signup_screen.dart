@@ -12,7 +12,9 @@ import '../../l10n/app_localizations.dart';
 import 'dart:async';
 
 class SignupScreen extends StatefulWidget {
-  const SignupScreen({super.key});
+  final Map<String, String>? urlParameters;
+
+  const SignupScreen({super.key, this.urlParameters});
 
   @override
   State<SignupScreen> createState() => _SignupScreenState();
@@ -67,9 +69,18 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   void _loadUrlParameters() {
-    // Controlla se ci sono parametri di invito nell'URL
-    final uri = Uri.base;
-    final queryParams = uri.queryParameters;
+    // Usa i parametri URL passati dal costruttore o estrai dall'URL corrente
+    Map<String, String> queryParams = widget.urlParameters ?? {};
+
+    // Se non ci sono parametri dal costruttore, prova a estrarre dall'URL corrente
+    if (queryParams.isEmpty) {
+      try {
+        final uri = Uri.base;
+        queryParams = uri.queryParameters;
+      } catch (e) {
+        print('Error extracting URL parameters: $e');
+      }
+    }
 
     // Se ci sono parametri di invito (token e email), pre-compila il form
     if (queryParams.containsKey('token') && queryParams.containsKey('email')) {
@@ -144,7 +155,9 @@ class _SignupScreenState extends State<SignupScreen> {
 
     // Se l'utente arriva da un invito con token (entità legale), salta la verifica Veriff
     if (_isFromInvitation && _invitationParams.containsKey('token')) {
-      print('SignupScreen: Utente da invito entità legale, saltando verifica Veriff...');
+      print(
+        'SignupScreen: Utente da invito entità legale, saltando verifica Veriff...',
+      );
       if (mounted) {
         Navigator.pushReplacementNamed(
           context,
