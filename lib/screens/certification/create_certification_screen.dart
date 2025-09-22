@@ -20,6 +20,7 @@ import '../../services/legal_entity_service.dart';
 import '../../services/location_service.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/user_search_selector.dart';
+import '../../models/media_item.dart';
 
 class CreateCertificationScreen extends StatefulWidget {
   const CreateCertificationScreen({super.key});
@@ -40,7 +41,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   final _otpController = TextEditingController();
   final _locationController = TextEditingController();
   String _selectedActivityType = '';
-  List<XFile> _mediaFiles = [];
+  List<MediaItem> _mediaFiles = [];
+  List<MediaItem> _certificationMediaFiles = []; // Media certificativi
 
   // API state
   bool _isCreating = false;
@@ -582,6 +584,10 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             const SizedBox(height: 24),
 
             _buildMediaSection(),
+            SizedBox(height: isTablet ? 20 : 16),
+
+            // Sezione Media Certificativi
+            _buildCertificationMediaSection(),
             SizedBox(height: isTablet ? 40 : 32),
 
             NeonButton(
@@ -653,92 +659,330 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                       ),
                     ],
                   )
-                : GridView.builder(
+                : ListView.builder(
                     padding: const EdgeInsets.all(8),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
-                          crossAxisSpacing: 8,
-                          mainAxisSpacing: 8,
-                        ),
                     itemCount: _mediaFiles.length,
                     itemBuilder: (context, index) {
-                      return Stack(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: FutureBuilder<Uint8List>(
-                              future: _mediaFiles[index].readAsBytes(),
-                              builder: (context, snapshot) {
-                                if (snapshot.hasData) {
-                                  return Image.memory(
-                                    snapshot.data!,
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      print('❌ Error displaying image: $error');
-                                      return Container(
-                                        width: double.infinity,
-                                        height: double.infinity,
-                                        color: AppTheme.lightGrey,
-                                        child: Icon(
-                                          Icons.error_outline,
-                                          color: AppTheme.errorRed,
-                                          size: 24,
-                                        ),
-                                      );
-                                    },
-                                  );
-                                } else if (snapshot.hasError) {
-                                  print(
-                                    '❌ Error loading image: ${snapshot.error}',
-                                  );
-                                  return Container(
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                    color: AppTheme.lightGrey,
-                                    child: Icon(
-                                      Icons.error_outline,
-                                      color: AppTheme.errorRed,
-                                      size: 24,
-                                    ),
-                                  );
-                                } else {
-                                  return Container(
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                    color: AppTheme.lightGrey,
-                                    child: Icon(
-                                      Icons.image,
-                                      color: AppTheme.textSecondary,
-                                      size: 24,
-                                    ),
-                                  );
-                                }
-                              },
+                      final mediaItem = _mediaFiles[index];
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: AppTheme.borderGrey),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
                             ),
-                          ),
-                          Positioned(
-                            top: 4,
-                            right: 4,
-                            child: GestureDetector(
-                              onTap: () => _removeMedia(index),
-                              child: Container(
-                                padding: const EdgeInsets.all(4),
-                                decoration: BoxDecoration(
-                                  color: AppTheme.errorRed,
-                                  shape: BoxShape.circle,
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            // Anteprima immagine
+                            Container(
+                              width: 80,
+                              height: 80,
+                              decoration: BoxDecoration(
+                                color: AppTheme.lightGrey,
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(8),
+                                  bottomLeft: Radius.circular(8),
                                 ),
-                                child: Icon(
-                                  Icons.close,
-                                  color: AppTheme.pureWhite,
-                                  size: 16,
+                              ),
+                              child: ClipRRect(
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(8),
+                                  bottomLeft: Radius.circular(8),
+                                ),
+                                child: FutureBuilder<Uint8List>(
+                                  future: mediaItem.file.readAsBytes(),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasData) {
+                                      return Image.memory(
+                                        snapshot.data!,
+                                        width: 80,
+                                        height: 80,
+                                        fit: BoxFit.cover,
+                                        errorBuilder:
+                                            (context, error, stackTrace) {
+                                              return Icon(
+                                                Icons.error_outline,
+                                                color: AppTheme.errorRed,
+                                                size: 24,
+                                              );
+                                            },
+                                      );
+                                    } else {
+                                      return Icon(
+                                        Icons.image,
+                                        color: AppTheme.textSecondary,
+                                        size: 24,
+                                      );
+                                    }
+                                  },
                                 ),
                               ),
                             ),
-                          ),
-                        ],
+                            // Contenuto
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.all(12),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      mediaItem.title.isNotEmpty
+                                          ? mediaItem.title
+                                          : 'Senza titolo',
+                                      style: TextStyle(
+                                        fontSize: isTablet ? 16 : 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppTheme.primaryBlack,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      mediaItem.description.isNotEmpty
+                                          ? mediaItem.description
+                                          : 'Nessuna descrizione',
+                                      style: TextStyle(
+                                        fontSize: isTablet ? 14 : 12,
+                                        color: AppTheme.textSecondary,
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            // Pulsanti azione
+                            Column(
+                              children: [
+                                IconButton(
+                                  onPressed: () => _showMediaEditDialog(
+                                    mediaItem,
+                                    index,
+                                    false,
+                                  ),
+                                  icon: Icon(
+                                    Icons.edit,
+                                    color: AppTheme.primaryBlue,
+                                    size: 20,
+                                  ),
+                                  tooltip: 'Modifica',
+                                ),
+                                IconButton(
+                                  onPressed: () => _removeMedia(index),
+                                  icon: Icon(
+                                    Icons.delete,
+                                    color: AppTheme.errorRed,
+                                    size: 20,
+                                  ),
+                                  tooltip: 'Rimuovi',
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCertificationMediaSection() {
+    final l10n = AppLocalizations.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 768;
+
+    return EnterpriseCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Media Certificativi',
+                style: TextStyle(
+                  fontSize: isTablet ? 20 : 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.primaryBlack,
+                ),
+              ),
+              NeonButton(
+                onPressed: _addCertificationMedia,
+                text: '+ ${l10n.getString('add')}',
+              ),
+            ],
+          ),
+          SizedBox(height: isTablet ? 20 : 16),
+          Container(
+            height: isTablet ? 140 : 120,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: AppTheme.lightGrey,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: AppTheme.borderGrey,
+                style: BorderStyle.solid,
+              ),
+            ),
+            child: _certificationMediaFiles.isEmpty
+                ? Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.verified_user,
+                        size: isTablet ? 56 : 48,
+                        color: AppTheme.textSecondary,
+                      ),
+                      SizedBox(height: isTablet ? 12 : 8),
+                      Text(
+                        'Aggiungi media certificativi',
+                        style: TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: isTablet ? 18 : 16,
+                        ),
+                      ),
+                    ],
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.all(8),
+                    itemCount: _certificationMediaFiles.length,
+                    itemBuilder: (context, index) {
+                      final mediaItem = _certificationMediaFiles[index];
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: AppTheme.borderGrey),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            // Anteprima immagine
+                            Container(
+                              width: 80,
+                              height: 80,
+                              decoration: BoxDecoration(
+                                color: AppTheme.lightGrey,
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(8),
+                                  bottomLeft: Radius.circular(8),
+                                ),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(8),
+                                  bottomLeft: Radius.circular(8),
+                                ),
+                                child: FutureBuilder<Uint8List>(
+                                  future: mediaItem.file.readAsBytes(),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasData) {
+                                      return Image.memory(
+                                        snapshot.data!,
+                                        width: 80,
+                                        height: 80,
+                                        fit: BoxFit.cover,
+                                        errorBuilder:
+                                            (context, error, stackTrace) {
+                                              return Icon(
+                                                Icons.error_outline,
+                                                color: AppTheme.errorRed,
+                                                size: 24,
+                                              );
+                                            },
+                                      );
+                                    } else {
+                                      return Icon(
+                                        Icons.image,
+                                        color: AppTheme.textSecondary,
+                                        size: 24,
+                                      );
+                                    }
+                                  },
+                                ),
+                              ),
+                            ),
+                            // Contenuto
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.all(12),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      mediaItem.title.isNotEmpty
+                                          ? mediaItem.title
+                                          : 'Senza titolo',
+                                      style: TextStyle(
+                                        fontSize: isTablet ? 16 : 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppTheme.primaryBlack,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      mediaItem.description.isNotEmpty
+                                          ? mediaItem.description
+                                          : 'Nessuna descrizione',
+                                      style: TextStyle(
+                                        fontSize: isTablet ? 14 : 12,
+                                        color: AppTheme.textSecondary,
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            // Pulsanti azione
+                            Column(
+                              children: [
+                                IconButton(
+                                  onPressed: () => _showMediaEditDialog(
+                                    mediaItem,
+                                    index,
+                                    true,
+                                  ),
+                                  icon: Icon(
+                                    Icons.edit,
+                                    color: AppTheme.primaryBlue,
+                                    size: 20,
+                                  ),
+                                  tooltip: 'Modifica',
+                                ),
+                                IconButton(
+                                  onPressed: () =>
+                                      _removeCertificationMedia(index),
+                                  icon: Icon(
+                                    Icons.delete,
+                                    color: AppTheme.errorRed,
+                                    size: 20,
+                                  ),
+                                  tooltip: 'Rimuovi',
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       );
                     },
                   ),
@@ -1587,7 +1831,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(8),
                             child: FutureBuilder<Uint8List>(
-                              future: _mediaFiles[i].readAsBytes(),
+                              future: _mediaFiles[i].file.readAsBytes(),
                               builder: (context, snapshot) {
                                 if (snapshot.hasData && snapshot.data != null) {
                                   return Image.memory(
@@ -1617,7 +1861,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                _mediaFiles[i].name,
+                                _mediaFiles[i].file.name,
                                 style: TextStyle(
                                   fontSize: isTablet ? 14 : 12,
                                   fontWeight: FontWeight.w500,
@@ -1628,7 +1872,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                               ),
                               SizedBox(height: isTablet ? 4 : 2),
                               FutureBuilder<int>(
-                                future: _mediaFiles[i].length(),
+                                future: _mediaFiles[i].file.length(),
                                 builder: (context, snapshot) {
                                   final size = snapshot.data ?? 0;
                                   final sizeKB = (size / 1024).round();
@@ -2033,7 +2277,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           certificationUsers: certificationUsers.isNotEmpty
               ? certificationUsers
               : null,
-          mediaFiles: _mediaFiles,
+          mediaFiles: _mediaFiles.map((item) => item.file).toList(),
           acquisitionType: 'deferred',
         );
       } else {
@@ -2321,7 +2565,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
 
       final result = await CertificationMediaService.uploadMedia(
         certificationId: certificationId,
-        mediaFiles: _mediaFiles,
+        mediaFiles: _mediaFiles.map((item) => item.file).toList(),
         acquisitionType: 'deferred',
         capturedAt: DateTime.now().toIso8601String(),
         idLocation: mediaLocationId,
@@ -2419,7 +2663,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           await image.readAsBytes();
 
           setState(() {
-            _mediaFiles.add(image);
+            _mediaFiles.add(MediaItem(file: image));
           });
           print('✅ Media file added successfully: ${image.name}');
         } catch (fileError) {
@@ -2439,6 +2683,152 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     setState(() {
       _mediaFiles.removeAt(index);
     });
+  }
+
+  void _addCertificationMedia() async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+      if (image != null) {
+        // Su web, usiamo direttamente XFile per evitare problemi con File
+        try {
+          // Testiamo se il file può essere letto
+          await image.readAsBytes();
+
+          setState(() {
+            _certificationMediaFiles.add(MediaItem(file: image));
+          });
+        } catch (e) {
+          print('❌ Error reading certification media file: $e');
+          _showErrorDialog('Errore nel caricamento del file certificativo');
+        }
+      }
+    } catch (e) {
+      print('❌ Error picking certification media: $e');
+      _showErrorDialog('Errore nella selezione del media certificativo');
+    }
+  }
+
+  void _removeCertificationMedia(int index) {
+    setState(() {
+      _certificationMediaFiles.removeAt(index);
+    });
+  }
+
+  void _showMediaEditDialog(
+    MediaItem mediaItem,
+    int index,
+    bool isCertificationMedia,
+  ) {
+    final titleController = TextEditingController(text: mediaItem.title);
+    final descriptionController = TextEditingController(
+      text: mediaItem.description,
+    );
+    final l10n = AppLocalizations.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 768;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            'Modifica Media',
+            style: TextStyle(
+              fontSize: isTablet ? 20 : 18,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.primaryBlack,
+            ),
+          ),
+          content: SizedBox(
+            width: isTablet ? 400 : 300,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Anteprima immagine
+                Container(
+                  height: 120,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: AppTheme.lightGrey,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppTheme.borderGrey),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: FutureBuilder<Uint8List>(
+                      future: mediaItem.file.readAsBytes(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          return Image.memory(
+                            snapshot.data!,
+                            width: double.infinity,
+                            height: double.infinity,
+                            fit: BoxFit.cover,
+                          );
+                        } else {
+                          return Icon(
+                            Icons.image,
+                            size: 48,
+                            color: AppTheme.textSecondary,
+                          );
+                        }
+                      },
+                    ),
+                  ),
+                ),
+                SizedBox(height: isTablet ? 20 : 16),
+
+                // Campo titolo
+                EnterpriseTextField(
+                  controller: titleController,
+                  label: 'Titolo',
+                  hint: 'Inserisci un titolo per il media',
+                  validator: (value) => null,
+                ),
+                SizedBox(height: isTablet ? 16 : 12),
+
+                // Campo descrizione
+                EnterpriseTextField(
+                  controller: descriptionController,
+                  label: 'Descrizione',
+                  hint: 'Inserisci una descrizione per il media',
+                  maxLines: 3,
+                  validator: (value) => null,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'Annulla',
+                style: TextStyle(color: AppTheme.textSecondary),
+              ),
+            ),
+            NeonButton(
+              onPressed: () {
+                setState(() {
+                  final updatedMedia = mediaItem.copyWith(
+                    title: titleController.text.trim(),
+                    description: descriptionController.text.trim(),
+                  );
+
+                  if (isCertificationMedia) {
+                    _certificationMediaFiles[index] = updatedMedia;
+                  } else {
+                    _mediaFiles[index] = updatedMedia;
+                  }
+                });
+                Navigator.of(context).pop();
+              },
+              text: 'Salva',
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _addUserByOTP() async {

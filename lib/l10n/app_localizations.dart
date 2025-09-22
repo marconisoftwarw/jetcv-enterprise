@@ -309,7 +309,7 @@ class AppLocalizations {
       'exam': 'Esame',
       'other': 'Altro',
       'description': 'Descrizione',
-      'media_photos_videos': 'Media (Foto e Video)',
+      'media_photos_videos': 'Media Contesto (Foto e Video)',
       'add_photos_videos': 'Aggiungi foto e video',
       'add': 'Aggiungi',
       'continue': 'Continua',
@@ -330,7 +330,7 @@ class AppLocalizations {
       'passed': 'Superato',
       'score': 'Punteggio',
       'evaluation': 'Valutazione',
-      'media_photos_videos_short': 'Media (Foto e Video)',
+      'media_photos_videos_short': 'Media Contesto (Foto e Video)',
       'certification_review': 'Revisione Certificazione',
       'check_details_before_sending':
           'Controlla tutti i dettagli prima di inviare la certificazione',
