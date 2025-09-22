@@ -513,6 +513,8 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
                       l10n.getString('login'),
                       () => Navigator.pushNamed(context, '/login'),
                     ),
+                    // Spacer per evitare sovrapposizione con il button delle bandiere
+                    const SizedBox(width: 80),
                   ],
                 ),
             ],

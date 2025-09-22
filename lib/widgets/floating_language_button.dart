@@ -89,7 +89,7 @@ class _FloatingLanguageButtonState extends State<FloatingLanguageButton>
             : localeProvider.getSupportedLanguages();
 
         return Positioned(
-          bottom: 20,
+          top: 20,
           right: 20,
           child: Column(
             mainAxisSize: MainAxisSize.min,

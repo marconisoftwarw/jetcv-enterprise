@@ -86,13 +86,12 @@ class _GlobalFloatingLanguageButtonState
     return Consumer<LocaleProvider>(
       builder: (context, localeProvider, child) {
         return Positioned(
-          bottom: 20,
+          top: 20,
           right: 20,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              // Language options (appear when expanded)
               if (_isExpanded) ...[
                 ...(_cachedLanguages.isNotEmpty
                         ? _cachedLanguages
