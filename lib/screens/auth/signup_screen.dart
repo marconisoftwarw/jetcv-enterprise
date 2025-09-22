@@ -93,6 +93,16 @@ class _SignupScreenState extends State<SignupScreen> {
         }
       }
     }
+    // Se c'è solo l'email (per certificatori), pre-compila il form
+    else if (queryParams.containsKey('email')) {
+      _isFromInvitation = true;
+      _invitationParams = Map<String, String>.from(queryParams);
+
+      // Pre-compila l'email se presente
+      if (queryParams['email'] != null) {
+        _emailController.text = queryParams['email']!;
+      }
+    }
   }
 
   Future<void> _signUp() async {
@@ -132,9 +142,9 @@ class _SignupScreenState extends State<SignupScreen> {
       lastName: _lastNameController.text.trim(),
     );
 
-    // Se l'utente arriva da un invito, salta la verifica Veriff
-    if (_isFromInvitation) {
-      print('SignupScreen: Utente da invito, saltando verifica Veriff...');
+    // Se l'utente arriva da un invito con token (entità legale), salta la verifica Veriff
+    if (_isFromInvitation && _invitationParams.containsKey('token')) {
+      print('SignupScreen: Utente da invito entità legale, saltando verifica Veriff...');
       if (mounted) {
         Navigator.pushReplacementNamed(
           context,
@@ -143,7 +153,8 @@ class _SignupScreenState extends State<SignupScreen> {
         );
       }
     } else {
-      // Altrimenti, procedi con la verifica Veriff normale
+      // Per tutti gli altri casi (inclusi i certificatori), procedi con la verifica Veriff
+      print('SignupScreen: Procedendo con verifica Veriff...');
       await _startVeriffVerification();
     }
   }

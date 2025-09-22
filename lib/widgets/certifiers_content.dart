@@ -1512,8 +1512,6 @@ class _CertifiersContentState extends State<CertifiersContent> {
     final roleController = TextEditingController();
     final cityController = TextEditingController();
     final addressController = TextEditingController();
-    final passwordController = TextEditingController();
-    final confirmPasswordController = TextEditingController();
 
     LegalEntity? selectedLegalEntity = isAdmin
         ? null
@@ -1719,37 +1717,6 @@ class _CertifiersContentState extends State<CertifiersContent> {
                   ),
                   SizedBox(height: 16),
 
-                  // Password Section
-                  _buildSectionHeader(
-                    l10n.getString('password'),
-                    Icons.lock,
-                    isTablet,
-                  ),
-                  SizedBox(height: 12),
-
-                  // Password fields hidden - password will be same as email
-                  // Row(
-                  //   children: [
-                  //     Expanded(
-                  //       child: _buildPasswordField(
-                  //         controller: passwordController,
-                  //         label: l10n.getString('password'),
-                  //         hint: l10n.getString('password'),
-                  //         isTablet: isTablet,
-                  //       ),
-                  //     ),
-                  //     SizedBox(width: 16),
-                  //     Expanded(
-                  //       child: _buildPasswordField(
-                  //         controller: confirmPasswordController,
-                  //         label: l10n.getString('confirm_password'),
-                  //         hint: l10n.getString('confirm_password'),
-                  //         isTablet: isTablet,
-                  //       ),
-                  //     ),
-                  //   ],
-                  // ),
-                  // SizedBox(height: 16),
 
                   // Address Information
                   Row(
@@ -1900,39 +1867,11 @@ class _CertifiersContentState extends State<CertifiersContent> {
                           active: true,
                         );
 
-                        // 1. Crea l'utente con signup (solo autenticazione)
-                        print('🚀 Creating user with signup (auth only)...');
-                        final supabaseService = SupabaseService();
-                        final authResponse = await supabaseService
-                            .signUpWithEmail(
-                              email: emailController.text.trim(),
-                              password: emailController.text
-                                  .trim(), // Password uguale all'email
-                              userData: userData,
-                              createUserRecord:
-                                  false, // Solo autenticazione, niente record
-                            );
-
-                        if (authResponse.user == null) {
-                          throw Exception(
-                            'Errore nella creazione dell\'utente',
-                          );
-                        }
-
-                        print(
-                          '✅ User authenticated successfully: ${authResponse.user!.id}',
-                        );
-
-                        // 2. Crea utente e certificatore tramite Edge Function
-                        print(
-                          '🚀 Creating user and certifier via Edge Function...',
-                        );
+                        // Crea solo il certificatore tramite Edge Function
+                        print('🚀 Creating certifier via Edge Function...');
                         final certifierResult = await _certifierService
                             .createCertifierWithUser(
-                              userData: {
-                                ...userData,
-                                'idUser': authResponse.user!.id,
-                              },
+                              userData: userData,
                               certifier: newCertifier,
                             );
 
@@ -1942,14 +1881,29 @@ class _CertifiersContentState extends State<CertifiersContent> {
                           );
                         }
 
-                        print('✅ User and certifier created successfully');
+                        print('✅ Certifier created successfully');
+
+                        // Invia email di invito al certificatore
+                        try {
+                          await _emailService.sendCertifierInvitationEmail(
+                            email: emailController.text.trim(),
+                            firstName: firstNameController.text.trim(),
+                            lastName: lastNameController.text.trim(),
+                            role: roleController.text.trim(),
+                            legalEntityName: selectedLegalEntity!.legalName ?? 'Entità Legale',
+                          );
+                          print('✅ Invitation email sent successfully');
+                        } catch (e) {
+                          print('❌ Error sending invitation email: $e');
+                          // Non bloccare il processo se l'email fallisce
+                        }
 
                         if (mounted) {
                           Navigator.pop(context);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                '${l10n.getString('certifier_created_successfully')} - L\'utente può accedere con email e password uguale all\'email',
+                                '${l10n.getString('certifier_created_successfully')} - Email di invito inviata',
                               ),
                               backgroundColor: AppTheme.successGreen,
                               duration: Duration(seconds: 4),

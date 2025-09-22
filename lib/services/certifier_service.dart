@@ -378,12 +378,12 @@ class CertifierService {
       if (!success) return false;
 
       // Invia email di invito
-      final emailSent = await _emailService.sendCertifierInvitation(
+      final emailSent = await _emailService.sendCertifierInvitationEmail(
         email: email,
-        invitationToken: invitationToken,
-        legalEntityId: legalEntityId,
-        role: role,
-        message: message,
+        firstName: '', // Will be filled by the certifier during registration
+        lastName: '', // Will be filled by the certifier during registration
+        role: role ?? 'Certificatore',
+        legalEntityName: 'Entità Legale', // This should be fetched from legal entity data
       );
 
       return emailSent;

@@ -281,8 +281,10 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
             // Return the appropriate route
             switch (settings.name) {
               case '/login':
+              case '/#/login':
                 return MaterialPageRoute(builder: (_) => const LoginScreen());
               case '/signup':
+              case '/#/signup':
                 return MaterialPageRoute(builder: (_) => const SignupScreen());
               case '/password-reset':
                 return MaterialPageRoute(

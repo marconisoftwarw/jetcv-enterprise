@@ -770,134 +770,7 @@ Questo è un messaggio automatico, non rispondere a questa email.
     return _generateInvitationLink(invitation, legalEntityData);
   }
 
-  // Metodo per inviare invito a certificatore
-  Future<bool> sendCertifierInvitation({
-    required String email,
-    required String invitationToken,
-    required String legalEntityId,
-    String? role,
-    String? message,
-  }) async {
-    try {
-      final subject = 'Invito a diventare Certificatore - JetCV Enterprise';
-      final htmlContent = _generateCertifierInvitationEmailHTML(
-        invitationToken: invitationToken,
-        legalEntityId: legalEntityId,
-        role: role,
-        message: message,
-      );
-      final textContent = _generateCertifierInvitationEmailText(
-        invitationToken: invitationToken,
-        legalEntityId: legalEntityId,
-        role: role,
-        message: message,
-      );
 
-      if (AppConfig.environment == 'development' && AppConfig.enableDebugMode) {
-        return await _sendViaMailHog({
-          'to': email,
-          'subject': subject,
-          'html': htmlContent,
-          'text': textContent,
-        });
-      } else {
-        return await _sendViaExternalService({
-          'to': email,
-          'subject': subject,
-          'html': htmlContent,
-          'text': textContent,
-        });
-      }
-    } catch (e) {
-      print('Error sending certifier invitation email: $e');
-      return false;
-    }
-  }
-
-  String _generateCertifierInvitationEmailHTML({
-    required String invitationToken,
-    required String legalEntityId,
-    String? role,
-    String? message,
-  }) {
-    final roleText = role != null ? ' come $role' : '';
-    final messageText = message != null
-        ? '<p><strong>Messaggio:</strong> $message</p>'
-        : '';
-
-    return '''
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <title>Invito Certificatore - JetCV Enterprise</title>
-        <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: #1976d2; color: white; padding: 20px; text-align: center; }
-          .content { padding: 20px; background: #f9f9f9; }
-          .button { display: inline-block; padding: 12px 24px; background: #1976d2; color: white; text-decoration: none; border-radius: 4px; margin: 20px 0; }
-          .footer { text-align: center; padding: 20px; color: #666; font-size: 14px; }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <h1>🎯 Invito a diventare Certificatore</h1>
-            <p>JetCV Enterprise</p>
-          </div>
-          
-          <div class="content">
-            <h2>Benvenuto nel team di certificazione!</h2>
-            <p>Sei stato invitato a diventare un certificatore$roleText per JetCV Enterprise.</p>
-            
-            $messageText
-            
-            <p>Per accettare l'invito e iniziare a lavorare come certificatore, clicca sul pulsante qui sotto:</p>
-            
-            <a href="${AppConfig.appUrl}/certifier/invite/$invitationToken" class="button">
-              🚀 Accetta Invito
-            </a>
-            
-            <p><strong>Link diretto:</strong> <a href="${AppConfig.appUrl}/certifier/invite/$invitationToken">${AppConfig.appUrl}/certifier/invite/$invitationToken</a></p>
-            
-            <p><em>Questo invito è valido per 30 giorni. Se hai domande, contattaci a support@jetcv.com</em></p>
-          </div>
-          
-          <div class="footer">
-            <p>© 2024 JetCV Enterprise. Tutti i diritti riservati.</p>
-          </div>
-        </div>
-      </body>
-      </html>
-    ''';
-  }
-
-  String _generateCertifierInvitationEmailText({
-    required String invitationToken,
-    required String legalEntityId,
-    String? message,
-    String? role,
-  }) {
-    final roleText = role != null ? ' come $role' : '';
-    final messageText = message != null ? '\n\nMessaggio: $message' : '';
-
-    return '''
-      Invito a diventare Certificatore - JetCV Enterprise
-      
-      Benvenuto nel team di certificazione!
-      
-      Sei stato invitato a diventare un certificatore$roleText per JetCV Enterprise.
-      $messageText
-      
-      Per accettare l'invito e iniziare a lavorare come certificatore, visita:
-      ${AppConfig.appUrl}/certifier/invite/$invitationToken
-      
-      Questo invito è valido per 30 giorni. Se hai domande, contattaci a support@jetcv.com
-      
-      © 2024 JetCV Enterprise. Tutti i diritti riservati.
-    ''';
-  }
 
   // Metodo per inviare email di impostazione password per nuovo certificatore
   Future<bool> sendPasswordSetupEmail({
@@ -1039,6 +912,159 @@ Questo è un messaggio automatico, non rispondere a questa email.
     - La password deve contenere almeno 8 caratteri
     - Usa una combinazione di lettere, numeri e simboli
     - Non condividere questo link con altri
+    
+    Se hai domande o hai bisogno di assistenza, contattaci a support@jetcv.com
+    
+    © 2024 JetCV Enterprise. Tutti i diritti riservati.
+    ''';
+  }
+
+  // Metodo per inviare invito certificatore
+  Future<bool> sendCertifierInvitationEmail({
+    required String email,
+    required String firstName,
+    required String lastName,
+    required String role,
+    required String legalEntityName,
+  }) async {
+    try {
+      final signupUrl = '${AppConfig.appUrl}/#/signup?email=${Uri.encodeComponent(email)}';
+
+      final emailData = {
+        'to': email,
+        'subject': 'Invito a diventare Certificatore - JetCV Enterprise',
+        'html': _generateCertifierInvitationEmailHTML(
+          firstName: firstName,
+          lastName: lastName,
+          role: role,
+          legalEntityName: legalEntityName,
+          signupUrl: signupUrl,
+        ),
+        'text': _generateCertifierInvitationEmailText(
+          firstName: firstName,
+          lastName: lastName,
+          role: role,
+          legalEntityName: legalEntityName,
+          signupUrl: signupUrl,
+        ),
+      };
+
+      // Opzione 1: MailHog per sviluppo locale
+      if (AppConfig.environment == 'development' && AppConfig.enableDebugMode) {
+        return await _sendViaMailHog(emailData);
+      }
+
+      // Opzione 2: Servizio email esterno
+      return await _sendViaExternalService(emailData);
+    } catch (e) {
+      print('Error sending certifier invitation email: $e');
+      return false;
+    }
+  }
+
+  // Genera HTML per email di invito certificatore
+  String _generateCertifierInvitationEmailHTML({
+    required String firstName,
+    required String lastName,
+    required String role,
+    required String legalEntityName,
+    required String signupUrl,
+  }) {
+    return '''
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Invito Certificatore - JetCV Enterprise</title>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; margin: -20px -20px 20px -20px; }
+        .header h1 { margin: 0; font-size: 28px; }
+        .content { padding: 20px 0; }
+        .highlight { background: #e8f4fd; padding: 15px; border-left: 4px solid #2196F3; margin: 20px 0; border-radius: 5px; }
+        .button { display: inline-block; background: #2196F3; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 20px 0; }
+        .button:hover { background: #1976D2; }
+        .footer { background: #f8f9fa; padding: 20px; text-align: center; border-radius: 0 0 10px 10px; margin: 20px -20px -20px -20px; font-size: 12px; color: #666; }
+        .role-badge { background: #4CAF50; color: white; padding: 5px 15px; border-radius: 20px; font-size: 14px; font-weight: bold; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>🎯 Invito Certificatore</h1>
+          <p>JetCV Enterprise</p>
+        </div>
+        
+        <div class="content">
+          <h2>Ciao $firstName $lastName!</h2>
+          
+          <p>Sei stato invitato a diventare un <span class="role-badge">$role</span> per <strong>$legalEntityName</strong> su JetCV Enterprise.</p>
+          
+          <div class="highlight">
+            <h3>🚀 Cosa significa essere un Certificatore?</h3>
+            <ul>
+              <li>Verificare e certificare competenze professionali</li>
+              <li>Contribuire alla qualità del sistema di certificazioni</li>
+              <li>Accedere a strumenti avanzati di valutazione</li>
+              <li>Far parte di una community di esperti</li>
+            </ul>
+          </div>
+          
+          <h3>📋 Prossimi Passi:</h3>
+          <ol>
+            <li><strong>Registrati</strong> cliccando sul pulsante qui sotto</li>
+            <li><strong>Completa la verifica</strong> KYC per la sicurezza</li>
+            <li><strong>Inizia a certificare</strong> competenze e talenti</li>
+          </ol>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="$signupUrl" class="button">🚀 Registrati Ora</a>
+          </div>
+          
+          <p><strong>Nota importante:</strong> Il link di registrazione è personalizzato per te. Non condividerlo con altri.</p>
+          
+          <p>Se hai domande o hai bisogno di assistenza, non esitare a contattarci a <a href="mailto:support@jetcv.com">support@jetcv.com</a></p>
+        </div>
+        
+        <div class="footer">
+          <p>© 2024 JetCV Enterprise. Tutti i diritti riservati.</p>
+          <p>Questo è un messaggio automatico, non rispondere a questa email.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+    ''';
+  }
+
+  // Genera testo per email di invito certificatore
+  String _generateCertifierInvitationEmailText({
+    required String firstName,
+    required String lastName,
+    required String role,
+    required String legalEntityName,
+    required String signupUrl,
+  }) {
+    return '''
+    Invito Certificatore - JetCV Enterprise
+    
+    Ciao $firstName $lastName!
+    
+    Sei stato invitato a diventare un $role per $legalEntityName su JetCV Enterprise.
+    
+    COSA SIGNIFICA ESSERE UN CERTIFICATORE?
+    - Verificare e certificare competenze professionali
+    - Contribuire alla qualità del sistema di certificazioni
+    - Accedere a strumenti avanzati di valutazione
+    - Far parte di una community di esperti
+    
+    PROSSIMI PASSI:
+    1. Registrati cliccando su questo link: $signupUrl
+    2. Completa la verifica KYC per la sicurezza
+    3. Inizia a certificare competenze e talenti
+    
+    NOTA IMPORTANTE: Il link di registrazione è personalizzato per te. Non condividerlo con altri.
     
     Se hai domande o hai bisogno di assistenza, contattaci a support@jetcv.com
     
