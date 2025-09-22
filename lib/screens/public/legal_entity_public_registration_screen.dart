@@ -8,13 +8,12 @@ import '../../models/user.dart' show AppUser;
 import '../../models/legal_entity.dart';
 import '../../services/supabase_service.dart';
 import '../../services/image_upload_service.dart';
-
 import '../../providers/pricing_provider.dart';
+
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/url_parameter_service.dart';
-import '../veriff/veriff_verification_screen.dart';
 
 class LegalEntityPublicRegistrationScreen extends StatefulWidget {
   final Map<String, String>? urlParameters;
@@ -34,10 +33,11 @@ class _LegalEntityPublicRegistrationScreenState
 
   // Step management
   int _currentStep = 0;
-  final int _totalSteps = 3;
+  final int _totalSteps = 2;
 
   // Pricing
   Pricing? _selectedPricing;
+
 
   // Personal information
   final _personalNameController = TextEditingController();
@@ -77,7 +77,7 @@ class _LegalEntityPublicRegistrationScreenState
   @override
   void initState() {
     super.initState();
-    // Carica i dati dei pricing dopo che il widget è stato costruito
+    // Carica i dati dei pricing e parametri URL dopo che il widget è stato costruito
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadPricingData();
       _loadUrlParameters();
@@ -336,7 +336,6 @@ class _LegalEntityPublicRegistrationScreenState
                 children: [
                   _buildPricingStep(),
                   _buildPersonalInfoStep(),
-                  _buildLegalEntityStep(),
                 ],
               ),
             ),
@@ -383,13 +382,7 @@ class _LegalEntityPublicRegistrationScreenState
                   Text(
                     index == 0
                         ? AppLocalizations.of(context).getString('pricing')
-                        : index == 1
-                        ? AppLocalizations.of(
-                            context,
-                          ).getString('personal_info')
-                        : AppLocalizations.of(
-                            context,
-                          ).getString('company_info'),
+                        : AppLocalizations.of(context).getString('legal_entity'),
                     style: TextStyle(
                       fontSize: 12,
                       color: isActive ? Colors.blue : Colors.grey,
@@ -583,12 +576,12 @@ class _LegalEntityPublicRegistrationScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            AppLocalizations.of(context).getString('personal_information'),
+            'Informazioni Personali e Aziendali',
             style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           Text(
-            AppLocalizations.of(context).getString('enter_personal_info'),
+            'Inserisci le tue informazioni personali e i dati della tua azienda',
             style: const TextStyle(fontSize: 16, color: Colors.grey),
           ),
           const SizedBox(height: 24),
@@ -673,90 +666,69 @@ class _LegalEntityPublicRegistrationScreenState
                     keyboardType: TextInputType.phone,
                   ),
                 ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+                const SizedBox(height: 32),
 
-  Widget _buildLegalEntityStep() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            AppLocalizations.of(context).getString('legal_entity_information'),
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            AppLocalizations.of(context).getString('enter_company_info'),
-            style: const TextStyle(fontSize: 16, color: Colors.grey),
-          ),
-          const SizedBox(height: 24),
+                // Sezione Azienda
+                Text(
+                  'Dati Aziendali',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 16),
 
-          // Company pictures
-          Row(
-            children: [
-              Expanded(
-                child: Column(
+                // Company pictures
+                Row(
                   children: [
-                    CircleAvatar(
-                      radius: 40,
-                      backgroundImage: _entityProfilePicture != null
-                          ? FileImage(_entityProfilePicture!)
-                          : null,
-                      child: _entityProfilePicture == null
-                          ? const Icon(Icons.business, size: 40)
-                          : null,
+                    Expanded(
+                      child: Column(
+                        children: [
+                          CircleAvatar(
+                            radius: 40,
+                            backgroundImage: _entityProfilePicture != null
+                                ? FileImage(_entityProfilePicture!)
+                                : null,
+                            child: _entityProfilePicture == null
+                                ? const Icon(Icons.business, size: 40)
+                                : null,
+                          ),
+                          const SizedBox(height: 8),
+                          CustomButton(
+                            onPressed: _pickEntityProfilePicture,
+                            text: 'Logo Azienda',
+                            backgroundColor: Colors.grey,
+                          ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 8),
-                    CustomButton(
-                      onPressed: _pickEntityProfilePicture,
-                      text: AppLocalizations.of(
-                        context,
-                      ).getString('company_logo'),
-                      backgroundColor: Colors.grey,
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        children: [
+                          CircleAvatar(
+                            radius: 40,
+                            backgroundImage: _entityCompanyPicture != null
+                                ? FileImage(_entityCompanyPicture!)
+                                : null,
+                            child: _entityCompanyPicture == null
+                                ? const Icon(Icons.photo_camera, size: 40)
+                                : null,
+                          ),
+                          const SizedBox(height: 8),
+                          CustomButton(
+                            onPressed: _pickEntityCompanyPicture,
+                            text: 'Foto Azienda',
+                            backgroundColor: Colors.grey,
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  children: [
-                    CircleAvatar(
-                      radius: 40,
-                      backgroundImage: _entityCompanyPicture != null
-                          ? FileImage(_entityCompanyPicture!)
-                          : null,
-                      child: _entityCompanyPicture == null
-                          ? const Icon(Icons.photo_camera, size: 40)
-                          : null,
-                    ),
-                    const SizedBox(height: 8),
-                    CustomButton(
-                      onPressed: _pickEntityCompanyPicture,
-                      text: AppLocalizations.of(
-                        context,
-                      ).getString('company_photo'),
-                      backgroundColor: Colors.grey,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-          // Legal entity form
-          Form(
-            key: _entityFormKey,
-            child: Column(
-              children: [
+                // Campi aziendali
                 SizedBox(
                   width: double.infinity,
                   child: CustomTextField(
@@ -795,21 +767,16 @@ class _LegalEntityPublicRegistrationScreenState
                   width: double.infinity,
                   child: CustomTextField(
                     controller: _entityEmailController,
-                    labelText:
-                        '${AppLocalizations.of(context).getString('company_email')} *',
+                    labelText: 'Email Azienda *',
                     keyboardType: TextInputType.emailAddress,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return AppLocalizations.of(
-                          context,
-                        ).getString('enter_company_email');
+                        return 'Inserisci l\'email aziendale';
                       }
                       if (!RegExp(
                         r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
                       ).hasMatch(value)) {
-                        return AppLocalizations.of(
-                          context,
-                        ).getString('enter_valid_email');
+                        return 'Inserisci un\'email valida';
                       }
                       return null;
                     },
@@ -820,154 +787,13 @@ class _LegalEntityPublicRegistrationScreenState
                   width: double.infinity,
                   child: CustomTextField(
                     controller: _legalRepresentativeController,
-                    labelText:
-                        '${AppLocalizations.of(context).getString('legal_representative')} *',
+                    labelText: 'Rappresentante Legale *',
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return AppLocalizations.of(
-                          context,
-                        ).getString('enter_legal_representative');
+                        return 'Inserisci il nome del rappresentante legale';
                       }
                       return null;
                     },
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Operational address
-                Text(
-                  AppLocalizations.of(context).getString('operational_address'),
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: CustomTextField(
-                    controller: _operationalAddressController,
-                    labelText: AppLocalizations.of(
-                      context,
-                    ).getString('address'),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: CustomTextField(
-                        controller: _operationalCityController,
-                        labelText: AppLocalizations.of(
-                          context,
-                        ).getString('city'),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: CustomTextField(
-                        controller: _operationalPostalCodeController,
-                        labelText: AppLocalizations.of(
-                          context,
-                        ).getString('postal_code'),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: CustomTextField(
-                        controller: _operationalStateController,
-                        labelText: AppLocalizations.of(
-                          context,
-                        ).getString('province'),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: CustomTextField(
-                        controller: _operationalCountryController,
-                        labelText: AppLocalizations.of(
-                          context,
-                        ).getString('country'),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-
-                // Headquarter address
-                Text(
-                  AppLocalizations.of(context).getString('headquarters'),
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: CustomTextField(
-                    controller: _headquarterAddressController,
-                    labelText: AppLocalizations.of(
-                      context,
-                    ).getString('address'),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: CustomTextField(
-                        controller: _headquarterCityController,
-                        labelText: AppLocalizations.of(
-                          context,
-                        ).getString('city'),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: CustomTextField(
-                        controller: _headquarterPostalCodeController,
-                        labelText: AppLocalizations.of(
-                          context,
-                        ).getString('postal_code'),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: CustomTextField(
-                        controller: _headquarterStateController,
-                        labelText: AppLocalizations.of(
-                          context,
-                        ).getString('province'),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: CustomTextField(
-                        controller: _headquarterCountryController,
-                        labelText: AppLocalizations.of(
-                          context,
-                        ).getString('country'),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-
-                // Contact information
-                Text(
-                  AppLocalizations.of(context).getString('contact_information'),
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -975,7 +801,7 @@ class _LegalEntityPublicRegistrationScreenState
                   width: double.infinity,
                   child: CustomTextField(
                     controller: _phoneController,
-                    labelText: AppLocalizations.of(context).getString('phone'),
+                    labelText: 'Telefono Azienda',
                     keyboardType: TextInputType.phone,
                   ),
                 ),
@@ -984,7 +810,7 @@ class _LegalEntityPublicRegistrationScreenState
                   width: double.infinity,
                   child: CustomTextField(
                     controller: _pecController,
-                    labelText: AppLocalizations.of(context).getString('pec'),
+                    labelText: 'PEC',
                     keyboardType: TextInputType.emailAddress,
                   ),
                 ),
@@ -993,9 +819,7 @@ class _LegalEntityPublicRegistrationScreenState
                   width: double.infinity,
                   child: CustomTextField(
                     controller: _websiteController,
-                    labelText: AppLocalizations.of(
-                      context,
-                    ).getString('website'),
+                    labelText: 'Sito Web',
                     keyboardType: TextInputType.url,
                   ),
                 ),
@@ -1006,6 +830,7 @@ class _LegalEntityPublicRegistrationScreenState
       ),
     );
   }
+
 
   Widget _buildNavigationButtons() {
     return Container(
@@ -1072,12 +897,6 @@ class _LegalEntityPublicRegistrationScreenState
       case 1:
         if (_personalFormKey.currentState == null ||
             !_personalFormKey.currentState!.validate()) {
-          return false;
-        }
-        break;
-      case 2:
-        if (_entityFormKey.currentState == null ||
-            !_entityFormKey.currentState!.validate()) {
           return false;
         }
         break;
@@ -1172,7 +991,7 @@ class _LegalEntityPublicRegistrationScreenState
       final createdUser = result['user'];
       final createdEntity = result['legalEntity'];
 
-      // 5. Create pricing record (temporary/mock for now)
+      // 5. Handle pricing if selected
       if (_selectedPricing != null) {
         // TODO: Implement actual pricing purchase and database storage
         print(
@@ -1198,14 +1017,8 @@ class _LegalEntityPublicRegistrationScreenState
           ),
         );
 
-        // Navigate to Veriff verification screen with user data
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) =>
-                VeriffVerificationScreen(userData: user.toJson()),
-          ),
-        );
+        // Navigate to home screen
+        Navigator.pushReplacementNamed(context, '/home');
       }
     } catch (e) {
       print('❌ Error completing registration: $e');
