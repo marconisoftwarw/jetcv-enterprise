@@ -146,30 +146,16 @@ class _SignupScreenState extends State<SignupScreen> {
     print('SignupScreen: Iniziando processo di registrazione...');
 
     final authProvider = context.read<AuthProvider>();
-    final success = await authProvider.signUpWithEmail(
+    await authProvider.signUpWithEmail(
       email: _emailController.text.trim(),
       password: _passwordController.text,
       firstName: _firstNameController.text.trim(),
       lastName: _lastNameController.text.trim(),
     );
 
-    // Se l'utente arriva da un invito con token (entità legale), salta la verifica Veriff
-    if (_isFromInvitation && _invitationParams.containsKey('token')) {
-      print(
-        'SignupScreen: Utente da invito entità legale, saltando verifica Veriff...',
-      );
-      if (mounted) {
-        Navigator.pushReplacementNamed(
-          context,
-          '/legal-entity/invitation-details',
-          arguments: _invitationParams,
-        );
-      }
-    } else {
-      // Per tutti gli altri casi (inclusi i certificatori), procedi con la verifica Veriff
-      print('SignupScreen: Procedendo con verifica Veriff...');
-      await _startVeriffVerification();
-    }
+    // Per tutti gli utenti, procedi con la verifica Veriff dopo la registrazione
+    print('SignupScreen: Procedendo con verifica Veriff...');
+    await _startVeriffVerification();
   }
 
   Future<void> _signInWithGoogle() async {
@@ -177,20 +163,9 @@ class _SignupScreenState extends State<SignupScreen> {
     final success = await authProvider.signInWithGoogle();
 
     if (success && mounted) {
-      // Se l'utente arriva da un invito, salta la verifica Veriff
-      if (_isFromInvitation) {
-        print(
-          'SignupScreen: Utente Google da invito, saltando verifica Veriff...',
-        );
-        Navigator.pushReplacementNamed(
-          context,
-          '/legal-entity/invitation-details',
-          arguments: _invitationParams,
-        );
-      } else {
-        // Per gli utenti Google normali, avvia la verifica Veriff
-        await _startVeriffVerification();
-      }
+      // Per tutti gli utenti Google, avvia la verifica Veriff
+      print('SignupScreen: Utente Google, procedendo con verifica Veriff...');
+      await _startVeriffVerification();
     }
   }
 
