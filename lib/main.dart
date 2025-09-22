@@ -319,7 +319,7 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
             // Gestisci hash routing speciale
             if (settings.name?.startsWith('/#/') == true) {
               print('🔍 Handling hash routing: ${settings.name}');
-              
+
               // Estrai parametri URL dall'URL corrente per hash routing
               Map<String, String>? urlParams;
               try {
@@ -343,7 +343,7 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
               } else if (settings.name?.startsWith('/#/signup?') == true) {
                 // Gestisci hash routing con parametri URL
                 print('🔍 Handling hash routing with params: ${settings.name}');
-                
+
                 // Estrai parametri dall'hash
                 final hashPart = settings.name!.substring(2); // Rimuovi '/#'
                 final uri = Uri.parse('http://localhost$hashPart');
@@ -351,7 +351,7 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
                   urlParams = Map<String, String>.from(uri.queryParameters);
                   print('🔍 Extracted URL params from hash: $urlParams');
                 }
-                
+
                 return MaterialPageRoute(
                   builder: (_) => SignupScreen(urlParameters: urlParams),
                   settings: settings,
