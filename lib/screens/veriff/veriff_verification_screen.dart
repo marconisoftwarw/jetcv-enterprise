@@ -170,10 +170,15 @@ class _VeriffVerificationScreenState extends State<VeriffVerificationScreen> {
         elevation: 0,
         actions: [
           if (_sessionId != null)
-            IconButton(
-              onPressed: _checkVerificationStatus,
-              icon: const Icon(Icons.refresh),
-              tooltip: 'Controlla stato verifica',
+            Container(
+              margin: const EdgeInsets.only(
+                right: 80,
+              ), // Spazio per il floating button
+              child: IconButton(
+                onPressed: _checkVerificationStatus,
+                icon: const Icon(Icons.refresh),
+                tooltip: 'Controlla stato verifica',
+              ),
             ),
         ],
       ),

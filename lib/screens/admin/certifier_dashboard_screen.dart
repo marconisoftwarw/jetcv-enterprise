@@ -44,10 +44,15 @@ class _AdminCertifierDashboardScreenState
         foregroundColor: AppTheme.white,
         elevation: 0,
         actions: [
-          IconButton(
-            onPressed: () => _showInviteCertifierDialog(context),
-            icon: const Icon(Icons.person_add),
-            tooltip: 'Invita Certificatore',
+          Container(
+            margin: const EdgeInsets.only(
+              right: 80,
+            ), // Spazio per il floating button
+            child: IconButton(
+              onPressed: () => _showInviteCertifierDialog(context),
+              icon: const Icon(Icons.person_add),
+              tooltip: 'Invita Certificatore',
+            ),
           ),
         ],
       ),

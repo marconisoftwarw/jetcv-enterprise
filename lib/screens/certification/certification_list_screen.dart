@@ -331,7 +331,11 @@ class _CertificationListScreenState extends State<CertificationListScreen>
       ),
       actions: [
         Container(
-          margin: const EdgeInsets.only(right: 16, top: 8, bottom: 8),
+          margin: const EdgeInsets.only(
+            right: 80,
+            top: 8,
+            bottom: 8,
+          ), // Spazio per il floating button
           child: Consumer<AuthProvider>(
             builder: (context, authProvider, child) {
               final user = authProvider.currentUser;
