@@ -196,7 +196,12 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
           darkTheme: AppTheme.darkTheme,
           themeMode: themeProvider.themeMode,
           builder: (context, child) {
-            return child ?? const SizedBox();
+            return Stack(
+              children: [
+                child ?? const SizedBox(),
+                const GlobalFloatingLanguageButton(),
+              ],
+            );
           },
           home: FutureBuilder(
             future: _initializationFuture,
