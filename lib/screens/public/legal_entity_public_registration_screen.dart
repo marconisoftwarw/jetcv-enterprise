@@ -8,6 +8,7 @@ import '../../models/user.dart' show AppUser;
 import '../../models/legal_entity.dart';
 import '../../services/supabase_service.dart';
 import '../../services/image_upload_service.dart';
+import '../../services/edge_function_service.dart';
 import '../../providers/pricing_provider.dart';
 
 import '../../widgets/custom_button.dart';
@@ -968,7 +969,7 @@ class _LegalEntityPublicRegistrationScreenState
         );
       }
 
-      // 2. Create user
+      // 2. Create user first using Supabase service
       final user = AppUser(
         idUser: const Uuid().v4(),
         idUserHash: const Uuid().v4(),
@@ -982,49 +983,45 @@ class _LegalEntityPublicRegistrationScreenState
         fullName: _personalNameController.text,
       );
 
-      // 3. Create legal entity data
-      final legalEntity = LegalEntity(
-        idLegalEntity: const Uuid().v4(),
-        idLegalEntityHash: const Uuid().v4(),
-        legalName: _legalNameController.text,
-        identifierCode: _identifierCodeController.text,
-        email: _entityEmailController.text,
-        legalRapresentative: _legalRepresentativeController.text,
-        operationalAddress: _operationalAddressController.text,
-        operationalCity: _operationalCityController.text,
-        operationalPostalCode: _operationalPostalCodeController.text,
-        operationalState: _operationalStateController.text,
-        operationalCountry: _operationalCountryController.text,
-        headquarterAddress: _headquarterAddressController.text,
-        headquarterCity: _headquarterCityController.text,
-        headquarterPostalCode: _headquarterPostalCodeController.text,
-        headquarterState: _headquarterStateController.text,
-        headquarterCountry: _headquarterCountryController.text,
-        phone: '$_entityCountryCode${_phoneController.text}',
-        pec: _pecController.text,
-        website: _websiteController.text,
-        logoPicture: entityProfileUrl,
-        companyPicture: entityCompanyUrl,
-        status: LegalEntityStatus.pending,
-      );
+      // 3. Prepare legal entity data for edge function
+      final legalEntityData = {
+        'id_legal_entity': const Uuid().v4(),
+        'id_legal_entity_hash': const Uuid().v4(),
+        'legal_name': _legalNameController.text,
+        'identifier_code': _identifierCodeController.text,
+        'operational_address': _operationalAddressController.text,
+        'operational_city': _operationalCityController.text,
+        'operational_postal_code': _operationalPostalCodeController.text,
+        'operational_state': _operationalStateController.text,
+        'operational_country': _operationalCountryController.text,
+        'headquarter_address': _headquarterAddressController.text,
+        'headquarter_city': _headquarterCityController.text,
+        'headquarter_postal_code': _headquarterPostalCodeController.text,
+        'headquarter_state': _headquarterStateController.text,
+        'headquarter_country': _headquarterCountryController.text,
+        'legal_rapresentative': _legalRepresentativeController.text,
+        'email': _entityEmailController.text,
+        'phone': '$_entityCountryCode${_phoneController.text}',
+        'pec': _pecController.text,
+        'website': _websiteController.text,
+        'status': 'pending',
+        'logo_picture': entityProfileUrl,
+        'company_picture': entityCompanyUrl,
+        'created_at': DateTime.now().toIso8601String(),
+        'created_by_id_user': user.idUser,
+      };
 
-      // 4. Create both user and legal entity in one operation
-      final result = await _supabaseService.createLegalEntityWithUser(
+      // 4. Call edge function to create both user and legal entity
+      final edgeFunctionResult = await EdgeFunctionService.createLegalEntityWithUser(
         userData: user.toJson(),
-        legalEntityData: {
-          ...legalEntity.toJson(),
-          'createdByIdUser': user.idUser,
-        },
+        legalEntityData: legalEntityData,
       );
 
-      if (result == null) {
-        throw Exception(
-          AppLocalizations.of(context).getString('user_entity_creation_error'),
-        );
+      if (edgeFunctionResult == null || !edgeFunctionResult['ok']) {
+        throw Exception('Failed to create user and legal entity via edge function');
       }
 
-      final createdUser = result['user'];
-      final createdEntity = result['legalEntity'];
+      final createdEntity = edgeFunctionResult['data']['legalEntity'];
 
       // 5. Handle pricing if selected
       if (_selectedPricing != null) {
@@ -1052,8 +1049,8 @@ class _LegalEntityPublicRegistrationScreenState
           ),
         );
 
-        // Navigate to home screen
-        Navigator.pushReplacementNamed(context, '/home');
+        // Navigate to login screen
+        Navigator.pushReplacementNamed(context, '/login');
       }
     } catch (e) {
       print('❌ Error completing registration: $e');
