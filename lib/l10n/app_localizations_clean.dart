@@ -42,7 +42,7 @@ class AppLocalizations {
       'email_invalid': 'Inserisci un\'email valida',
       'password_required': 'Password richiesta',
       'password_min_length': 'La password deve essere di almeno 6 caratteri',
-      'public_cvs': 'CV Pubblici',
+      'public_cvs': 'Registro Pubblico',
       'professional_certification_platform':
           'Piattaforma di Certificazione Professionale',
       'streamline_business_verification':

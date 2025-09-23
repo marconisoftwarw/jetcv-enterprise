@@ -177,7 +177,7 @@ class _CVListScreenState extends State<CVListScreen> {
       backgroundColor: AppTheme.lightGrey,
       appBar: AppBar(
         title: Text(
-          'CV Pubblici',
+          'Registro Pubblico',
           style: AppTheme.title1.copyWith(color: AppTheme.white),
         ),
         backgroundColor: AppTheme.primaryBlue,
