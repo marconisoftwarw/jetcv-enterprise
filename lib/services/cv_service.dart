@@ -38,80 +38,55 @@ class CVService {
     }
   }
 
-  /// Ottiene tutti i CV pubblici
-  Future<List<CV>> getPublicCVs() async {
+  /// Ottiene CV pubblici tramite Edge Function `search-cv`
+  Future<List<CV>> getPublicCVs({
+    String? q,
+    String? city,
+    String? state,
+    int limit = 50,
+    int offset = 0,
+    String orderBy = 'createdAt',
+    String orderDir = 'desc',
+  }) async {
     try {
-      print('CVService: Iniziando caricamento CV pubblici...');
+      print('CVService: Iniziando caricamento CV via edge function search-cv...');
 
-      final response = await _supabase
-          .from('cv')
-          .select('*')
-          .order('createdAt', ascending: false);
+      final payload = {
+        if (q != null && q.trim().isNotEmpty) 'q': q.trim(),
+        if (city != null && city.trim().isNotEmpty) 'city': city.trim(),
+        if (state != null && state.trim().isNotEmpty) 'state': state.trim(),
+        'order_by': orderBy,
+        'order_dir': orderDir,
+        'limit': limit,
+        'offset': offset,
+      };
 
-      print('CVService: Risposta da Supabase: $response');
-      print('CVService: Tipo di risposta: ${response.runtimeType}');
+      final response = await _supabase.functions.invoke(
+        'searchcv',
+        body: payload,
+      );
 
-      if (response == null) {
-        print('CVService: Risposta null da Supabase');
+      print('CVService: search-cv status: ${response.status}');
+      final data = response.data;
+      if (data == null || data['ok'] != true) {
+        print('CVService: Risposta non valida dalla edge function: $data');
         return [];
       }
 
-      if (response is List) {
-        print('CVService: Numero di CV trovati: ${response.length}');
+      final List<dynamic> rows = data['data'] as List<dynamic>? ?? [];
+      print('CVService: Numero di CV trovati: ${rows.length}');
 
-        if (response.isEmpty) {
-          print('CVService: Lista CV vuota');
-          return [];
-        }
-
-        // Log del primo CV per debug
-        if (response.isNotEmpty) {
-          print('CVService: Primo CV: ${response.first}');
-        }
-
-        final cvs = response.map((json) {
-          try {
-            print('CVService: Parsing CV: $json');
-            return CV.fromJson(json);
-          } catch (e) {
-            print('CVService: Errore nel parsing del CV: $e');
-            print('CVService: JSON problematico: $json');
-            rethrow;
-          }
-        }).toList();
-
-        print('CVService: CV parsati con successo: ${cvs.length}');
-        return cvs;
-      } else {
-        print(
-          'CVService: Tipo di risposta inaspettato: ${response.runtimeType}',
-        );
-        return [];
-      }
+      return rows.map((json) => CV.fromJson(json as Map<String, dynamic>)).toList();
     } catch (e) {
-      print('CVService: Errore nel caricamento CV pubblici: $e');
-      print('CVService: Stack trace: ${StackTrace.current}');
+      print('CVService: Errore nel caricamento CV via edge function: $e');
       return [];
     }
   }
 
-  /// Cerca CV per nome, località o competenze
-  Future<List<CV>> searchCVs(String query) async {
+  /// Cerca CV tramite Edge Function `search-cv`
+  Future<List<CV>> searchCVs(String query, {String? city, String? state, String orderBy = 'createdAt', String orderDir = 'desc'}) async {
     try {
-      if (query.isEmpty) {
-        return await getPublicCVs();
-      }
-
-      final lowercaseQuery = query.toLowerCase();
-      final allCVs = await getPublicCVs();
-
-      return allCVs.where((cv) {
-        return cv.displayName.toLowerCase().contains(lowercaseQuery) ||
-            cv.displayLocation.toLowerCase().contains(lowercaseQuery) ||
-            (cv.email?.toLowerCase() ?? '').contains(lowercaseQuery) ||
-            (cv.city?.toLowerCase() ?? '').contains(lowercaseQuery) ||
-            (cv.state?.toLowerCase() ?? '').contains(lowercaseQuery);
-      }).toList();
+      return getPublicCVs(q: query, city: city, state: state, orderBy: orderBy, orderDir: orderDir);
     } catch (e) {
       print('Error searching CVs: $e');
       return [];
