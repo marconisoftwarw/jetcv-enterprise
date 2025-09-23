@@ -25,7 +25,7 @@ class ResponsiveLayout extends StatefulWidget {
     this.onDestinationSelected,
     this.title,
     this.actions,
-    this.hideAppBar = false,
+    this.hideAppBar = true, // Cambiato da false a true per nascondere l'AppBar di default
   });
 
   @override
@@ -52,7 +52,11 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
     );
   }
 
-  PreferredSizeWidget? _buildAppBar(bool isMobile, bool isTablet, bool isDesktop) {
+  PreferredSizeWidget? _buildAppBar(
+    bool isMobile,
+    bool isTablet,
+    bool isDesktop,
+  ) {
     if (widget.hideAppBar) return null;
 
     return AppBar(
@@ -83,7 +87,12 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
     );
   }
 
-  Widget _buildBody(bool isMobile, bool isTablet, bool isDesktop, AuthProvider authProvider) {
+  Widget _buildBody(
+    bool isMobile,
+    bool isTablet,
+    bool isDesktop,
+    AuthProvider authProvider,
+  ) {
     if (!widget.showMenu) {
       return widget.child;
     }
@@ -97,9 +106,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
               _buildNavigationMenu(isMobile, isTablet, isDesktop, authProvider),
 
             // Main Content
-            Expanded(
-              child: widget.child,
-            ),
+            Expanded(child: widget.child),
           ],
         ),
 
@@ -112,16 +119,19 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
                   _isMenuExpanded = false;
                 });
               },
-              child: Container(
-                color: Colors.black.withOpacity(0.5),
-              ),
+              child: Container(color: Colors.black.withOpacity(0.5)),
             ),
           ),
       ],
     );
   }
 
-  Widget _buildNavigationMenu(bool isMobile, bool isTablet, bool isDesktop, AuthProvider authProvider) {
+  Widget _buildNavigationMenu(
+    bool isMobile,
+    bool isTablet,
+    bool isDesktop,
+    AuthProvider authProvider,
+  ) {
     double menuWidth;
     if (isDesktop) {
       menuWidth = 280;
@@ -135,9 +145,7 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
       width: menuWidth,
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(
-          right: BorderSide(color: Colors.grey[200]!, width: 1),
-        ),
+        border: Border(right: BorderSide(color: Colors.grey[200]!, width: 1)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -196,7 +204,7 @@ class ResponsivePadding {
   static EdgeInsets screen(BuildContext context) {
     final isMobile = ResponsiveBreakpoints.isMobile(context);
     final isTablet = ResponsiveBreakpoints.isTablet(context);
-    
+
     if (isMobile) {
       return const EdgeInsets.all(16);
     } else if (isTablet) {
@@ -208,7 +216,7 @@ class ResponsivePadding {
 
   static EdgeInsets card(BuildContext context) {
     final isMobile = ResponsiveBreakpoints.isMobile(context);
-    
+
     if (isMobile) {
       return const EdgeInsets.all(16);
     } else {
@@ -218,7 +226,7 @@ class ResponsivePadding {
 
   static EdgeInsets section(BuildContext context) {
     final isMobile = ResponsiveBreakpoints.isMobile(context);
-    
+
     if (isMobile) {
       return const EdgeInsets.symmetric(vertical: 16);
     } else {
@@ -228,10 +236,10 @@ class ResponsivePadding {
 }
 
 /// Responsive text utilities
-class ResponsiveText {
+class ResponsiveTextStyles {
   static TextStyle? titleLarge(BuildContext context) {
     final isMobile = ResponsiveBreakpoints.isMobile(context);
-    
+
     return Theme.of(context).textTheme.titleLarge?.copyWith(
       fontSize: isMobile ? 20 : 24,
       fontWeight: FontWeight.w700,
@@ -240,7 +248,7 @@ class ResponsiveText {
 
   static TextStyle? titleMedium(BuildContext context) {
     final isMobile = ResponsiveBreakpoints.isMobile(context);
-    
+
     return Theme.of(context).textTheme.titleMedium?.copyWith(
       fontSize: isMobile ? 16 : 18,
       fontWeight: FontWeight.w600,
@@ -249,18 +257,18 @@ class ResponsiveText {
 
   static TextStyle? bodyLarge(BuildContext context) {
     final isMobile = ResponsiveBreakpoints.isMobile(context);
-    
-    return Theme.of(context).textTheme.bodyLarge?.copyWith(
-      fontSize: isMobile ? 14 : 16,
-    );
+
+    return Theme.of(
+      context,
+    ).textTheme.bodyLarge?.copyWith(fontSize: isMobile ? 14 : 16);
   }
 
   static TextStyle? bodyMedium(BuildContext context) {
     final isMobile = ResponsiveBreakpoints.isMobile(context);
-    
-    return Theme.of(context).textTheme.bodyMedium?.copyWith(
-      fontSize: isMobile ? 12 : 14,
-    );
+
+    return Theme.of(
+      context,
+    ).textTheme.bodyMedium?.copyWith(fontSize: isMobile ? 12 : 14);
   }
 }
 
@@ -269,7 +277,7 @@ class ResponsiveGrid {
   static int getColumns(BuildContext context) {
     final isMobile = ResponsiveBreakpoints.isMobile(context);
     final isTablet = ResponsiveBreakpoints.isTablet(context);
-    
+
     if (isMobile) {
       return 1;
     } else if (isTablet) {
@@ -281,7 +289,7 @@ class ResponsiveGrid {
 
   static double getChildAspectRatio(BuildContext context) {
     final isMobile = ResponsiveBreakpoints.isMobile(context);
-    
+
     if (isMobile) {
       return 1.2;
     } else {
@@ -291,7 +299,7 @@ class ResponsiveGrid {
 
   static double getCrossAxisSpacing(BuildContext context) {
     final isMobile = ResponsiveBreakpoints.isMobile(context);
-    
+
     if (isMobile) {
       return 12;
     } else {
@@ -301,7 +309,7 @@ class ResponsiveGrid {
 
   static double getMainAxisSpacing(BuildContext context) {
     final isMobile = ResponsiveBreakpoints.isMobile(context);
-    
+
     if (isMobile) {
       return 12;
     } else {
@@ -315,7 +323,7 @@ class ResponsiveContainer {
   static double getMaxWidth(BuildContext context) {
     final isMobile = ResponsiveBreakpoints.isMobile(context);
     final isTablet = ResponsiveBreakpoints.isTablet(context);
-    
+
     if (isMobile) {
       return double.infinity;
     } else if (isTablet) {
@@ -331,11 +339,66 @@ class ResponsiveContainer {
 
   static BorderRadius getBorderRadius(BuildContext context) {
     final isMobile = ResponsiveBreakpoints.isMobile(context);
-    
+
     if (isMobile) {
       return BorderRadius.circular(12);
     } else {
       return BorderRadius.circular(16);
     }
   }
+}
+
+/// Responsive text widget
+class ResponsiveText extends StatelessWidget {
+  final String text;
+  final TextStyle? style;
+  final TextAlign? textAlign;
+  final int? maxLines;
+  final TextOverflow? overflow;
+  final TextType textType;
+
+  const ResponsiveText(
+    this.text, {
+    super.key,
+    this.style,
+    this.textAlign,
+    this.maxLines,
+    this.overflow,
+    this.textType = TextType.bodyMedium,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    TextStyle? responsiveStyle;
+    
+    switch (textType) {
+      case TextType.titleLarge:
+        responsiveStyle = ResponsiveTextStyles.titleLarge(context);
+        break;
+      case TextType.titleMedium:
+        responsiveStyle = ResponsiveTextStyles.titleMedium(context);
+        break;
+      case TextType.bodyLarge:
+        responsiveStyle = ResponsiveTextStyles.bodyLarge(context);
+        break;
+      case TextType.bodyMedium:
+        responsiveStyle = ResponsiveTextStyles.bodyMedium(context);
+        break;
+    }
+
+    return Text(
+      text,
+      style: style ?? responsiveStyle,
+      textAlign: textAlign,
+      maxLines: maxLines,
+      overflow: overflow,
+    );
+  }
+}
+
+enum TextType {
+  titleLarge,
+  titleMedium,
+  bodyLarge,
+  bodyMedium,
 }

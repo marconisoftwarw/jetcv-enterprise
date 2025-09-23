@@ -40,18 +40,21 @@ class ResponsiveCard extends StatelessWidget {
           : padding,
       decoration: BoxDecoration(
         color: backgroundColor ?? AppTheme.pureWhite,
-        borderRadius: borderRadius ?? ResponsiveContainer.getBorderRadius(context),
-        boxShadow: boxShadow ?? _getDefaultShadow(isMobile, isTablet, isDesktop),
-        border: border ?? Border.all(
-          color: AppTheme.borderGray,
-          width: 1,
-        ),
+        borderRadius:
+            borderRadius ?? BorderRadius.circular(ResponsiveBreakpoints.isMobile(context) ? 12 : 16),
+        boxShadow:
+            boxShadow ?? _getDefaultShadow(isMobile, isTablet, isDesktop),
+        border: border ?? Border.all(color: AppTheme.borderGray, width: 1),
       ),
       child: child,
     );
   }
 
-  List<BoxShadow> _getDefaultShadow(bool isMobile, bool isTablet, bool isDesktop) {
+  List<BoxShadow> _getDefaultShadow(
+    bool isMobile,
+    bool isTablet,
+    bool isDesktop,
+  ) {
     if (isMobile) {
       return [
         BoxShadow(
@@ -107,9 +110,12 @@ class ResponsiveGridView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final columns = maxColumns ?? ResponsiveGrid.getColumns(context);
-    final aspectRatio = childAspectRatio ?? ResponsiveGrid.getChildAspectRatio(context);
-    final crossSpacing = crossAxisSpacing ?? ResponsiveGrid.getCrossAxisSpacing(context);
-    final mainSpacing = mainAxisSpacing ?? ResponsiveGrid.getMainAxisSpacing(context);
+    final aspectRatio =
+        childAspectRatio ?? ResponsiveGrid.getChildAspectRatio(context);
+    final crossSpacing =
+        crossAxisSpacing ?? ResponsiveGrid.getCrossAxisSpacing(context);
+    final mainSpacing =
+        mainAxisSpacing ?? ResponsiveGrid.getMainAxisSpacing(context);
 
     return GridView.builder(
       padding: padding ?? ResponsivePadding.screen(context),
@@ -182,9 +188,11 @@ class ResponsiveContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final containerMaxWidth = maxWidth ?? ResponsiveContainer.getMaxWidth(context);
+    final containerMaxWidth =
+        maxWidth ?? (ResponsiveBreakpoints.isMobile(context) ? double.infinity : (ResponsiveBreakpoints.isTablet(context) ? 600 : 800));
     final containerPadding = padding ?? ResponsivePadding.screen(context);
-    final containerBorderRadius = borderRadius ?? ResponsiveContainer.getBorderRadius(context);
+    final containerBorderRadius =
+        borderRadius ?? BorderRadius.circular(ResponsiveBreakpoints.isMobile(context) ? 12 : 16);
 
     return Container(
       margin: margin,
@@ -196,65 +204,9 @@ class ResponsiveContainer extends StatelessWidget {
         border: border,
       ),
       alignment: alignment,
-      constraints: BoxConstraints(
-        maxWidth: containerMaxWidth,
-      ),
+      constraints: BoxConstraints(maxWidth: containerMaxWidth),
       child: child,
     );
   }
 }
 
-/// A responsive text widget that adapts to different screen sizes
-class ResponsiveText extends StatelessWidget {
-  final String text;
-  final TextStyle? style;
-  final TextAlign? textAlign;
-  final int? maxLines;
-  final TextOverflow? overflow;
-  final TextType textType;
-
-  const ResponsiveText(
-    this.text, {
-    super.key,
-    this.style,
-    this.textAlign,
-    this.maxLines,
-    this.overflow,
-    this.textType = TextType.bodyMedium,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    TextStyle? responsiveStyle;
-    
-    switch (textType) {
-      case TextType.titleLarge:
-        responsiveStyle = ResponsiveText.titleLarge(context);
-        break;
-      case TextType.titleMedium:
-        responsiveStyle = ResponsiveText.titleMedium(context);
-        break;
-      case TextType.bodyLarge:
-        responsiveStyle = ResponsiveText.bodyLarge(context);
-        break;
-      case TextType.bodyMedium:
-        responsiveStyle = ResponsiveText.bodyMedium(context);
-        break;
-    }
-
-    return Text(
-      text,
-      style: style ?? responsiveStyle,
-      textAlign: textAlign,
-      maxLines: maxLines,
-      overflow: overflow,
-    );
-  }
-}
-
-enum TextType {
-  titleLarge,
-  titleMedium,
-  bodyLarge,
-  bodyMedium,
-}

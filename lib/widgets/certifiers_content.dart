@@ -1248,7 +1248,6 @@ class _CertifiersContentState extends State<CertifiersContent> {
     );
   }
 
-
   void _showCertifierDetails(
     CertifierWithUser certifierWithUser,
     AppLocalizations l10n,

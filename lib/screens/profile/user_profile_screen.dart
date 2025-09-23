@@ -7,6 +7,8 @@ import '../../widgets/enterprise_card.dart';
 import '../../widgets/neon_button.dart';
 import '../../widgets/enterprise_text_field.dart';
 import '../../widgets/global_hamburger_menu.dart';
+import '../../widgets/responsive_layout.dart';
+import '../../widgets/responsive_card.dart';
 import '../../l10n/app_localizations.dart';
 
 class UserProfileScreen extends StatefulWidget {
@@ -161,14 +163,16 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           }
 
           return SingleChildScrollView(
-            padding: EdgeInsets.all(isTablet ? 32 : 24),
+            padding: ResponsivePadding.screen(context),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Header con foto profilo e informazioni principali
                 _buildProfileHeader(authProvider.currentUser!, l10n, isTablet),
 
-                const SizedBox(height: 32),
+                SizedBox(
+                  height: ResponsiveBreakpoints.isMobile(context) ? 24 : 32,
+                ),
 
                 // Form per le informazioni personali
                 _buildPersonalInfoForm(l10n, isTablet),

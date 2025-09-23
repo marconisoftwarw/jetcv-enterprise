@@ -3,7 +3,10 @@ import 'dart:math' as math;
 import '../../config/app_config.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/page_with_floating_language.dart';
+import '../../widgets/responsive_card.dart';
+import '../../widgets/responsive_layout.dart';
 import '../../l10n/app_localizations.dart';
+import 'legal_entity_pricing_screen.dart';
 
 class PublicHomeScreen extends StatefulWidget {
   const PublicHomeScreen({super.key});
@@ -148,6 +151,11 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
 
                     // Features Grid
                     _buildFeaturesGrid(context, l10n, isDesktop, isTablet),
+
+                    const SizedBox(height: 80),
+
+                    // Pricing Section
+                    _buildPricingSection(context, l10n, isDesktop, isTablet),
 
                     const SizedBox(height: 80),
 
@@ -1610,6 +1618,281 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
             ),
           )
           .toList(),
+    );
+  }
+
+  // Pricing Section
+  Widget _buildPricingSection(
+    BuildContext context,
+    AppLocalizations l10n,
+    bool isDesktop,
+    bool isTablet,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Piani e Listini',
+          style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+            color: AppTheme.textPrimary,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.3,
+            fontSize: isDesktop ? 32 : 28,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'Scegli il piano più adatto alle tue esigenze aziendali',
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+            color: AppTheme.textGray,
+            fontSize: isDesktop ? 18 : 16,
+          ),
+        ),
+        const SizedBox(height: 48),
+        ResponsiveBreakpoints.isMobile(context)
+            ? Column(
+                children: [
+                  _buildPricingCard(
+                    context,
+                    'Starter',
+                    'Perfetto per piccole aziende',
+                    '€29',
+                    '/mese',
+                    ['Fino a 10 certificazioni', 'Supporto email', 'Dashboard base'],
+                    AppTheme.primaryBlue,
+                    false,
+                  ),
+                  const SizedBox(height: 24),
+                  _buildPricingCard(
+                    context,
+                    'Professional',
+                    'Ideale per aziende in crescita',
+                    '€79',
+                    '/mese',
+                    ['Fino a 100 certificazioni', 'Supporto prioritario', 'Analytics avanzate'],
+                    AppTheme.successGreen,
+                    true,
+                  ),
+                  const SizedBox(height: 24),
+                  _buildPricingCard(
+                    context,
+                    'Enterprise',
+                    'Per grandi organizzazioni',
+                    '€199',
+                    '/mese',
+                    ['Certificazioni illimitate', 'Supporto dedicato', 'API personalizzate'],
+                    AppTheme.purple,
+                    false,
+                  ),
+                ],
+              )
+            : Row(
+                children: [
+                  Expanded(
+                    child: _buildPricingCard(
+                      context,
+                      'Starter',
+                      'Perfetto per piccole aziende',
+                      '€29',
+                      '/mese',
+                      ['Fino a 10 certificazioni', 'Supporto email', 'Dashboard base'],
+                      AppTheme.primaryBlue,
+                      false,
+                    ),
+                  ),
+                  const SizedBox(width: 24),
+                  Expanded(
+                    child: _buildPricingCard(
+                      context,
+                      'Professional',
+                      'Ideale per aziende in crescita',
+                      '€79',
+                      '/mese',
+                      ['Fino a 100 certificazioni', 'Supporto prioritario', 'Analytics avanzate'],
+                      AppTheme.successGreen,
+                      true,
+                    ),
+                  ),
+                  const SizedBox(width: 24),
+                  Expanded(
+                    child: _buildPricingCard(
+                      context,
+                      'Enterprise',
+                      'Per grandi organizzazioni',
+                      '€199',
+                      '/mese',
+                      ['Certificazioni illimitate', 'Supporto dedicato', 'API personalizzate'],
+                      AppTheme.purple,
+                      false,
+                    ),
+                  ),
+                ],
+              ),
+        const SizedBox(height: 48),
+        Center(
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const LegalEntityPricingScreen(),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primaryBlue,
+              foregroundColor: Colors.white,
+              padding: EdgeInsets.symmetric(
+                horizontal: isDesktop ? 32 : 24,
+                vertical: isDesktop ? 16 : 12,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 8,
+            ),
+            child: Text(
+              'Vedi tutti i piani',
+              style: TextStyle(
+                fontSize: isDesktop ? 16 : 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPricingCard(
+    BuildContext context,
+    String title,
+    String description,
+    String price,
+    String period,
+    List<String> features,
+    Color color,
+    bool isPopular,
+  ) {
+    return ResponsiveCard(
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isPopular ? color : AppTheme.borderGray,
+            width: isPopular ? 2 : 1,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (isPopular)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  'PIÙ POPOLARE',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            if (isPopular) const SizedBox(height: 16),
+            Text(
+              title,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: AppTheme.textPrimary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              description,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppTheme.textGray,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  price,
+                  style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  period,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: AppTheme.textGray,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            Column(
+              children: features.map((feature) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.check_circle,
+                      color: color,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        feature,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppTheme.textPrimary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )).toList(),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const LegalEntityPricingScreen(),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isPopular ? color : AppTheme.primaryBlue,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: Text(
+                  'Scegli Piano',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

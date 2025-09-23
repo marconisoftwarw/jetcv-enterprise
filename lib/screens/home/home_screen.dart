@@ -197,9 +197,8 @@ class _HomeScreenState extends State<HomeScreen> {
           onDestinationSelected: _onDestinationSelected,
           title: 'JetCV',
           actions: [const AppBarLanguageDropdown()],
-          child: _buildContent(
-            authProvider.userType ?? AppUserType.user,
-          ),
+          hideAppBar: false, // Mostra l'AppBar per la home
+          child: _buildContent(authProvider.userType ?? AppUserType.user),
         );
       },
     );
@@ -342,74 +341,133 @@ class _DashboardContent extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Welcome message
-                EnterpriseCard(
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          gradient: AppTheme.primaryGradient,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppTheme.primaryBlue.withValues(
-                                alpha: 0.2,
-                              ),
-                              blurRadius: 12,
-                              spreadRadius: 0,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Icon(
-                          Icons.person,
-                          size: 40,
-                          color: AppTheme.pureWhite,
-                        ),
-                      ),
-                      const SizedBox(width: 24),
-                      Expanded(
-                        child: Column(
+                ResponsiveCard(
+                  child: ResponsiveBreakpoints.isMobile(context)
+                      ? Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'Benvenuto, ${user.firstName}!',
-                              style: Theme.of(context).textTheme.headlineLarge
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                    color: AppTheme.textPrimary,
-                                    letterSpacing: -0.3,
+                            Row(
+                              children: [
+                                Container(
+                                  width: 60,
+                                  height: 60,
+                                  decoration: BoxDecoration(
+                                    gradient: AppTheme.primaryGradient,
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: AppTheme.primaryBlue.withValues(
+                                          alpha: 0.2,
+                                        ),
+                                        blurRadius: 12,
+                                        spreadRadius: 0,
+                                        offset: const Offset(0, 4),
+                                      ),
+                                    ],
                                   ),
+                                  child: Icon(
+                                    Icons.person,
+                                    size: 30,
+                                    color: AppTheme.pureWhite,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      ResponsiveText(
+                                        'Benvenuto, ${user.firstName}!',
+                                        textType: TextType.titleLarge,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          color: AppTheme.textPrimary,
+                                          letterSpacing: -0.3,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      ResponsiveText(
+                                        'Gestisci le tue certificazioni e la tua azienda',
+                                        textType: TextType.bodyLarge,
+                                        style: TextStyle(
+                                          color: AppTheme.textGray,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Gestisci le tue certificazioni e la tua azienda',
-                              style: Theme.of(context).textTheme.bodyLarge
-                                  ?.copyWith(
-                                    color: AppTheme.textGray,
-                                    fontSize: 16,
+                          ],
+                        )
+                      : Row(
+                          children: [
+                            Container(
+                              width: 80,
+                              height: 80,
+                              decoration: BoxDecoration(
+                                gradient: AppTheme.primaryGradient,
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppTheme.primaryBlue.withValues(
+                                      alpha: 0.2,
+                                    ),
+                                    blurRadius: 12,
+                                    spreadRadius: 0,
+                                    offset: const Offset(0, 4),
                                   ),
+                                ],
+                              ),
+                              child: Icon(
+                                Icons.person,
+                                size: 40,
+                                color: AppTheme.pureWhite,
+                              ),
+                            ),
+                            const SizedBox(width: 24),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  ResponsiveText(
+                                    'Benvenuto, ${user.firstName}!',
+                                    textType: TextType.titleLarge,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      color: AppTheme.textPrimary,
+                                      letterSpacing: -0.3,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  ResponsiveText(
+                                    'Gestisci le tue certificazioni e la tua azienda',
+                                    textType: TextType.bodyLarge,
+                                    style: TextStyle(color: AppTheme.textGray),
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
-                      ),
-                    ],
-                  ),
                 ),
 
                 const SizedBox(height: 32),
 
                 // Grafico delle certificazioni emesse
-                Text(
+                ResponsiveText(
                   l10n.getString('certifications_trend'),
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  textType: TextType.titleLarge,
+                  style: TextStyle(
                     fontWeight: FontWeight.w700,
                     color: AppTheme.textPrimary,
                     letterSpacing: -0.2,
                   ),
                 ),
-                const SizedBox(height: 20),
+                SizedBox(
+                  height: ResponsiveBreakpoints.isMobile(context) ? 16 : 20,
+                ),
                 _buildCertificationsChart(context, l10n),
 
                 const SizedBox(height: 40),
@@ -435,73 +493,142 @@ class _DashboardContent extends StatelessWidget {
       const FlSpot(5, 22), // Giugno
     ];
 
-    return EnterpriseCard(
+    return ResponsiveCard(
       child: Column(
         children: [
           // Header del grafico
-          Row(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  gradient: AppTheme.primaryGradient,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.trending_up,
-                  color: AppTheme.pureWhite,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          ResponsiveBreakpoints.isMobile(context)
+              ? Column(
                   children: [
-                    Text(
-                      l10n.getString('issued_certifications'),
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: AppTheme.textPrimary,
+                    Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            gradient: AppTheme.primaryGradient,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(
+                            Icons.trending_up,
+                            color: AppTheme.pureWhite,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ResponsiveText(
+                                l10n.getString('issued_certifications'),
+                                textType: TextType.titleMedium,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  color: AppTheme.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              ResponsiveText(
+                                l10n.getString('last_6_months'),
+                                textType: TextType.bodyMedium,
+                                style: TextStyle(color: AppTheme.textGray),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    // Statistiche rapide per mobile
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _buildMobileStatCard(
+                          context,
+                          '22',
+                          l10n.getString('this_month'),
+                          AppTheme.primaryBlue,
+                        ),
+                        _buildMobileStatCard(
+                          context,
+                          '80',
+                          l10n.getString('total'),
+                          AppTheme.successGreen,
+                        ),
+                        _buildMobileStatCard(
+                          context,
+                          '+340%',
+                          l10n.getString('growth'),
+                          AppTheme.purple,
+                        ),
+                      ],
+                    ),
+                  ],
+                )
+              : Row(
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        gradient: AppTheme.primaryGradient,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.trending_up,
+                        color: AppTheme.pureWhite,
+                        size: 24,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      l10n.getString('last_6_months'),
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppTheme.textGray,
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ResponsiveText(
+                            l10n.getString('issued_certifications'),
+                            textType: TextType.titleLarge,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          ResponsiveText(
+                            l10n.getString('last_6_months'),
+                            textType: TextType.bodyMedium,
+                            style: TextStyle(color: AppTheme.textGray),
+                          ),
+                        ],
                       ),
+                    ),
+                    // Statistiche rapide per desktop
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        ResponsiveText(
+                          '22',
+                          textType: TextType.titleLarge,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.primaryBlue,
+                          ),
+                        ),
+                        ResponsiveText(
+                          l10n.getString('this_month'),
+                          textType: TextType.bodyMedium,
+                          style: TextStyle(color: AppTheme.textGray),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ),
-              // Statistiche rapide
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    '22',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: AppTheme.primaryBlue,
-                    ),
-                  ),
-                  Text(
-                    l10n.getString('this_month'),
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodySmall?.copyWith(color: AppTheme.textGray),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
+          SizedBox(height: ResponsiveBreakpoints.isMobile(context) ? 16 : 24),
 
           // Grafico
           SizedBox(
-            height: 300,
+            height: ResponsiveBreakpoints.isMobile(context) ? 250 : 300,
             child: LineChart(
               LineChartData(
                 gridData: FlGridData(
@@ -645,42 +772,43 @@ class _DashboardContent extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 20),
+          SizedBox(height: ResponsiveBreakpoints.isMobile(context) ? 16 : 20),
 
-          // Legenda e statistiche aggiuntive
-          Row(
-            children: [
-              Expanded(
-                child: _buildStatCard(
-                  context,
-                  l10n.getString('total'),
-                  '80',
-                  Icons.verified,
-                  AppTheme.successGreen,
+          // Legenda e statistiche aggiuntive - Solo su desktop
+          if (!ResponsiveBreakpoints.isMobile(context))
+            Row(
+              children: [
+                Expanded(
+                  child: _buildStatCard(
+                    context,
+                    l10n.getString('total'),
+                    '80',
+                    Icons.verified,
+                    AppTheme.successGreen,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildStatCard(
-                  context,
-                  l10n.getString('monthly_average'),
-                  '13.3',
-                  Icons.trending_up,
-                  AppTheme.primaryBlue,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildStatCard(
+                    context,
+                    l10n.getString('monthly_average'),
+                    '13.3',
+                    Icons.trending_up,
+                    AppTheme.primaryBlue,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildStatCard(
-                  context,
-                  l10n.getString('growth'),
-                  '+340%',
-                  Icons.show_chart,
-                  AppTheme.purple,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildStatCard(
+                    context,
+                    l10n.getString('growth'),
+                    '+340%',
+                    Icons.show_chart,
+                    AppTheme.purple,
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
         ],
       ),
     );
@@ -719,6 +847,47 @@ class _DashboardContent extends StatelessWidget {
               fontWeight: FontWeight.w500,
             ),
             textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMobileStatCard(
+    BuildContext context,
+    String value,
+    String label,
+    Color color,
+  ) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withValues(alpha: 0.2), width: 1),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            value,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: color,
+              fontSize: 16,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppTheme.textGray,
+              fontWeight: FontWeight.w500,
+              fontSize: 10,
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -810,7 +979,7 @@ class _UserSettingsContentState extends State<UserSettingsContent> {
     return Container(
       color: AppTheme.offWhite,
       child: SingleChildScrollView(
-        padding: EdgeInsets.all(isTablet ? 32 : 24),
+        padding: ResponsivePadding.screen(context),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

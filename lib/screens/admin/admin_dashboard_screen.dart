@@ -7,6 +7,8 @@ import '../../theme/app_theme.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/global_hamburger_menu.dart';
 import '../../widgets/appbar_language_dropdown.dart';
+import '../../widgets/responsive_layout.dart';
+import '../../widgets/responsive_card.dart';
 import '../../l10n/app_localizations.dart';
 
 import 'create_legal_entity_screen.dart';
@@ -36,138 +38,48 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: MediaQuery.of(context).size.width <= 768
-          ? AppBar(
-              backgroundColor: Colors.white,
-              elevation: 0,
-              leading: IconButton(
-                icon: Icon(Icons.menu, color: Colors.black),
-                onPressed: () {
-                  setState(() {
-                    _isMenuExpanded = !_isMenuExpanded;
-                  });
-                },
+          return ResponsiveLayout(
+            showMenu: true,
+            selectedIndex: _selectedIndex == 0
+                ? 0
+                : (_selectedIndex == 1
+                      ? 2
+                      : 4), // Dashboard, Entità Legali, o Impostazioni
+            onDestinationSelected: (index) {
+              _handleNavigation(index);
+            },
+            title: 'Admin Dashboard',
+            actions: [
+              const AppBarLanguageDropdown(),
+              IconButton(
+                onPressed: () => _showProfileMenu(context),
+                icon: const Icon(Icons.account_circle),
+                tooltip: 'Profile Menu',
               ),
-              title: Text(
-                'Admin Dashboard',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              actions: [
-                const AppBarLanguageDropdown(),
-                IconButton(
-                  onPressed: () => _showProfileMenu(context),
-                  icon: const Icon(Icons.account_circle),
-                  tooltip: 'Profile Menu',
-                ),
-              ],
-            )
-          : AppBar(
-              title: Text(
-                'Admin Dashboard',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              backgroundColor: Colors.white,
-              foregroundColor: Colors.black,
-              elevation: 0,
-              actions: [
-                const AppBarLanguageDropdown(),
-                IconButton(
-                  onPressed: () => _showProfileMenu(context),
-                  icon: const Icon(Icons.account_circle),
-                  tooltip: 'Profile Menu',
-                ),
-              ],
-            ),
-      body: Stack(
-        children: [
-          Row(
-            children: [
-              // Navigation Rail - Solo su desktop o quando espanso su mobile
-              if (MediaQuery.of(context).size.width > 768 || _isMenuExpanded)
-                Container(
-                  width: MediaQuery.of(context).size.width > 768 ? 280 : 260,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border(
-                      right: BorderSide(color: Colors.grey[200]!, width: 1),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 8,
-                        spreadRadius: 0,
-                        offset: const Offset(2, 0),
-                      ),
-                    ],
-                  ),
-                  child: Consumer<AuthProvider>(
-                    builder: (context, authProvider, child) {
-                      return GlobalHamburgerMenu(
-                        selectedIndex: _selectedIndex == 0
-                            ? 0
-                            : (_selectedIndex == 1
-                                  ? 2
-                                  : 4), // Dashboard, Entità Legali, o Impostazioni
-                        onDestinationSelected: (index) {
-                          setState(() {
-                            _isMenuExpanded = false;
-                          });
-                          _handleNavigation(index);
-                        },
-                        isExpanded: _isMenuExpanded,
-                        onExpansionChanged: (expanded) {
-                          setState(() {
-                            _isMenuExpanded = expanded;
-                          });
-                        },
-                        context: context,
-                        userType: authProvider.userType,
-                      );
-                    },
-                  ),
-                ),
-
-              // Main Content
-              Expanded(child: _buildContent()),
             ],
-          ),
-
-          // Overlay scuro su mobile quando il menu è aperto
-          if (MediaQuery.of(context).size.width <= 768 && _isMenuExpanded)
-            Positioned.fill(
-              child: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _isMenuExpanded = false;
-                  });
-                },
-                child: Container(color: Colors.black.withOpacity(0.5)),
+            hideAppBar: false, // Mostra l'AppBar per l'admin dashboard
+            child: Stack(
+        children: [
+          _buildContent(),
+          if (_selectedIndex == 1)
+            Positioned(
+              bottom: 16,
+              right: 16,
+              child: FloatingActionButton(
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CreateLegalEntityScreen(),
+                  ),
+                ),
+                backgroundColor: AppTheme.accentGreen,
+                foregroundColor: AppTheme.pureWhite,
+                elevation: 8,
+                child: const Icon(Icons.add),
               ),
             ),
         ],
       ),
-      floatingActionButton: _selectedIndex == 1
-          ? FloatingActionButton(
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const CreateLegalEntityScreen(),
-                ),
-              ),
-              backgroundColor: AppTheme.accentGreen,
-              foregroundColor: AppTheme.pureWhite,
-              elevation: 8,
-              child: const Icon(Icons.add),
-            )
-          : null,
     );
   }
 
@@ -340,251 +252,295 @@ class _DashboardContent extends StatelessWidget {
     return Consumer<LegalEntityProvider>(
       builder: (context, legalEntityProvider, child) {
         return SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: ResponsivePadding.screen(context),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Welcome Section
-              Text(
+              ResponsiveText(
                 'Welcome back, Admin!',
+                textType: TextType.titleLarge,
                 style: TextStyle(
-                  fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: AppTheme.primaryBlack,
                 ),
               ),
-              const SizedBox(height: 8),
-              Text(
+              SizedBox(height: ResponsiveBreakpoints.isMobile(context) ? 4 : 8),
+              ResponsiveText(
                 'Here\'s what\'s happening with your platform today.',
-                style: TextStyle(color: AppTheme.primaryBlack, fontSize: 16),
+                textType: TextType.bodyLarge,
+                style: TextStyle(color: AppTheme.primaryBlack),
               ),
 
-              const SizedBox(height: 32),
+              SizedBox(
+                height: ResponsiveBreakpoints.isMobile(context) ? 24 : 32,
+              ),
 
               // Statistics Cards
-              Row(
-                children: [
-                  Expanded(
-                    child: GlassCard(
-                      child: Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    gradient: AppTheme.primaryGradient,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Icon(
-                                    Icons.business,
-                                    color: AppTheme.pureWhite,
-                                    size: 20,
-                                  ),
-                                ),
-                                const Spacer(),
-                                Text(
-                                  '+12%',
-                                  style: TextStyle(
-                                    color: AppTheme.accentGreen,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              legalEntityProvider.totalCount.toString(),
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.primaryBlack,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Total Legal Entities',
-                              style: TextStyle(
-                                color: AppTheme.primaryBlack,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
+              ResponsiveBreakpoints.isMobile(context)
+                  ? Column(
+                      children: [
+                        _buildStatCard(
+                          context,
+                          'Total Legal Entities',
+                          legalEntityProvider.totalCount.toString(),
+                          Icons.business,
+                          AppTheme.primaryBlue,
+                          '+12%',
                         ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: GlassCard(
-                      child: Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    gradient: AppTheme.accentGradient,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Icon(
-                                    Icons.pending,
-                                    color: AppTheme.primaryBlack,
-                                    size: 20,
-                                  ),
-                                ),
-                                const Spacer(),
-                                Text(
-                                  '+5',
-                                  style: TextStyle(
-                                    color: AppTheme.accentOrange,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              legalEntityProvider.pendingCount.toString(),
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.primaryBlack,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Pending Approvals',
-                              style: TextStyle(
-                                color: AppTheme.primaryBlack,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
+                        const SizedBox(height: 16),
+                        _buildStatCard(
+                          context,
+                          'Active Users',
+                          '1,234',
+                          Icons.people,
+                          AppTheme.accentGreen,
+                          '+8%',
                         ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: GlassCard(
-                      child: Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    gradient: AppTheme.primaryGradient,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Icon(
-                                    Icons.check_circle,
-                                    color: AppTheme.pureWhite,
-                                    size: 20,
-                                  ),
-                                ),
-                                const Spacer(),
-                                Text(
-                                  '+8%',
-                                  style: TextStyle(
-                                    color: AppTheme.accentGreen,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              legalEntityProvider.approvedCount.toString(),
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.primaryBlack,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Approved',
-                              style: TextStyle(
-                                color: AppTheme.primaryBlack,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
+                        const SizedBox(height: 16),
+                        _buildStatCard(
+                          context,
+                          'Certifications',
+                          '5,678',
+                          Icons.verified,
+                          AppTheme.purple,
+                          '+15%',
                         ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: GlassCard(
-                      child: Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    gradient: AppTheme.accentGradient,
-                                    borderRadius: BorderRadius.circular(8),
+                      ],
+                    )
+                  : Row(
+                      children: [
+                        Expanded(
+                          child: GlassCard(
+                            child: Padding(
+                              padding: const EdgeInsets.all(20),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          gradient: AppTheme.primaryGradient,
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                        child: Icon(
+                                          Icons.business,
+                                          color: AppTheme.pureWhite,
+                                          size: 20,
+                                        ),
+                                      ),
+                                      const Spacer(),
+                                      Text(
+                                        '+12%',
+                                        style: TextStyle(
+                                          color: AppTheme.accentGreen,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  child: Icon(
-                                    Icons.cancel,
-                                    color: AppTheme.pureWhite,
-                                    size: 20,
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    legalEntityProvider.totalCount.toString(),
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppTheme.primaryBlack,
+                                    ),
                                   ),
-                                ),
-                                const Spacer(),
-                                Text(
-                                  '-2',
-                                  style: TextStyle(
-                                    color: AppTheme.accentOrange,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Total Legal Entities',
+                                    style: TextStyle(
+                                      color: AppTheme.primaryBlack,
+                                      fontSize: 14,
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              legalEntityProvider.rejectedCount.toString(),
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.primaryBlack,
+                                ],
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Rejected',
-                              style: TextStyle(
-                                color: AppTheme.primaryBlack,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: GlassCard(
+                            child: Padding(
+                              padding: const EdgeInsets.all(20),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          gradient: AppTheme.accentGradient,
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                        child: Icon(
+                                          Icons.pending,
+                                          color: AppTheme.primaryBlack,
+                                          size: 20,
+                                        ),
+                                      ),
+                                      const Spacer(),
+                                      Text(
+                                        '+5',
+                                        style: TextStyle(
+                                          color: AppTheme.accentOrange,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    legalEntityProvider.pendingCount.toString(),
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppTheme.primaryBlack,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Pending Approvals',
+                                    style: TextStyle(
+                                      color: AppTheme.primaryBlack,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: GlassCard(
+                            child: Padding(
+                              padding: const EdgeInsets.all(20),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          gradient: AppTheme.primaryGradient,
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                        child: Icon(
+                                          Icons.check_circle,
+                                          color: AppTheme.pureWhite,
+                                          size: 20,
+                                        ),
+                                      ),
+                                      const Spacer(),
+                                      Text(
+                                        '+8%',
+                                        style: TextStyle(
+                                          color: AppTheme.accentGreen,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    legalEntityProvider.approvedCount
+                                        .toString(),
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppTheme.primaryBlack,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Approved',
+                                    style: TextStyle(
+                                      color: AppTheme.primaryBlack,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: GlassCard(
+                            child: Padding(
+                              padding: const EdgeInsets.all(20),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          gradient: AppTheme.accentGradient,
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                        child: Icon(
+                                          Icons.cancel,
+                                          color: AppTheme.pureWhite,
+                                          size: 20,
+                                        ),
+                                      ),
+                                      const Spacer(),
+                                      Text(
+                                        '-2',
+                                        style: TextStyle(
+                                          color: AppTheme.accentOrange,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    legalEntityProvider.rejectedCount
+                                        .toString(),
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppTheme.primaryBlack,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Rejected',
+                                    style: TextStyle(
+                                      color: AppTheme.primaryBlack,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
 
               const SizedBox(height: 32),
 
@@ -1184,4 +1140,64 @@ class _SettingsContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return const UserSettingsScreen();
   }
+}
+
+Widget _buildStatCard(
+  BuildContext context,
+  String title,
+  String value,
+  IconData icon,
+  Color color,
+  String change,
+) {
+  return ResponsiveCard(
+    child: Padding(
+      padding: ResponsivePadding.card(context),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  gradient: AppTheme.primaryGradient,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  icon,
+                  color: AppTheme.pureWhite,
+                  size: ResponsiveBreakpoints.isMobile(context) ? 16 : 20,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                change,
+                style: TextStyle(
+                  color: AppTheme.accentGreen,
+                  fontSize: ResponsiveBreakpoints.isMobile(context) ? 10 : 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: ResponsiveBreakpoints.isMobile(context) ? 8 : 12),
+          ResponsiveText(
+            value,
+            textType: TextType.titleLarge,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: AppTheme.primaryBlack,
+            ),
+          ),
+          SizedBox(height: ResponsiveBreakpoints.isMobile(context) ? 2 : 4),
+          ResponsiveText(
+            title,
+            textType: TextType.bodyMedium,
+            style: TextStyle(color: AppTheme.primaryBlack),
+          ),
+        ],
+      ),
+    ),
+  );
 }

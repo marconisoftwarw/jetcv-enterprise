@@ -8,7 +8,7 @@ class UserSearchService {
   static const String _apiKey = AppConfig.supabaseAnonKey;
 
   /// Cerca utenti per nome, email o ID
-  static Future<List<User>> searchUsers(String query) async {
+  static Future<List<AppUser>> searchUsers(String query) async {
     try {
       print('🔍 Searching users with query: $query');
 
@@ -29,7 +29,7 @@ class UserSearchService {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        return data.map((userData) => User.fromJson(userData)).toList();
+        return data.map((userData) => AppUser.fromJson(userData)).toList();
       } else {
         print(
           '❌ Error searching users: ${response.statusCode} - ${response.body}',
@@ -43,7 +43,7 @@ class UserSearchService {
   }
 
   /// Cerca utenti per email specifica
-  static Future<User?> getUserByEmail(String email) async {
+  static Future<AppUser?> getUserByEmail(String email) async {
     try {
       print('🔍 Getting user by email: $email');
 
@@ -63,7 +63,7 @@ class UserSearchService {
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         if (data.isNotEmpty) {
-          return User.fromJson(data.first);
+          return AppUser.fromJson(data.first);
         }
         return null;
       } else {
@@ -79,7 +79,7 @@ class UserSearchService {
   }
 
   /// Cerca utenti per ID specifico
-  static Future<User?> getUserById(String userId) async {
+  static Future<AppUser?> getUserById(String userId) async {
     try {
       print('🔍 Getting user by ID: $userId');
 
@@ -99,7 +99,7 @@ class UserSearchService {
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         if (data.isNotEmpty) {
-          return User.fromJson(data.first);
+          return AppUser.fromJson(data.first);
         }
         return null;
       } else {
@@ -115,7 +115,7 @@ class UserSearchService {
   }
 
   /// Ottiene tutti gli utenti (con paginazione)
-  static Future<List<User>> getAllUsers({
+  static Future<List<AppUser>> getAllUsers({
     int offset = 0,
     int limit = 20,
   }) async {
@@ -137,7 +137,7 @@ class UserSearchService {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        return data.map((userData) => User.fromJson(userData)).toList();
+        return data.map((userData) => AppUser.fromJson(userData)).toList();
       } else {
         print(
           '❌ Error getting all users: ${response.statusCode} - ${response.body}',

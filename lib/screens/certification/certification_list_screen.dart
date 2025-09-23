@@ -45,7 +45,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
     print('🏁 CertificationListScreen initState called');
 
     try {
-      _tabController = TabController(length: 2, vsync: this);
+      _tabController = TabController(length: 3, vsync: this);
       _tabController!.addListener(() {
         if (mounted &&
             _tabController != null &&
@@ -378,31 +378,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         child: Row(
           children: [
-            Expanded(
-              child: _buildTabButton(
-                'Bozze e In corso',
-                _tabController!.length > 0 && _tabController!.index == 0,
-                () {
-                  if (_tabController != null && _tabController!.length > 0) {
-                    _tabController!.animateTo(0);
-                  }
-                },
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildTabButton(
-                'Emesse',
-                _tabController!.length > 1 && _tabController!.index == 1,
-                () {
-                  if (_tabController != null && _tabController!.length > 1) {
-                    _tabController!.animateTo(1);
-                  }
-                },
-              ),
-            ),
-            const SizedBox(width: 16),
-            // Pulsante Nuova Certificazione
+            // Pulsante Nuova Certificazione - Spostato a sinistra come primo
             GestureDetector(
               onTap: () {
                 Navigator.push(
@@ -449,6 +425,42 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                     ),
                   ],
                 ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _buildTabButton(
+                'Bozze',
+                _tabController!.length > 0 && _tabController!.index == 0,
+                () {
+                  if (_tabController != null && _tabController!.length > 0) {
+                    _tabController!.animateTo(0);
+                  }
+                },
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildTabButton(
+                'Sent',
+                _tabController!.length > 1 && _tabController!.index == 1,
+                () {
+                  if (_tabController != null && _tabController!.length > 1) {
+                    _tabController!.animateTo(1);
+                  }
+                },
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildTabButton(
+                'Closed',
+                _tabController!.length > 2 && _tabController!.index == 2,
+                () {
+                  if (_tabController != null && _tabController!.length > 2) {
+                    _tabController!.animateTo(2);
+                  }
+                },
               ),
             ),
           ],
@@ -506,7 +518,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
     return SliverFillRemaining(
       child: TabBarView(
         controller: _tabController!,
-        children: [_buildDraftsTab(), _buildSentTab()],
+        children: [_buildDraftsTab(), _buildSentTab(), _buildClosedTab()],
       ),
     );
   }
@@ -756,6 +768,27 @@ class _CertificationListScreenState extends State<CertificationListScreen>
     }
 
     return _buildCertificationsGrid(_sentCertifications, isTablet);
+  }
+
+  Widget _buildClosedTab() {
+    final l10n = AppLocalizations.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 768;
+    final isDesktop = screenWidth > 1024;
+
+    if (_isLoading) {
+      return _buildLoadingState();
+    }
+
+    if (_errorMessage != null) {
+      return _buildErrorState();
+    }
+
+    if (_closedCertifications.isEmpty) {
+      return _buildEmptyState();
+    }
+
+    return _buildCertificationsGrid(_closedCertifications, isTablet);
   }
 
   Widget _buildLoadingState() {

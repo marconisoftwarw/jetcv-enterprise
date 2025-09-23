@@ -3,6 +3,9 @@ import 'package:provider/provider.dart';
 import '../../models/pricing.dart';
 import '../../providers/pricing_provider.dart';
 import '../../widgets/custom_button.dart';
+import '../../widgets/responsive_card.dart';
+import '../../widgets/responsive_layout.dart';
+import '../../theme/app_theme.dart';
 
 class LegalEntityPricingScreen extends StatefulWidget {
   const LegalEntityPricingScreen({super.key});
@@ -26,14 +29,11 @@ class _LegalEntityPricingScreenState extends State<LegalEntityPricingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Seleziona Licenza'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 0,
-      ),
-      body: Consumer<PricingProvider>(
+    return ResponsiveLayout(
+      showMenu: false,
+      hideAppBar: false, // Mostra l'AppBar per questa pagina
+      title: 'Seleziona Licenza',
+      child: Consumer<PricingProvider>(
         builder: (context, pricingProvider, child) {
           if (pricingProvider.isLoading) {
             return const Center(child: CircularProgressIndicator());
@@ -69,33 +69,54 @@ class _LegalEntityPricingScreenState extends State<LegalEntityPricingScreen> {
           }
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
+            padding: ResponsivePadding.screen(context),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                ResponsiveText(
                   'Scegli il piano più adatto alla tua azienda',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  textType: TextType.titleLarge,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.textPrimary,
+                  ),
                 ),
-                const SizedBox(height: 8),
-                const Text(
+                SizedBox(height: ResponsiveBreakpoints.isMobile(context) ? 8 : 12),
+                ResponsiveText(
                   'Seleziona una licenza per continuare con la registrazione della tua entità legale',
-                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                  textType: TextType.bodyLarge,
+                  style: TextStyle(color: AppTheme.textGray),
                 ),
-                const SizedBox(height: 32),
-                ...availablePricings.map(
-                  (pricing) => _buildPricingCard(pricing),
-                ),
-                const SizedBox(height: 32),
+                SizedBox(height: ResponsiveBreakpoints.isMobile(context) ? 24 : 32),
+                ResponsiveBreakpoints.isMobile(context)
+                    ? Column(
+                        children: availablePricings.map(
+                          (pricing) => Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: _buildPricingCard(pricing),
+                          ),
+                        ).toList(),
+                      )
+                    : Row(
+                        children: availablePricings.map(
+                          (pricing) => Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              child: _buildPricingCard(pricing),
+                            ),
+                          ),
+                        ).toList(),
+                      ),
+                SizedBox(height: ResponsiveBreakpoints.isMobile(context) ? 24 : 32),
                 if (selectedPricing != null) ...[
                   _buildSelectedPricingSummary(),
-                  const SizedBox(height: 24),
+                  SizedBox(height: ResponsiveBreakpoints.isMobile(context) ? 16 : 24),
                   SizedBox(
                     width: double.infinity,
                     child: CustomButton(
                       onPressed: () => _proceedToRegistration(),
                       text: 'Continua con la Registrazione',
-                      backgroundColor: Colors.green,
+                      backgroundColor: AppTheme.successGreen,
                     ),
                   ),
                 ],
@@ -110,20 +131,17 @@ class _LegalEntityPricingScreenState extends State<LegalEntityPricingScreen> {
   Widget _buildPricingCard(Pricing pricing) {
     final isSelected = selectedPricing?.idPricing == pricing.idPricing;
 
-    return Card(
+    return ResponsiveCard(
       margin: const EdgeInsets.only(bottom: 16),
-      elevation: isSelected ? 4 : 2,
-      color: isSelected ? Colors.blue.shade50 : Colors.white,
+      backgroundColor: isSelected ? AppTheme.primaryBlue.withValues(alpha: 0.1) : AppTheme.pureWhite,
+      border: isSelected
+          ? Border.all(color: AppTheme.primaryBlue, width: 2)
+          : Border.all(color: AppTheme.borderGray, width: 1),
       child: InkWell(
         onTap: () => setState(() => selectedPricing = pricing),
+        borderRadius: BorderRadius.circular(ResponsiveBreakpoints.isMobile(context) ? 12 : 16),
         child: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            border: isSelected
-                ? Border.all(color: Colors.blue, width: 2)
-                : null,
-            borderRadius: BorderRadius.circular(8),
-          ),
+          padding: ResponsivePadding.card(context),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -134,17 +152,19 @@ class _LegalEntityPricingScreenState extends State<LegalEntityPricingScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        ResponsiveText(
                           pricing.name,
+                          textType: TextType.titleLarge,
                           style: TextStyle(
-                            fontSize: 20,
                             fontWeight: FontWeight.bold,
+                            color: AppTheme.textPrimary,
                           ),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
+                        SizedBox(height: ResponsiveBreakpoints.isMobile(context) ? 4 : 6),
+                        ResponsiveText(
                           pricing.description,
-                          style: TextStyle(fontSize: 14, color: Colors.grey),
+                          textType: TextType.bodyMedium,
+                          style: TextStyle(color: AppTheme.textGray),
                         ),
                       ],
                     ),
