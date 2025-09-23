@@ -411,25 +411,14 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             const SizedBox(height: 32),
                             Text(
-                              AppLocalizations.of(
-                                context,
-                              ).getString('welcome_back'),
+                              'Bentornato in\nJetCV - Enterprise',
+                              textAlign: TextAlign.center,
                               style: Theme.of(context).textTheme.displaySmall
                                   ?.copyWith(
                                     fontWeight: FontWeight.w700,
                                     color: AppTheme.textPrimary,
                                     letterSpacing: -0.2,
-                                  ),
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              AppLocalizations.of(
-                                context,
-                              ).getString('sign_in_to_account'),
-                              style: Theme.of(context).textTheme.bodyLarge
-                                  ?.copyWith(
-                                    color: AppTheme.textGray,
-                                    fontSize: 16,
+                                    height: 1.2,
                                   ),
                             ),
                           ],
@@ -773,19 +762,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    l10n.getString('welcome_back'),
+                    'Bentornato in\nJetCV - Enterprise',
+                    textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 28,
                       fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    l10n.getString('sign_in_to_account'),
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.9),
-                      fontSize: 16,
+                      height: 1.2,
                     ),
                   ),
                 ],
