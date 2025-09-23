@@ -241,7 +241,7 @@ class AppLocalizations {
       'new_certifier': 'Nuovo Certificatore',
       'create_certifier': 'Crea Certificatore',
       'certifier_role': 'Ruolo del Certificatore',
-      'enter_role': 'Inserisci il ruolo',
+      'enter_role': 'CEO, IT manager',
       'creating_certifier': 'Creazione certificatore...',
       'certifier_created_successfully': 'Certificatore creato con successo',
       'error_creating_certifier': 'Errore nella creazione del certificatore',
@@ -1423,7 +1423,8 @@ class AppLocalizations {
       'participants': 'Teilnehmer',
       'series': 'Serie',
       'no_certifications_found': 'Keine Zertifizierungen',
-      'certifications_will_appear_here': 'Ihre Zertifizierungen werden hier angezeigt',
+      'certifications_will_appear_here':
+          'Ihre Zertifizierungen werden hier angezeigt',
       'certification_type': 'Typ',
       'certification_title': 'Titel',
       'unknown_category': 'Unbekannte Kategorie',
