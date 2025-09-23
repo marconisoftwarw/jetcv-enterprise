@@ -591,10 +591,6 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             const SizedBox(height: 24),
 
             _buildMediaSection(),
-            SizedBox(height: isTablet ? 20 : 16),
-
-            // Sezione Media Certificativi
-            _buildCertificationMediaSection(),
             SizedBox(height: isTablet ? 40 : 32),
 
             NeonButton(
