@@ -9,6 +9,8 @@ import '../../widgets/enterprise_card.dart';
 import '../../widgets/neon_button.dart';
 import '../../widgets/global_hamburger_menu.dart';
 import '../../widgets/appbar_language_dropdown.dart';
+import '../../widgets/responsive_layout.dart';
+import '../../widgets/responsive_card.dart';
 import '../../services/user_type_service.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -189,90 +191,14 @@ class _HomeScreenState extends State<HomeScreen> {
         final currentUserType = authProvider.userType ?? AppUserType.user;
         // Non chiamare _validateAndResetSelectedIndex qui per evitare loop infiniti
 
-        return Scaffold(
-          appBar: MediaQuery.of(context).size.width <= 768
-              ? AppBar(
-                  backgroundColor: Colors.white,
-                  elevation: 0,
-                  leading: IconButton(
-                    icon: Icon(Icons.menu, color: Colors.black),
-                    onPressed: () {
-                      setState(() {
-                        _isMenuExpanded = !_isMenuExpanded;
-                      });
-                    },
-                  ),
-                  title: Text(
-                    'JetCV',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  actions: [const AppBarLanguageDropdown()],
-                )
-              : null,
-          body: Stack(
-            children: [
-              Row(
-                children: [
-                  // Navigation Rail - Solo su desktop o quando espanso su mobile
-                  if (MediaQuery.of(context).size.width > 768 ||
-                      _isMenuExpanded)
-                    Container(
-                      width: MediaQuery.of(context).size.width > 768
-                          ? 280
-                          : 260,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border(
-                          right: BorderSide(color: Colors.grey[200]!, width: 1),
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 8,
-                            spreadRadius: 0,
-                            offset: const Offset(2, 0),
-                          ),
-                        ],
-                      ),
-                      child: GlobalHamburgerMenu(
-                        selectedIndex: _selectedIndex,
-                        onDestinationSelected: _onDestinationSelected,
-                        isExpanded: _isMenuExpanded,
-                        onExpansionChanged: (expanded) {
-                          setState(() {
-                            _isMenuExpanded = expanded;
-                          });
-                        },
-                        context: context,
-                        userType: authProvider.userType,
-                      ),
-                    ),
-
-                  // Main Content
-                  Expanded(
-                    child: _buildContent(
-                      authProvider.userType ?? AppUserType.user,
-                    ),
-                  ),
-                ],
-              ),
-
-              // Overlay scuro su mobile quando il menu è aperto
-              if (MediaQuery.of(context).size.width <= 768 && _isMenuExpanded)
-                Positioned.fill(
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _isMenuExpanded = false;
-                      });
-                    },
-                    child: Container(color: Colors.black.withOpacity(0.5)),
-                  ),
-                ),
-            ],
+        return ResponsiveLayout(
+          showMenu: true,
+          selectedIndex: _selectedIndex,
+          onDestinationSelected: _onDestinationSelected,
+          title: 'JetCV',
+          actions: [const AppBarLanguageDropdown()],
+          child: _buildContent(
+            authProvider.userType ?? AppUserType.user,
           ),
         );
       },
@@ -411,7 +337,7 @@ class _DashboardContent extends StatelessWidget {
         return Container(
           color: AppTheme.offWhite,
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(32),
+            padding: ResponsivePadding.screen(context),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
