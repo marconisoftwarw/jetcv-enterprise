@@ -401,67 +401,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             ),
             const SizedBox(height: 24),
 
-            EnterpriseTextField(
-              controller: _titleController,
-              label: l10n.getString('certification_title'),
-              hint: l10n.getString('certification_title'),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Inserisci il titolo della certificazione';
-                }
-                return null;
-              },
-            ),
-            SizedBox(height: isTablet ? 20 : 16),
-
-            DropdownButtonFormField<String>(
-              value: _selectedLegalEntityId,
-              decoration: InputDecoration(
-                labelText: l10n.getString('issuing_organization'),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: isTablet ? 16 : 12,
-                ),
-              ),
-              items: _isLoadingLegalEntities
-                  ? [
-                      DropdownMenuItem<String>(
-                        value: null,
-                        child: Text(
-                          AppLocalizations.of(
-                            context,
-                          ).getString('loading_legal_entities'),
-                        ),
-                      ),
-                    ]
-                  : _legalEntities.map((legalEntity) {
-                      return DropdownMenuItem<String>(
-                        value: legalEntity.idLegalEntity,
-                        child: Text(legalEntity.legalName ?? 'N/A'),
-                      );
-                    }).toList(),
-              onChanged: _isLoadingLegalEntities
-                  ? null
-                  : (String? newValue) {
-                      if (newValue != null) {
-                        setState(() {
-                          _selectedLegalEntityId = newValue;
-                          // Trova il nome della legal entity selezionata
-                          final selectedEntity = _legalEntities.firstWhere(
-                            (entity) => entity.idLegalEntity == newValue,
-                            orElse: () => _legalEntities.first,
-                          );
-                          _legalEntityName = selectedEntity.legalName;
-                          print('🔍 Selected legal entity: $_legalEntityName');
-                        });
-                      }
-                    },
-            ),
-            SizedBox(height: isTablet ? 20 : 16),
-
+            // Campo Tipologia - PRIMO CAMPO
             DropdownButtonFormField<String>(
               value: _selectedActivityType,
               decoration: InputDecoration(
@@ -558,6 +498,70 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             ),
             SizedBox(height: isTablet ? 20 : 16),
 
+            // Campo Titolo - SECONDO CAMPO
+            EnterpriseTextField(
+              controller: _titleController,
+              label: l10n.getString('certification_title'),
+              hint: l10n.getString('certification_title'),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Inserisci il titolo della certificazione';
+                }
+                return null;
+              },
+            ),
+            SizedBox(height: isTablet ? 20 : 16),
+
+            // Campo Organizzazione - TERZO CAMPO
+            DropdownButtonFormField<String>(
+              value: _selectedLegalEntityId,
+              decoration: InputDecoration(
+                labelText: l10n.getString('issuing_organization'),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: isTablet ? 16 : 12,
+                ),
+              ),
+              items: _isLoadingLegalEntities
+                  ? [
+                      DropdownMenuItem<String>(
+                        value: null,
+                        child: Text(
+                          AppLocalizations.of(
+                            context,
+                          ).getString('loading_legal_entities'),
+                        ),
+                      ),
+                    ]
+                  : _legalEntities.map((legalEntity) {
+                      return DropdownMenuItem<String>(
+                        value: legalEntity.idLegalEntity,
+                        child: Text(legalEntity.legalName ?? 'N/A'),
+                      );
+                    }).toList(),
+              onChanged: _isLoadingLegalEntities
+                  ? null
+                  : (String? newValue) {
+                      if (newValue != null) {
+                        setState(() {
+                          _selectedLegalEntityId = newValue;
+                          // Trova il nome della legal entity selezionata
+                          final selectedEntity = _legalEntities.firstWhere(
+                            (entity) => entity.idLegalEntity == newValue,
+                            orElse: () => _legalEntities.first,
+                          );
+                          _legalEntityName = selectedEntity.legalName;
+                          print('🔍 Selected legal entity: $_legalEntityName');
+                        });
+                      }
+                    },
+            ),
+            SizedBox(height: isTablet ? 20 : 16),
+
+            // Campo Descrizione - QUARTO CAMPO
             EnterpriseTextField(
               controller: _descriptionController,
               label: l10n.getString('description'),
