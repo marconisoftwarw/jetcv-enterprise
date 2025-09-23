@@ -39,7 +39,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
   Map<String, String> _categoryNames = {};
   Map<String, String> _locationNames = {};
   String? _errorMessage;
-  
+
   // Informazioni dettagliate delle certificazioni
   Map<String, Map<String, dynamic>> _certificationDetails = {};
   bool _isLoadingDetails = false;
@@ -139,14 +139,14 @@ class _CertificationListScreenState extends State<CertificationListScreen>
           );
           _isLoading = false;
         });
-      print(
-        '✅ State updated with ${_draftCertifications.length} draft, ${_sentCertifications.length} sent, ${_closedCertifications.length} closed certifications',
-      );
-      
-      // Carica i dettagli delle certificazioni
-      _loadCertificationDetails();
-    }
-  } catch (e) {
+        print(
+          '✅ State updated with ${_draftCertifications.length} draft, ${_sentCertifications.length} sent, ${_closedCertifications.length} closed certifications',
+        );
+
+        // Carica i dettagli delle certificazioni
+        _loadCertificationDetails();
+      }
+    } catch (e) {
       print('💥 Error loading certifications: $e');
       if (mounted) {
         setState(() {
@@ -170,7 +170,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
         ..._sentCertifications,
         ..._closedCertifications,
       ];
-      
+
       final certificationIds = allCertifications
           .map((cert) => cert['id_certification'] as String?)
           .where((id) => id != null)
@@ -186,10 +186,13 @@ class _CertificationListScreenState extends State<CertificationListScreen>
       }
 
       print('📝 Loading details for ${certificationIds.length} certifications');
-      
+
       // Carica i dettagli in batch
-      final details = await CertificationInfoService.getMultipleCertificationsInfo(certificationIds);
-      
+      final details =
+          await CertificationInfoService.getMultipleCertificationsInfo(
+            certificationIds,
+          );
+
       if (mounted) {
         setState(() {
           _certificationDetails = details;
@@ -297,7 +300,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
               Icon(Icons.error_outline, color: Colors.red, size: 48),
               SizedBox(height: 16),
               Text(
-                'Errore di inizializzazione',
+                l10n.getString('initialization_error'),
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 8),
@@ -314,7 +317,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                   });
                   initState();
                 },
-                child: Text('Riprova'),
+                child: Text(l10n.getString('retry')),
               ),
             ],
           ),
@@ -414,7 +417,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                   ),
                   child: Center(
                     child: Text(
-                      user?.initials ?? 'U',
+                      user?.initials ?? l10n.getString('unknown_user').substring(0, 1).toUpperCase(),
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w600,
@@ -595,12 +598,12 @@ class _CertificationListScreenState extends State<CertificationListScreen>
         ? DateTime.tryParse(cert['sent_at'])
         : null;
     final nUsers = cert['n_users'] ?? 0;
-    final serialNumber = cert['serial_number'] ?? 'N/A';
+    final serialNumber = cert['serial_number'] ?? l10n.getString('no_data');
     final categoryId = cert['id_certification_category'] ?? '';
     final locationId = cert['id_location'] ?? '';
     final categoryName =
         _categoryNames[categoryId] ?? l10n.getString('unknown_category');
-    final locationName = _locationNames[locationId] ?? 'Luogo sconosciuto';
+    final locationName = _locationNames[locationId] ?? l10n.getString('unknown_location');
 
     return EnterpriseCard(
       isHoverable: true,
@@ -733,7 +736,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                 Icon(Icons.calendar_today, size: 16, color: AppTheme.textGray),
                 const SizedBox(width: 8),
                 Text(
-                  'Creata: ${createdAt.day}/${createdAt.month}/${createdAt.year}',
+                  '${l10n.getString('created_on')}: ${createdAt.day}/${createdAt.month}/${createdAt.year}',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: AppTheme.textGray,
                     fontWeight: FontWeight.w500,
@@ -744,7 +747,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                   Icon(Icons.send, size: 16, color: AppTheme.textGray),
                   const SizedBox(width: 8),
                   Text(
-                    'Inviata: ${sentAt.day}/${sentAt.month}/${sentAt.year}',
+                    '${l10n.getString('sent_on')}: ${sentAt.day}/${sentAt.month}/${sentAt.year}',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: AppTheme.textGray,
                       fontWeight: FontWeight.w500,
@@ -775,21 +778,23 @@ class _CertificationListScreenState extends State<CertificationListScreen>
   }
 
   String _getStatusText(String status, {bool forceClosed = false}) {
+    final l10n = AppLocalizations.of(context);
+    
     if (forceClosed) {
-      return 'Chiusa';
+      return l10n.getString('status_closed');
     }
 
     switch (status) {
       case 'sent':
-        return 'Inviata';
+        return l10n.getString('status_sent');
       case 'closed':
-        return 'Chiusa';
+        return l10n.getString('status_closed');
       case 'draft':
-        return 'Bozza';
+        return l10n.getString('status_draft');
       case 'pending':
-        return 'In corso';
+        return l10n.getString('status_pending');
       default:
-        return 'Sconosciuto';
+        return l10n.getString('status_unknown');
     }
   }
 
@@ -846,6 +851,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
   }
 
   Widget _buildLoadingState() {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -853,7 +859,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
           CircularProgressIndicator(color: AppTheme.primaryBlue),
           const SizedBox(height: 16),
           Text(
-            'Caricamento certificazioni...',
+            l10n.getString('loading_certifications'),
             style: Theme.of(
               context,
             ).textTheme.bodyLarge?.copyWith(color: AppTheme.textGray),
@@ -864,6 +870,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
   }
 
   Widget _buildErrorState() {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Container(
         margin: const EdgeInsets.all(32),
@@ -886,7 +893,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
             Icon(Icons.error_outline, size: 64, color: AppTheme.errorRed),
             const SizedBox(height: 16),
             Text(
-              'Errore nel caricamento',
+              l10n.getString('loading_error'),
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: AppTheme.textPrimary,
                 fontWeight: FontWeight.w600,
@@ -913,7 +920,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                   borderRadius: BorderRadius.circular(25),
                 ),
                 child: Text(
-                  'Riprova',
+                  l10n.getString('retry'),
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     color: AppTheme.pureWhite,
                     fontWeight: FontWeight.w600,
@@ -1047,27 +1054,32 @@ class _CertificationListScreenState extends State<CertificationListScreen>
     final createdAt =
         DateTime.tryParse(cert['created_at'] ?? '') ?? DateTime.now();
     final nUsers = cert['n_users'] ?? 0;
-    final serialNumber = cert['serial_number'] ?? 'N/A';
+    final serialNumber = cert['serial_number'] ?? l10n.getString('no_data');
     final certificationId = cert['id_certification'] as String?;
-    
+
     // Recupera i dettagli dalla nuova edge function
-    final details = certificationId != null ? _certificationDetails[certificationId] : null;
+    final details = certificationId != null
+        ? _certificationDetails[certificationId]
+        : null;
     final certificationData = details?['certification'];
     final usersData = details?['users'] as List<dynamic>? ?? [];
-    
+
     // Estrai le informazioni dai dettagli
-    final categoryName = certificationData?['category']?['name'] ?? 
-                        _categoryNames[cert['id_certification_category']] ?? 
-                        l10n.getString('unknown_category');
+    final categoryName =
+        certificationData?['category']?['name'] ??
+        _categoryNames[cert['id_certification_category']] ??
+        l10n.getString('unknown_category');
     final categoryType = certificationData?['category']?['type'] ?? '';
-    final title = certificationData?['title'] ?? 
-                 cert['title'] ?? 
-                 cert['name'] ?? 
-                 l10n.getString('no_title_available');
-    final description = certificationData?['description'] ?? 
-                       cert['description'] ?? 
-                       l10n.getString('no_description');
-    
+    final title =
+        certificationData?['title'] ??
+        cert['title'] ??
+        cert['name'] ??
+        l10n.getString('no_title_available');
+    final description =
+        certificationData?['description'] ??
+        cert['description'] ??
+        l10n.getString('no_description');
+
     // Conta gli utenti dai dettagli se disponibili
     final actualUserCount = usersData.isNotEmpty ? usersData.length : nUsers;
 
@@ -1077,16 +1089,10 @@ class _CertificationListScreenState extends State<CertificationListScreen>
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Colors.white,
-            Colors.grey[50]!,
-          ],
+          colors: [Colors.white, Colors.grey[50]!],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.grey[200]!,
-          width: 1,
-        ),
+        border: Border.all(color: Colors.grey[200]!, width: 1),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.08),
@@ -1109,10 +1115,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [
-                Colors.white,
-                Colors.grey[50]!,
-              ],
+              colors: [Colors.white, Colors.grey[50]!],
             ),
           ),
           child: Padding(
@@ -1151,7 +1154,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                       ),
                     ),
                     const SizedBox(width: 16),
-                    
+
                     // Titolo e status
                     Expanded(
                       child: Column(
@@ -1220,7 +1223,9 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                               ),
                               const SizedBox(width: 6),
                               Text(
-                                categoryType.isNotEmpty ? categoryType : categoryName,
+                                categoryType.isNotEmpty
+                                    ? categoryType
+                                    : categoryName,
                                 style: TextStyle(
                                   color: AppTheme.primaryBlue,
                                   fontWeight: FontWeight.w600,
@@ -1234,9 +1239,9 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Descrizione in box separato
                 Container(
                   width: double.infinity,
@@ -1244,10 +1249,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Colors.grey[200]!,
-                      width: 1,
-                    ),
+                    border: Border.all(color: Colors.grey[200]!, width: 1),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.03),
@@ -1292,9 +1294,9 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                     ],
                   ),
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Footer con informazioni e utenti
                 Row(
                   children: [
@@ -1335,7 +1337,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                       ),
                     ),
                     const SizedBox(width: 12),
-                    
+
                     // Partecipanti
                     Container(
                       padding: const EdgeInsets.all(12),
@@ -1368,17 +1370,14 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                       ),
                     ),
                     const SizedBox(width: 12),
-                    
+
                     // Data
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: Colors.grey[50],
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: Colors.grey[200]!,
-                          width: 1,
-                        ),
+                        border: Border.all(color: Colors.grey[200]!, width: 1),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -1402,7 +1401,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                     ),
                   ],
                 ),
-                
+
                 // Lista utenti (se presenti)
                 if (usersData.isNotEmpty) ...[
                   const SizedBox(height: 16),
@@ -1412,10 +1411,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.grey[200]!,
-                        width: 1,
-                      ),
+                      border: Border.all(color: Colors.grey[200]!, width: 1),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withValues(alpha: 0.03),
@@ -1463,107 +1459,45 @@ class _CertificationListScreenState extends State<CertificationListScreen>
     return Wrap(
       spacing: 8,
       runSpacing: 8,
-      children: usersData.take(6).map((user) {
-        final firstName = user['firstName'] ?? '';
-        final lastName = user['lastName'] ?? '';
-        final email = user['email'] ?? '';
-        
-        // Crea il nome da visualizzare
-        String displayName = '';
-        if (firstName.isNotEmpty && lastName.isNotEmpty) {
-          displayName = '$firstName $lastName';
-        } else if (firstName.isNotEmpty) {
-          displayName = firstName;
-        } else if (lastName.isNotEmpty) {
-          displayName = lastName;
-        } else if (email.isNotEmpty) {
-          displayName = email.split('@').first;
-        } else {
-          displayName = l10n.getString('unknown_user');
-        }
+      children:
+          usersData.take(6).map((user) {
+            final firstName = user['firstName'] ?? '';
+            final lastName = user['lastName'] ?? '';
+            final email = user['email'] ?? '';
 
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                AppTheme.primaryBlue.withValues(alpha: 0.1),
-                AppTheme.primaryBlue.withValues(alpha: 0.05),
-              ],
-            ),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: AppTheme.primaryBlue.withValues(alpha: 0.2),
-              width: 1,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: AppTheme.primaryBlue.withValues(alpha: 0.1),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 24,
-                height: 24,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppTheme.primaryBlue,
-                      AppTheme.primaryBlue.withValues(alpha: 0.8),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.person_rounded,
-                  size: 14,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                displayName,
-                style: TextStyle(
-                  color: AppTheme.primaryBlue,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        );
-      }).toList()
-        ..addAll([
-          // Mostra "+N altri" se ci sono più di 6 utenti
-          if (usersData.length > 6)
-            Container(
+            // Crea il nome da visualizzare
+            String displayName = '';
+            if (firstName.isNotEmpty && lastName.isNotEmpty) {
+              displayName = '$firstName $lastName';
+            } else if (firstName.isNotEmpty) {
+              displayName = firstName;
+            } else if (lastName.isNotEmpty) {
+              displayName = lastName;
+            } else if (email.isNotEmpty) {
+              displayName = email.split('@').first;
+            } else {
+              displayName = l10n.getString('unknown_user');
+            }
+
+            return Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    Colors.grey[100]!,
-                    Colors.grey[50]!,
+                    AppTheme.primaryBlue.withValues(alpha: 0.1),
+                    AppTheme.primaryBlue.withValues(alpha: 0.05),
                   ],
                 ),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: Colors.grey[300]!,
+                  color: AppTheme.primaryBlue.withValues(alpha: 0.2),
                   width: 1,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withValues(alpha: 0.1),
+                    color: AppTheme.primaryBlue.withValues(alpha: 0.1),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -1576,41 +1510,101 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                     width: 24,
                     height: 24,
                     decoration: BoxDecoration(
-                      color: Colors.grey[400],
+                      gradient: LinearGradient(
+                        colors: [
+                          AppTheme.primaryBlue,
+                          AppTheme.primaryBlue.withValues(alpha: 0.8),
+                        ],
+                      ),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(
-                      Icons.more_horiz_rounded,
+                      Icons.person_rounded,
                       size: 14,
                       color: Colors.white,
                     ),
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    '+${usersData.length - 6} ${l10n.getString('others')}',
+                    displayName,
                     style: TextStyle(
-                      color: Colors.grey[600],
+                      color: AppTheme.primaryBlue,
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
-            ),
-        ]),
+            );
+          }).toList()..addAll([
+            // Mostra "+N altri" se ci sono più di 6 utenti
+            if (usersData.length > 6)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Colors.grey[100]!, Colors.grey[50]!],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.grey[300]!, width: 1),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withValues(alpha: 0.1),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[400],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.more_horiz_rounded,
+                        size: 14,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '+${usersData.length - 6} ${l10n.getString('others')}',
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ]),
     );
   }
 
   String _formatDate(DateTime date) {
+    final l10n = AppLocalizations.of(context);
     final now = DateTime.now();
     final difference = now.difference(date);
 
     if (difference.inDays == 0) {
-      return 'Oggi';
+      return l10n.getString('today');
     } else if (difference.inDays == 1) {
-      return 'Ieri';
+      return l10n.getString('yesterday');
     } else if (difference.inDays < 7) {
-      return '${difference.inDays} giorni fa';
+      return '${difference.inDays} ${l10n.getString('days_ago')}';
     } else {
       return '${date.day}/${date.month}/${date.year}';
     }
