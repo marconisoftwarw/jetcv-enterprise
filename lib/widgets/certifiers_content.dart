@@ -248,7 +248,9 @@ class _CertifiersContentState extends State<CertifiersContent> {
           // Filtro ricerca testo (nome, email, ruolo, città)
           if (_searchQuery.trim().isNotEmpty) {
             final query = _searchQuery.toLowerCase().trim();
-            final fullName = '${certifierWithUser.user?.firstName ?? ''} ${certifierWithUser.user?.lastName ?? ''}'.toLowerCase();
+            final fullName =
+                '${certifierWithUser.user?.firstName ?? ''} ${certifierWithUser.user?.lastName ?? ''}'
+                    .toLowerCase();
             final email = (certifierWithUser.user?.email ?? '').toLowerCase();
             final role = (certifierWithUser.certifier.role ?? '').toLowerCase();
             final city = (certifierWithUser.user?.city ?? '').toLowerCase();
@@ -690,7 +692,8 @@ class _CertifiersContentState extends State<CertifiersContent> {
   }
 
   Widget _buildSelectedFilterChips(AppLocalizations l10n, bool isTablet) {
-    final hasAny = _selectedBirthDate != null ||
+    final hasAny =
+        _selectedBirthDate != null ||
         _selectedRole != null ||
         _selectedCity != null ||
         _searchQuery.isNotEmpty;
@@ -700,55 +703,59 @@ class _CertifiersContentState extends State<CertifiersContent> {
     final chips = <Widget>[];
 
     if (_searchQuery.isNotEmpty) {
-      chips.add(_buildChip(
-        label: '${l10n.getString('search')}: $_searchQuery',
-        onDeleted: () {
-          _searchController.clear();
-          _searchQuery = '';
-          _applyFilters();
-        },
-        isTablet: isTablet,
-      ));
+      chips.add(
+        _buildChip(
+          label: '${l10n.getString('search')}: $_searchQuery',
+          onDeleted: () {
+            _searchController.clear();
+            _searchQuery = '';
+            _applyFilters();
+          },
+          isTablet: isTablet,
+        ),
+      );
     }
     if (_selectedBirthDate != null) {
-      chips.add(_buildChip(
-        label:
-            '${l10n.getString('birth_date')}: ${_selectedBirthDate!.day}/${_selectedBirthDate!.month}/${_selectedBirthDate!.year}',
-        onDeleted: () {
-          setState(() => _selectedBirthDate = null);
-          _applyFilters();
-        },
-        isTablet: isTablet,
-      ));
+      chips.add(
+        _buildChip(
+          label:
+              '${l10n.getString('birth_date')}: ${_selectedBirthDate!.day}/${_selectedBirthDate!.month}/${_selectedBirthDate!.year}',
+          onDeleted: () {
+            setState(() => _selectedBirthDate = null);
+            _applyFilters();
+          },
+          isTablet: isTablet,
+        ),
+      );
     }
     if (_selectedRole != null) {
-      chips.add(_buildChip(
-        label: '${l10n.getString('role')}: $_selectedRole',
-        onDeleted: () {
-          setState(() => _selectedRole = null);
-          _applyFilters();
-        },
-        isTablet: isTablet,
-      ));
+      chips.add(
+        _buildChip(
+          label: '${l10n.getString('role')}: $_selectedRole',
+          onDeleted: () {
+            setState(() => _selectedRole = null);
+            _applyFilters();
+          },
+          isTablet: isTablet,
+        ),
+      );
     }
     if (_selectedCity != null) {
-      chips.add(_buildChip(
-        label: '${l10n.getString('city')}: $_selectedCity',
-        onDeleted: () {
-          setState(() => _selectedCity = null);
-          _applyFilters();
-        },
-        isTablet: isTablet,
-      ));
+      chips.add(
+        _buildChip(
+          label: '${l10n.getString('city')}: $_selectedCity',
+          onDeleted: () {
+            setState(() => _selectedCity = null);
+            _applyFilters();
+          },
+          isTablet: isTablet,
+        ),
+      );
     }
 
     return Padding(
       padding: EdgeInsets.only(top: isTablet ? 8 : 6),
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        children: chips,
-      ),
+      child: Wrap(spacing: 8, runSpacing: 8, children: chips),
     );
   }
 
@@ -758,10 +765,7 @@ class _CertifiersContentState extends State<CertifiersContent> {
     required bool isTablet,
   }) {
     return Chip(
-      label: Text(
-        label,
-        style: TextStyle(fontSize: isTablet ? 13 : 12),
-      ),
+      label: Text(label, style: TextStyle(fontSize: isTablet ? 13 : 12)),
       backgroundColor: AppTheme.primaryBlue.withValues(alpha: 0.08),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       deleteIcon: Icon(Icons.close, size: 16),

@@ -35,6 +35,7 @@ class GlobalHamburgerMenu extends StatelessWidget {
     final isSmallTablet = screenWidth >= 600 && screenWidth <= 900;
     final isLargeTablet = screenWidth > 900 && screenWidth <= 1200;
     final isVerySmall = screenWidth < 480; // Schermi molto piccoli
+    final isExtraSmall = screenWidth < 360; // Schermi extra piccoli
 
     // Logica di espansione più intelligente
     final shouldBeExpanded = isDesktop
@@ -52,21 +53,25 @@ class GlobalHamburgerMenu extends StatelessWidget {
         menuWidth = 240;
       } else if (isSmallTablet) {
         // Per tablet piccoli, usa una percentuale della larghezza schermo
-        menuWidth = screenWidth * 0.7;
-        if (menuWidth < 200) menuWidth = 200; // Larghezza minima
+        menuWidth = screenWidth * 0.75;
+        if (menuWidth < 220) menuWidth = 220; // Larghezza minima
       } else if (isMobile) {
         // Per mobile, usa una percentuale maggiore ma non full screen
-        menuWidth = screenWidth * 0.85;
-        if (menuWidth < 180) menuWidth = 180; // Larghezza minima
+        menuWidth = screenWidth * 0.9;
+        if (menuWidth < 200) menuWidth = 200; // Larghezza minima
       } else if (isVerySmall) {
         // Per schermi molto piccoli, usa quasi tutta la larghezza
         menuWidth = screenWidth * 0.95;
+        if (menuWidth < 180) menuWidth = 180; // Larghezza minima
+      } else if (isExtraSmall) {
+        // Per schermi extra piccoli, usa tutta la larghezza disponibile
+        menuWidth = screenWidth;
       } else {
         menuWidth = 240;
       }
     } else {
       // Quando è collassato, larghezza fissa per l'icona
-      menuWidth = 72;
+      menuWidth = isExtraSmall ? 60 : 72;
     }
 
     return Consumer<AuthProvider>(
@@ -171,8 +176,16 @@ class GlobalHamburgerMenu extends StatelessWidget {
               // Header del menu
               Container(
                 height: shouldBeExpanded
-                    ? (isMobile ? 100 : 120)
-                    : (isMobile ? 60 : 80),
+                    ? (isExtraSmall
+                          ? 80
+                          : isMobile
+                          ? 100
+                          : 120)
+                    : (isExtraSmall
+                          ? 50
+                          : isMobile
+                          ? 60
+                          : 80),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
@@ -182,7 +195,13 @@ class GlobalHamburgerMenu extends StatelessWidget {
                 ),
                 child: SafeArea(
                   child: Padding(
-                    padding: EdgeInsets.all(isMobile ? 12 : 16),
+                    padding: EdgeInsets.all(
+                      isExtraSmall
+                          ? 8
+                          : isMobile
+                          ? 12
+                          : 16,
+                    ),
                     child: shouldBeExpanded
                         ? Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,7 +214,11 @@ class GlobalHamburgerMenu extends StatelessWidget {
                                   Icon(
                                     Icons.verified_user,
                                     color: Colors.white,
-                                    size: isMobile ? 28 : 32,
+                                    size: isExtraSmall
+                                        ? 24
+                                        : isMobile
+                                        ? 28
+                                        : 32,
                                   ),
                                   Expanded(
                                     child: Row(
@@ -263,7 +286,11 @@ class GlobalHamburgerMenu extends StatelessWidget {
                                 l10n.getString('app_title'),
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: isMobile ? 16 : 18,
+                                  fontSize: isExtraSmall
+                                      ? 14
+                                      : isMobile
+                                      ? 16
+                                      : 18,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -444,11 +471,20 @@ class GlobalHamburgerMenu extends StatelessWidget {
   }) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 600;
+    final isExtraSmall = screenWidth < 360;
 
     return Container(
       margin: EdgeInsets.symmetric(
-        horizontal: isMobile ? 6 : 8,
-        vertical: isMobile ? 1 : 2,
+        horizontal: isExtraSmall
+            ? 4
+            : isMobile
+            ? 6
+            : 8,
+        vertical: isExtraSmall
+            ? 1
+            : isMobile
+            ? 1
+            : 2,
       ),
       child: Material(
         color: isSelected
@@ -460,8 +496,18 @@ class GlobalHamburgerMenu extends StatelessWidget {
           onTap: () => _handleNavigation(index),
           child: Container(
             padding: EdgeInsets.symmetric(
-              horizontal: isExpanded ? (isMobile ? 12 : 16) : 8,
-              vertical: isMobile ? 10 : 12,
+              horizontal: isExpanded
+                  ? (isExtraSmall
+                        ? 8
+                        : isMobile
+                        ? 12
+                        : 16)
+                  : (isExtraSmall ? 6 : 8),
+              vertical: isExtraSmall
+                  ? 8
+                  : isMobile
+                  ? 10
+                  : 12,
             ),
             child: Row(
               children: [
@@ -470,10 +516,20 @@ class GlobalHamburgerMenu extends StatelessWidget {
                   color: isSelected
                       ? AppTheme.primaryBlue
                       : AppTheme.textSecondary,
-                  size: isMobile ? 18 : 20,
+                  size: isExtraSmall
+                      ? 16
+                      : isMobile
+                      ? 18
+                      : 20,
                 ),
                 if (isExpanded) ...[
-                  SizedBox(width: isMobile ? 10 : 12),
+                  SizedBox(
+                    width: isExtraSmall
+                        ? 8
+                        : isMobile
+                        ? 10
+                        : 12,
+                  ),
                   Expanded(
                     child: Text(
                       label,
@@ -484,7 +540,11 @@ class GlobalHamburgerMenu extends StatelessWidget {
                         fontWeight: isSelected
                             ? FontWeight.w600
                             : FontWeight.normal,
-                        fontSize: isMobile ? 13 : 14,
+                        fontSize: isExtraSmall
+                            ? 12
+                            : isMobile
+                            ? 13
+                            : 14,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -501,9 +561,16 @@ class GlobalHamburgerMenu extends StatelessWidget {
   Widget _buildLogoutItem(bool isExpanded, AppLocalizations l10n) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 600;
+    final isExtraSmall = screenWidth < 360;
 
     return Container(
-      margin: EdgeInsets.all(isMobile ? 6 : 8),
+      margin: EdgeInsets.all(
+        isExtraSmall
+            ? 4
+            : isMobile
+            ? 6
+            : 8,
+      ),
       child: Material(
         color: Colors.red[50],
         borderRadius: BorderRadius.circular(8),
@@ -512,24 +579,46 @@ class GlobalHamburgerMenu extends StatelessWidget {
           onTap: () => _showLogoutDialog(context, l10n),
           child: Container(
             padding: EdgeInsets.symmetric(
-              horizontal: isMobile ? 12 : 16,
-              vertical: isMobile ? 10 : 12,
+              horizontal: isExtraSmall
+                  ? 8
+                  : isMobile
+                  ? 12
+                  : 16,
+              vertical: isExtraSmall
+                  ? 8
+                  : isMobile
+                  ? 10
+                  : 12,
             ),
             child: Row(
               children: [
                 Icon(
                   Icons.logout,
                   color: Colors.red[600],
-                  size: isMobile ? 18 : 20,
+                  size: isExtraSmall
+                      ? 16
+                      : isMobile
+                      ? 18
+                      : 20,
                 ),
-                SizedBox(width: isMobile ? 10 : 12),
+                SizedBox(
+                  width: isExtraSmall
+                      ? 8
+                      : isMobile
+                      ? 10
+                      : 12,
+                ),
                 Expanded(
                   child: Text(
                     l10n.getString('logout'),
                     style: TextStyle(
                       color: Colors.red[600],
                       fontWeight: FontWeight.w500,
-                      fontSize: isMobile ? 13 : 14,
+                      fontSize: isExtraSmall
+                          ? 12
+                          : isMobile
+                          ? 13
+                          : 14,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),

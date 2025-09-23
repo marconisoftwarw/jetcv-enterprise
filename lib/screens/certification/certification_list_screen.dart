@@ -45,7 +45,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
     print('🏁 CertificationListScreen initState called');
 
     try {
-      _tabController = TabController(length: 3, vsync: this);
+      _tabController = TabController(length: 2, vsync: this);
       _tabController!.addListener(() {
         if (mounted &&
             _tabController != null &&
@@ -295,66 +295,81 @@ class _CertificationListScreenState extends State<CertificationListScreen>
 
   Widget _buildAirbnbHeader(AppLocalizations l10n, bool isTablet) {
     return SliverAppBar(
-      expandedHeight: 120,
+      expandedHeight: 100,
       floating: false,
       pinned: true,
-      backgroundColor: AppTheme.pureWhite,
+      backgroundColor: Colors.white,
       elevation: 0,
+      surfaceTintColor: Colors.transparent,
+      automaticallyImplyLeading: false, // Rimuove il pulsante di back
       flexibleSpace: FlexibleSpaceBar(
         titlePadding: EdgeInsets.only(
-          left: isTablet ? 120 : 80,
-          right: isTablet ? 120 : 80,
-          bottom: 16,
+          left: isTablet ? 24 : 16,
+          right: isTablet ? 24 : 16,
+          bottom: 12,
         ),
-        title: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+        title: Row(
           children: [
-            Text(
-              'Le tue certificazioni',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                color: AppTheme.textPrimary,
-                fontWeight: FontWeight.w700,
-                fontSize: 22,
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.getString('certifications'),
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontWeight: FontWeight.w600,
+                      fontSize: isTablet ? 24 : 20,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    l10n.getString('manage_certifications'),
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: isTablet ? 14 : 13,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              'Gestisci e crea nuove certificazioni',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppTheme.textGray,
-                fontSize: 14,
-              ),
+            Consumer<AuthProvider>(
+              builder: (context, authProvider, child) {
+                final user = authProvider.currentUser;
+                return Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryBlue,
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: Colors.white, width: 2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.1),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: Text(
+                      user?.initials ?? 'U',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
           ],
         ),
       ),
-      actions: [
-        Container(
-          margin: const EdgeInsets.only(
-            right: 80,
-            top: 8,
-            bottom: 8,
-          ), // Spazio per il floating button
-          child: Consumer<AuthProvider>(
-            builder: (context, authProvider, child) {
-              final user = authProvider.currentUser;
-              return CircleAvatar(
-                radius: 20,
-                backgroundColor: AppTheme.primaryBlue,
-                child: Text(
-                  user?.initials ?? 'U',
-                  style: TextStyle(
-                    color: AppTheme.pureWhite,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
     );
   }
 
@@ -375,92 +390,75 @@ class _CertificationListScreenState extends State<CertificationListScreen>
 
     return SliverToBoxAdapter(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        child: Row(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+        child: Column(
           children: [
-            // Pulsante Nuova Certificazione - Spostato a sinistra come primo
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const CreateCertificationScreen(),
-                  ),
-                );
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
-                ),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppTheme.successGreen,
-                      AppTheme.successGreen.withValues(alpha: 0.8),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(25),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppTheme.successGreen.withValues(alpha: 0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+            // Pulsante Nuova Certificazione - Stile LinkedIn
+            Container(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const CreateCertificationScreen(),
                     ),
-                  ],
+                  );
+                },
+                icon: Icon(Icons.add, size: 20),
+                label: Text(
+                  l10n.getString('create_new_certification'),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.add, color: AppTheme.pureWhite, size: 20),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Nuova',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: AppTheme.pureWhite,
-                        fontWeight: FontWeight.w600,
-                      ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryBlue,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 14,
+                    horizontal: 20,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  elevation: 0,
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            // Tab Navigation - Stile LinkedIn
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey[200]!),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _buildLinkedInTabButton(
+                      l10n.getString('sent_certifications'),
+                      _tabController!.length > 0 && _tabController!.index == 0,
+                      () {
+                        if (_tabController != null &&
+                            _tabController!.length > 0) {
+                          _tabController!.animateTo(0);
+                        }
+                      },
                     ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildTabButton(
-                'Bozze',
-                _tabController!.length > 0 && _tabController!.index == 0,
-                () {
-                  if (_tabController != null && _tabController!.length > 0) {
-                    _tabController!.animateTo(0);
-                  }
-                },
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildTabButton(
-                'Sent',
-                _tabController!.length > 1 && _tabController!.index == 1,
-                () {
-                  if (_tabController != null && _tabController!.length > 1) {
-                    _tabController!.animateTo(1);
-                  }
-                },
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildTabButton(
-                'Closed',
-                _tabController!.length > 2 && _tabController!.index == 2,
-                () {
-                  if (_tabController != null && _tabController!.length > 2) {
-                    _tabController!.animateTo(2);
-                  }
-                },
+                  ),
+                  Expanded(
+                    child: _buildLinkedInTabButton(
+                      l10n.getString('closed_certifications'),
+                      _tabController!.length > 1 && _tabController!.index == 1,
+                      () {
+                        if (_tabController != null &&
+                            _tabController!.length > 1) {
+                          _tabController!.animateTo(1);
+                        }
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -469,24 +467,24 @@ class _CertificationListScreenState extends State<CertificationListScreen>
     );
   }
 
-  Widget _buildTabButton(String title, bool isSelected, VoidCallback onTap) {
+  Widget _buildLinkedInTabButton(
+    String title,
+    bool isSelected,
+    VoidCallback onTap,
+  ) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         decoration: BoxDecoration(
-          color: isSelected ? AppTheme.primaryBlue : AppTheme.pureWhite,
-          borderRadius: BorderRadius.circular(25),
-          border: Border.all(
-            color: isSelected ? AppTheme.primaryBlue : AppTheme.borderGray,
-            width: 1.5,
-          ),
+          color: isSelected ? Colors.white : Colors.transparent,
+          borderRadius: BorderRadius.circular(6),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: AppTheme.primaryBlue.withValues(alpha: 0.2),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 4,
+                    offset: const Offset(0, 1),
                   ),
                 ]
               : null,
@@ -494,9 +492,10 @@ class _CertificationListScreenState extends State<CertificationListScreen>
         child: Text(
           title,
           textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: isSelected ? AppTheme.pureWhite : AppTheme.textPrimary,
-            fontWeight: FontWeight.w600,
+          style: TextStyle(
+            color: isSelected ? Colors.black87 : Colors.grey[600],
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+            fontSize: 14,
           ),
         ),
       ),
@@ -518,39 +517,20 @@ class _CertificationListScreenState extends State<CertificationListScreen>
     return SliverFillRemaining(
       child: TabBarView(
         controller: _tabController!,
-        children: [_buildDraftsTab(), _buildSentTab(), _buildClosedTab()],
+        children: [_buildSentTab(), _buildClosedTab()],
       ),
     );
-  }
-
-  Widget _buildDraftsTab() {
-    final l10n = AppLocalizations.of(context);
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isTablet = screenWidth > 768;
-
-    if (_isLoading) {
-      return _buildLoadingState();
-    }
-
-    if (_errorMessage != null) {
-      return _buildErrorState();
-    }
-
-    if (_draftCertifications.isEmpty) {
-      return _buildEmptyState();
-    }
-
-    return _buildCertificationsGrid(_draftCertifications, isTablet);
   }
 
   Widget _buildCertificationCard(
     Map<String, dynamic> cert,
     AppLocalizations l10n,
-    bool isTablet,
-  ) {
+    bool isTablet, {
+    bool forceClosedStatus = false,
+  }) {
     final status = cert['status'] ?? 'draft';
     final statusColor = _getStatusColor(status);
-    final statusText = _getStatusText(status);
+    final statusText = _getStatusText(status, forceClosed: forceClosedStatus);
     final createdAt =
         DateTime.tryParse(cert['created_at'] ?? '') ?? DateTime.now();
     final sentAt = cert['sent_at'] != null
@@ -560,7 +540,8 @@ class _CertificationListScreenState extends State<CertificationListScreen>
     final serialNumber = cert['serial_number'] ?? 'N/A';
     final categoryId = cert['id_certification_category'] ?? '';
     final locationId = cert['id_location'] ?? '';
-    final categoryName = _categoryNames[categoryId] ?? 'Categoria sconosciuta';
+    final categoryName =
+        _categoryNames[categoryId] ?? l10n.getString('unknown_category');
     final locationName = _locationNames[locationId] ?? 'Luogo sconosciuto';
 
     return EnterpriseCard(
@@ -637,6 +618,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                                   ?.copyWith(
                                     color: statusColor,
                                     fontWeight: FontWeight.w600,
+                                    fontSize: 12,
                                   ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -651,7 +633,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                         const SizedBox(width: 4),
                         Flexible(
                           child: Text(
-                            '$nUsers utenti',
+                            '$nUsers ${l10n.getString('participants')}',
                             style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(color: AppTheme.textGray),
                             overflow: TextOverflow.ellipsis,
@@ -734,7 +716,11 @@ class _CertificationListScreenState extends State<CertificationListScreen>
     }
   }
 
-  String _getStatusText(String status) {
+  String _getStatusText(String status, {bool forceClosed = false}) {
+    if (forceClosed) {
+      return 'Chiusa';
+    }
+
     switch (status) {
       case 'sent':
         return 'Inviata';
@@ -784,11 +770,21 @@ class _CertificationListScreenState extends State<CertificationListScreen>
       return _buildErrorState();
     }
 
-    if (_closedCertifications.isEmpty) {
+    // Combine draft and closed certifications
+    final allClosedCertifications = [
+      ..._draftCertifications,
+      ..._closedCertifications,
+    ];
+
+    if (allClosedCertifications.isEmpty) {
       return _buildEmptyState();
     }
 
-    return _buildCertificationsGrid(_closedCertifications, isTablet);
+    return _buildCertificationsGrid(
+      allClosedCertifications,
+      isTablet,
+      forceClosedStatus: true,
+    );
   }
 
   Widget _buildLoadingState() {
@@ -874,18 +870,19 @@ class _CertificationListScreenState extends State<CertificationListScreen>
   }
 
   Widget _buildEmptyState() {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Container(
-        margin: const EdgeInsets.all(32),
+        margin: const EdgeInsets.all(24),
         padding: const EdgeInsets.all(32),
         decoration: BoxDecoration(
-          color: AppTheme.pureWhite,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppTheme.borderGray),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey[200]!),
           boxShadow: [
             BoxShadow(
-              color: AppTheme.textPrimary.withValues(alpha: 0.05),
-              blurRadius: 10,
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 8,
               offset: const Offset(0, 2),
             ),
           ],
@@ -894,37 +891,41 @@ class _CertificationListScreenState extends State<CertificationListScreen>
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 80,
-              height: 80,
+              width: 64,
+              height: 64,
               decoration: BoxDecoration(
-                color: AppTheme.lightBlue,
-                borderRadius: BorderRadius.circular(20),
+                color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
-                Icons.edit_outlined,
-                size: 40,
+                Icons.workspace_premium_outlined,
+                size: 32,
                 color: AppTheme.primaryBlue,
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
             Text(
-              'Nessuna certificazione',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: AppTheme.textPrimary,
+              l10n.getString('no_certifications_found'),
+              style: TextStyle(
+                color: Colors.black87,
                 fontWeight: FontWeight.w600,
+                fontSize: 18,
+                letterSpacing: -0.2,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Le certificazioni in bozza e in corso appariranno qui',
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: AppTheme.textGray),
+              l10n.getString('certifications_will_appear_here'),
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
+              ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 20),
-            GestureDetector(
-              onTap: () {
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -932,29 +933,22 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                   ),
                 );
               },
-              child: Container(
+              icon: Icon(Icons.add, size: 18),
+              label: Text(
+                l10n.getString('create_new_certification'),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primaryBlue,
+                foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
                   vertical: 12,
+                  horizontal: 20,
                 ),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppTheme.successGreen,
-                      AppTheme.successGreen.withValues(alpha: 0.8),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(25),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                child: Text(
-                  'Crea Certificazione',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppTheme.pureWhite,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                elevation: 0,
               ),
             ),
           ],
@@ -965,139 +959,219 @@ class _CertificationListScreenState extends State<CertificationListScreen>
 
   Widget _buildCertificationsGrid(
     List<Map<String, dynamic>> certifications,
-    bool isTablet,
-  ) {
-    final crossAxisCount = isTablet ? 2 : 1;
-
+    bool isTablet, {
+    bool forceClosedStatus = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: GridView.builder(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: crossAxisCount,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-          childAspectRatio: isTablet ? 1.2 : 1.0,
-        ),
+      child: ListView.separated(
         itemCount: certifications.length,
+        separatorBuilder: (context, index) => const SizedBox(height: 12),
         itemBuilder: (context, index) {
           final certification = certifications[index];
-          return _buildAirbnbCard(certification);
+          return _buildAirbnbCard(
+            certification,
+            forceClosedStatus: forceClosedStatus,
+          );
         },
       ),
     );
   }
 
-  Widget _buildAirbnbCard(Map<String, dynamic> cert) {
+  Widget _buildAirbnbCard(
+    Map<String, dynamic> cert, {
+    bool forceClosedStatus = false,
+  }) {
+    final l10n = AppLocalizations.of(context);
     final status = cert['status'] ?? 'draft';
     final statusColor = _getStatusColor(status);
-    final statusText = _getStatusText(status);
+    final statusText = _getStatusText(status, forceClosed: forceClosedStatus);
     final createdAt =
         DateTime.tryParse(cert['created_at'] ?? '') ?? DateTime.now();
     final nUsers = cert['n_users'] ?? 0;
     final serialNumber = cert['serial_number'] ?? 'N/A';
     final categoryId = cert['id_certification_category'] ?? '';
-    final categoryName = _categoryNames[categoryId] ?? 'Categoria sconosciuta';
+    final categoryName =
+        _categoryNames[categoryId] ?? l10n.getString('unknown_category');
+    final title = cert['title'] ?? cert['name'] ?? 'Titolo non disponibile';
+    final description = cert['description'] ?? l10n.getString('no_description');
 
-    return GestureDetector(
-      onTap: () {
-        Navigator.of(context).pushNamed(
-          '/certification-detail',
-          arguments: {
-            'certificationId': cert['id_certification'],
-            'certificationData': cert,
-          },
-        );
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppTheme.pureWhite,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppTheme.borderGray),
-          boxShadow: [
-            BoxShadow(
-              color: AppTheme.textPrimary.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey[200]!),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
           children: [
-            // Header con status
+            // Icona categoria - Stile LinkedIn
             Container(
-              padding: const EdgeInsets.all(16),
+              width: 56,
+              height: 56,
               decoration: BoxDecoration(
-                color: statusColor.withValues(alpha: 0.1),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(16),
-                  topRight: Radius.circular(16),
-                ),
+                color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
               ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: statusColor,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      statusText,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: statusColor,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  Icon(Icons.more_vert, color: AppTheme.textGray, size: 20),
-                ],
+              child: Icon(
+                Icons.workspace_premium,
+                color: AppTheme.primaryBlue,
+                size: 28,
               ),
             ),
+            const SizedBox(width: 16),
 
             // Contenuto principale
             Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      categoryName,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: AppTheme.textPrimary,
-                        fontWeight: FontWeight.w700,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Status badge
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: statusColor.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Text(
+                          statusText,
+                          style: TextStyle(
+                            color: statusColor,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 12,
+                          ),
+                        ),
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Tipologia
+                  Text(
+                    l10n.getString('certification_type'),
+                    style: TextStyle(
+                      color: Colors.grey[500],
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Serie: $serialNumber',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppTheme.textGray,
+                  ),
+                  Text(
+                    categoryName,
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      letterSpacing: -0.1,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 6),
+
+                  // Titolo
+                  Text(
+                    l10n.getString('certification_title'),
+                    style: TextStyle(
+                      color: Colors.grey[500],
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Text(
+                    title,
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                      letterSpacing: -0.2,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 6),
+
+                  // Descrizione
+                  Text(
+                    l10n.getString('certification_description'),
+                    style: TextStyle(
+                      color: Colors.grey[500],
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Text(
+                    description,
+                    style: TextStyle(
+                      color: Colors.grey[700],
+                      fontSize: 13,
+                      fontWeight: FontWeight.w400,
+                      height: 1.3,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Informazioni aggiuntive
+                  Row(
+                    children: [
+                      Icon(Icons.tag, size: 14, color: Colors.grey[500]),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${l10n.getString('series')}: $serialNumber',
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${nUsers} partecipanti',
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodySmall?.copyWith(color: AppTheme.textGray),
-                    ),
-                    const Spacer(),
-                    Text(
-                      _formatDate(createdAt),
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodySmall?.copyWith(color: AppTheme.textGray),
-                    ),
-                  ],
-                ),
+                      const SizedBox(width: 16),
+                      Icon(
+                        Icons.people_outline,
+                        size: 14,
+                        color: Colors.grey[500],
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '$nUsers ${l10n.getString('participants')}',
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Icon(
+                        Icons.access_time,
+                        size: 14,
+                        color: Colors.grey[500],
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        _formatDate(createdAt),
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],
