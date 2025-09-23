@@ -31,6 +31,9 @@ class _CertifiersContentState extends State<CertifiersContent> {
   String? _selectedCity;
   List<String> _availableRoles = [];
   List<String> _availableCities = [];
+  // Search
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
 
   // Legal entity per l'utente corrente
   String? _selectedLegalEntityId;
@@ -42,6 +45,12 @@ class _CertifiersContentState extends State<CertifiersContent> {
     super.initState();
     _loadCertifiers();
     _loadCurrentUserLegalEntity();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadCurrentUserLegalEntity() async {
@@ -223,6 +232,21 @@ class _CertifiersContentState extends State<CertifiersContent> {
             return false;
           }
 
+          // Filtro ricerca testo (nome, email, ruolo, città)
+          if (_searchQuery.trim().isNotEmpty) {
+            final query = _searchQuery.toLowerCase().trim();
+            final fullName = '${certifierWithUser.user?.firstName ?? ''} ${certifierWithUser.user?.lastName ?? ''}'.toLowerCase();
+            final email = (certifierWithUser.user?.email ?? '').toLowerCase();
+            final role = (certifierWithUser.certifier.role ?? '').toLowerCase();
+            final city = (certifierWithUser.user?.city ?? '').toLowerCase();
+            if (!(fullName.contains(query) ||
+                email.contains(query) ||
+                role.contains(query) ||
+                city.contains(query))) {
+              return false;
+            }
+          }
+
           return true;
         }).toList();
       });
@@ -235,6 +259,7 @@ class _CertifiersContentState extends State<CertifiersContent> {
         _selectedBirthDate = null;
         _selectedRole = null;
         _selectedCity = null;
+        _searchQuery = '';
         _filteredCertifiers = _certifiersWithUser;
       });
     }
@@ -502,7 +527,8 @@ class _CertifiersContentState extends State<CertifiersContent> {
                     color:
                         (_selectedBirthDate != null ||
                             _selectedRole != null ||
-                            _selectedCity != null)
+                            _selectedCity != null ||
+                            _searchQuery.isNotEmpty)
                         ? AppTheme.errorRed.withValues(alpha: 0.1)
                         : AppTheme.neutralGrey.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
@@ -510,7 +536,8 @@ class _CertifiersContentState extends State<CertifiersContent> {
                       color:
                           (_selectedBirthDate != null ||
                               _selectedRole != null ||
-                              _selectedCity != null)
+                              _selectedCity != null ||
+                              _searchQuery.isNotEmpty)
                           ? AppTheme.errorRed.withValues(alpha: 0.3)
                           : AppTheme.neutralGrey.withValues(alpha: 0.3),
                       width: 1,
@@ -524,7 +551,8 @@ class _CertifiersContentState extends State<CertifiersContent> {
                         color:
                             (_selectedBirthDate != null ||
                                 _selectedRole != null ||
-                                _selectedCity != null)
+                                _selectedCity != null ||
+                                _searchQuery.isNotEmpty)
                             ? AppTheme.errorRed
                             : AppTheme.neutralGrey,
                         size: 16,
@@ -536,7 +564,8 @@ class _CertifiersContentState extends State<CertifiersContent> {
                           color:
                               (_selectedBirthDate != null ||
                                   _selectedRole != null ||
-                                  _selectedCity != null)
+                                  _selectedCity != null ||
+                                  _searchQuery.isNotEmpty)
                               ? AppTheme.errorRed
                               : AppTheme.neutralGrey,
                           fontSize: isTablet ? 13 : 12,
@@ -550,7 +579,15 @@ class _CertifiersContentState extends State<CertifiersContent> {
             ],
           ),
 
-          SizedBox(height: isTablet ? 20 : 16),
+          SizedBox(height: isTablet ? 16 : 12),
+
+          // Search bar
+          _buildSearchBar(l10n, isTablet),
+
+          // Selected filters chips
+          _buildSelectedFilterChips(l10n, isTablet),
+
+          SizedBox(height: isTablet ? 16 : 12),
 
           // Filtri
           Wrap(
@@ -595,6 +632,127 @@ class _CertifiersContentState extends State<CertifiersContent> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildSearchBar(AppLocalizations l10n, bool isTablet) {
+    return TextField(
+      controller: _searchController,
+      onChanged: (value) {
+        _searchQuery = value;
+        _applyFilters();
+      },
+      decoration: InputDecoration(
+        hintText: l10n.getString('search_placeholder'),
+        prefixIcon: Icon(Icons.search, color: AppTheme.textSecondary),
+        suffixIcon: _searchQuery.isNotEmpty
+            ? IconButton(
+                tooltip: l10n.getString('clear_filters'),
+                icon: Icon(Icons.close, color: AppTheme.textSecondary),
+                onPressed: () {
+                  _searchController.clear();
+                  _searchQuery = '';
+                  _applyFilters();
+                },
+              )
+            : null,
+        filled: true,
+        fillColor: Colors.grey.withValues(alpha: 0.06),
+        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.3)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppTheme.primaryBlue, width: 2),
+        ),
+      ),
+      style: TextStyle(fontSize: isTablet ? 14 : 13),
+    );
+  }
+
+  Widget _buildSelectedFilterChips(AppLocalizations l10n, bool isTablet) {
+    final hasAny = _selectedBirthDate != null ||
+        _selectedRole != null ||
+        _selectedCity != null ||
+        _searchQuery.isNotEmpty;
+
+    if (!hasAny) return SizedBox.shrink();
+
+    final chips = <Widget>[];
+
+    if (_searchQuery.isNotEmpty) {
+      chips.add(_buildChip(
+        label: '${l10n.getString('search')}: $_searchQuery',
+        onDeleted: () {
+          _searchController.clear();
+          _searchQuery = '';
+          _applyFilters();
+        },
+        isTablet: isTablet,
+      ));
+    }
+    if (_selectedBirthDate != null) {
+      chips.add(_buildChip(
+        label:
+            '${l10n.getString('birth_date')}: ${_selectedBirthDate!.day}/${_selectedBirthDate!.month}/${_selectedBirthDate!.year}',
+        onDeleted: () {
+          setState(() => _selectedBirthDate = null);
+          _applyFilters();
+        },
+        isTablet: isTablet,
+      ));
+    }
+    if (_selectedRole != null) {
+      chips.add(_buildChip(
+        label: '${l10n.getString('role')}: $_selectedRole',
+        onDeleted: () {
+          setState(() => _selectedRole = null);
+          _applyFilters();
+        },
+        isTablet: isTablet,
+      ));
+    }
+    if (_selectedCity != null) {
+      chips.add(_buildChip(
+        label: '${l10n.getString('city')}: $_selectedCity',
+        onDeleted: () {
+          setState(() => _selectedCity = null);
+          _applyFilters();
+        },
+        isTablet: isTablet,
+      ));
+    }
+
+    return Padding(
+      padding: EdgeInsets.only(top: isTablet ? 8 : 6),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: chips,
+      ),
+    );
+  }
+
+  Widget _buildChip({
+    required String label,
+    required VoidCallback onDeleted,
+    required bool isTablet,
+  }) {
+    return Chip(
+      label: Text(
+        label,
+        style: TextStyle(fontSize: isTablet ? 13 : 12),
+      ),
+      backgroundColor: AppTheme.primaryBlue.withValues(alpha: 0.08),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      deleteIcon: Icon(Icons.close, size: 16),
+      onDeleted: onDeleted,
     );
   }
 
