@@ -41,7 +41,10 @@ class ResponsiveCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: backgroundColor ?? AppTheme.pureWhite,
         borderRadius:
-            borderRadius ?? BorderRadius.circular(ResponsiveBreakpoints.isMobile(context) ? 12 : 16),
+            borderRadius ??
+            BorderRadius.circular(
+              ResponsiveBreakpoints.isMobile(context) ? 12 : 16,
+            ),
         boxShadow:
             boxShadow ?? _getDefaultShadow(isMobile, isTablet, isDesktop),
         border: border ?? Border.all(color: AppTheme.borderGray, width: 1),
@@ -189,10 +192,16 @@ class ResponsiveContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final containerMaxWidth =
-        maxWidth ?? (ResponsiveBreakpoints.isMobile(context) ? double.infinity : (ResponsiveBreakpoints.isTablet(context) ? 600 : 800));
+        maxWidth ??
+        (ResponsiveBreakpoints.isMobile(context)
+            ? double.infinity
+            : (ResponsiveBreakpoints.isTablet(context) ? 600 : 800));
     final containerPadding = padding ?? ResponsivePadding.screen(context);
     final containerBorderRadius =
-        borderRadius ?? BorderRadius.circular(ResponsiveBreakpoints.isMobile(context) ? 12 : 16);
+        borderRadius ??
+        BorderRadius.circular(
+          ResponsiveBreakpoints.isMobile(context) ? 12 : 16,
+        );
 
     return Container(
       margin: margin,
@@ -209,4 +218,3 @@ class ResponsiveContainer extends StatelessWidget {
     );
   }
 }
-

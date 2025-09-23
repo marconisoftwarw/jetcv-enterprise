@@ -1658,7 +1658,11 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
                     'Perfetto per piccole aziende',
                     '€29',
                     '/mese',
-                    ['Fino a 10 certificazioni', 'Supporto email', 'Dashboard base'],
+                    [
+                      'Fino a 10 certificazioni',
+                      'Supporto email',
+                      'Dashboard base',
+                    ],
                     AppTheme.primaryBlue,
                     false,
                   ),
@@ -1669,7 +1673,11 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
                     'Ideale per aziende in crescita',
                     '€79',
                     '/mese',
-                    ['Fino a 100 certificazioni', 'Supporto prioritario', 'Analytics avanzate'],
+                    [
+                      'Fino a 100 certificazioni',
+                      'Supporto prioritario',
+                      'Analytics avanzate',
+                    ],
                     AppTheme.successGreen,
                     true,
                   ),
@@ -1680,7 +1688,11 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
                     'Per grandi organizzazioni',
                     '€199',
                     '/mese',
-                    ['Certificazioni illimitate', 'Supporto dedicato', 'API personalizzate'],
+                    [
+                      'Certificazioni illimitate',
+                      'Supporto dedicato',
+                      'API personalizzate',
+                    ],
                     AppTheme.purple,
                     false,
                   ),
@@ -1695,7 +1707,11 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
                       'Perfetto per piccole aziende',
                       '€29',
                       '/mese',
-                      ['Fino a 10 certificazioni', 'Supporto email', 'Dashboard base'],
+                      [
+                        'Fino a 10 certificazioni',
+                        'Supporto email',
+                        'Dashboard base',
+                      ],
                       AppTheme.primaryBlue,
                       false,
                     ),
@@ -1708,7 +1724,11 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
                       'Ideale per aziende in crescita',
                       '€79',
                       '/mese',
-                      ['Fino a 100 certificazioni', 'Supporto prioritario', 'Analytics avanzate'],
+                      [
+                        'Fino a 100 certificazioni',
+                        'Supporto prioritario',
+                        'Analytics avanzate',
+                      ],
                       AppTheme.successGreen,
                       true,
                     ),
@@ -1721,7 +1741,11 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
                       'Per grandi organizzazioni',
                       '€199',
                       '/mese',
-                      ['Certificazioni illimitate', 'Supporto dedicato', 'API personalizzate'],
+                      [
+                        'Certificazioni illimitate',
+                        'Supporto dedicato',
+                        'API personalizzate',
+                      ],
                       AppTheme.purple,
                       false,
                     ),
@@ -1789,7 +1813,10 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
           children: [
             if (isPopular)
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: color,
                   borderRadius: BorderRadius.circular(20),
@@ -1814,9 +1841,9 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
             const SizedBox(height: 8),
             Text(
               description,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppTheme.textGray,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppTheme.textGray),
             ),
             const SizedBox(height: 24),
             Row(
@@ -1832,35 +1859,34 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
                 const SizedBox(width: 4),
                 Text(
                   period,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppTheme.textGray,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(color: AppTheme.textGray),
                 ),
               ],
             ),
             const SizedBox(height: 24),
             Column(
-              children: features.map((feature) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.check_circle,
-                      color: color,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        feature,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppTheme.textPrimary,
-                        ),
+              children: features
+                  .map(
+                    (feature) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Row(
+                        children: [
+                          Icon(Icons.check_circle, color: color, size: 20),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              feature,
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(color: AppTheme.textPrimary),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-              )).toList(),
+                  )
+                  .toList(),
             ),
             const SizedBox(height: 24),
             SizedBox(
@@ -1884,9 +1910,7 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
                 ),
                 child: Text(
                   'Scegli Piano',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.w600),
                 ),
               ),
             ),

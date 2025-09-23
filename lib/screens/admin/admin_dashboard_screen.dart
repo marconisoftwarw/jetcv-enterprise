@@ -38,27 +38,27 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-          return ResponsiveLayout(
-            showMenu: true,
-            selectedIndex: _selectedIndex == 0
-                ? 0
-                : (_selectedIndex == 1
-                      ? 2
-                      : 4), // Dashboard, Entità Legali, o Impostazioni
-            onDestinationSelected: (index) {
-              _handleNavigation(index);
-            },
-            title: 'Admin Dashboard',
-            actions: [
-              const AppBarLanguageDropdown(),
-              IconButton(
-                onPressed: () => _showProfileMenu(context),
-                icon: const Icon(Icons.account_circle),
-                tooltip: 'Profile Menu',
-              ),
-            ],
-            hideAppBar: false, // Mostra l'AppBar per l'admin dashboard
-            child: Stack(
+    return ResponsiveLayout(
+      showMenu: true,
+      selectedIndex: _selectedIndex == 0
+          ? 0
+          : (_selectedIndex == 1
+                ? 2
+                : 4), // Dashboard, Entità Legali, o Impostazioni
+      onDestinationSelected: (index) {
+        _handleNavigation(index);
+      },
+      // title: 'Admin Dashboard', // Rimosso
+      // actions: [ // Rimosso
+      //   const AppBarLanguageDropdown(),
+      //   IconButton(
+      //     onPressed: () => _showProfileMenu(context),
+      //     icon: const Icon(Icons.account_circle),
+      //     tooltip: 'Profile Menu',
+      //   ),
+      // ],
+      // hideAppBar: false, // Rimosso - usa il default true
+      child: Stack(
         children: [
           _buildContent(),
           if (_selectedIndex == 1)

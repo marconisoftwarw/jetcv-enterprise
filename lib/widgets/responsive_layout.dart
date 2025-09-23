@@ -25,7 +25,8 @@ class ResponsiveLayout extends StatefulWidget {
     this.onDestinationSelected,
     this.title,
     this.actions,
-    this.hideAppBar = true, // Cambiato da false a true per nascondere l'AppBar di default
+    this.hideAppBar =
+        true, // Cambiato da false a true per nascondere l'AppBar di default
   });
 
   @override
@@ -370,7 +371,7 @@ class ResponsiveText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     TextStyle? responsiveStyle;
-    
+
     switch (textType) {
       case TextType.titleLarge:
         responsiveStyle = ResponsiveTextStyles.titleLarge(context);
@@ -396,9 +397,4 @@ class ResponsiveText extends StatelessWidget {
   }
 }
 
-enum TextType {
-  titleLarge,
-  titleMedium,
-  bodyLarge,
-  bodyMedium,
-}
+enum TextType { titleLarge, titleMedium, bodyLarge, bodyMedium }

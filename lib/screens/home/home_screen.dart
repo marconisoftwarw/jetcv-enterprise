@@ -195,9 +195,9 @@ class _HomeScreenState extends State<HomeScreen> {
           showMenu: true,
           selectedIndex: _selectedIndex,
           onDestinationSelected: _onDestinationSelected,
-          title: 'JetCV',
-          actions: [const AppBarLanguageDropdown()],
-          hideAppBar: false, // Mostra l'AppBar per la home
+          // title: 'JetCV', // Rimosso
+          // actions: [const AppBarLanguageDropdown()], // Rimosso
+          // hideAppBar: false, // Rimosso - usa il default true
           child: _buildContent(authProvider.userType ?? AppUserType.user),
         );
       },

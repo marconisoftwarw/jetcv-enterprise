@@ -81,36 +81,50 @@ class _LegalEntityPricingScreenState extends State<LegalEntityPricingScreen> {
                     color: AppTheme.textPrimary,
                   ),
                 ),
-                SizedBox(height: ResponsiveBreakpoints.isMobile(context) ? 8 : 12),
+                SizedBox(
+                  height: ResponsiveBreakpoints.isMobile(context) ? 8 : 12,
+                ),
                 ResponsiveText(
                   'Seleziona una licenza per continuare con la registrazione della tua entità legale',
                   textType: TextType.bodyLarge,
                   style: TextStyle(color: AppTheme.textGray),
                 ),
-                SizedBox(height: ResponsiveBreakpoints.isMobile(context) ? 24 : 32),
+                SizedBox(
+                  height: ResponsiveBreakpoints.isMobile(context) ? 24 : 32,
+                ),
                 ResponsiveBreakpoints.isMobile(context)
                     ? Column(
-                        children: availablePricings.map(
-                          (pricing) => Padding(
-                            padding: const EdgeInsets.only(bottom: 16),
-                            child: _buildPricingCard(pricing),
-                          ),
-                        ).toList(),
+                        children: availablePricings
+                            .map(
+                              (pricing) => Padding(
+                                padding: const EdgeInsets.only(bottom: 16),
+                                child: _buildPricingCard(pricing),
+                              ),
+                            )
+                            .toList(),
                       )
                     : Row(
-                        children: availablePricings.map(
-                          (pricing) => Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 8),
-                              child: _buildPricingCard(pricing),
-                            ),
-                          ),
-                        ).toList(),
+                        children: availablePricings
+                            .map(
+                              (pricing) => Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                  ),
+                                  child: _buildPricingCard(pricing),
+                                ),
+                              ),
+                            )
+                            .toList(),
                       ),
-                SizedBox(height: ResponsiveBreakpoints.isMobile(context) ? 24 : 32),
+                SizedBox(
+                  height: ResponsiveBreakpoints.isMobile(context) ? 24 : 32,
+                ),
                 if (selectedPricing != null) ...[
                   _buildSelectedPricingSummary(),
-                  SizedBox(height: ResponsiveBreakpoints.isMobile(context) ? 16 : 24),
+                  SizedBox(
+                    height: ResponsiveBreakpoints.isMobile(context) ? 16 : 24,
+                  ),
                   SizedBox(
                     width: double.infinity,
                     child: CustomButton(
@@ -133,13 +147,17 @@ class _LegalEntityPricingScreenState extends State<LegalEntityPricingScreen> {
 
     return ResponsiveCard(
       margin: const EdgeInsets.only(bottom: 16),
-      backgroundColor: isSelected ? AppTheme.primaryBlue.withValues(alpha: 0.1) : AppTheme.pureWhite,
+      backgroundColor: isSelected
+          ? AppTheme.primaryBlue.withValues(alpha: 0.1)
+          : AppTheme.pureWhite,
       border: isSelected
           ? Border.all(color: AppTheme.primaryBlue, width: 2)
           : Border.all(color: AppTheme.borderGray, width: 1),
       child: InkWell(
         onTap: () => setState(() => selectedPricing = pricing),
-        borderRadius: BorderRadius.circular(ResponsiveBreakpoints.isMobile(context) ? 12 : 16),
+        borderRadius: BorderRadius.circular(
+          ResponsiveBreakpoints.isMobile(context) ? 12 : 16,
+        ),
         child: Container(
           padding: ResponsivePadding.card(context),
           child: Column(
@@ -160,7 +178,11 @@ class _LegalEntityPricingScreenState extends State<LegalEntityPricingScreen> {
                             color: AppTheme.textPrimary,
                           ),
                         ),
-                        SizedBox(height: ResponsiveBreakpoints.isMobile(context) ? 4 : 6),
+                        SizedBox(
+                          height: ResponsiveBreakpoints.isMobile(context)
+                              ? 4
+                              : 6,
+                        ),
                         ResponsiveText(
                           pricing.description,
                           textType: TextType.bodyMedium,
