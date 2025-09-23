@@ -44,6 +44,10 @@ class _CertificationListScreenState extends State<CertificationListScreen>
   Map<String, Map<String, dynamic>> _certificationDetails = {};
   bool _isLoadingDetails = false;
 
+  // Filtri
+  String? _selectedUserId;
+  List<Map<String, dynamic>> _availableUsers = [];
+
   @override
   void initState() {
     super.initState();
@@ -194,6 +198,9 @@ class _CertificationListScreenState extends State<CertificationListScreen>
           );
 
       if (mounted) {
+        // Raccoglie tutti gli utenti unici dalle certificazioni
+        _collectAvailableUsers(details);
+        
         setState(() {
           _certificationDetails = details;
           _isLoadingDetails = false;
@@ -208,6 +215,55 @@ class _CertificationListScreenState extends State<CertificationListScreen>
         });
       }
     }
+  }
+
+  void _collectAvailableUsers(Map<String, Map<String, dynamic>> details) {
+    final Set<String> userIds = {};
+    final Map<String, Map<String, dynamic>> usersMap = {};
+
+    // Raccoglie tutti gli utenti unici dalle certificazioni
+    for (final detail in details.values) {
+      final users = detail['users'] as List<dynamic>? ?? [];
+      for (final user in users) {
+        final userId = user['idUser'] as String?;
+        if (userId != null && !userIds.contains(userId)) {
+          userIds.add(userId);
+          usersMap[userId] = {
+            'idUser': userId,
+            'firstName': user['firstName'] ?? '',
+            'lastName': user['lastName'] ?? '',
+            'email': user['email'] ?? '',
+          };
+        }
+      }
+    }
+
+    // Converte in lista ordinata per nome
+    _availableUsers = usersMap.values.toList()
+      ..sort((a, b) {
+        final nameA = '${a['firstName']} ${a['lastName']}'.trim();
+        final nameB = '${b['firstName']} ${b['lastName']}'.trim();
+        return nameA.compareTo(nameB);
+      });
+
+    print('👥 Collected ${_availableUsers.length} unique users');
+  }
+
+  List<Map<String, dynamic>> _filterCertificationsByUser(List<Map<String, dynamic>> certifications) {
+    if (_selectedUserId == null) {
+      return certifications;
+    }
+
+    return certifications.where((cert) {
+      final certificationId = cert['id_certification'] as String?;
+      if (certificationId == null) return false;
+
+      final details = _certificationDetails[certificationId];
+      final users = details?['users'] as List<dynamic>? ?? [];
+
+      // Verifica se l'utente selezionato è presente negli utenti di questa certificazione
+      return users.any((user) => user['idUser'] == _selectedUserId);
+    }).toList();
   }
 
   void _loadMockData() {
@@ -270,7 +326,81 @@ class _CertificationListScreenState extends State<CertificationListScreen>
         _isLoading = false;
         _errorMessage = null;
       });
+      
+      // Aggiunge dati mock per gli utenti
+      _loadMockUserData();
     }
+  }
+
+  void _loadMockUserData() {
+    // Crea dati mock per gli utenti e i dettagli delle certificazioni
+    final mockUsers = [
+      {
+        'idUser': 'user-001',
+        'firstName': 'Marco',
+        'lastName': 'Rossi',
+        'email': 'marco.rossi@example.com',
+      },
+      {
+        'idUser': 'user-002',
+        'firstName': 'Cristina',
+        'lastName': 'Bianchi',
+        'email': 'cristina.bianchi@example.com',
+      },
+      {
+        'idUser': 'user-003',
+        'firstName': 'Giuseppe',
+        'lastName': 'Verdi',
+        'email': 'giuseppe.verdi@example.com',
+      },
+    ];
+
+    // Crea dettagli mock per le certificazioni
+    final mockDetails = <String, Map<String, dynamic>>{
+      'cert-001': {
+        'certification': {
+          'id_certification': 'cert-001',
+          'category': {'name': 'Tech Skills', 'type': 'standard'},
+          'title': 'Certificazione React',
+          'description': 'Certificazione avanzata per React e JavaScript moderno',
+        },
+        'users': [mockUsers[0], mockUsers[1]], // Marco e Cristina
+      },
+      'cert-002': {
+        'certification': {
+          'id_certification': 'cert-002',
+          'category': {'name': 'Design Skills', 'type': 'standard'},
+          'title': 'UI/UX Design',
+          'description': 'Certificazione per design di interfacce utente',
+        },
+        'users': [mockUsers[1]], // Solo Cristina
+      },
+      'cert-003': {
+        'certification': {
+          'id_certification': 'cert-003',
+          'category': {'name': 'Soft Skills', 'type': 'standard'},
+          'title': 'Leadership',
+          'description': 'Certificazione per competenze di leadership',
+        },
+        'users': [mockUsers[0], mockUsers[2]], // Marco e Giuseppe
+      },
+      'cert-004': {
+        'certification': {
+          'id_certification': 'cert-004',
+          'category': {'name': 'Leadership', 'type': 'standard'},
+          'title': 'Project Management',
+          'description': 'Certificazione per gestione progetti',
+        },
+        'users': [mockUsers[2]], // Solo Giuseppe
+      },
+    };
+
+    // Raccoglie gli utenti disponibili
+    _collectAvailableUsers(mockDetails);
+
+    setState(() {
+      _certificationDetails = mockDetails;
+    });
   }
 
   @override
@@ -373,10 +503,10 @@ class _CertificationListScreenState extends State<CertificationListScreen>
           children: [
             Expanded(
               child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
                     l10n.getString('certifications'),
                     style: TextStyle(
                       color: Colors.black87,
@@ -386,20 +516,20 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                     ),
                   ),
                   const SizedBox(height: 2),
-                  Text(
+            Text(
                     l10n.getString('manage_certifications'),
                     style: TextStyle(
                       color: Colors.grey[600],
                       fontSize: isTablet ? 14 : 13,
                       fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                ],
               ),
             ),
+          ],
+        ),
+      ),
             Consumer<AuthProvider>(
-              builder: (context, authProvider, child) {
-                final user = authProvider.currentUser;
+            builder: (context, authProvider, child) {
+              final user = authProvider.currentUser;
                 return Container(
                   width: 36,
                   height: 36,
@@ -416,19 +546,19 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                     ],
                   ),
                   child: Center(
-                    child: Text(
+                child: Text(
                       user?.initials ?? l10n.getString('unknown_user').substring(0, 1).toUpperCase(),
-                      style: TextStyle(
+                  style: TextStyle(
                         color: Colors.white,
-                        fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w600,
                         fontSize: 14,
                       ),
-                    ),
                   ),
-                );
-              },
-            ),
-          ],
+                ),
+              );
+            },
+        ),
+      ],
         ),
       ),
     );
@@ -459,13 +589,13 @@ class _CertificationListScreenState extends State<CertificationListScreen>
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const CreateCertificationScreen(),
-                    ),
-                  );
-                },
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CreateCertificationScreen(),
+                  ),
+                );
+              },
                 icon: Icon(Icons.add, size: 20),
                 label: Text(
                   l10n.getString('create_new_certification'),
@@ -474,9 +604,9 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primaryBlue,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
+                padding: const EdgeInsets.symmetric(
                     vertical: 14,
-                    horizontal: 20,
+                  horizontal: 20,
                   ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -486,6 +616,112 @@ class _CertificationListScreenState extends State<CertificationListScreen>
               ),
             ),
             const SizedBox(height: 20),
+            
+            // Filtro utenti
+            if (_availableUsers.isNotEmpty) ...[
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey[300]!),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.person_search_rounded,
+                      size: 20,
+                      color: AppTheme.primaryBlue,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      l10n.getString('filter_by_user'),
+                      style: TextStyle(
+                        color: Colors.grey[700],
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: _selectedUserId,
+                          hint: Text(
+                            l10n.getString('all_users'),
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 14,
+                            ),
+                          ),
+                          isExpanded: true,
+                          icon: Icon(
+                            Icons.keyboard_arrow_down_rounded,
+                            color: AppTheme.primaryBlue,
+                          ),
+                          items: [
+                            DropdownMenuItem<String>(
+                              value: null,
+                              child: Text(
+                                l10n.getString('all_users'),
+                                style: TextStyle(
+                                  color: Colors.grey[700],
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                            ..._availableUsers.map((user) {
+                              final firstName = user['firstName'] ?? '';
+                              final lastName = user['lastName'] ?? '';
+                              final email = user['email'] ?? '';
+                              
+                              String displayName = '';
+                              if (firstName.isNotEmpty && lastName.isNotEmpty) {
+                                displayName = '$firstName $lastName';
+                              } else if (firstName.isNotEmpty) {
+                                displayName = firstName;
+                              } else if (lastName.isNotEmpty) {
+                                displayName = lastName;
+                              } else if (email.isNotEmpty) {
+                                displayName = email.split('@').first;
+                              } else {
+                                displayName = l10n.getString('unknown_user');
+                              }
+                              
+                              return DropdownMenuItem<String>(
+                                value: user['idUser'],
+                                child: Text(
+                                  displayName,
+                                  style: TextStyle(
+                                    color: Colors.grey[700],
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ],
+                          onChanged: (String? value) {
+                            setState(() {
+                              _selectedUserId = value;
+                            });
+                          },
+                ),
+              ),
+            ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+            
             // Tab Navigation - Stile LinkedIn
             Container(
               decoration: BoxDecoration(
@@ -495,30 +731,30 @@ class _CertificationListScreenState extends State<CertificationListScreen>
               ),
               child: Row(
                 children: [
-                  Expanded(
+            Expanded(
                     child: _buildLinkedInTabButton(
                       l10n.getString('sent_certifications'),
-                      _tabController!.length > 0 && _tabController!.index == 0,
-                      () {
+                _tabController!.length > 0 && _tabController!.index == 0,
+                () {
                         if (_tabController != null &&
                             _tabController!.length > 0) {
-                          _tabController!.animateTo(0);
-                        }
-                      },
-                    ),
-                  ),
-                  Expanded(
+                    _tabController!.animateTo(0);
+                  }
+                },
+              ),
+            ),
+            Expanded(
                     child: _buildLinkedInTabButton(
                       l10n.getString('closed_certifications'),
-                      _tabController!.length > 1 && _tabController!.index == 1,
-                      () {
+                _tabController!.length > 1 && _tabController!.index == 1,
+                () {
                         if (_tabController != null &&
                             _tabController!.length > 1) {
-                          _tabController!.animateTo(1);
-                        }
-                      },
-                    ),
-                  ),
+                    _tabController!.animateTo(1);
+                  }
+                },
+              ),
+            ),
                 ],
               ),
             ),
@@ -816,7 +1052,8 @@ class _CertificationListScreenState extends State<CertificationListScreen>
       return _buildEmptyState();
     }
 
-    return _buildCertificationsGrid(_sentCertifications, isTablet);
+    final filteredCertifications = _filterCertificationsByUser(_sentCertifications);
+    return _buildCertificationsGrid(filteredCertifications, isTablet);
   }
 
   Widget _buildClosedTab() {
@@ -843,8 +1080,9 @@ class _CertificationListScreenState extends State<CertificationListScreen>
       return _buildEmptyState();
     }
 
+    final filteredCertifications = _filterCertificationsByUser(allClosedCertifications);
     return _buildCertificationsGrid(
-      allClosedCertifications,
+      filteredCertifications,
       isTablet,
       forceClosedStatus: true,
     );
@@ -1085,16 +1323,16 @@ class _CertificationListScreenState extends State<CertificationListScreen>
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
+        decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [Colors.white, Colors.grey[50]!],
         ),
-        borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.grey[200]!, width: 1),
-        boxShadow: [
-          BoxShadow(
+          boxShadow: [
+            BoxShadow(
             color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 20,
             offset: const Offset(0, 4),
@@ -1103,11 +1341,11 @@ class _CertificationListScreenState extends State<CertificationListScreen>
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
-            offset: const Offset(0, 2),
+              offset: const Offset(0, 2),
             spreadRadius: 0,
-          ),
-        ],
-      ),
+            ),
+          ],
+        ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
         child: Container(
@@ -1120,16 +1358,16 @@ class _CertificationListScreenState extends State<CertificationListScreen>
           ),
           child: Padding(
             padding: const EdgeInsets.all(20),
-            child: Column(
-              children: [
+        child: Column(
+          children: [
                 // Header con status e icona
                 Row(
                   children: [
                     // Icona categoria con gradiente
-                    Container(
+            Container(
                       width: 64,
                       height: 64,
-                      decoration: BoxDecoration(
+              decoration: BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
@@ -1162,13 +1400,13 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                         children: [
                           // Status badge moderno
                           Row(
-                            children: [
-                              Container(
+                children: [
+                  Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 16,
                                   vertical: 8,
                                 ),
-                                decoration: BoxDecoration(
+                    decoration: BoxDecoration(
                                   gradient: LinearGradient(
                                     colors: [
                                       statusColor,
@@ -1184,16 +1422,16 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                                     ),
                                   ],
                                 ),
-                                child: Text(
-                                  statusText,
+                    child: Text(
+                      statusText,
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w600,
                                     fontSize: 12,
                                     letterSpacing: 0.5,
-                                  ),
-                                ),
-                              ),
+                      ),
+                    ),
+                  ),
                             ],
                           ),
                           const SizedBox(height: 12),
@@ -1245,7 +1483,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                 // Descrizione in box separato
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
@@ -1258,9 +1496,9 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                       ),
                     ],
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                       Row(
                         children: [
                           Icon(
@@ -1269,7 +1507,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                             color: Colors.grey[600],
                           ),
                           const SizedBox(width: 6),
-                          Text(
+                    Text(
                             l10n.getString('certification_description'),
                             style: TextStyle(
                               color: Colors.grey[600],
@@ -1278,9 +1516,9 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                             ),
                           ),
                         ],
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
                         description,
                         style: TextStyle(
                           color: Colors.grey[700],
@@ -1358,7 +1596,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                             color: AppTheme.primaryBlue,
                           ),
                           const SizedBox(width: 6),
-                          Text(
+                    Text(
                             '$actualUserCount',
                             style: TextStyle(
                               color: AppTheme.primaryBlue,
@@ -1388,17 +1626,17 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                             color: Colors.grey[600],
                           ),
                           const SizedBox(width: 6),
-                          Text(
-                            _formatDate(createdAt),
+                    Text(
+                      _formatDate(createdAt),
                             style: TextStyle(
                               color: Colors.grey[700],
                               fontSize: 13,
                               fontWeight: FontWeight.w500,
                             ),
-                          ),
-                        ],
-                      ),
                     ),
+                  ],
+                ),
+              ),
                   ],
                 ),
 
