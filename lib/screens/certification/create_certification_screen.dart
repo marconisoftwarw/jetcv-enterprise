@@ -250,7 +250,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           Expanded(
             child: PageView(
               controller: _pageController,
-              physics: const NeverScrollableScrollPhysics(), // Disabilita lo swipe
+              physics:
+                  const NeverScrollableScrollPhysics(), // Disabilita lo swipe
               onPageChanged: (index) {
                 setState(() {
                   _currentStep = index;

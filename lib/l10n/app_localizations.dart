@@ -218,7 +218,9 @@ class AppLocalizations {
       'no_data': 'N/A',
       'filter_by_user': 'Filtra per utente',
       'all_users': 'Tutti gli utenti',
-      'certifier_account_info': 'Verrà creata l\'utenza per il certificatore che potrà accedere al sistema con le credenziali fornite',
+      'users': 'Utenti',
+      'certifier_account_info':
+          'Verrà creata l\'utenza per il certificatore che potrà accedere al sistema con le credenziali fornite',
       'legal_entities': 'Enti Legali',
       'analytics': 'Analytics',
       'user_management': 'Gestione Utenti',
@@ -906,7 +908,9 @@ class AppLocalizations {
       'no_data': 'N/A',
       'filter_by_user': 'Filter by user',
       'all_users': 'All users',
-      'certifier_account_info': 'A user account will be created for the certifier who will be able to access the system with the provided credentials',
+      'users': 'Users',
+      'certifier_account_info':
+          'A user account will be created for the certifier who will be able to access the system with the provided credentials',
       'profile': 'Profile',
       'open_menu': 'Open menu',
       'legal_entity': 'Legal Entities',
@@ -1452,7 +1456,9 @@ class AppLocalizations {
       'no_data': 'N/V',
       'filter_by_user': 'Nach Benutzer filtern',
       'all_users': 'Alle Benutzer',
-      'certifier_account_info': 'Es wird ein Benutzerkonto für den Zertifizierer erstellt, der mit den bereitgestellten Anmeldedaten auf das System zugreifen kann',
+      'users': 'Benutzer',
+      'certifier_account_info':
+          'Es wird ein Benutzerkonto für den Zertifizierer erstellt, der mit den bereitgestellten Anmeldedaten auf das System zugreifen kann',
       'profile': 'Profil',
       'open_menu': 'Menü öffnen',
       'legal_entity': 'Rechtsträger',
@@ -1975,7 +1981,9 @@ class AppLocalizations {
       'no_data': 'N/A',
       'filter_by_user': 'Filtrer par utilisateur',
       'all_users': 'Tous les utilisateurs',
-      'certifier_account_info': 'Un compte utilisateur sera créé pour le certificateur qui pourra accéder au système avec les identifiants fournis',
+      'users': 'Utilisateurs',
+      'certifier_account_info':
+          'Un compte utilisateur sera créé pour le certificateur qui pourra accéder au système avec les identifiants fournis',
       'profile': 'Profil',
       'open_menu': 'Ouvrir le menu',
       'legal_entity': 'Entités Légales',
