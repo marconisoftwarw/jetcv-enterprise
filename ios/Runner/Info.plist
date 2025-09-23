@@ -50,6 +50,10 @@
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Questa app utilizza la posizione per creare certificazioni geolocalizzate.</string>
 	
+	<!-- Permessi per la camera e QR scanning -->
+	<key>NSCameraUsageDescription</key>
+	<string>Questa app utilizza la camera per scansionare codici QR per le certificazioni.</string>
+	
 	<!-- OAuth URL Scheme for Google Sign-In -->
 	<key>CFBundleURLTypes</key>
 	<array>

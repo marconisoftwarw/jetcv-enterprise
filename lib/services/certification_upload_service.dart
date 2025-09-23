@@ -26,6 +26,8 @@ class CertificationUploadService {
     String? closedAt,
     List<Map<String, dynamic>>? certificationUsers,
     List<XFile>? mediaFiles,
+    List<Map<String, String>>?
+    mediaMetadata, // title e description per ogni media
     String? acquisitionType,
     String? capturedAt,
     String? description,
@@ -107,9 +109,28 @@ class CertificationUploadService {
         request.fields['users_json'] = json.encode(certificationUsers);
       }
 
-      // Aggiungi i file media
+      // Aggiungi i file media con metadati
+      print('📝 Processing ${mediaFiles.length} media files with metadata...');
+      if (mediaMetadata != null) {
+        print('📝 Media metadata provided: ${mediaMetadata.length} items');
+        for (int j = 0; j < mediaMetadata.length; j++) {
+          print('  📝 Metadata $j: ${mediaMetadata[j]}');
+        }
+      } else {
+        print('⚠️ No media metadata provided');
+      }
+
       for (int i = 0; i < mediaFiles.length; i++) {
         final xFile = mediaFiles[i];
+
+        // Ottieni i metadati per questo file (se disponibili)
+        Map<String, String>? metadata = null;
+        if (mediaMetadata != null && i < mediaMetadata.length) {
+          metadata = mediaMetadata[i];
+          print('📝 Using metadata for file $i: $metadata');
+        } else {
+          print('⚠️ No metadata for file $i');
+        }
 
         try {
           final fileBytes = await xFile.readAsBytes();
@@ -137,9 +158,39 @@ class CertificationUploadService {
           );
 
           request.files.add(multipartFile);
+
+          // Aggiungi i metadati per questo file
+          if (metadata != null) {
+            if (metadata['title'] != null && metadata['title']!.isNotEmpty) {
+              final newTitle = request.fields['media_titles'] != null
+                  ? '${request.fields['media_titles']},${metadata['title']}'
+                  : metadata['title']!;
+              request.fields['media_titles'] = newTitle;
+              print('📝 Added title to request: "$newTitle"');
+            }
+            if (metadata['description'] != null &&
+                metadata['description']!.isNotEmpty) {
+              final newDescription =
+                  request.fields['media_descriptions'] != null
+                  ? '${request.fields['media_descriptions']},${metadata['description']}'
+                  : metadata['description']!;
+              request.fields['media_descriptions'] = newDescription;
+              print('📝 Added description to request: "$newDescription"');
+            }
+          } else {
+            print(
+              '⚠️ No metadata available for file $i, skipping title/description',
+            );
+          }
+
           print(
             '📎 Added media file: $fileName (${fileBytes.length} bytes, $contentType)',
           );
+          if (metadata != null) {
+            print(
+              '  📝 Metadata: title="${metadata['title']}", description="${metadata['description']}"',
+            );
+          }
         } catch (fileError) {
           print('❌ Error reading media file ${i}: $fileError');
           continue;
@@ -150,6 +201,22 @@ class CertificationUploadService {
       print('🌐 URL: ${request.url}');
       print('📋 Fields: ${request.fields}');
       print('📁 Files: ${request.files.length}');
+
+      // Debug specifico per i metadati
+      if (request.fields.containsKey('media_titles')) {
+        print(
+          '✅ media_titles field present: "${request.fields['media_titles']}"',
+        );
+      } else {
+        print('❌ media_titles field missing');
+      }
+      if (request.fields.containsKey('media_descriptions')) {
+        print(
+          '✅ media_descriptions field present: "${request.fields['media_descriptions']}"',
+        );
+      } else {
+        print('❌ media_descriptions field missing');
+      }
 
       // Invia la richiesta
       final streamedResponse = await request.send();

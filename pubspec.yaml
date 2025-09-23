@@ -68,6 +68,10 @@ dependencies:
   
   # Geolocation
   geolocator: ^11.0.0
+  geocoding: ^3.0.0
+  
+  # QR Code Scanning
+  mobile_scanner: ^5.0.1
   
   # WebView - Removed, using url_launcher instead
   

@@ -49,27 +49,35 @@ class Location {
 
   factory Location.fromJson(Map<String, dynamic> json) {
     return Location(
-      idLocation: json['id_location'],
-      idUser: json['id_user'],
-      acquiredAt: DateTime.parse(json['acquired_at']),
-      latitude: json['latitude'].toDouble(),
-      longitude: json['longitude'].toDouble(),
-      accuracyM: json['accuracy_m']?.toDouble(),
-      isMocked: json['is_mocked'],
-      altitude: json['altitude']?.toDouble(),
-      altitudeAccuracyM: json['altitude_accuracy_m']?.toDouble(),
-      name: json['name'],
-      street: json['street'],
-      locality: json['locality'],
-      subLocality: json['sub_locality'],
-      administrativeArea: json['administrative_area'],
-      subAdministrativeArea: json['sub_administrative_area'],
-      postalCode: json['postal_code'],
-      isoCountryCode: json['iso_country_code'],
-      country: json['country'],
-      thoroughfare: json['thoroughfare'],
-      subThoroughfare: json['sub_thoroughfare'],
-      createdAt: DateTime.parse(json['created_at']),
+      idLocation: json['id_location'] as String,
+      idUser: json['id_user'] as String,
+      acquiredAt: DateTime.parse(json['acquired_at'] as String),
+      latitude: (json['latitude'] as num).toDouble(),
+      longitude: (json['longitude'] as num).toDouble(),
+      accuracyM: json['accuracy_m'] != null
+          ? (json['accuracy_m'] as num).toDouble()
+          : null,
+      isMocked: json['is_mocked'] as bool?,
+      altitude: json['altitude'] != null
+          ? (json['altitude'] as num).toDouble()
+          : null,
+      altitudeAccuracyM: json['altitude_accuracy_m'] != null
+          ? (json['altitude_accuracy_m'] as num).toDouble()
+          : null,
+      name: json['name'] as String?,
+      street: json['street'] as String?,
+      locality: json['locality'] as String?,
+      subLocality: json['sub_locality'] as String?,
+      administrativeArea: json['administrative_area'] as String?,
+      subAdministrativeArea: json['sub_administrative_area'] as String?,
+      postalCode: json['postal_code'] as String?,
+      isoCountryCode: json['iso_country_code'] as String?,
+      country: json['country'] as String?,
+      thoroughfare: json['thoroughfare'] as String?,
+      subThoroughfare: json['sub_thoroughfare'] as String?,
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'] as String)
+          : DateTime.now(),
     );
   }
 

@@ -1,0 +1,10 @@
+{
+  "user_id": "test_user_123",
+  "email": "test@example.com",
+  "first_name": "Mario",
+  "last_name": "Rossi",
+  "phone": "+39 123 456 7890",
+  "full_name": "Mario Rossi",
+  "company": "Test Company",
+  "role": "Developer"
+}

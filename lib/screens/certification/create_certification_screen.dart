@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 import 'dart:typed_data';
+import 'dart:convert';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:flutter/foundation.dart';
+import 'package:uuid/uuid.dart';
+import '../qr_scanner/qr_scanner_screen.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/enterprise_card.dart';
 import '../../widgets/neon_button.dart';
 import '../../widgets/enterprise_text_field.dart';
 import '../../l10n/app_localizations.dart';
+import '../../models/user.dart';
 import '../../services/certification_edge_service.dart';
 import '../../services/certification_media_service.dart';
 import '../../services/certification_upload_service.dart';
@@ -75,6 +83,13 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   Map<String, Map<String, String>> _userFieldValues =
       {}; // user_id -> field_name -> value
 
+  // Media certificativi per utente
+  Map<String, List<MediaItem>> _userCertificationMedia =
+      {}; // user_id -> List<MediaItem>
+
+  // GPS Location
+  bool _isLoadingLocation = false;
+
   @override
   void initState() {
     super.initState();
@@ -90,6 +105,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     _loadCertificationFields();
     // Carica le legal entities dell'utente
     _loadLegalEntities();
+    // Rileva automaticamente la posizione all'avvio
+    _getCurrentLocation();
   }
 
   Future<void> _loadCategories() async {
@@ -839,15 +856,92 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                   ),
                 ],
               ),
-              child: EnterpriseTextField(
-                controller: _locationController,
-                label: l10n.getString('location'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Inserisci il luogo della certificazione';
-                  }
-                  return null;
-                },
+              child: Column(
+                children: [
+                  // Campo di testo per la location
+                  EnterpriseTextField(
+                    controller: _locationController,
+                    label: l10n.getString('location'),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Inserisci il luogo della certificazione';
+                      }
+                      return null;
+                    },
+                  ),
+
+                  // Pulsante per rilevamento GPS automatico
+                  Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.only(
+                      top: 8,
+                      left: 16,
+                      right: 16,
+                      bottom: 16,
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: _isLoadingLocation ? null : _getCurrentLocation,
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 12,
+                            horizontal: 16,
+                          ),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: _isLoadingLocation
+                                  ? [AppTheme.lightGrey, AppTheme.lightGrey]
+                                  : [
+                                      AppTheme.successGreen,
+                                      AppTheme.successGreen.withValues(
+                                        alpha: 0.8,
+                                      ),
+                                    ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              if (_isLoadingLocation)
+                                SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      AppTheme.pureWhite,
+                                    ),
+                                  ),
+                                )
+                              else
+                                Icon(
+                                  Icons.my_location_rounded,
+                                  color: AppTheme.pureWhite,
+                                  size: 18,
+                                ),
+                              const SizedBox(width: 8),
+                              Text(
+                                _isLoadingLocation
+                                    ? 'Rilevamento posizione...'
+                                    : 'Rileva posizione automaticamente',
+                                style: TextStyle(
+                                  color: AppTheme.pureWhite,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 24),
@@ -1985,6 +2079,9 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             ..._certificationUserFields
                 .map((field) => _buildFieldInput(user, field, isTablet))
                 .toList(),
+
+          // Sezione Media Certificativi per questo utente
+          _buildUserCertificationMediaSection(user.idUser, isTablet),
         ],
       ),
     );
@@ -2671,10 +2768,24 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
       // Scegli il servizio appropriato in base alla presenza di media
       Map<String, dynamic>? result;
 
-      if (_mediaFiles.isNotEmpty) {
+      // Raccogli tutti i media (di contesto + degli utenti)
+      List<MediaItem> allMedia = [];
+
+      // Aggiungi i media di contesto
+      allMedia.addAll(_mediaFiles);
+
+      // Aggiungi i media degli utenti
+      for (String userId in _userCertificationMedia.keys) {
+        final userMedia = _userCertificationMedia[userId] ?? [];
+        allMedia.addAll(userMedia);
+      }
+
+      if (allMedia.isNotEmpty) {
         // Se ci sono media, usa il servizio di upload unificato
         print('🚀 Creating certification with media files...');
-        print('📁 Media files to upload: ${_mediaFiles.length}');
+        print('📁 Context media files: ${_mediaFiles.length}');
+        print('📁 User media files: ${allMedia.length - _mediaFiles.length}');
+        print('📁 Total media files: ${allMedia.length}');
 
         result = await CertificationUploadService.createCertificationWithMedia(
           idCertifier: certifierId,
@@ -2687,7 +2798,15 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           certificationUsers: certificationUsers.isNotEmpty
               ? certificationUsers
               : null,
-          mediaFiles: _mediaFiles.map((item) => item.file).toList(),
+          mediaFiles: allMedia.map((item) => item.file).toList(),
+          mediaMetadata: allMedia
+              .map(
+                (item) => {
+                  'title': item.title,
+                  'description': item.description,
+                },
+              )
+              .toList(),
           acquisitionType: 'deferred',
         );
       } else {
@@ -2973,19 +3092,48 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
       final mediaLocationId =
           locationId ?? 'a5196c46-3d57-4e8c-b293-f4dff308a1a0';
 
-      final result = await CertificationMediaService.uploadMedia(
-        certificationId: certificationId,
-        mediaFiles: _mediaFiles.map((item) => item.file).toList(),
-        acquisitionType: 'deferred',
-        capturedAt: DateTime.now().toIso8601String(),
-        idLocation: mediaLocationId,
-        description: 'Media file for certification',
-      );
+      // Raccogli tutti i media (di contesto + degli utenti)
+      List<MediaItem> allMedia = [];
+
+      // Aggiungi i media di contesto
+      allMedia.addAll(_mediaFiles);
+      print('📁 Context media files: ${_mediaFiles.length}');
+
+      // Aggiungi i media degli utenti
+      for (String userId in _userCertificationMedia.keys) {
+        final userMedia = _userCertificationMedia[userId] ?? [];
+        allMedia.addAll(userMedia);
+        print('📁 User $userId media files: ${userMedia.length}');
+      }
+
+      if (allMedia.isEmpty) {
+        print('ℹ️ No media files to upload');
+        return;
+      }
+
+      // Usa il servizio di upload unificato che supporta metadati
+      final result =
+          await CertificationUploadService.createCertificationWithMedia(
+            idCertifier: '', // Non necessario per l'upload di media
+            idLegalEntity: '', // Non necessario per l'upload di media
+            idLocation: mediaLocationId,
+            nUsers: 0, // Non necessario per l'upload di media
+            idCertificationCategory: '', // Non necessario per l'upload di media
+            mediaFiles: allMedia.map((item) => item.file).toList(),
+            mediaMetadata: allMedia
+                .map(
+                  (item) => {
+                    'title': item.title,
+                    'description': item.description,
+                  },
+                )
+                .toList(),
+            acquisitionType: 'deferred',
+            capturedAt: DateTime.now().toIso8601String(),
+          );
 
       if (result != null) {
-        print(
-          '✅ Media uploaded successfully: ${result['data']?.length ?? 0} files',
-        );
+        print('✅ Media uploaded successfully: ${allMedia.length} files');
       } else {
         print('❌ Failed to upload media');
       }
@@ -3093,6 +3241,649 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     setState(() {
       _mediaFiles.removeAt(index);
     });
+  }
+
+  // Metodi per gestire i media certificativi per utente
+  void _addUserCertificationMedia(String userId) async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+      if (image != null) {
+        final mediaItem = MediaItem(file: image, title: '', description: '');
+
+        setState(() {
+          if (_userCertificationMedia[userId] == null) {
+            _userCertificationMedia[userId] = [];
+          }
+          _userCertificationMedia[userId]!.add(mediaItem);
+        });
+
+        // Mostra dialog per modificare titolo e descrizione
+        _showUserMediaEditDialog(
+          userId,
+          mediaItem,
+          _userCertificationMedia[userId]!.length - 1,
+        );
+      }
+    } catch (e) {
+      print('❌ Error picking image for user $userId: $e');
+      _showErrorDialog('Errore nella selezione dell\'immagine. Riprova.');
+    }
+  }
+
+  void _removeUserCertificationMedia(String userId, int index) {
+    setState(() {
+      _userCertificationMedia[userId]?.removeAt(index);
+    });
+  }
+
+  void _showUserMediaEditDialog(String userId, MediaItem mediaItem, int index) {
+    final titleController = TextEditingController(text: mediaItem.title);
+    final descriptionController = TextEditingController(
+      text: mediaItem.description,
+    );
+    final l10n = AppLocalizations.of(context);
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.getString('edit_media')),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            EnterpriseTextField(
+              controller: titleController,
+              label: l10n.getString('title'),
+              hint: 'Inserisci il titolo...',
+            ),
+            const SizedBox(height: 16),
+            EnterpriseTextField(
+              controller: descriptionController,
+              label: l10n.getString('description'),
+              hint: 'Inserisci la descrizione...',
+              maxLines: 3,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.getString('cancel')),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                _userCertificationMedia[userId]![index] = MediaItem(
+                  file: mediaItem.file,
+                  title: titleController.text,
+                  description: descriptionController.text,
+                );
+              });
+              Navigator.of(context).pop();
+            },
+            child: Text(l10n.getString('save')),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Widget per la sezione media certificativi di ogni utente
+  Widget _buildUserCertificationMediaSection(String userId, bool isTablet) {
+    final l10n = AppLocalizations.of(context);
+    final userMedia = _userCertificationMedia[userId] ?? [];
+
+    return Container(
+      margin: const EdgeInsets.only(top: 24),
+      decoration: BoxDecoration(
+        color: AppTheme.pureWhite,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(isTablet ? 28 : 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        AppTheme.primaryBlue,
+                        AppTheme.primaryBlue.withValues(alpha: 0.8),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.verified_user_outlined,
+                    color: AppTheme.pureWhite,
+                    size: isTablet ? 24 : 20,
+                  ),
+                ),
+                SizedBox(width: isTablet ? 16 : 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.getString('certification_media'),
+                        style: TextStyle(
+                          fontSize: isTablet ? 20 : 18,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.primaryBlack,
+                          letterSpacing: -0.3,
+                        ),
+                      ),
+                      SizedBox(height: isTablet ? 2 : 1),
+                      Text(
+                        'Media specifici per questo utente',
+                        style: TextStyle(
+                          fontSize: isTablet ? 14 : 12,
+                          color: AppTheme.textSecondary,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        AppTheme.primaryBlue,
+                        AppTheme.primaryBlue.withValues(alpha: 0.8),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () => _addUserCertificationMedia(userId),
+                      borderRadius: BorderRadius.circular(12),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isTablet ? 20 : 16,
+                          vertical: isTablet ? 12 : 10,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.add_rounded,
+                              color: AppTheme.pureWhite,
+                              size: isTablet ? 20 : 18,
+                            ),
+                            SizedBox(width: isTablet ? 8 : 6),
+                            Text(
+                              l10n.getString('add'),
+                              style: TextStyle(
+                                color: AppTheme.pureWhite,
+                                fontWeight: FontWeight.w600,
+                                fontSize: isTablet ? 14 : 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: isTablet ? 24 : 20),
+            Container(
+              height: isTablet ? 160 : 140,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppTheme.lightGrey.withValues(alpha: 0.3),
+                    AppTheme.lightGrey.withValues(alpha: 0.1),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: AppTheme.borderGrey.withValues(alpha: 0.3),
+                  width: 1,
+                ),
+              ),
+              child: userMedia.isEmpty
+                  ? Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Icon(
+                            Icons.cloud_upload_outlined,
+                            size: isTablet ? 48 : 40,
+                            color: AppTheme.primaryBlue,
+                          ),
+                        ),
+                        SizedBox(height: isTablet ? 16 : 12),
+                        Text(
+                          l10n.getString('add_photos_videos'),
+                          style: TextStyle(
+                            color: AppTheme.textSecondary,
+                            fontSize: isTablet ? 16 : 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        SizedBox(height: isTablet ? 4 : 2),
+                        Text(
+                          'Trascina qui i file o clicca per selezionare',
+                          style: TextStyle(
+                            color: AppTheme.textSecondary.withValues(
+                              alpha: 0.7,
+                            ),
+                            fontSize: isTablet ? 12 : 11,
+                          ),
+                        ),
+                      ],
+                    )
+                  : ListView.builder(
+                      padding: EdgeInsets.all(isTablet ? 12 : 8),
+                      itemCount: userMedia.length,
+                      itemBuilder: (context, index) {
+                        final mediaItem = userMedia[index];
+                        return Container(
+                          margin: EdgeInsets.only(bottom: isTablet ? 16 : 12),
+                          decoration: BoxDecoration(
+                            color: AppTheme.pureWhite,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: AppTheme.borderGrey.withValues(alpha: 0.2),
+                              width: 1,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.08),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              // Anteprima immagine
+                              Container(
+                                width: isTablet ? 90 : 80,
+                                height: isTablet ? 90 : 80,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      AppTheme.lightGrey.withValues(alpha: 0.3),
+                                      AppTheme.lightGrey.withValues(alpha: 0.1),
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(16),
+                                    bottomLeft: Radius.circular(16),
+                                  ),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(16),
+                                    bottomLeft: Radius.circular(16),
+                                  ),
+                                  child: FutureBuilder<Uint8List>(
+                                    future: mediaItem.file.readAsBytes(),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasData) {
+                                        return Image.memory(
+                                          snapshot.data!,
+                                          width: isTablet ? 90 : 80,
+                                          height: isTablet ? 90 : 80,
+                                          fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (context, error, stackTrace) {
+                                                return Icon(
+                                                  Icons.error_outline_rounded,
+                                                  color: AppTheme.errorRed,
+                                                  size: isTablet ? 28 : 24,
+                                                );
+                                              },
+                                        );
+                                      } else {
+                                        return Icon(
+                                          Icons.image_outlined,
+                                          color: AppTheme.textSecondary,
+                                          size: isTablet ? 28 : 24,
+                                        );
+                                      }
+                                    },
+                                  ),
+                                ),
+                              ),
+                              // Contenuto
+                              Expanded(
+                                child: Padding(
+                                  padding: EdgeInsets.all(isTablet ? 16 : 12),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        mediaItem.title.isNotEmpty
+                                            ? mediaItem.title
+                                            : 'Senza titolo',
+                                        style: TextStyle(
+                                          fontSize: isTablet ? 16 : 14,
+                                          fontWeight: FontWeight.w700,
+                                          color: AppTheme.primaryBlack,
+                                          letterSpacing: -0.2,
+                                        ),
+                                      ),
+                                      SizedBox(height: isTablet ? 6 : 4),
+                                      Text(
+                                        mediaItem.description.isNotEmpty
+                                            ? mediaItem.description
+                                            : 'Nessuna descrizione',
+                                        style: TextStyle(
+                                          fontSize: isTablet ? 14 : 12,
+                                          color: AppTheme.textSecondary,
+                                          fontWeight: FontWeight.w400,
+                                          height: 1.4,
+                                        ),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              // Pulsanti azione
+                              Padding(
+                                padding: EdgeInsets.all(isTablet ? 12 : 8),
+                                child: Column(
+                                  children: [
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        color: AppTheme.primaryBlue.withValues(
+                                          alpha: 0.1,
+                                        ),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: IconButton(
+                                        onPressed: () =>
+                                            _showUserMediaEditDialog(
+                                              userId,
+                                              mediaItem,
+                                              index,
+                                            ),
+                                        icon: Icon(
+                                          Icons.edit_outlined,
+                                          color: AppTheme.primaryBlue,
+                                          size: isTablet ? 20 : 18,
+                                        ),
+                                        tooltip: 'Modifica',
+                                      ),
+                                    ),
+                                    SizedBox(height: isTablet ? 8 : 6),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        color: AppTheme.errorRed.withValues(
+                                          alpha: 0.1,
+                                        ),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: IconButton(
+                                        onPressed: () =>
+                                            _removeUserCertificationMedia(
+                                              userId,
+                                              index,
+                                            ),
+                                        icon: Icon(
+                                          Icons.delete_outline,
+                                          color: AppTheme.errorRed,
+                                          size: isTablet ? 20 : 18,
+                                        ),
+                                        tooltip: 'Rimuovi',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Metodi per gestire la posizione GPS
+  Future<void> _getCurrentLocation() async {
+    setState(() {
+      _isLoadingLocation = true;
+    });
+
+    try {
+      // Verifica se i servizi di localizzazione sono abilitati
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        _showErrorDialog(
+          'I servizi di localizzazione sono disabilitati. Abilitali nelle impostazioni.',
+        );
+        return;
+      }
+
+      // Richiedi permessi
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          _showErrorDialog('I permessi di localizzazione sono stati negati.');
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        setState(() {
+          _locationController.text = 'Roma, Italia';
+        });
+        _showErrorDialog(
+          'I permessi di localizzazione sono stati negati permanentemente. Utilizzato Roma come posizione predefinita.',
+        );
+        return;
+      }
+
+      // Ottieni la posizione corrente
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy
+            .medium, // Ridotto da high a medium per maggiore compatibilità
+        timeLimit: const Duration(seconds: 15), // Aumentato timeout
+      );
+
+      // Verifica che le coordinate siano valide
+      if (position.latitude.isNaN || position.longitude.isNaN) {
+        throw Exception('Coordinate non valide ricevute');
+      }
+
+      // Converti le coordinate in indirizzo
+      String address = await _getAddressFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+
+      setState(() {
+        _locationController.text = address;
+        _isLoadingLocation = false;
+      });
+
+      print('📍 Posizione ottenuta: $address');
+    } catch (e) {
+      setState(() {
+        _isLoadingLocation = false;
+      });
+      print('❌ Errore nel rilevamento della posizione: $e');
+
+      // Messaggio di errore più specifico
+      String errorMessage = 'Errore nel rilevamento della posizione.';
+      if (e.toString().contains('timeout')) {
+        errorMessage =
+            'Timeout nel rilevamento della posizione. Utilizzo Roma come posizione predefinita.';
+        // Imposta Roma come posizione predefinita
+        setState(() {
+          _locationController.text = 'Roma, Italia';
+        });
+        return;
+      } else if (e.toString().contains('permission')) {
+        errorMessage =
+            'Permessi di localizzazione non concessi. Utilizzo Roma come posizione predefinita.';
+        // Imposta Roma come posizione predefinita
+        setState(() {
+          _locationController.text = 'Roma, Italia';
+        });
+        return;
+      } else if (e.toString().contains('service')) {
+        errorMessage =
+            'Servizio di localizzazione non disponibile. Utilizzo Roma come posizione predefinita.';
+        // Imposta Roma come posizione predefinita
+        setState(() {
+          _locationController.text = 'Roma, Italia';
+        });
+        return;
+      }
+
+      // Fallback generale: usa Roma
+      setState(() {
+        _locationController.text = 'Roma, Italia';
+      });
+      _showErrorDialog(
+        'Errore nel rilevamento della posizione. Utilizzato Roma come posizione predefinita.',
+      );
+    }
+  }
+
+  Future<String> _getAddressFromCoordinates(double lat, double lng) async {
+    try {
+      // Verifica che le coordinate siano valide
+      if (lat.isNaN || lng.isNaN || lat == 0.0 && lng == 0.0) {
+        print(
+          '❌ Coordinate non valide per reverse geocoding: lat=$lat, lng=$lng',
+        );
+        return 'Roma, Italia';
+      }
+
+      // Su web, usa un fallback più robusto
+      if (kIsWeb) {
+        return await _getAddressFromCoordinatesWeb(lat, lng);
+      }
+
+      List<Placemark> placemarks = await placemarkFromCoordinates(lat, lng);
+
+      if (placemarks.isNotEmpty) {
+        Placemark place = placemarks[0];
+
+        // Costruisci l'indirizzo in formato leggibile
+        List<String> addressParts = [];
+
+        if (place.street != null && place.street!.isNotEmpty) {
+          addressParts.add(place.street!);
+        }
+        if (place.locality != null && place.locality!.isNotEmpty) {
+          addressParts.add(place.locality!);
+        }
+        if (place.administrativeArea != null &&
+            place.administrativeArea!.isNotEmpty) {
+          addressParts.add(place.administrativeArea!);
+        }
+        if (place.country != null && place.country!.isNotEmpty) {
+          addressParts.add(place.country!);
+        }
+
+        String address = addressParts.join(', ');
+        return address.isNotEmpty ? address : 'Roma, Italia';
+      }
+
+      print('⚠️ Nessun risultato dal reverse geocoding per lat=$lat, lng=$lng');
+      return 'Roma, Italia';
+    } catch (e) {
+      print('❌ Errore nel reverse geocoding: $e');
+
+      // Log più dettagliato per debugging
+      if (e.toString().contains('network')) {
+        print('🌐 Errore di rete durante reverse geocoding');
+      } else if (e.toString().contains('timeout')) {
+        print('⏰ Timeout durante reverse geocoding');
+      } else if (e.toString().contains('null')) {
+        print('🔍 Errore null durante reverse geocoding');
+      }
+
+      // Fallback per web
+      if (kIsWeb) {
+        return 'Roma, Italia';
+      }
+
+      return 'Roma, Italia';
+    }
+  }
+
+  /// Fallback method per geocoding su web
+  Future<String> _getAddressFromCoordinatesWeb(double lat, double lng) async {
+    try {
+      // Prova prima con il geocoding normale
+      List<Placemark> placemarks = await placemarkFromCoordinates(lat, lng);
+
+      if (placemarks.isNotEmpty) {
+        Placemark place = placemarks[0];
+
+        // Costruisci l'indirizzo in formato leggibile
+        List<String> addressParts = [];
+
+        if (place.street != null && place.street!.isNotEmpty) {
+          addressParts.add(place.street!);
+        }
+        if (place.locality != null && place.locality!.isNotEmpty) {
+          addressParts.add(place.locality!);
+        }
+        if (place.administrativeArea != null &&
+            place.administrativeArea!.isNotEmpty) {
+          addressParts.add(place.administrativeArea!);
+        }
+        if (place.country != null && place.country!.isNotEmpty) {
+          addressParts.add(place.country!);
+        }
+
+        String address = addressParts.join(', ');
+        return address.isNotEmpty ? address : 'Roma, Italia';
+      }
+
+      // Se non funziona, restituisci Roma
+      return 'Roma, Italia';
+    } catch (e) {
+      print('❌ Errore nel reverse geocoding web: $e');
+      // Fallback finale: restituisci Roma
+      return 'Roma, Italia';
+    }
   }
 
   void _showMediaEditDialog(MediaItem mediaItem, int index) {
@@ -3264,8 +4055,202 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     }
   }
 
-  void _scanQRCode() {
-    // Implement QR code scanning
+  Future<void> _scanQRCode() async {
+    try {
+      // Naviga alla schermata di scansione QR
+      final String? scannedData = await Navigator.push<String>(
+        context,
+        MaterialPageRoute(builder: (context) => const QRScannerScreen()),
+      );
+
+      if (scannedData != null && scannedData.isNotEmpty) {
+        // Processa i dati scansionati
+        await _processScannedQRData(scannedData);
+      } else {
+        // Mostra messaggio se la scansione è stata annullata
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Scansione annullata'),
+              backgroundColor: AppTheme.textSecondary,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      print('❌ Errore nella scansione QR: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Errore nella scansione: $e'),
+            backgroundColor: AppTheme.errorRed,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _processScannedQRData(String scannedData) async {
+    try {
+      print('📱 Dati QR scansionati: $scannedData');
+
+      // Prova a parsare i dati come JSON
+      Map<String, dynamic>? qrData;
+      try {
+        qrData = json.decode(scannedData) as Map<String, dynamic>;
+      } catch (e) {
+        print('⚠️ I dati QR non sono in formato JSON valido');
+      }
+
+      if (qrData != null) {
+        // Se è un JSON, estrai le informazioni utente
+        final userData = _extractUserDataFromQR(qrData);
+        if (userData != null) {
+          await _addUserFromQR(userData);
+        } else {
+          _showQRDataDialog(scannedData);
+        }
+      } else {
+        // Se non è JSON, mostra i dati raw
+        _showQRDataDialog(scannedData);
+      }
+    } catch (e) {
+      print('❌ Errore nel processamento dei dati QR: $e');
+      _showQRDataDialog(scannedData);
+    }
+  }
+
+  Map<String, dynamic>? _extractUserDataFromQR(Map<String, dynamic> qrData) {
+    try {
+      // Cerca campi comuni per i dati utente
+      if (qrData.containsKey('user_id') ||
+          qrData.containsKey('email') ||
+          qrData.containsKey('userId')) {
+        return qrData;
+      }
+
+      // Cerca in strutture nidificate
+      if (qrData.containsKey('user')) {
+        return qrData['user'] as Map<String, dynamic>?;
+      }
+
+      if (qrData.containsKey('data')) {
+        final data = qrData['data'];
+        if (data is Map<String, dynamic>) {
+          return data;
+        }
+      }
+
+      return null;
+    } catch (e) {
+      print('❌ Errore nell\'estrazione dati utente: $e');
+      return null;
+    }
+  }
+
+  Future<void> _addUserFromQR(Map<String, dynamic> userData) async {
+    try {
+      // Crea un oggetto UserData dai dati QR
+      final user = UserData(
+        idUser: userData['user_id'] ?? userData['userId'] ?? const Uuid().v4(),
+        email: userData['email'] ?? 'email@sconosciuta.com', // Email richiesta
+        firstName: userData['first_name'] ?? userData['firstName'],
+        lastName: userData['last_name'] ?? userData['lastName'],
+        phone: userData['phone'],
+        fullName: userData['full_name'] ?? userData['fullName'],
+        createdAt: DateTime.now().toIso8601String(),
+      );
+
+      // Verifica se l'utente è già stato aggiunto
+      final isAlreadyAdded = _addedUsers.any((u) => u.idUser == user.idUser);
+
+      if (isAlreadyAdded) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Utente già aggiunto alla certificazione'),
+              backgroundColor: AppTheme.warningOrange,
+            ),
+          );
+        }
+        return;
+      }
+
+      // Aggiungi l'utente
+      setState(() {
+        _addedUsers.add(user);
+        _userFieldValues[user.idUser] = {};
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Utente ${user.fullName ?? user.email ?? 'Sconosciuto'} aggiunto',
+            ),
+            backgroundColor: AppTheme.successGreen,
+          ),
+        );
+      }
+    } catch (e) {
+      print('❌ Errore nell\'aggiunta utente da QR: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Errore nell\'aggiunta utente: $e'),
+            backgroundColor: AppTheme.errorRed,
+          ),
+        );
+      }
+    }
+  }
+
+  void _showQRDataDialog(String scannedData) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        final l10n = AppLocalizations.of(context);
+        return AlertDialog(
+          title: const Text('Dati QR Scansionati'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Contenuto del codice QR:'),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppTheme.pureWhite.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: SelectableText(
+                    scannedData,
+                    style: const TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Questi dati non sembrano contenere informazioni utente valide. '
+                  'Puoi copiare il contenuto e usarlo manualmente.',
+                  style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Chiudi'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _removeUser() {
