@@ -209,13 +209,26 @@ class _CertifiersContentState extends State<CertifiersContent> {
     if (mounted) {
       setState(() {
         _filteredCertifiers = _certifiersWithUser.where((certifierWithUser) {
-          // Filtro per data di nascita
-          if (_selectedBirthDate != null &&
-              certifierWithUser.user?.dateOfBirth != null) {
-            final userBirthDate = certifierWithUser.user!.dateOfBirth!;
-            if (userBirthDate.year != _selectedBirthDate!.year ||
-                userBirthDate.month != _selectedBirthDate!.month ||
-                userBirthDate.day != _selectedBirthDate!.day) {
+          // Filtro per data di nascita (match esatto sul giorno)
+          if (_selectedBirthDate != null) {
+            final userBirthDate = certifierWithUser.user?.dateOfBirth;
+            // Se l'utente non ha la data di nascita, escludi
+            if (userBirthDate == null) {
+              return false;
+            }
+
+            final selected = DateTime(
+              _selectedBirthDate!.year,
+              _selectedBirthDate!.month,
+              _selectedBirthDate!.day,
+            );
+            final userDobOnly = DateTime(
+              userBirthDate.year,
+              userBirthDate.month,
+              userBirthDate.day,
+            );
+
+            if (userDobOnly != selected) {
               return false;
             }
           }
