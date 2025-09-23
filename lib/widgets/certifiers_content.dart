@@ -886,8 +886,9 @@ class _CertifiersContentState extends State<CertifiersContent> {
               ),
             ),
             selectedItemBuilder: (BuildContext context) {
-              return _availableRoles.map<Widget>((String? role) {
-                return Padding(
+              return [
+                // Per il valore null (all_roles)
+                Padding(
                   padding: EdgeInsets.all(isTablet ? 12 : 10),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -902,7 +903,7 @@ class _CertifiersContentState extends State<CertifiersContent> {
                       ),
                       Flexible(
                         child: Text(
-                          role ?? l10n.getString('all_roles'),
+                          l10n.getString('all_roles'),
                           style: TextStyle(
                             fontSize: isTablet ? 13 : 12,
                             color: AppTheme.primaryBlack,
@@ -915,8 +916,40 @@ class _CertifiersContentState extends State<CertifiersContent> {
                       ),
                     ],
                   ),
-                );
-              }).toList();
+                ),
+                // Per ogni ruolo disponibile
+                ..._availableRoles.map((String role) {
+                  return Padding(
+                    padding: EdgeInsets.all(isTablet ? 12 : 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          l10n.getString('role'),
+                          style: TextStyle(
+                            fontSize: isTablet ? 11 : 10,
+                            color: Colors.grey[600],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        Flexible(
+                          child: Text(
+                            role,
+                            style: TextStyle(
+                              fontSize: isTablet ? 13 : 12,
+                              color: AppTheme.primaryBlack,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.right,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ];
             },
             items: [
               DropdownMenuItem<String?>(
@@ -992,8 +1025,9 @@ class _CertifiersContentState extends State<CertifiersContent> {
               ),
             ),
             selectedItemBuilder: (BuildContext context) {
-              return _availableCities.map<Widget>((String? city) {
-                return Padding(
+              return [
+                // Per il valore null (all_cities)
+                Padding(
                   padding: EdgeInsets.all(isTablet ? 12 : 10),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1008,7 +1042,7 @@ class _CertifiersContentState extends State<CertifiersContent> {
                       ),
                       Flexible(
                         child: Text(
-                          city ?? l10n.getString('all_cities'),
+                          l10n.getString('all_cities'),
                           style: TextStyle(
                             fontSize: isTablet ? 13 : 12,
                             color: AppTheme.primaryBlack,
@@ -1021,8 +1055,40 @@ class _CertifiersContentState extends State<CertifiersContent> {
                       ),
                     ],
                   ),
-                );
-              }).toList();
+                ),
+                // Per ogni città disponibile
+                ..._availableCities.map((String city) {
+                  return Padding(
+                    padding: EdgeInsets.all(isTablet ? 12 : 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          l10n.getString('city'),
+                          style: TextStyle(
+                            fontSize: isTablet ? 11 : 10,
+                            color: Colors.grey[600],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        Flexible(
+                          child: Text(
+                            city,
+                            style: TextStyle(
+                              fontSize: isTablet ? 13 : 12,
+                              color: AppTheme.primaryBlack,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.right,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ];
             },
             items: [
               DropdownMenuItem<String?>(
