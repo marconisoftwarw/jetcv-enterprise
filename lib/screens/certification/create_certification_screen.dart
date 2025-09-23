@@ -43,7 +43,6 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   final _locationController = TextEditingController();
   String _selectedActivityType = '';
   List<MediaItem> _mediaFiles = [];
-  List<MediaItem> _certificationMediaFiles = []; // Media certificativi
 
   // API state
   bool _isCreating = false;
@@ -276,35 +275,51 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     final isTablet = screenWidth > 768;
 
     return Container(
-      padding: EdgeInsets.all(isTablet ? 24 : 16),
-      color: AppTheme.pureWhite,
+      padding: EdgeInsets.symmetric(
+        horizontal: isTablet ? 32 : 20,
+        vertical: isTablet ? 20 : 16,
+      ),
+      decoration: BoxDecoration(
+        color: AppTheme.pureWhite,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: Row(
         children: [
           _buildStepIndicator(
             0,
             l10n.getString('general_info'),
             _currentStep >= 0,
+            _currentStep == 0,
             isTablet,
           ),
-          _buildStepConnector(),
+          _buildStepConnector(_currentStep > 0, isTablet),
           _buildStepIndicator(
             1,
             l10n.getString('users'),
             _currentStep >= 1,
+            _currentStep == 1,
             isTablet,
           ),
-          _buildStepConnector(),
+          _buildStepConnector(_currentStep > 1, isTablet),
           _buildStepIndicator(
             2,
             l10n.getString('results'),
             _currentStep >= 2,
+            _currentStep == 2,
             isTablet,
           ),
-          _buildStepConnector(),
+          _buildStepConnector(_currentStep > 2, isTablet),
           _buildStepIndicator(
             3,
             l10n.getString('review'),
             _currentStep >= 3,
+            _currentStep == 3,
             isTablet,
           ),
         ],
@@ -315,42 +330,79 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   Widget _buildStepIndicator(
     int stepNumber,
     String label,
-    bool isActive,
+    bool isCompleted,
+    bool isCurrent,
     bool isTablet,
   ) {
+    final isActive = isCompleted || isCurrent;
+
     return Column(
       children: [
-        Container(
-          width: isTablet ? 40 : 32,
-          height: isTablet ? 40 : 32,
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          width: isTablet ? 48 : 40,
+          height: isTablet ? 48 : 40,
           decoration: BoxDecoration(
-            color: isActive ? AppTheme.primaryBlack : AppTheme.lightGrey,
+            gradient: isCompleted
+                ? LinearGradient(
+                    colors: [
+                      AppTheme.primaryBlue,
+                      AppTheme.primaryBlue.withValues(alpha: 0.8),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  )
+                : null,
+            color: isCompleted
+                ? null
+                : isCurrent
+                ? AppTheme.primaryBlue.withValues(alpha: 0.1)
+                : AppTheme.lightGrey.withValues(alpha: 0.3),
             shape: BoxShape.circle,
+            border: Border.all(
+              color: isCurrent
+                  ? AppTheme.primaryBlue
+                  : isCompleted
+                  ? AppTheme.primaryBlue
+                  : AppTheme.borderGrey.withValues(alpha: 0.5),
+              width: isCurrent ? 2 : 1,
+            ),
+            boxShadow: isCurrent
+                ? [
+                    BoxShadow(
+                      color: AppTheme.primaryBlue.withValues(alpha: 0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : null,
           ),
           child: Center(
-            child: isActive
+            child: isCompleted
                 ? Icon(
-                    Icons.check,
+                    Icons.check_rounded,
                     color: AppTheme.pureWhite,
                     size: isTablet ? 24 : 20,
                   )
                 : Text(
                     '${stepNumber + 1}',
                     style: TextStyle(
-                      color: AppTheme.primaryBlack,
+                      color: isCurrent
+                          ? AppTheme.primaryBlue
+                          : AppTheme.textSecondary,
                       fontWeight: FontWeight.bold,
                       fontSize: isTablet ? 16 : 14,
                     ),
                   ),
           ),
         ),
-        SizedBox(height: isTablet ? 6 : 4),
+        SizedBox(height: isTablet ? 8 : 6),
         Text(
           label,
           style: TextStyle(
             fontSize: isTablet ? 14 : 12,
             color: isActive ? AppTheme.primaryBlack : AppTheme.textSecondary,
-            fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+            fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w500,
           ),
           textAlign: TextAlign.center,
         ),
@@ -358,15 +410,23 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     );
   }
 
-  Widget _buildStepConnector() {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isTablet = screenWidth > 768;
-
+  Widget _buildStepConnector(bool isCompleted, bool isTablet) {
     return Expanded(
       child: Container(
-        height: isTablet ? 3 : 2,
-        margin: EdgeInsets.symmetric(horizontal: isTablet ? 12 : 8),
-        color: AppTheme.lightGrey,
+        height: isTablet ? 4 : 3,
+        margin: EdgeInsets.symmetric(horizontal: isTablet ? 16 : 12),
+        decoration: BoxDecoration(
+          gradient: isCompleted
+              ? LinearGradient(
+                  colors: [
+                    AppTheme.primaryBlue,
+                    AppTheme.primaryBlue.withValues(alpha: 0.6),
+                  ],
+                )
+              : null,
+          color: isCompleted ? null : AppTheme.lightGrey.withValues(alpha: 0.4),
+          borderRadius: BorderRadius.circular(2),
+        ),
       ),
     );
   }
@@ -375,109 +435,225 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     final l10n = AppLocalizations.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 768;
-    // final isDesktop = screenWidth > 1024;
 
     return SingleChildScrollView(
-      padding: EdgeInsets.all(isTablet ? 24 : 16),
+      padding: EdgeInsets.all(isTablet ? 32 : 20),
       child: Form(
         key: _formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              l10n.getString('general_information'),
-              style: TextStyle(
-                fontSize: isTablet ? 28 : 24,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.primaryBlack,
+            // Header moderno
+            Container(
+              padding: EdgeInsets.all(isTablet ? 24 : 20),
+              decoration: BoxDecoration(
+                color: AppTheme.pureWhite,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
-            ),
-            SizedBox(height: isTablet ? 12 : 8),
-            Text(
-              l10n.getString('enter_main_details'),
-              style: TextStyle(
-                fontSize: isTablet ? 18 : 16,
-                color: AppTheme.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Campo Tipologia - PRIMO CAMPO
-            DropdownButtonFormField<String>(
-              value: _selectedActivityType,
-              decoration: InputDecoration(
-                labelText: l10n.getString('activity_type'),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: isTablet ? 16 : 12,
-                ),
-              ),
-              items: _isLoadingCategories
-                  ? [
-                      DropdownMenuItem<String>(
-                        value: '',
-                        child: Text(
-                          AppLocalizations.of(context).getString('loading'),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              AppTheme.primaryBlue,
+                              AppTheme.primaryBlue.withValues(alpha: 0.8),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          Icons.info_outline_rounded,
+                          color: AppTheme.pureWhite,
+                          size: isTablet ? 24 : 20,
                         ),
                       ),
-                    ]
-                  : _categories.map((CertificationCategoryEdge category) {
-                      return DropdownMenuItem<String>(
-                        value: category.name,
-                        child: Text(category.name),
-                      );
-                    }).toList(),
-              onChanged: _isLoadingCategories
-                  ? null
-                  : (String? newValue) {
-                      if (newValue != null) {
-                        setState(() {
-                          _selectedActivityType = newValue;
-                          // Trova l'ID della categoria selezionata
-                          final selectedCategory = _categories.firstWhere(
-                            (cat) => cat.name == newValue,
-                            orElse: () => _categories.first,
-                          );
-                          _selectedCategoryId =
-                              selectedCategory.idCertificationCategory;
-                          _selectedCategoryName = selectedCategory.name;
-                          print(
-                            '🔍 Selected category: $newValue with ID: $_selectedCategoryId',
-                          );
-                        });
-                      }
-                    },
+                      SizedBox(width: isTablet ? 16 : 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.getString('general_information'),
+                              style: TextStyle(
+                                fontSize: isTablet ? 24 : 20,
+                                fontWeight: FontWeight.w700,
+                                color: AppTheme.primaryBlack,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                            SizedBox(height: isTablet ? 4 : 2),
+                            Text(
+                              l10n.getString('enter_main_details'),
+                              style: TextStyle(
+                                fontSize: isTablet ? 16 : 14,
+                                color: AppTheme.textSecondary,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-            SizedBox(height: isTablet ? 12 : 8),
+            SizedBox(height: isTablet ? 32 : 24),
+
+            // Campo Tipologia - PRIMO CAMPO
+            Container(
+              decoration: BoxDecoration(
+                color: AppTheme.pureWhite,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: DropdownButtonFormField<String>(
+                value: _selectedActivityType,
+                decoration: InputDecoration(
+                  labelText: l10n.getString('activity_type'),
+                  labelStyle: TextStyle(
+                    color: AppTheme.textSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(
+                      color: AppTheme.borderGrey.withValues(alpha: 0.3),
+                      width: 1,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(
+                      color: AppTheme.borderGrey.withValues(alpha: 0.3),
+                      width: 1,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(
+                      color: AppTheme.primaryBlue,
+                      width: 2,
+                    ),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: isTablet ? 20 : 16,
+                    vertical: isTablet ? 20 : 16,
+                  ),
+                  prefixIcon: Icon(
+                    Icons.category_outlined,
+                    color: AppTheme.primaryBlue,
+                    size: isTablet ? 24 : 20,
+                  ),
+                ),
+                items: _isLoadingCategories
+                    ? [
+                        DropdownMenuItem<String>(
+                          value: '',
+                          child: Text(
+                            AppLocalizations.of(context).getString('loading'),
+                          ),
+                        ),
+                      ]
+                    : _categories.map((CertificationCategoryEdge category) {
+                        return DropdownMenuItem<String>(
+                          value: category.name,
+                          child: Text(category.name),
+                        );
+                      }).toList(),
+                onChanged: _isLoadingCategories
+                    ? null
+                    : (String? newValue) {
+                        if (newValue != null) {
+                          setState(() {
+                            _selectedActivityType = newValue;
+                            // Trova l'ID della categoria selezionata
+                            final selectedCategory = _categories.firstWhere(
+                              (cat) => cat.name == newValue,
+                              orElse: () => _categories.first,
+                            );
+                            _selectedCategoryId =
+                                selectedCategory.idCertificationCategory;
+                            _selectedCategoryName = selectedCategory.name;
+                            print(
+                              '🔍 Selected category: $newValue with ID: $_selectedCategoryId',
+                            );
+                          });
+                        }
+                      },
+              ),
+            ),
+            SizedBox(height: isTablet ? 20 : 16),
 
             // Label per contattare il supporto se il tipo attività non è incluso
             Container(
-              padding: EdgeInsets.all(isTablet ? 16 : 12),
+              padding: EdgeInsets.all(isTablet ? 20 : 16),
               decoration: BoxDecoration(
-                color: AppTheme.lightBlue.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: AppTheme.primaryBlue.withValues(alpha: 0.3),
+                gradient: LinearGradient(
+                  colors: [
+                    AppTheme.primaryBlue.withValues(alpha: 0.05),
+                    AppTheme.primaryBlue.withValues(alpha: 0.02),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: AppTheme.primaryBlue.withValues(alpha: 0.2),
+                  width: 1,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.info_outline,
-                    color: AppTheme.primaryBlue,
-                    size: isTablet ? 20 : 18,
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      Icons.lightbulb_outline_rounded,
+                      color: AppTheme.primaryBlue,
+                      size: isTablet ? 20 : 18,
+                    ),
                   ),
-                  SizedBox(width: isTablet ? 12 : 8),
+                  SizedBox(width: isTablet ? 16 : 12),
                   Expanded(
                     child: RichText(
                       text: TextSpan(
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        style: TextStyle(
                           color: AppTheme.textGray,
-                          fontSize: isTablet ? 14 : 12,
+                          fontSize: isTablet ? 14 : 13,
+                          height: 1.5,
+                          fontWeight: FontWeight.w400,
                         ),
                         children: [
                           TextSpan(
@@ -489,6 +665,10 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                             style: TextStyle(
                               color: AppTheme.primaryBlue,
                               fontWeight: FontWeight.w600,
+                              decoration: TextDecoration.underline,
+                              decorationColor: AppTheme.primaryBlue.withValues(
+                                alpha: 0.3,
+                              ),
                             ),
                           ),
                         ],
@@ -501,102 +681,234 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             SizedBox(height: isTablet ? 20 : 16),
 
             // Campo Titolo - SECONDO CAMPO
-            EnterpriseTextField(
-              controller: _titleController,
-              label: l10n.getString('certification_title'),
-              hint: l10n.getString('certification_title'),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Inserisci il titolo della certificazione';
-                }
-                return null;
-              },
+            Container(
+              decoration: BoxDecoration(
+                color: AppTheme.pureWhite,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: EnterpriseTextField(
+                controller: _titleController,
+                label: l10n.getString('certification_title'),
+                hint: l10n.getString('certification_title'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Inserisci il titolo della certificazione';
+                  }
+                  return null;
+                },
+              ),
             ),
-            SizedBox(height: isTablet ? 20 : 16),
+            SizedBox(height: isTablet ? 24 : 20),
 
             // Campo Organizzazione - TERZO CAMPO
-            DropdownButtonFormField<String>(
-              value: _selectedLegalEntityId,
-              decoration: InputDecoration(
-                labelText: l10n.getString('issuing_organization'),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: isTablet ? 16 : 12,
-                ),
+            Container(
+              decoration: BoxDecoration(
+                color: AppTheme.pureWhite,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
-              items: _isLoadingLegalEntities
-                  ? [
-                      DropdownMenuItem<String>(
-                        value: null,
-                        child: Text(
-                          AppLocalizations.of(
-                            context,
-                          ).getString('loading_legal_entities'),
+              child: DropdownButtonFormField<String>(
+                value: _selectedLegalEntityId,
+                decoration: InputDecoration(
+                  labelText: l10n.getString('issuing_organization'),
+                  labelStyle: TextStyle(
+                    color: AppTheme.textSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(
+                      color: AppTheme.borderGrey.withValues(alpha: 0.3),
+                      width: 1,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(
+                      color: AppTheme.borderGrey.withValues(alpha: 0.3),
+                      width: 1,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(
+                      color: AppTheme.primaryBlue,
+                      width: 2,
+                    ),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: isTablet ? 20 : 16,
+                    vertical: isTablet ? 20 : 16,
+                  ),
+                  prefixIcon: Icon(
+                    Icons.business_outlined,
+                    color: AppTheme.primaryBlue,
+                    size: isTablet ? 24 : 20,
+                  ),
+                ),
+                items: _isLoadingLegalEntities
+                    ? [
+                        DropdownMenuItem<String>(
+                          value: null,
+                          child: Text(
+                            AppLocalizations.of(
+                              context,
+                            ).getString('loading_legal_entities'),
+                          ),
                         ),
-                      ),
-                    ]
-                  : _legalEntities.map((legalEntity) {
-                      return DropdownMenuItem<String>(
-                        value: legalEntity.idLegalEntity,
-                        child: Text(legalEntity.legalName ?? 'N/A'),
-                      );
-                    }).toList(),
-              onChanged: _isLoadingLegalEntities
-                  ? null
-                  : (String? newValue) {
-                      if (newValue != null) {
-                        setState(() {
-                          _selectedLegalEntityId = newValue;
-                          // Trova il nome della legal entity selezionata
-                          final selectedEntity = _legalEntities.firstWhere(
-                            (entity) => entity.idLegalEntity == newValue,
-                            orElse: () => _legalEntities.first,
-                          );
-                          _legalEntityName = selectedEntity.legalName;
-                          print('🔍 Selected legal entity: $_legalEntityName');
-                        });
-                      }
-                    },
+                      ]
+                    : _legalEntities.map((legalEntity) {
+                        return DropdownMenuItem<String>(
+                          value: legalEntity.idLegalEntity,
+                          child: Text(legalEntity.legalName ?? 'N/A'),
+                        );
+                      }).toList(),
+                onChanged: _isLoadingLegalEntities
+                    ? null
+                    : (String? newValue) {
+                        if (newValue != null) {
+                          setState(() {
+                            _selectedLegalEntityId = newValue;
+                            // Trova il nome della legal entity selezionata
+                            final selectedEntity = _legalEntities.firstWhere(
+                              (entity) => entity.idLegalEntity == newValue,
+                              orElse: () => _legalEntities.first,
+                            );
+                            _legalEntityName = selectedEntity.legalName;
+                            print(
+                              '🔍 Selected legal entity: $_legalEntityName',
+                            );
+                          });
+                        }
+                      },
+              ),
             ),
-            SizedBox(height: isTablet ? 20 : 16),
+            SizedBox(height: isTablet ? 24 : 20),
 
             // Campo Descrizione - QUARTO CAMPO
-            EnterpriseTextField(
-              controller: _descriptionController,
-              label: l10n.getString('description'),
-              hint: l10n.getString('description'),
-              maxLines: 4,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Inserisci una descrizione';
-                }
-                return null;
-              },
+            Container(
+              decoration: BoxDecoration(
+                color: AppTheme.pureWhite,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: EnterpriseTextField(
+                controller: _descriptionController,
+                label: l10n.getString('description'),
+                hint: l10n.getString('description'),
+                maxLines: 4,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Inserisci una descrizione';
+                  }
+                  return null;
+                },
+              ),
             ),
-            SizedBox(height: isTablet ? 20 : 16),
+            SizedBox(height: isTablet ? 24 : 20),
 
-            EnterpriseTextField(
-              controller: _locationController,
-              label: l10n.getString('location'),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Inserisci il luogo della certificazione';
-                }
-                return null;
-              },
+            // Campo Location - QUINTO CAMPO
+            Container(
+              decoration: BoxDecoration(
+                color: AppTheme.pureWhite,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: EnterpriseTextField(
+                controller: _locationController,
+                label: l10n.getString('location'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Inserisci il luogo della certificazione';
+                  }
+                  return null;
+                },
+              ),
             ),
             const SizedBox(height: 24),
 
             _buildMediaSection(),
             SizedBox(height: isTablet ? 40 : 32),
 
-            NeonButton(
-              onPressed: _nextStep,
-              text: l10n.getString('continue'),
-              icon: Icons.arrow_forward,
+            // Pulsante Continua moderno
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppTheme.primaryBlue,
+                    AppTheme.primaryBlue.withValues(alpha: 0.8),
+                  ],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                ),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.primaryBlue.withValues(alpha: 0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: _nextStep,
+                  borderRadius: BorderRadius.circular(16),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isTablet ? 32 : 24,
+                      vertical: isTablet ? 18 : 16,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          l10n.getString('continue'),
+                          style: TextStyle(
+                            color: AppTheme.pureWhite,
+                            fontSize: isTablet ? 18 : 16,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.3,
+                          ),
+                        ),
+                        SizedBox(width: isTablet ? 12 : 8),
+                        Icon(
+                          Icons.arrow_forward_rounded,
+                          color: AppTheme.pureWhite,
+                          size: isTablet ? 22 : 20,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ),
           ],
         ),
@@ -609,388 +921,341 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 768;
 
-    return EnterpriseCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                l10n.getString('media_photos_videos'),
-                style: TextStyle(
-                  fontSize: isTablet ? 20 : 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.primaryBlack,
-                ),
-              ),
-              NeonButton(
-                onPressed: _addMedia,
-                text: '+ ${l10n.getString('add')}',
-              ),
-            ],
-          ),
-          SizedBox(height: isTablet ? 20 : 16),
-          Container(
-            height: isTablet ? 140 : 120,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: AppTheme.lightGrey,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: AppTheme.borderGrey,
-                style: BorderStyle.solid,
-              ),
-            ),
-            child: _mediaFiles.isEmpty
-                ? Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.cloud_upload,
-                        size: isTablet ? 56 : 48,
-                        color: AppTheme.textSecondary,
-                      ),
-                      SizedBox(height: isTablet ? 12 : 8),
-                      Text(
-                        l10n.getString('add_photos_videos'),
-                        style: TextStyle(
-                          color: AppTheme.textSecondary,
-                          fontSize: isTablet ? 18 : 16,
-                        ),
-                      ),
-                    ],
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.all(8),
-                    itemCount: _mediaFiles.length,
-                    itemBuilder: (context, index) {
-                      final mediaItem = _mediaFiles[index];
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: AppTheme.borderGrey),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            // Anteprima immagine
-                            Container(
-                              width: 80,
-                              height: 80,
-                              decoration: BoxDecoration(
-                                color: AppTheme.lightGrey,
-                                borderRadius: const BorderRadius.only(
-                                  topLeft: Radius.circular(8),
-                                  bottomLeft: Radius.circular(8),
-                                ),
-                              ),
-                              child: ClipRRect(
-                                borderRadius: const BorderRadius.only(
-                                  topLeft: Radius.circular(8),
-                                  bottomLeft: Radius.circular(8),
-                                ),
-                                child: FutureBuilder<Uint8List>(
-                                  future: mediaItem.file.readAsBytes(),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.hasData) {
-                                      return Image.memory(
-                                        snapshot.data!,
-                                        width: 80,
-                                        height: 80,
-                                        fit: BoxFit.cover,
-                                        errorBuilder:
-                                            (context, error, stackTrace) {
-                                              return Icon(
-                                                Icons.error_outline,
-                                                color: AppTheme.errorRed,
-                                                size: 24,
-                                              );
-                                            },
-                                      );
-                                    } else {
-                                      return Icon(
-                                        Icons.image,
-                                        color: AppTheme.textSecondary,
-                                        size: 24,
-                                      );
-                                    }
-                                  },
-                                ),
-                              ),
-                            ),
-                            // Contenuto
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.all(12),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      mediaItem.title.isNotEmpty
-                                          ? mediaItem.title
-                                          : 'Senza titolo',
-                                      style: TextStyle(
-                                        fontSize: isTablet ? 16 : 14,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppTheme.primaryBlack,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      mediaItem.description.isNotEmpty
-                                          ? mediaItem.description
-                                          : 'Nessuna descrizione',
-                                      style: TextStyle(
-                                        fontSize: isTablet ? 14 : 12,
-                                        color: AppTheme.textSecondary,
-                                      ),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            // Pulsanti azione
-                            Column(
-                              children: [
-                                IconButton(
-                                  onPressed: () => _showMediaEditDialog(
-                                    mediaItem,
-                                    index,
-                                    false,
-                                  ),
-                                  icon: Icon(
-                                    Icons.edit,
-                                    color: AppTheme.primaryBlue,
-                                    size: 20,
-                                  ),
-                                  tooltip: 'Modifica',
-                                ),
-                                IconButton(
-                                  onPressed: () => _removeMedia(index),
-                                  icon: Icon(
-                                    Icons.delete,
-                                    color: AppTheme.errorRed,
-                                    size: 20,
-                                  ),
-                                  tooltip: 'Rimuovi',
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
+    return Container(
+      decoration: BoxDecoration(
+        color: AppTheme.pureWhite,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildCertificationMediaSection() {
-    final l10n = AppLocalizations.of(context);
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isTablet = screenWidth > 768;
-
-    return EnterpriseCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Media Certificativi',
-                style: TextStyle(
-                  fontSize: isTablet ? 20 : 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.primaryBlack,
+      child: Padding(
+        padding: EdgeInsets.all(isTablet ? 28 : 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        AppTheme.successGreen,
+                        AppTheme.successGreen.withValues(alpha: 0.8),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.photo_camera_outlined,
+                    color: AppTheme.pureWhite,
+                    size: isTablet ? 24 : 20,
+                  ),
                 ),
-              ),
-              NeonButton(
-                onPressed: _addCertificationMedia,
-                text: '+ ${l10n.getString('add')}',
-              ),
-            ],
-          ),
-          SizedBox(height: isTablet ? 20 : 16),
-          Container(
-            height: isTablet ? 140 : 120,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: AppTheme.lightGrey,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: AppTheme.borderGrey,
-                style: BorderStyle.solid,
-              ),
-            ),
-            child: _certificationMediaFiles.isEmpty
-                ? Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                SizedBox(width: isTablet ? 16 : 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
-                        Icons.verified_user,
-                        size: isTablet ? 56 : 48,
-                        color: AppTheme.textSecondary,
-                      ),
-                      SizedBox(height: isTablet ? 12 : 8),
                       Text(
-                        'Aggiungi media certificativi',
+                        l10n.getString('media_photos_videos'),
                         style: TextStyle(
+                          fontSize: isTablet ? 20 : 18,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.primaryBlack,
+                          letterSpacing: -0.3,
+                        ),
+                      ),
+                      SizedBox(height: isTablet ? 2 : 1),
+                      Text(
+                        'Aggiungi foto e video per documentare la certificazione',
+                        style: TextStyle(
+                          fontSize: isTablet ? 14 : 12,
                           color: AppTheme.textSecondary,
-                          fontSize: isTablet ? 18 : 16,
+                          fontWeight: FontWeight.w400,
                         ),
                       ),
                     ],
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.all(8),
-                    itemCount: _certificationMediaFiles.length,
-                    itemBuilder: (context, index) {
-                      final mediaItem = _certificationMediaFiles[index];
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: AppTheme.borderGrey),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        AppTheme.primaryBlue,
+                        AppTheme.primaryBlue.withValues(alpha: 0.8),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: _addMedia,
+                      borderRadius: BorderRadius.circular(12),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isTablet ? 20 : 16,
+                          vertical: isTablet ? 12 : 10,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.add_rounded,
+                              color: AppTheme.pureWhite,
+                              size: isTablet ? 20 : 18,
+                            ),
+                            SizedBox(width: isTablet ? 8 : 6),
+                            Text(
+                              l10n.getString('add'),
+                              style: TextStyle(
+                                color: AppTheme.pureWhite,
+                                fontWeight: FontWeight.w600,
+                                fontSize: isTablet ? 14 : 13,
+                              ),
                             ),
                           ],
                         ),
-                        child: Row(
-                          children: [
-                            // Anteprima immagine
-                            Container(
-                              width: 80,
-                              height: 80,
-                              decoration: BoxDecoration(
-                                color: AppTheme.lightGrey,
-                                borderRadius: const BorderRadius.only(
-                                  topLeft: Radius.circular(8),
-                                  bottomLeft: Radius.circular(8),
-                                ),
-                              ),
-                              child: ClipRRect(
-                                borderRadius: const BorderRadius.only(
-                                  topLeft: Radius.circular(8),
-                                  bottomLeft: Radius.circular(8),
-                                ),
-                                child: FutureBuilder<Uint8List>(
-                                  future: mediaItem.file.readAsBytes(),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.hasData) {
-                                      return Image.memory(
-                                        snapshot.data!,
-                                        width: 80,
-                                        height: 80,
-                                        fit: BoxFit.cover,
-                                        errorBuilder:
-                                            (context, error, stackTrace) {
-                                              return Icon(
-                                                Icons.error_outline,
-                                                color: AppTheme.errorRed,
-                                                size: 24,
-                                              );
-                                            },
-                                      );
-                                    } else {
-                                      return Icon(
-                                        Icons.image,
-                                        color: AppTheme.textSecondary,
-                                        size: 24,
-                                      );
-                                    }
-                                  },
-                                ),
-                              ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: isTablet ? 24 : 20),
+            Container(
+              height: isTablet ? 160 : 140,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppTheme.lightGrey.withValues(alpha: 0.3),
+                    AppTheme.lightGrey.withValues(alpha: 0.1),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: AppTheme.borderGrey.withValues(alpha: 0.3),
+                  width: 1,
+                ),
+              ),
+              child: _mediaFiles.isEmpty
+                  ? Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Icon(
+                            Icons.cloud_upload_outlined,
+                            size: isTablet ? 48 : 40,
+                            color: AppTheme.primaryBlue,
+                          ),
+                        ),
+                        SizedBox(height: isTablet ? 16 : 12),
+                        Text(
+                          l10n.getString('add_photos_videos'),
+                          style: TextStyle(
+                            color: AppTheme.textSecondary,
+                            fontSize: isTablet ? 16 : 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        SizedBox(height: isTablet ? 4 : 2),
+                        Text(
+                          'Trascina qui i file o clicca per selezionare',
+                          style: TextStyle(
+                            color: AppTheme.textSecondary.withValues(
+                              alpha: 0.7,
                             ),
-                            // Contenuto
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.all(12),
+                            fontSize: isTablet ? 12 : 11,
+                          ),
+                        ),
+                      ],
+                    )
+                  : ListView.builder(
+                      padding: EdgeInsets.all(isTablet ? 12 : 8),
+                      itemCount: _mediaFiles.length,
+                      itemBuilder: (context, index) {
+                        final mediaItem = _mediaFiles[index];
+                        return Container(
+                          margin: EdgeInsets.only(bottom: isTablet ? 16 : 12),
+                          decoration: BoxDecoration(
+                            color: AppTheme.pureWhite,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: AppTheme.borderGrey.withValues(alpha: 0.2),
+                              width: 1,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.08),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              // Anteprima immagine
+                              Container(
+                                width: isTablet ? 90 : 80,
+                                height: isTablet ? 90 : 80,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      AppTheme.lightGrey.withValues(alpha: 0.3),
+                                      AppTheme.lightGrey.withValues(alpha: 0.1),
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(16),
+                                    bottomLeft: Radius.circular(16),
+                                  ),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(16),
+                                    bottomLeft: Radius.circular(16),
+                                  ),
+                                  child: FutureBuilder<Uint8List>(
+                                    future: mediaItem.file.readAsBytes(),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasData) {
+                                        return Image.memory(
+                                          snapshot.data!,
+                                          width: isTablet ? 90 : 80,
+                                          height: isTablet ? 90 : 80,
+                                          fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (context, error, stackTrace) {
+                                                return Icon(
+                                                  Icons.error_outline_rounded,
+                                                  color: AppTheme.errorRed,
+                                                  size: isTablet ? 28 : 24,
+                                                );
+                                              },
+                                        );
+                                      } else {
+                                        return Icon(
+                                          Icons.image_outlined,
+                                          color: AppTheme.textSecondary,
+                                          size: isTablet ? 28 : 24,
+                                        );
+                                      }
+                                    },
+                                  ),
+                                ),
+                              ),
+                              // Contenuto
+                              Expanded(
+                                child: Padding(
+                                  padding: EdgeInsets.all(isTablet ? 16 : 12),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        mediaItem.title.isNotEmpty
+                                            ? mediaItem.title
+                                            : 'Senza titolo',
+                                        style: TextStyle(
+                                          fontSize: isTablet ? 16 : 14,
+                                          fontWeight: FontWeight.w700,
+                                          color: AppTheme.primaryBlack,
+                                          letterSpacing: -0.2,
+                                        ),
+                                      ),
+                                      SizedBox(height: isTablet ? 6 : 4),
+                                      Text(
+                                        mediaItem.description.isNotEmpty
+                                            ? mediaItem.description
+                                            : 'Nessuna descrizione',
+                                        style: TextStyle(
+                                          fontSize: isTablet ? 14 : 12,
+                                          color: AppTheme.textSecondary,
+                                          fontWeight: FontWeight.w400,
+                                          height: 1.4,
+                                        ),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              // Pulsanti azione
+                              Padding(
+                                padding: EdgeInsets.all(isTablet ? 12 : 8),
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      mediaItem.title.isNotEmpty
-                                          ? mediaItem.title
-                                          : 'Senza titolo',
-                                      style: TextStyle(
-                                        fontSize: isTablet ? 16 : 14,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppTheme.primaryBlack,
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        color: AppTheme.primaryBlue.withValues(
+                                          alpha: 0.1,
+                                        ),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: IconButton(
+                                        onPressed: () => _showMediaEditDialog(
+                                          mediaItem,
+                                          index,
+                                        ),
+                                        icon: Icon(
+                                          Icons.edit_outlined,
+                                          color: AppTheme.primaryBlue,
+                                          size: isTablet ? 20 : 18,
+                                        ),
+                                        tooltip: 'Modifica',
                                       ),
                                     ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      mediaItem.description.isNotEmpty
-                                          ? mediaItem.description
-                                          : 'Nessuna descrizione',
-                                      style: TextStyle(
-                                        fontSize: isTablet ? 14 : 12,
-                                        color: AppTheme.textSecondary,
+                                    SizedBox(height: isTablet ? 8 : 6),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        color: AppTheme.errorRed.withValues(
+                                          alpha: 0.1,
+                                        ),
+                                        borderRadius: BorderRadius.circular(8),
                                       ),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
+                                      child: IconButton(
+                                        onPressed: () => _removeMedia(index),
+                                        icon: Icon(
+                                          Icons.delete_outline,
+                                          color: AppTheme.errorRed,
+                                          size: isTablet ? 20 : 18,
+                                        ),
+                                        tooltip: 'Rimuovi',
+                                      ),
                                     ),
                                   ],
                                 ),
                               ),
-                            ),
-                            // Pulsanti azione
-                            Column(
-                              children: [
-                                IconButton(
-                                  onPressed: () => _showMediaEditDialog(
-                                    mediaItem,
-                                    index,
-                                    true,
-                                  ),
-                                  icon: Icon(
-                                    Icons.edit,
-                                    color: AppTheme.primaryBlue,
-                                    size: 20,
-                                  ),
-                                  tooltip: 'Modifica',
-                                ),
-                                IconButton(
-                                  onPressed: () =>
-                                      _removeCertificationMedia(index),
-                                  icon: Icon(
-                                    Icons.delete,
-                                    color: AppTheme.errorRed,
-                                    size: 20,
-                                  ),
-                                  tooltip: 'Rimuovi',
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-          ),
-        ],
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1001,28 +1266,81 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     final isTablet = screenWidth > 768;
 
     return SingleChildScrollView(
-      padding: EdgeInsets.all(isTablet ? 24 : 16),
+      padding: EdgeInsets.all(isTablet ? 32 : 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            l10n.getString('add_users'),
-            style: TextStyle(
-              fontSize: isTablet ? 28 : 24,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.primaryBlack,
+          // Header moderno
+          Container(
+            padding: EdgeInsets.all(isTablet ? 24 : 20),
+            decoration: BoxDecoration(
+              color: AppTheme.pureWhite,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            AppTheme.warningOrange,
+                            AppTheme.warningOrange.withValues(alpha: 0.8),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.people_outline_rounded,
+                        color: AppTheme.pureWhite,
+                        size: isTablet ? 24 : 20,
+                      ),
+                    ),
+                    SizedBox(width: isTablet ? 16 : 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.getString('add_users'),
+                            style: TextStyle(
+                              fontSize: isTablet ? 24 : 20,
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.primaryBlack,
+                              letterSpacing: -0.5,
+                            ),
+                          ),
+                          SizedBox(height: isTablet ? 4 : 2),
+                          Text(
+                            l10n.getString('enter_participants'),
+                            style: TextStyle(
+                              fontSize: isTablet ? 16 : 14,
+                              color: AppTheme.textSecondary,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
-          SizedBox(height: isTablet ? 12 : 8),
-          Text(
-            l10n.getString('enter_participants'),
-            style: TextStyle(
-              fontSize: isTablet ? 18 : 16,
-              color: AppTheme.textSecondary,
-            ),
-          ),
-          const SizedBox(height: 24),
+          SizedBox(height: isTablet ? 32 : 24),
 
           _buildAddUserSection(),
           const SizedBox(height: 24),
@@ -1033,14 +1351,110 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           Row(
             children: [
               Expanded(
-                child: NeonButton(onPressed: _previousStep, text: 'Indietro'),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: AppTheme.pureWhite,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: AppTheme.borderGrey.withValues(alpha: 0.3),
+                      width: 1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.03),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: _previousStep,
+                      borderRadius: BorderRadius.circular(16),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isTablet ? 24 : 20,
+                          vertical: isTablet ? 16 : 14,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.arrow_back_rounded,
+                              color: AppTheme.textSecondary,
+                              size: isTablet ? 20 : 18,
+                            ),
+                            SizedBox(width: isTablet ? 8 : 6),
+                            Text(
+                              'Indietro',
+                              style: TextStyle(
+                                color: AppTheme.textSecondary,
+                                fontSize: isTablet ? 16 : 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: isTablet ? 20 : 16),
               Expanded(
-                child: NeonButton(
-                  onPressed: _nextStep,
-                  text: 'Continua alla Revisione',
-                  icon: Icons.arrow_forward,
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        AppTheme.primaryBlue,
+                        AppTheme.primaryBlue.withValues(alpha: 0.8),
+                      ],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppTheme.primaryBlue.withValues(alpha: 0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: _nextStep,
+                      borderRadius: BorderRadius.circular(16),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isTablet ? 24 : 20,
+                          vertical: isTablet ? 16 : 14,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Continua alla Revisione',
+                              style: TextStyle(
+                                color: AppTheme.pureWhite,
+                                fontSize: isTablet ? 16 : 14,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: -0.3,
+                              ),
+                            ),
+                            SizedBox(width: isTablet ? 8 : 6),
+                            Icon(
+                              Icons.arrow_forward_rounded,
+                              color: AppTheme.pureWhite,
+                              size: isTablet ? 20 : 18,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -1057,15 +1471,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
 
     return Column(
       children: [
-        // Mode selector
-        _buildUserSelectionModeSelector(l10n, isTablet),
-        SizedBox(height: isTablet ? 20 : 16),
-
-        // Selected mode content
-        if (_isOtpMode)
-          _buildOtpUserSection(l10n, isTablet)
-        else
-          _buildSearchUserSection(l10n),
+        // Solo modalità OTP - nascondo il selettore di modalità
+        _buildOtpUserSection(l10n, isTablet),
       ],
     );
   }
@@ -2688,41 +3095,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     });
   }
 
-  void _addCertificationMedia() async {
-    try {
-      final ImagePicker picker = ImagePicker();
-      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-      if (image != null) {
-        // Su web, usiamo direttamente XFile per evitare problemi con File
-        try {
-          // Testiamo se il file può essere letto
-          await image.readAsBytes();
-
-          setState(() {
-            _certificationMediaFiles.add(MediaItem(file: image));
-          });
-        } catch (e) {
-          print('❌ Error reading certification media file: $e');
-          _showErrorDialog('Errore nel caricamento del file certificativo');
-        }
-      }
-    } catch (e) {
-      print('❌ Error picking certification media: $e');
-      _showErrorDialog('Errore nella selezione del media certificativo');
-    }
-  }
-
-  void _removeCertificationMedia(int index) {
-    setState(() {
-      _certificationMediaFiles.removeAt(index);
-    });
-  }
-
-  void _showMediaEditDialog(
-    MediaItem mediaItem,
-    int index,
-    bool isCertificationMedia,
-  ) {
+  void _showMediaEditDialog(MediaItem mediaItem, int index) {
     final titleController = TextEditingController(text: mediaItem.title);
     final descriptionController = TextEditingController(
       text: mediaItem.description,
@@ -2818,11 +3191,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                     description: descriptionController.text.trim(),
                   );
 
-                  if (isCertificationMedia) {
-                    _certificationMediaFiles[index] = updatedMedia;
-                  } else {
-                    _mediaFiles[index] = updatedMedia;
-                  }
+                  _mediaFiles[index] = updatedMedia;
                 });
                 Navigator.of(context).pop();
               },
