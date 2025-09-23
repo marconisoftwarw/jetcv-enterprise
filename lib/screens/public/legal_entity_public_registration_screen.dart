@@ -1012,13 +1012,16 @@ class _LegalEntityPublicRegistrationScreenState
       };
 
       // 4. Call edge function to create both user and legal entity
-      final edgeFunctionResult = await EdgeFunctionService.createLegalEntityWithUser(
-        userData: user.toJson(),
-        legalEntityData: legalEntityData,
-      );
+      final edgeFunctionResult =
+          await EdgeFunctionService.createLegalEntityWithUser(
+            userData: user.toJson(),
+            legalEntityData: legalEntityData,
+          );
 
       if (edgeFunctionResult == null || !edgeFunctionResult['ok']) {
-        throw Exception('Failed to create user and legal entity via edge function');
+        throw Exception(
+          'Failed to create user and legal entity via edge function',
+        );
       }
 
       final createdEntity = edgeFunctionResult['data']['legalEntity'];

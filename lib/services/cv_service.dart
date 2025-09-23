@@ -49,7 +49,9 @@ class CVService {
     String orderDir = 'desc',
   }) async {
     try {
-      print('CVService: Iniziando caricamento CV via edge function search-cv...');
+      print(
+        'CVService: Iniziando caricamento CV via edge function search-cv...',
+      );
 
       final payload = {
         if (q != null && q.trim().isNotEmpty) 'q': q.trim(),
@@ -76,7 +78,9 @@ class CVService {
       final List<dynamic> rows = data['data'] as List<dynamic>? ?? [];
       print('CVService: Numero di CV trovati: ${rows.length}');
 
-      return rows.map((json) => CV.fromJson(json as Map<String, dynamic>)).toList();
+      return rows
+          .map((json) => CV.fromJson(json as Map<String, dynamic>))
+          .toList();
     } catch (e) {
       print('CVService: Errore nel caricamento CV via edge function: $e');
       return [];
@@ -84,9 +88,21 @@ class CVService {
   }
 
   /// Cerca CV tramite Edge Function `search-cv`
-  Future<List<CV>> searchCVs(String query, {String? city, String? state, String orderBy = 'createdAt', String orderDir = 'desc'}) async {
+  Future<List<CV>> searchCVs(
+    String query, {
+    String? city,
+    String? state,
+    String orderBy = 'createdAt',
+    String orderDir = 'desc',
+  }) async {
     try {
-      return getPublicCVs(q: query, city: city, state: state, orderBy: orderBy, orderDir: orderDir);
+      return getPublicCVs(
+        q: query,
+        city: city,
+        state: state,
+        orderBy: orderBy,
+        orderDir: orderDir,
+      );
     } catch (e) {
       print('Error searching CVs: $e');
       return [];

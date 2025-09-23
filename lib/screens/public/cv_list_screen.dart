@@ -50,16 +50,22 @@ class _CVListScreenState extends State<CVListScreen> {
     try {
       print('CVListScreen: Iniziando caricamento CV...');
       final cvs = await _cvService.getPublicCVs(
-        q: _searchController.text.trim().isEmpty ? null : _searchController.text.trim(),
-        city: _locationController.text.trim().isEmpty ? null : _locationController.text.trim(),
+        q: _searchController.text.trim().isEmpty
+            ? null
+            : _searchController.text.trim(),
+        city: _locationController.text.trim().isEmpty
+            ? null
+            : _locationController.text.trim(),
         orderBy: _selectedSortBy == 'name'
             ? 'lastName'
             : _selectedSortBy == 'location'
-                ? 'city'
-                : _selectedSortBy == 'verified'
-                    ? 'updatedAt'
-                    : 'createdAt',
-        orderDir: _selectedSortBy == 'name' || _selectedSortBy == 'location' ? 'asc' : 'desc',
+            ? 'city'
+            : _selectedSortBy == 'verified'
+            ? 'updatedAt'
+            : 'createdAt',
+        orderDir: _selectedSortBy == 'name' || _selectedSortBy == 'location'
+            ? 'asc'
+            : 'desc',
         limit: 100,
         offset: 0,
       );
@@ -159,19 +165,7 @@ class _CVListScreenState extends State<CVListScreen> {
         backgroundColor: AppTheme.primaryBlue,
         foregroundColor: AppTheme.white,
         elevation: 0,
-        actions: [
-          const AppBarLanguageDropdown(),
-          IconButton(
-            onPressed: _loadCVs,
-            icon: const Icon(Icons.refresh),
-            tooltip: 'Aggiorna',
-          ),
-          IconButton(
-            onPressed: _testDatabaseConnection,
-            icon: const Icon(Icons.bug_report),
-            tooltip: 'Test Database',
-          ),
-        ],
+        actions: const [AppBarLanguageDropdown()],
       ),
       body: Column(
         children: [
@@ -359,10 +353,7 @@ class _CVListScreenState extends State<CVListScreen> {
                             value: 'recent',
                             child: Text('Più recenti'),
                           ),
-                          DropdownMenuItem(
-                            value: 'name',
-                            child: Text('Nome'),
-                          ),
+                          DropdownMenuItem(value: 'name', child: Text('Nome')),
                           DropdownMenuItem(
                             value: 'location',
                             child: Text('Località'),
@@ -424,7 +415,9 @@ class _CVListScreenState extends State<CVListScreen> {
                               size: 16,
                               color: _showVerifiedOnly
                                   ? AppTheme.primaryBlue
-                                  : AppTheme.primaryBlack.withValues(alpha: 0.6),
+                                  : AppTheme.primaryBlack.withValues(
+                                      alpha: 0.6,
+                                    ),
                             ),
                             const SizedBox(width: 6),
                             Text(
@@ -434,7 +427,9 @@ class _CVListScreenState extends State<CVListScreen> {
                                 fontWeight: FontWeight.w500,
                                 color: _showVerifiedOnly
                                     ? AppTheme.primaryBlue
-                                    : AppTheme.primaryBlack.withValues(alpha: 0.6),
+                                    : AppTheme.primaryBlack.withValues(
+                                        alpha: 0.6,
+                                      ),
                               ),
                             ),
                           ],
@@ -497,7 +492,6 @@ class _CVListScreenState extends State<CVListScreen> {
       ),
     );
   }
-
 
   Widget _buildEmptyState() {
     return Center(
@@ -655,7 +649,9 @@ class _CVListScreenState extends State<CVListScreen> {
                   ),
                   child: CircleAvatar(
                     radius: 32,
-                    backgroundColor: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                    backgroundColor: AppTheme.primaryBlue.withValues(
+                      alpha: 0.1,
+                    ),
                     child: cv.hasProfilePicture
                         ? ClipOval(
                             child: Image.network(
@@ -710,7 +706,9 @@ class _CVListScreenState extends State<CVListScreen> {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: AppTheme.successGreen.withValues(alpha: 0.1),
+                                color: AppTheme.successGreen.withValues(
+                                  alpha: 0.1,
+                                ),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
                                   color: AppTheme.successGreen,
@@ -756,7 +754,9 @@ class _CVListScreenState extends State<CVListScreen> {
                               cv.displayLocation,
                               style: TextStyle(
                                 fontSize: 16,
-                                color: AppTheme.primaryBlack.withValues(alpha: 0.8),
+                                color: AppTheme.primaryBlack.withValues(
+                                  alpha: 0.8,
+                                ),
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -780,7 +780,9 @@ class _CVListScreenState extends State<CVListScreen> {
                               cv.displayContact,
                               style: TextStyle(
                                 fontSize: 14,
-                                color: AppTheme.primaryBlack.withValues(alpha: 0.7),
+                                color: AppTheme.primaryBlack.withValues(
+                                  alpha: 0.7,
+                                ),
                               ),
                             ),
                           ),
@@ -1003,26 +1005,5 @@ class _CVListScreenState extends State<CVListScreen> {
         backgroundColor: AppTheme.successGreen,
       ),
     );
-  }
-
-  Future<void> _testDatabaseConnection() async {
-    try {
-      final cvs = await _cvService.getPublicCVs();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Connessione al database riuscita! CV trovati: ${cvs.length}',
-          ),
-          backgroundColor: AppTheme.successGreen,
-        ),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Errore nella connessione al database: $e'),
-          backgroundColor: AppTheme.errorRed,
-        ),
-      );
-    }
   }
 }
