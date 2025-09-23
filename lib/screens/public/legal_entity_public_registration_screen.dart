@@ -265,7 +265,9 @@ class _LegalEntityPublicRegistrationScreenState
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                    'Registrazione tramite invito - Campi precompilati',
+                    AppLocalizations.of(
+                      context,
+                    ).getString('invitation_registration_message'),
                   ),
                   backgroundColor: Colors.green,
                   duration: Duration(seconds: 3),
@@ -577,12 +579,14 @@ class _LegalEntityPublicRegistrationScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Informazioni Personali e Aziendali',
+            AppLocalizations.of(context).getString('personal_and_company_info'),
             style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           Text(
-            'Inserisci le tue informazioni personali e i dati della tua azienda',
+            AppLocalizations.of(
+              context,
+            ).getString('enter_personal_company_info'),
             style: const TextStyle(fontSize: 16, color: Colors.grey),
           ),
           const SizedBox(height: 24),
@@ -639,7 +643,8 @@ class _LegalEntityPublicRegistrationScreenState
                   width: double.infinity,
                   child: CustomTextField(
                     controller: _personalEmailController,
-                    labelText: 'Email *',
+                    labelText:
+                        '${AppLocalizations.of(context).getString('email_label')} *',
                     keyboardType: TextInputType.emailAddress,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -679,7 +684,7 @@ class _LegalEntityPublicRegistrationScreenState
 
                 // Sezione Azienda
                 Text(
-                  'Dati Aziendali',
+                  AppLocalizations.of(context).getString('company_data'),
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -705,7 +710,9 @@ class _LegalEntityPublicRegistrationScreenState
                           const SizedBox(height: 8),
                           CustomButton(
                             onPressed: _pickEntityProfilePicture,
-                            text: 'Logo Azienda',
+                            text: AppLocalizations.of(
+                              context,
+                            ).getString('company_logo_label'),
                             backgroundColor: Colors.grey,
                           ),
                         ],
@@ -727,7 +734,9 @@ class _LegalEntityPublicRegistrationScreenState
                           const SizedBox(height: 8),
                           CustomButton(
                             onPressed: _pickEntityCompanyPicture,
-                            text: 'Foto Azienda',
+                            text: AppLocalizations.of(
+                              context,
+                            ).getString('company_photo_label'),
                             backgroundColor: Colors.grey,
                           ),
                         ],
@@ -776,16 +785,21 @@ class _LegalEntityPublicRegistrationScreenState
                   width: double.infinity,
                   child: CustomTextField(
                     controller: _entityEmailController,
-                    labelText: 'Email Azienda *',
+                    labelText:
+                        '${AppLocalizations.of(context).getString('company_email')} *',
                     keyboardType: TextInputType.emailAddress,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Inserisci l\'email aziendale';
+                        return AppLocalizations.of(
+                          context,
+                        ).getString('enter_company_email');
                       }
                       if (!RegExp(
                         r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
                       ).hasMatch(value)) {
-                        return 'Inserisci un\'email valida';
+                        return AppLocalizations.of(
+                          context,
+                        ).getString('enter_valid_email');
                       }
                       return null;
                     },
@@ -796,10 +810,13 @@ class _LegalEntityPublicRegistrationScreenState
                   width: double.infinity,
                   child: CustomTextField(
                     controller: _legalRepresentativeController,
-                    labelText: 'Rappresentante Legale *',
+                    labelText:
+                        '${AppLocalizations.of(context).getString('legal_representative')} *',
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Inserisci il nome del rappresentante legale';
+                        return AppLocalizations.of(
+                          context,
+                        ).getString('enter_legal_representative');
                       }
                       return null;
                     },
@@ -810,7 +827,9 @@ class _LegalEntityPublicRegistrationScreenState
                   width: double.infinity,
                   child: InternationalPhoneField(
                     controller: _phoneController,
-                    label: 'Telefono Azienda',
+                    label: AppLocalizations.of(
+                      context,
+                    ).getString('company_phone'),
                     initialCountryCode: _entityCountryCode,
                     onCountryCodeChanged: (countryCode) {
                       setState(() {

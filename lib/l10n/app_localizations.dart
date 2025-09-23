@@ -44,6 +44,17 @@ class AppLocalizations {
       'password_required': 'Password richiesta',
       'password_min_length': 'La password deve essere di almeno 6 caratteri',
       'public_cvs': 'Registro Pubblico',
+      'personal_and_company_info': 'Informazioni Personali e Aziendali',
+      'enter_personal_company_info':
+          'Inserisci le tue informazioni personali e i dati della tua azienda',
+      'upload_profile_photo': 'Carica Foto Profilo',
+      'company_data': 'Dati Aziendali',
+      'company_logo_label': 'Logo Azienda',
+      'company_photo_label': 'Foto Azienda',
+      'company_phone': 'Telefono Azienda',
+      'invitation_registration_message':
+          'Registrazione tramite invito - Campi precompilati',
+      'email_label': 'Email',
       'professional_certification_platform':
           'Piattaforma di Certificazione Professionale',
       'streamline_business_verification':
@@ -438,7 +449,7 @@ class AppLocalizations {
       'choose_plan_subtitle': 'Scegli il piano più adatto alle tue esigenze.',
       'personal_information': 'Informazioni Personali',
       'enter_personal_info': 'Inserisci le tue informazioni personali.',
-      'upload_profile_photo': 'Carica Foto Profilo',
+
       'full_name': 'Nome Completo',
       'enter_full_name': 'Inserisci il tuo nome completo',
       'enter_email': 'Inserisci la tua email',
