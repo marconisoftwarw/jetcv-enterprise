@@ -1869,7 +1869,7 @@ class _CertifiersContentState extends State<CertifiersContent> {
                         SizedBox(width: 12),
                         Expanded(
                           child: Text(
-                            'Verranno creati sia l\'utente che il certificatore associato. L\'utente potrà accedere al sistema con le credenziali fornite.',
+                            l10n.getString('certifier_account_info'),
                             style: TextStyle(
                               fontSize: isTablet ? 14 : 13,
                               color: AppTheme.primaryBlue,
