@@ -3,13 +3,15 @@ import 'package:provider/provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/certifier_provider.dart';
-import '../../providers/legal_entity_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/enterprise_card.dart';
 import '../../widgets/neon_button.dart';
 import '../../widgets/enterprise_text_field.dart';
 import '../../services/user_search_service.dart';
+import '../../services/legal_entity_service.dart';
+import '../../services/edge_function_service.dart';
 import '../../models/user.dart';
+import '../../models/legal_entity.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class CertifierManagementScreen extends StatefulWidget {
@@ -26,6 +28,9 @@ class _CertifierManagementScreenState extends State<CertifierManagementScreen>
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
 
+  // Services
+  final _legalEntityService = LegalEntityService();
+
   // Form controllers
   final _userSearchController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -38,7 +43,9 @@ class _CertifierManagementScreenState extends State<CertifierManagementScreen>
   String? _selectedUserName;
   String? _selectedLegalEntityId;
   List<User> _searchResults = [];
+  List<LegalEntity> _userLegalEntities = [];
   bool _isSearching = false;
+  bool _isLoadingCurrentUserLegalEntity = false;
 
   @override
   void initState() {
@@ -70,12 +77,69 @@ class _CertifierManagementScreenState extends State<CertifierManagementScreen>
 
   Future<void> _loadData() async {
     final certifierProvider = context.read<CertifierProvider>();
-    final legalEntityProvider = context.read<LegalEntityProvider>();
+    final authProvider = context.read<AuthProvider>();
 
-    await Future.wait([
-      certifierProvider.loadAllCertifiers(),
-      legalEntityProvider.loadLegalEntities(),
-    ]);
+    await certifierProvider.loadAllCertifiers();
+
+    // Carica la legal entity dell'utente loggato tramite edge function
+    final currentUser = authProvider.currentUser;
+    if (currentUser != null) {
+      await _loadCurrentUserLegalEntity(currentUser.idUser);
+    }
+  }
+
+  Future<void> _loadCurrentUserLegalEntity(String userId) async {
+    setState(() {
+      _isLoadingCurrentUserLegalEntity = true;
+    });
+
+    try {
+      // Usa l'edge function per ottenere le legal entity dell'utente
+      final response = await EdgeFunctionService.getLegalEntitiesByUser(
+        userId: userId,
+      );
+
+      if (response != null && response['ok'] == true) {
+        final data = response['data'] as List<dynamic>?;
+        if (data != null && data.isNotEmpty) {
+          // Converti i dati in oggetti LegalEntity
+          final legalEntities = data
+              .map((item) => LegalEntity.fromJson(item))
+              .toList();
+          setState(() {
+            _userLegalEntities = legalEntities;
+            // Seleziona automaticamente la prima legal entity
+            if (legalEntities.isNotEmpty) {
+              _selectedLegalEntityId = legalEntities.first.idLegalEntity;
+            }
+          });
+          print(
+            '✅ Loaded ${legalEntities.length} legal entities for current user',
+          );
+        } else {
+          setState(() {
+            _userLegalEntities = [];
+            _selectedLegalEntityId = null;
+          });
+          print('❌ No legal entities found for current user');
+        }
+      } else {
+        throw Exception(
+          response?['message'] ?? 'Failed to load legal entities',
+        );
+      }
+    } catch (e) {
+      print('Error loading current user legal entity: $e');
+      setState(() {
+        _errorMessage = 'Errore nel caricamento della legal entity';
+        _userLegalEntities = [];
+        _selectedLegalEntityId = null;
+      });
+    } finally {
+      setState(() {
+        _isLoadingCurrentUserLegalEntity = false;
+      });
+    }
   }
 
   @override
@@ -565,7 +629,7 @@ class _CertifierManagementScreenState extends State<CertifierManagementScreen>
                     children: [
                       _buildUserSearchField(setState, isTablet),
                       const SizedBox(height: 16),
-                      _buildLegalEntityDropdown(isTablet),
+                      _buildCurrentUserLegalEntityInfo(setState, isTablet),
                       if (_errorMessage != null) ...[
                         const SizedBox(height: 16),
                         Container(
@@ -764,44 +828,6 @@ class _CertifierManagementScreenState extends State<CertifierManagementScreen>
     );
   }
 
-  Widget _buildLegalEntityDropdown(bool isTablet) {
-    return Consumer<LegalEntityProvider>(
-      builder: (context, provider, child) {
-        if (provider.isLoading) {
-          return const CircularProgressIndicator();
-        }
-
-        final legalEntities = provider.legalEntities;
-
-        return DropdownButtonFormField<String>(
-          decoration: const InputDecoration(
-            labelText: 'Legal Entity',
-            border: OutlineInputBorder(),
-            prefixIcon: Icon(Icons.business),
-          ),
-          value: _selectedLegalEntityId,
-          items: legalEntities.map((entity) {
-            return DropdownMenuItem<String>(
-              value: entity.idLegalEntity,
-              child: Text(entity.legalName, overflow: TextOverflow.ellipsis),
-            );
-          }).toList(),
-          onChanged: (value) {
-            setState(() {
-              _selectedLegalEntityId = value;
-            });
-          },
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'Seleziona una legal entity';
-            }
-            return null;
-          },
-        );
-      },
-    );
-  }
-
   Future<void> _searchUsers(String query, StateSetter setState) async {
     if (query.trim().isEmpty) {
       setState(() {
@@ -835,9 +861,17 @@ class _CertifierManagementScreenState extends State<CertifierManagementScreen>
       return;
     }
 
-    if (_selectedUserId == null || _selectedLegalEntityId == null) {
+    if (_selectedUserId == null) {
       setState(() {
-        _errorMessage = 'Seleziona utente e legal entity';
+        _errorMessage = 'Seleziona un utente';
+      });
+      return;
+    }
+
+    if (_selectedLegalEntityId == null) {
+      setState(() {
+        _errorMessage =
+            'Nessuna legal entity disponibile per l\'utente corrente';
       });
       return;
     }
@@ -888,12 +922,12 @@ class _CertifierManagementScreenState extends State<CertifierManagementScreen>
     setState(() {
       _selectedUserId = null;
       _selectedUserName = null;
-      _selectedLegalEntityId = null;
       _errorMessage = null;
       _successMessage = null;
       _isCreating = false;
       _searchResults.clear();
       _userSearchController.clear();
+      // Non resettare _selectedLegalEntityId perché è basato sull'utente corrente
     });
   }
 
@@ -951,5 +985,112 @@ class _CertifierManagementScreenState extends State<CertifierManagementScreen>
         );
       }
     }
+  }
+
+  Widget _buildCurrentUserLegalEntityInfo(StateSetter setState, bool isTablet) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Legal Entity (Utente Corrente)',
+          style: TextStyle(
+            fontSize: isTablet ? 16 : 14,
+            fontWeight: FontWeight.w500,
+            color: AppTheme.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        if (_isLoadingCurrentUserLegalEntity) ...[
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppTheme.lightGray.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppTheme.borderGray),
+            ),
+            child: Row(
+              children: [
+                const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  'Caricamento legal entity...',
+                  style: TextStyle(color: AppTheme.textSecondary),
+                ),
+              ],
+            ),
+          ),
+        ] else if (_userLegalEntities.isEmpty) ...[
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppTheme.errorRed.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppTheme.errorRed.withOpacity(0.3)),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.error_outline,
+                  color: AppTheme.errorRed,
+                  size: 20,
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Text(
+                    'Nessuna legal entity disponibile per l\'utente corrente',
+                    style: TextStyle(color: AppTheme.errorRed),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ] else ...[
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppTheme.successGreen.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppTheme.successGreen.withOpacity(0.3)),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.check_circle,
+                  color: AppTheme.successGreen,
+                  size: 20,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _userLegalEntities.first.legalName ?? 'N/A',
+                        style: const TextStyle(
+                          color: AppTheme.successGreen,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      if (_userLegalEntities.first.identifierCode != null)
+                        Text(
+                          'ID: ${_userLegalEntities.first.identifierCode}',
+                          style: const TextStyle(
+                            color: AppTheme.successGreen,
+                            fontSize: 12,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
   }
 }

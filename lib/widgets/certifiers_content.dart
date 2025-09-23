@@ -6,6 +6,7 @@ import '../models/certifier.dart';
 import '../models/legal_entity.dart';
 import '../services/certifier_service.dart';
 import '../services/email_service.dart';
+import '../services/edge_function_service.dart';
 import '../providers/auth_provider.dart';
 import '../providers/legal_entity_provider.dart';
 import '../services/user_type_service.dart';
@@ -31,10 +32,76 @@ class _CertifiersContentState extends State<CertifiersContent> {
   List<String> _availableRoles = [];
   List<String> _availableCities = [];
 
+  // Legal entity per l'utente corrente
+  String? _selectedLegalEntityId;
+  List<LegalEntity> _userLegalEntities = [];
+  bool _isLoadingCurrentUserLegalEntity = false;
+
   @override
   void initState() {
     super.initState();
     _loadCertifiers();
+    _loadCurrentUserLegalEntity();
+  }
+
+  Future<void> _loadCurrentUserLegalEntity() async {
+    setState(() {
+      _isLoadingCurrentUserLegalEntity = true;
+    });
+
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final currentUser = authProvider.currentUser;
+
+      if (currentUser == null) {
+        throw Exception('Utente non autenticato');
+      }
+
+      // Usa l'edge function per ottenere le legal entity dell'utente
+      final response = await EdgeFunctionService.getLegalEntitiesByUser(
+        userId: currentUser.idUser,
+      );
+
+      if (response != null && response['ok'] == true) {
+        final data = response['data'] as List<dynamic>?;
+        if (data != null && data.isNotEmpty) {
+          // Converti i dati in oggetti LegalEntity
+          final legalEntities = data
+              .map((item) => LegalEntity.fromJson(item))
+              .toList();
+          setState(() {
+            _userLegalEntities = legalEntities;
+            // Seleziona automaticamente la prima legal entity
+            if (legalEntities.isNotEmpty) {
+              _selectedLegalEntityId = legalEntities.first.idLegalEntity;
+            }
+          });
+          print(
+            '✅ Loaded ${legalEntities.length} legal entities for current user',
+          );
+        } else {
+          setState(() {
+            _userLegalEntities = [];
+            _selectedLegalEntityId = null;
+          });
+          print('❌ No legal entities found for current user');
+        }
+      } else {
+        throw Exception(
+          response?['message'] ?? 'Failed to load legal entities',
+        );
+      }
+    } catch (e) {
+      print('Error loading current user legal entity: $e');
+      setState(() {
+        _userLegalEntities = [];
+        _selectedLegalEntityId = null;
+      });
+    } finally {
+      setState(() {
+        _isLoadingCurrentUserLegalEntity = false;
+      });
+    }
   }
 
   Future<void> _loadCertifiers() async {
@@ -1411,15 +1478,7 @@ class _CertifiersContentState extends State<CertifiersContent> {
     final cityController = TextEditingController();
     final addressController = TextEditingController();
 
-    LegalEntity? selectedLegalEntity = isAdmin
-        ? null
-        : legalEntityProvider.selectedLegalEntity;
     bool isLoading = false;
-
-    // Load legal entities if admin and not already loaded
-    if (isAdmin && legalEntityProvider.legalEntities.isEmpty) {
-      legalEntityProvider.loadLegalEntities(status: 'approved');
-    }
 
     showDialog(
       context: context,
@@ -1442,117 +1501,8 @@ class _CertifiersContentState extends State<CertifiersContent> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Legal Entity Selector (only for admin)
-                  if (isAdmin) ...[
-                    Text(
-                      l10n.getString('select_legal_entity'),
-                      style: TextStyle(
-                        fontSize: isTablet ? 14 : 13,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.primaryBlack,
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: selectedLegalEntity != null
-                              ? AppTheme.primaryBlue
-                              : Colors.grey.withValues(alpha: 0.3),
-                          width: selectedLegalEntity != null ? 2 : 1,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<LegalEntity>(
-                          value: selectedLegalEntity,
-                          hint: Text(
-                            l10n.getString('select_legal_entity'),
-                            style: TextStyle(
-                              color: Colors.grey[500],
-                              fontSize: isTablet ? 14 : 13,
-                            ),
-                          ),
-                          isExpanded: true,
-                          items: legalEntityProvider.approvedLegalEntities
-                              .map(
-                                (entity) => DropdownMenuItem<LegalEntity>(
-                                  value: entity,
-                                  child: Text(
-                                    entity.legalName ?? 'Nome non disponibile',
-                                    style: TextStyle(
-                                      fontSize: isTablet ? 14 : 13,
-                                      color: AppTheme.primaryBlack,
-                                    ),
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (LegalEntity? value) {
-                            setState(() {
-                              selectedLegalEntity = value;
-                            });
-                          },
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 24),
-                  ] else ...[
-                    // Show selected legal entity for non-admin users
-                    if (selectedLegalEntity != null) ...[
-                      Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: AppTheme.primaryBlue.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: AppTheme.primaryBlue.withValues(alpha: 0.3),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.business,
-                              color: AppTheme.primaryBlue,
-                              size: 20,
-                            ),
-                            SizedBox(width: 8),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Entità Legale:',
-                                    style: TextStyle(
-                                      fontSize: isTablet ? 12 : 11,
-                                      color: AppTheme.primaryBlue,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  Text(
-                                    selectedLegalEntity!.legalName ??
-                                        'Nome non disponibile',
-                                    style: TextStyle(
-                                      fontSize: isTablet ? 14 : 13,
-                                      color: AppTheme.primaryBlue,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(height: 24),
-                    ],
-                  ],
+                  // Legal Entity Info (per tutti gli utenti)
+                  _buildCurrentUserLegalEntityInfo(l10n, isTablet),
 
                   // Personal Data Section
                   _buildSectionHeader(
@@ -1728,8 +1678,10 @@ class _CertifiersContentState extends State<CertifiersContent> {
                         return;
                       }
 
-                      if (selectedLegalEntity == null) {
-                        _showError(l10n.getString('legal_entity_required'));
+                      if (_selectedLegalEntityId == null) {
+                        _showError(
+                          'Nessuna legal entity disponibile per l\'utente corrente',
+                        );
                         return;
                       }
 
@@ -1759,7 +1711,7 @@ class _CertifiersContentState extends State<CertifiersContent> {
 
                         // Prepara i dati certificatore
                         final newCertifier = Certifier(
-                          idLegalEntity: selectedLegalEntity!.idLegalEntity,
+                          idLegalEntity: _selectedLegalEntityId!,
                           role: roleController.text.trim(),
                           active: true,
                         );
@@ -1787,9 +1739,10 @@ class _CertifiersContentState extends State<CertifiersContent> {
                             firstName: firstNameController.text.trim(),
                             lastName: lastNameController.text.trim(),
                             role: roleController.text.trim(),
-                            legalEntityName:
-                                selectedLegalEntity!.legalName ??
-                                'Entità Legale',
+                            legalEntityName: _userLegalEntities.isNotEmpty
+                                ? _userLegalEntities.first.legalName ??
+                                      'Entità Legale'
+                                : 'Entità Legale',
                           );
                           print('✅ Invitation email sent successfully');
                         } catch (e) {
@@ -2023,6 +1976,113 @@ class _CertifiersContentState extends State<CertifiersContent> {
         backgroundColor: AppTheme.errorRed,
         duration: Duration(seconds: 3),
       ),
+    );
+  }
+
+  Widget _buildCurrentUserLegalEntityInfo(
+    AppLocalizations l10n,
+    bool isTablet,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Legal Entity (Utente Corrente)',
+          style: TextStyle(
+            fontSize: isTablet ? 14 : 13,
+            fontWeight: FontWeight.w600,
+            color: AppTheme.primaryBlack,
+          ),
+        ),
+        SizedBox(height: 8),
+        if (_isLoadingCurrentUserLegalEntity) ...[
+          Container(
+            padding: EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppTheme.lightGray.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppTheme.borderGray),
+            ),
+            child: Row(
+              children: [
+                const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Caricamento legal entity...',
+                  style: TextStyle(color: AppTheme.textSecondary),
+                ),
+              ],
+            ),
+          ),
+        ] else if (_userLegalEntities.isEmpty) ...[
+          Container(
+            padding: EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppTheme.errorRed.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppTheme.errorRed.withOpacity(0.3)),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.error_outline, color: AppTheme.errorRed, size: 20),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Nessuna legal entity disponibile per l\'utente corrente',
+                    style: TextStyle(color: AppTheme.errorRed),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ] else ...[
+          Container(
+            padding: EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppTheme.successGreen.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppTheme.successGreen.withOpacity(0.3)),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.check_circle,
+                  color: AppTheme.successGreen,
+                  size: 20,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _userLegalEntities.first.legalName ?? 'N/A',
+                        style: TextStyle(
+                          color: AppTheme.successGreen,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      if (_userLegalEntities.first.identifierCode != null)
+                        Text(
+                          'ID: ${_userLegalEntities.first.identifierCode}',
+                          style: TextStyle(
+                            color: AppTheme.successGreen,
+                            fontSize: 12,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+        SizedBox(height: 24),
+      ],
     );
   }
 }

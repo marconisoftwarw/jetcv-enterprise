@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/certifier_provider.dart';
+import '../../providers/auth_provider.dart';
+import '../../services/edge_function_service.dart';
+import '../../models/legal_entity.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/linkedin_card.dart';
 import '../../widgets/linkedin_text_field.dart';
@@ -21,6 +24,9 @@ class _InviteCertifierScreenState extends State<InviteCertifierScreen> {
 
   String? _selectedRole;
   bool _isLoading = false;
+  String? _selectedLegalEntityId;
+  List<LegalEntity> _userLegalEntities = [];
+  bool _isLoadingLegalEntity = false;
 
   final List<String> _predefinedRoles = [
     'Certificatore',
@@ -30,6 +36,72 @@ class _InviteCertifierScreenState extends State<InviteCertifierScreen> {
     'Ispettore',
     'Consulente',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCurrentUserLegalEntity();
+  }
+
+  Future<void> _loadCurrentUserLegalEntity() async {
+    setState(() {
+      _isLoadingLegalEntity = true;
+    });
+
+    try {
+      final authProvider = context.read<AuthProvider>();
+      final currentUser = authProvider.currentUser;
+
+      if (currentUser == null) {
+        throw Exception('Utente non autenticato');
+      }
+
+      // Usa l'edge function per ottenere le legal entity dell'utente
+      final response = await EdgeFunctionService.getLegalEntitiesByUser(
+        userId: currentUser.idUser,
+      );
+
+      if (response != null && response['ok'] == true) {
+        final data = response['data'] as List<dynamic>?;
+        if (data != null && data.isNotEmpty) {
+          // Converti i dati in oggetti LegalEntity
+          final legalEntities = data
+              .map((item) => LegalEntity.fromJson(item))
+              .toList();
+          setState(() {
+            _userLegalEntities = legalEntities;
+            // Seleziona automaticamente la prima legal entity
+            if (legalEntities.isNotEmpty) {
+              _selectedLegalEntityId = legalEntities.first.idLegalEntity;
+            }
+          });
+          print(
+            '✅ Loaded ${legalEntities.length} legal entities for current user',
+          );
+        } else {
+          setState(() {
+            _userLegalEntities = [];
+            _selectedLegalEntityId = null;
+          });
+          print('❌ No legal entities found for current user');
+        }
+      } else {
+        throw Exception(
+          response?['message'] ?? 'Failed to load legal entities',
+        );
+      }
+    } catch (e) {
+      print('Error loading current user legal entity: $e');
+      setState(() {
+        _userLegalEntities = [];
+        _selectedLegalEntityId = null;
+      });
+    } finally {
+      setState(() {
+        _isLoadingLegalEntity = false;
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -272,8 +344,19 @@ class _InviteCertifierScreenState extends State<InviteCertifierScreen> {
     try {
       final certifierProvider = context.read<CertifierProvider>();
 
-      // TODO: Ottenere legal entity ID dall'utente corrente
-      final legalEntityId = 'temp_legal_entity_id';
+      if (_selectedLegalEntityId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text(
+              'Nessuna legal entity disponibile per l\'utente corrente',
+            ),
+            backgroundColor: AppTheme.errorRed,
+          ),
+        );
+        return;
+      }
+
+      final legalEntityId = _selectedLegalEntityId!;
 
       final role = _selectedRole == 'custom'
           ? _roleController.text

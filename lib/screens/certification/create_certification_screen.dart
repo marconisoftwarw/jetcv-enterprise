@@ -18,6 +18,7 @@ import '../../services/otp_verification_service.dart';
 import '../../services/default_ids_service.dart';
 import '../../services/legal_entity_service.dart';
 import '../../services/location_service.dart';
+import '../../models/legal_entity.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/user_search_selector.dart';
 import '../../models/media_item.dart';
@@ -61,7 +62,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
 
   // Legal entity information
   String? _legalEntityName;
-  List<LegalEntityInfo> _legalEntities = [];
+  List<LegalEntity> _legalEntities = [];
   String? _selectedLegalEntityId;
   bool _isLoadingLegalEntities = true;
 
@@ -439,7 +440,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                   : _legalEntities.map((legalEntity) {
                       return DropdownMenuItem<String>(
                         value: legalEntity.idLegalEntity,
-                        child: Text(legalEntity.displayName),
+                        child: Text(legalEntity.legalName ?? 'N/A'),
                       );
                     }).toList(),
               onChanged: _isLoadingLegalEntities
@@ -1367,7 +1368,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  user.displayName,
+                  user.fullName ?? 'N/A',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -1544,7 +1545,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      user.displayName,
+                      user.fullName ?? 'N/A',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,

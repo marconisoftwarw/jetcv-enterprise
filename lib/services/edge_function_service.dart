@@ -139,4 +139,51 @@ class EdgeFunctionService {
       rethrow;
     }
   }
+
+  /// Chiama l'edge function get-legal-entities-by-user
+  static Future<Map<String, dynamic>?> getLegalEntitiesByUser({
+    required String userId,
+    String? accessToken,
+  }) async {
+    try {
+      final url = Uri.parse('$_baseUrl/get-legal-of-user');
+
+      final headers = {
+        'Content-Type': 'application/json',
+        'apikey': AppConfig.supabaseAnonKey,
+      };
+
+      // Aggiungi Authorization header solo se abbiamo un token
+      if (accessToken != null) {
+        headers['Authorization'] = 'Bearer $accessToken';
+      }
+
+      final requestBody = {'id_user': userId};
+
+      final response = await http.post(
+        url,
+        headers: headers,
+        body: jsonEncode(requestBody),
+      );
+
+      print(
+        '🔍 Get legal entities by user response status: ${response.statusCode}',
+      );
+      print('🔍 Get legal entities by user response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data;
+      } else {
+        final errorData = jsonDecode(response.body);
+        print('❌ Get legal entities by user error: $errorData');
+        throw Exception(
+          errorData['message'] ?? 'Failed to get legal entities by user',
+        );
+      }
+    } catch (e) {
+      print('❌ Get legal entities by user call error: $e');
+      rethrow;
+    }
+  }
 }

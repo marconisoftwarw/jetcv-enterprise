@@ -821,43 +821,6 @@ class _CVListScreenState extends State<CVListScreen> {
                   ),
                 ),
 
-                // Badge aggiuntivi
-                if (cv.hasWallet)
-                  Container(
-                    margin: const EdgeInsets.only(right: 8),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppTheme.warningOrange.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: AppTheme.warningOrange.withValues(alpha: 0.3),
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.account_balance_wallet,
-                          size: 14,
-                          color: AppTheme.warningOrange,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          'Wallet',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: AppTheme.warningOrange,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
                 // Azioni
                 Row(
                   children: [
