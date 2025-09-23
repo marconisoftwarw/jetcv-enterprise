@@ -345,7 +345,7 @@ class _CertifiersContentState extends State<CertifiersContent> {
                 Spacer(),
                 // Add certifier button
                 Container(
-                  margin: EdgeInsets.only(right: 8),
+                  margin: EdgeInsets.only(right: 18),
                   child: ElevatedButton.icon(
                     onPressed: _showAddCertifierDialog,
                     icon: Icon(Icons.add, size: isTablet ? 20 : 18),
@@ -438,7 +438,7 @@ class _CertifiersContentState extends State<CertifiersContent> {
               const Spacer(),
               // Add certifier button
               Container(
-                margin: EdgeInsets.only(right: 8),
+                margin: EdgeInsets.only(right: 18),
                 child: ElevatedButton.icon(
                   onPressed: _showAddCertifierDialog,
                   icon: Icon(Icons.add, size: isTablet ? 20 : 18),
