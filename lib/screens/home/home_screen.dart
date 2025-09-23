@@ -98,10 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case 3: // Certifiers
         // Rimani nella home - mostra contenuto certificatori
         break;
-      case 4: // Settings
-        // Rimani nella home
-        break;
-      case 5: // Profile
+      case 4: // Profile
         // Rimani nella home
         break;
     }
@@ -129,10 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case 0: // Certifications
         // Rimani nella home
         break;
-      case 1: // Settings
-        // Rimani nella home
-        break;
-      case 2: // Profile
+      case 1: // Profile
         // Rimani nella home
         break;
     }
@@ -143,9 +137,6 @@ class _HomeScreenState extends State<HomeScreen> {
       case 0: // Profile
         // Rimani nella home
         break;
-      case 1: // Settings
-        // Rimani nella home
-        break;
     }
   }
 
@@ -153,19 +144,19 @@ class _HomeScreenState extends State<HomeScreen> {
     int maxIndex;
     switch (userType) {
       case AppUserType.admin:
-        maxIndex = 5; // 6 items (0-5)
+        maxIndex = 4; // 5 items (0-4) - rimosso settings
         break;
       case AppUserType.legalEntity:
-        maxIndex = 4; // 5 items (0-4)
+        maxIndex = 3; // 4 items (0-3) - rimosso settings
         break;
       case AppUserType.certifier:
-        maxIndex = 2; // 3 items (0-2)
+        maxIndex = 2; // 3 items (0-2) - già corretto
         break;
       case AppUserType.user:
-        maxIndex = 1; // 2 items (0-1)
+        maxIndex = 0; // 1 item (0) - rimosso settings
         break;
       default:
-        maxIndex = 1;
+        maxIndex = 0;
         break;
     }
     return index >= 0 && index <= maxIndex;
@@ -312,9 +303,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return const LegalEntityManagementScreen(hideMenu: true);
   }
 
-  Widget _buildSettingsContent(AppLocalizations l10n) {
-    return const UserSettingsScreen(hideMenu: true);
-  }
+  // Rimosso _buildSettingsContent - menu impostazioni rimosso
 
   Widget _buildCertifiersContent() {
     return CertifiersContent();

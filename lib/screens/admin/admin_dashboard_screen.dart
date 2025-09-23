@@ -44,7 +44,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           ? 0
           : (_selectedIndex == 1
                 ? 2
-                : 4), // Dashboard, Entità Legali, o Impostazioni
+                : 3), // Dashboard, Entità Legali, o Certifiers
       onDestinationSelected: (index) {
         _handleNavigation(index);
       },
@@ -93,8 +93,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         return const _UsersContent();
       case 3:
         return const _AnalyticsContent();
-      case 4:
-        return const _SettingsContent();
+      // Rimosso case 4 - Settings
       default:
         return const _DashboardContent();
     }
@@ -187,17 +186,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 }
               },
             ),
-            ListTile(
-              leading: Icon(Icons.settings, color: AppTheme.accentBlue),
-              title: Text(
-                'Impostazioni',
-                style: TextStyle(color: AppTheme.primaryBlack),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, '/settings');
-              },
-            ),
+            // Rimosso menu Impostazioni
             ListTile(
               leading: Icon(Icons.logout, color: AppTheme.accentOrange),
               title: Text(
@@ -1133,14 +1122,7 @@ class _AnalyticsContent extends StatelessWidget {
   }
 }
 
-class _SettingsContent extends StatelessWidget {
-  const _SettingsContent();
-
-  @override
-  Widget build(BuildContext context) {
-    return const UserSettingsScreen();
-  }
-}
+// Rimosso _SettingsContent - menu impostazioni rimosso
 
 Widget _buildStatCard(
   BuildContext context,

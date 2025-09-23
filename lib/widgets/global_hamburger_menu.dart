@@ -4,6 +4,7 @@ import '../providers/auth_provider.dart';
 import '../theme/app_theme.dart';
 import '../l10n/app_localizations.dart';
 import '../services/user_type_service.dart';
+import 'appbar_language_dropdown.dart';
 
 class GlobalHamburgerMenu extends StatelessWidget {
   final int selectedIndex;
@@ -197,16 +198,65 @@ class GlobalHamburgerMenu extends StatelessWidget {
                                     color: Colors.white,
                                     size: isMobile ? 28 : 32,
                                   ),
-                                  if (!isDesktop && !isVerySmall)
-                                    IconButton(
-                                      icon: Icon(
-                                        Icons.close,
-                                        color: Colors.white,
-                                        size: isMobile ? 18 : 20,
+                                  Row(
+                                    children: [
+                                      // Dropdown della lingua
+                                      const AppBarLanguageDropdown(),
+                                      const SizedBox(width: 8),
+                                      // Menu del profilo
+                                      PopupMenuButton<String>(
+                                        icon: const Icon(
+                                          Icons.account_circle,
+                                          color: Colors.white,
+                                          size: 24,
+                                        ),
+                                        onSelected: (value) {
+                                          if (value == 'profile') {
+                                            // Naviga al profilo
+                                            Navigator.pushNamed(
+                                              context,
+                                              '/profile',
+                                            );
+                                          } else if (value == 'logout') {
+                                            // Logout
+                                            authProvider.signOut();
+                                          }
+                                        },
+                                        itemBuilder: (context) => [
+                                          const PopupMenuItem(
+                                            value: 'profile',
+                                            child: Row(
+                                              children: [
+                                                Icon(Icons.person),
+                                                SizedBox(width: 8),
+                                                Text('Profilo'),
+                                              ],
+                                            ),
+                                          ),
+                                          const PopupMenuItem(
+                                            value: 'logout',
+                                            child: Row(
+                                              children: [
+                                                Icon(Icons.logout),
+                                                SizedBox(width: 8),
+                                                Text('Logout'),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                      onPressed: () =>
-                                          onExpansionChanged(false),
-                                    ),
+                                      if (!isDesktop && !isVerySmall)
+                                        IconButton(
+                                          icon: Icon(
+                                            Icons.close,
+                                            color: Colors.white,
+                                            size: isMobile ? 18 : 20,
+                                          ),
+                                          onPressed: () =>
+                                              onExpansionChanged(false),
+                                        ),
+                                    ],
+                                  ),
                                 ],
                               ),
                               SizedBox(height: isMobile ? 6 : 8),
@@ -330,12 +380,8 @@ class GlobalHamburgerMenu extends StatelessWidget {
           'label': l10n.getString('certifiers'),
           'index': 3,
         },
-        {
-          'icon': Icons.settings,
-          'label': l10n.getString('settings'),
-          'index': 4,
-        },
-        {'icon': Icons.person, 'label': l10n.getString('profile'), 'index': 5},
+        // Rimosso menu Impostazioni
+        {'icon': Icons.person, 'label': l10n.getString('profile'), 'index': 4},
       ];
     }
     // Legal Entity menu
@@ -356,12 +402,8 @@ class GlobalHamburgerMenu extends StatelessWidget {
           'label': l10n.getString('certifiers'),
           'index': 2,
         },
-        {
-          'icon': Icons.settings,
-          'label': l10n.getString('settings'),
-          'index': 3,
-        },
-        {'icon': Icons.person, 'label': l10n.getString('profile'), 'index': 4},
+        // Rimosso menu Impostazioni
+        {'icon': Icons.person, 'label': l10n.getString('profile'), 'index': 3},
       ];
     }
     // Certifier menu
@@ -384,11 +426,7 @@ class GlobalHamburgerMenu extends StatelessWidget {
     else {
       menuItems = [
         {'icon': Icons.person, 'label': l10n.getString('profile'), 'index': 0},
-        {
-          'icon': Icons.settings,
-          'label': l10n.getString('settings'),
-          'index': 1,
-        },
+        // Rimosso menu Impostazioni
       ];
     }
 
