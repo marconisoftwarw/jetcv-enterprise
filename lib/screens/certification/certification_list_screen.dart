@@ -7,6 +7,7 @@ import '../../services/certification_service.dart';
 import '../../services/certification_edge_service.dart';
 import '../../services/certification_service_v2.dart';
 import '../../services/certification_category_service.dart';
+import '../../services/certification_info_service.dart';
 import '../../services/location_service.dart';
 import '../../providers/auth_provider.dart';
 import '../../l10n/app_localizations.dart';
@@ -38,6 +39,10 @@ class _CertificationListScreenState extends State<CertificationListScreen>
   Map<String, String> _categoryNames = {};
   Map<String, String> _locationNames = {};
   String? _errorMessage;
+  
+  // Informazioni dettagliate delle certificazioni
+  Map<String, Map<String, dynamic>> _certificationDetails = {};
+  bool _isLoadingDetails = false;
 
   @override
   void initState() {
@@ -134,16 +139,69 @@ class _CertificationListScreenState extends State<CertificationListScreen>
           );
           _isLoading = false;
         });
-        print(
-          '✅ State updated with ${_draftCertifications.length} draft, ${_sentCertifications.length} sent, ${_closedCertifications.length} closed certifications',
-        );
-      }
-    } catch (e) {
+      print(
+        '✅ State updated with ${_draftCertifications.length} draft, ${_sentCertifications.length} sent, ${_closedCertifications.length} closed certifications',
+      );
+      
+      // Carica i dettagli delle certificazioni
+      _loadCertificationDetails();
+    }
+  } catch (e) {
       print('💥 Error loading certifications: $e');
       if (mounted) {
         setState(() {
           _errorMessage = 'Errore nel caricamento delle certificazioni: $e';
           _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _loadCertificationDetails() async {
+    print('🔍 Loading certification details...');
+    setState(() {
+      _isLoadingDetails = true;
+    });
+
+    try {
+      // Raccoglie tutti gli ID delle certificazioni
+      final allCertifications = [
+        ..._draftCertifications,
+        ..._sentCertifications,
+        ..._closedCertifications,
+      ];
+      
+      final certificationIds = allCertifications
+          .map((cert) => cert['id_certification'] as String?)
+          .where((id) => id != null)
+          .cast<String>()
+          .toList();
+
+      if (certificationIds.isEmpty) {
+        print('📝 No certifications to load details for');
+        setState(() {
+          _isLoadingDetails = false;
+        });
+        return;
+      }
+
+      print('📝 Loading details for ${certificationIds.length} certifications');
+      
+      // Carica i dettagli in batch
+      final details = await CertificationInfoService.getMultipleCertificationsInfo(certificationIds);
+      
+      if (mounted) {
+        setState(() {
+          _certificationDetails = details;
+          _isLoadingDetails = false;
+        });
+        print('✅ Loaded details for ${details.length} certifications');
+      }
+    } catch (e) {
+      print('💥 Error loading certification details: $e');
+      if (mounted) {
+        setState(() {
+          _isLoadingDetails = false;
         });
       }
     }
@@ -741,7 +799,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
     final isTablet = screenWidth > 768;
     final isDesktop = screenWidth > 1024;
 
-    if (_isLoading) {
+    if (_isLoading || _isLoadingDetails) {
       return _buildLoadingState();
     }
 
@@ -762,7 +820,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
     final isTablet = screenWidth > 768;
     final isDesktop = screenWidth > 1024;
 
-    if (_isLoading) {
+    if (_isLoading || _isLoadingDetails) {
       return _buildLoadingState();
     }
 
@@ -990,193 +1048,556 @@ class _CertificationListScreenState extends State<CertificationListScreen>
         DateTime.tryParse(cert['created_at'] ?? '') ?? DateTime.now();
     final nUsers = cert['n_users'] ?? 0;
     final serialNumber = cert['serial_number'] ?? 'N/A';
-    final categoryId = cert['id_certification_category'] ?? '';
-    final categoryName =
-        _categoryNames[categoryId] ?? l10n.getString('unknown_category');
-    final title = cert['title'] ?? cert['name'] ?? 'Titolo non disponibile';
-    final description = cert['description'] ?? l10n.getString('no_description');
+    final certificationId = cert['id_certification'] as String?;
+    
+    // Recupera i dettagli dalla nuova edge function
+    final details = certificationId != null ? _certificationDetails[certificationId] : null;
+    final certificationData = details?['certification'];
+    final usersData = details?['users'] as List<dynamic>? ?? [];
+    
+    // Estrai le informazioni dai dettagli
+    final categoryName = certificationData?['category']?['name'] ?? 
+                        _categoryNames[cert['id_certification_category']] ?? 
+                        l10n.getString('unknown_category');
+    final categoryType = certificationData?['category']?['type'] ?? '';
+    final title = certificationData?['title'] ?? 
+                 cert['title'] ?? 
+                 cert['name'] ?? 
+                 l10n.getString('no_title_available');
+    final description = certificationData?['description'] ?? 
+                       cert['description'] ?? 
+                       l10n.getString('no_description');
+    
+    // Conta gli utenti dai dettagli se disponibili
+    final actualUserCount = usersData.isNotEmpty ? usersData.length : nUsers;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[200]!),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.white,
+            Colors.grey[50]!,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.grey[200]!,
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 1),
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+            spreadRadius: 0,
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+            spreadRadius: 0,
           ),
         ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            // Icona categoria - Stile LinkedIn
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: AppTheme.primaryBlue.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(
-                Icons.workspace_premium,
-                color: AppTheme.primaryBlue,
-                size: 28,
-              ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.white,
+                Colors.grey[50]!,
+              ],
             ),
-            const SizedBox(width: 16),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                // Header con status e icona
+                Row(
+                  children: [
+                    // Icona categoria con gradiente
+                    Container(
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            AppTheme.primaryBlue,
+                            AppTheme.primaryBlue.withValues(alpha: 0.8),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppTheme.primaryBlue.withValues(alpha: 0.3),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        Icons.workspace_premium_rounded,
+                        color: Colors.white,
+                        size: 32,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    
+                    // Titolo e status
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Status badge moderno
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      statusColor,
+                                      statusColor.withValues(alpha: 0.8),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(20),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: statusColor.withValues(alpha: 0.3),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Text(
+                                  statusText,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
 
-            // Contenuto principale
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Status badge
-                  Row(
+                          // Titolo principale
+                          Text(
+                            title,
+                            style: TextStyle(
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 18,
+                              letterSpacing: -0.3,
+                              height: 1.2,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 8),
+
+                          // Tipologia con icona
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.category_rounded,
+                                size: 16,
+                                color: AppTheme.primaryBlue,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                categoryType.isNotEmpty ? categoryType : categoryName,
+                                style: TextStyle(
+                                  color: AppTheme.primaryBlue,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                
+                const SizedBox(height: 16),
+                
+                // Descrizione in box separato
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.grey[200]!,
+                      width: 1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.03),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.description_rounded,
+                            size: 16,
+                            color: Colors.grey[600],
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            l10n.getString('certification_description'),
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        description,
+                        style: TextStyle(
+                          color: Colors.grey[700],
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          height: 1.4,
                         ),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                
+                const SizedBox(height: 16),
+                
+                // Footer con informazioni e utenti
+                Row(
+                  children: [
+                    // Serie
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: statusColor.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Text(
-                          statusText,
-                          style: TextStyle(
-                            color: statusColor,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 12,
+                          color: Colors.grey[50],
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: Colors.grey[200]!,
+                            width: 1,
                           ),
                         ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.tag_rounded,
+                              size: 16,
+                              color: Colors.grey[600],
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                serialNumber,
+                                style: TextStyle(
+                                  color: Colors.grey[700],
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
+                    ),
+                    const SizedBox(width: 12),
+                    
+                    // Partecipanti
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: AppTheme.primaryBlue.withValues(alpha: 0.2),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.people_rounded,
+                            size: 16,
+                            color: AppTheme.primaryBlue,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            '$actualUserCount',
+                            style: TextStyle(
+                              color: AppTheme.primaryBlue,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    
+                    // Data
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[50],
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: Colors.grey[200]!,
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.access_time_rounded,
+                            size: 16,
+                            color: Colors.grey[600],
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            _formatDate(createdAt),
+                            style: TextStyle(
+                              color: Colors.grey[700],
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                
+                // Lista utenti (se presenti)
+                if (usersData.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Colors.grey[200]!,
+                        width: 1,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.03),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.verified_user_rounded,
+                              size: 16,
+                              color: AppTheme.successGreen,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              l10n.getString('certified_users'),
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        _buildUsersList(usersData, l10n),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUsersList(List<dynamic> usersData, AppLocalizations l10n) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: usersData.take(6).map((user) {
+        final firstName = user['firstName'] ?? '';
+        final lastName = user['lastName'] ?? '';
+        final email = user['email'] ?? '';
+        
+        // Crea il nome da visualizzare
+        String displayName = '';
+        if (firstName.isNotEmpty && lastName.isNotEmpty) {
+          displayName = '$firstName $lastName';
+        } else if (firstName.isNotEmpty) {
+          displayName = firstName;
+        } else if (lastName.isNotEmpty) {
+          displayName = lastName;
+        } else if (email.isNotEmpty) {
+          displayName = email.split('@').first;
+        } else {
+          displayName = l10n.getString('unknown_user');
+        }
+
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppTheme.primaryBlue.withValues(alpha: 0.1),
+                AppTheme.primaryBlue.withValues(alpha: 0.05),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: AppTheme.primaryBlue.withValues(alpha: 0.2),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      AppTheme.primaryBlue,
+                      AppTheme.primaryBlue.withValues(alpha: 0.8),
                     ],
                   ),
-                  const SizedBox(height: 8),
-
-                  // Tipologia
-                  Text(
-                    l10n.getString('certification_type'),
-                    style: TextStyle(
-                      color: Colors.grey[500],
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.person_rounded,
+                  size: 14,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                displayName,
+                style: TextStyle(
+                  color: AppTheme.primaryBlue,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        );
+      }).toList()
+        ..addAll([
+          // Mostra "+N altri" se ci sono più di 6 utenti
+          if (usersData.length > 6)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Colors.grey[100]!,
+                    Colors.grey[50]!,
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: Colors.grey[300]!,
+                  width: 1,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withValues(alpha: 0.1),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 24,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[400],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.more_horiz_rounded,
+                      size: 14,
+                      color: Colors.white,
                     ),
                   ),
+                  const SizedBox(width: 8),
                   Text(
-                    categoryName,
+                    '+${usersData.length - 6} ${l10n.getString('others')}',
                     style: TextStyle(
-                      color: Colors.black87,
+                      color: Colors.grey[600],
+                      fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                      letterSpacing: -0.1,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 6),
-
-                  // Titolo
-                  Text(
-                    l10n.getString('certification_title'),
-                    style: TextStyle(
-                      color: Colors.grey[500],
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  Text(
-                    title,
-                    style: TextStyle(
-                      color: Colors.black87,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                      letterSpacing: -0.2,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 6),
-
-                  // Descrizione
-                  Text(
-                    l10n.getString('certification_description'),
-                    style: TextStyle(
-                      color: Colors.grey[500],
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  Text(
-                    description,
-                    style: TextStyle(
-                      color: Colors.grey[700],
-                      fontSize: 13,
-                      fontWeight: FontWeight.w400,
-                      height: 1.3,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Informazioni aggiuntive
-                  Row(
-                    children: [
-                      Icon(Icons.tag, size: 14, color: Colors.grey[500]),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${l10n.getString('series')}: $serialNumber',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 12,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Icon(
-                        Icons.people_outline,
-                        size: 14,
-                        color: Colors.grey[500],
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '$nUsers ${l10n.getString('participants')}',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 12,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Icon(
-                        Icons.access_time,
-                        size: 14,
-                        color: Colors.grey[500],
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        _formatDate(createdAt),
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 12,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ],
                   ),
                 ],
               ),
             ),
-          ],
-        ),
-      ),
+        ]),
     );
   }
 
