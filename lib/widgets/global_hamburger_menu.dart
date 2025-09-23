@@ -4,7 +4,6 @@ import '../providers/auth_provider.dart';
 import '../theme/app_theme.dart';
 import '../l10n/app_localizations.dart';
 import '../services/user_type_service.dart';
-import 'appbar_language_dropdown.dart';
 
 class GlobalHamburgerMenu extends StatelessWidget {
   final int selectedIndex;
@@ -198,64 +197,64 @@ class GlobalHamburgerMenu extends StatelessWidget {
                                     color: Colors.white,
                                     size: isMobile ? 28 : 32,
                                   ),
-                                  Row(
-                                    children: [
-                                      // Dropdown della lingua
-                                      const AppBarLanguageDropdown(),
-                                      const SizedBox(width: 8),
-                                      // Menu del profilo
-                                      PopupMenuButton<String>(
-                                        icon: const Icon(
-                                          Icons.account_circle,
-                                          color: Colors.white,
-                                          size: 24,
-                                        ),
-                                        onSelected: (value) {
-                                          if (value == 'profile') {
-                                            // Naviga al profilo
-                                            Navigator.pushNamed(
-                                              context,
-                                              '/profile',
-                                            );
-                                          } else if (value == 'logout') {
-                                            // Logout
-                                            authProvider.signOut();
-                                          }
-                                        },
-                                        itemBuilder: (context) => [
-                                          const PopupMenuItem(
-                                            value: 'profile',
-                                            child: Row(
-                                              children: [
-                                                Icon(Icons.person),
-                                                SizedBox(width: 8),
-                                                Text('Profilo'),
-                                              ],
-                                            ),
-                                          ),
-                                          const PopupMenuItem(
-                                            value: 'logout',
-                                            child: Row(
-                                              children: [
-                                                Icon(Icons.logout),
-                                                SizedBox(width: 8),
-                                                Text('Logout'),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      if (!isDesktop && !isVerySmall)
-                                        IconButton(
-                                          icon: Icon(
-                                            Icons.close,
+                                  Expanded(
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        // Menu del profilo
+                                        PopupMenuButton<String>(
+                                          icon: const Icon(
+                                            Icons.account_circle,
                                             color: Colors.white,
-                                            size: isMobile ? 18 : 20,
+                                            size: 24,
                                           ),
-                                          onPressed: () =>
-                                              onExpansionChanged(false),
+                                          onSelected: (value) {
+                                            if (value == 'profile') {
+                                              // Naviga al profilo
+                                              Navigator.pushNamed(
+                                                context,
+                                                '/profile',
+                                              );
+                                            } else if (value == 'logout') {
+                                              // Logout
+                                              authProvider.signOut();
+                                            }
+                                          },
+                                          itemBuilder: (context) => [
+                                            const PopupMenuItem(
+                                              value: 'profile',
+                                              child: Row(
+                                                children: [
+                                                  Icon(Icons.person),
+                                                  SizedBox(width: 8),
+                                                  Text('Profilo'),
+                                                ],
+                                              ),
+                                            ),
+                                            const PopupMenuItem(
+                                              value: 'logout',
+                                              child: Row(
+                                                children: [
+                                                  Icon(Icons.logout),
+                                                  SizedBox(width: 8),
+                                                  Text('Logout'),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                    ],
+                                        if (!isDesktop && !isVerySmall)
+                                          IconButton(
+                                            icon: Icon(
+                                              Icons.close,
+                                              color: Colors.white,
+                                              size: isMobile ? 18 : 20,
+                                            ),
+                                            onPressed: () =>
+                                                onExpansionChanged(false),
+                                          ),
+                                      ],
+                                    ),
                                   ),
                                 ],
                               ),
@@ -266,13 +265,6 @@ class GlobalHamburgerMenu extends StatelessWidget {
                                   color: Colors.white,
                                   fontSize: isMobile ? 16 : 18,
                                   fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                l10n.getString('welcome_back'),
-                                style: TextStyle(
-                                  color: Colors.white.withOpacity(0.9),
-                                  fontSize: isMobile ? 10 : 12,
                                 ),
                               ),
                             ],
