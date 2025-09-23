@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../config/app_config.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../widgets/custom_button.dart';
+import '../../widgets/international_phone_field.dart';
 import '../../l10n/app_localizations.dart';
 
 class LegalEntityRegistrationScreen extends StatefulWidget {
@@ -22,13 +23,13 @@ class _LegalEntityRegistrationScreenState
   final _legalRepresentativeController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
+  String _selectedCountryCode = '+39'; // Default to Italy
   final _websiteController = TextEditingController();
   final _addressController = TextEditingController();
   final _cityController = TextEditingController();
   final _stateController = TextEditingController();
   final _postalCodeController = TextEditingController();
 
-  String? _selectedCountryCode;
   List<Map<String, String>> _countries = [];
 
   bool _isLoading = false;
@@ -237,7 +238,7 @@ class _LegalEntityRegistrationScreenState
                       }).toList(),
                       onChanged: (value) {
                         setState(() {
-                          _selectedCountryCode = value;
+                          _selectedCountryCode = value ?? '+39';
                         });
                       },
                       validator: (value) {
@@ -280,11 +281,19 @@ class _LegalEntityRegistrationScreenState
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: CustomTextField(
+                    child: InternationalPhoneField(
                       controller: _phoneController,
-                      labelText: 'Phone *',
-                      hintText: 'Enter company phone number',
-                      keyboardType: TextInputType.phone,
+                      label: 'Phone *',
+                      hint: 'Enter company phone number',
+                      initialCountryCode: _selectedCountryCode,
+                      onCountryCodeChanged: (countryCode) {
+                        setState(() {
+                          _selectedCountryCode = countryCode;
+                        });
+                      },
+                      onPhoneNumberChanged: (phoneNumber) {
+                        // Il controller viene aggiornato automaticamente
+                      },
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Phone number is required';

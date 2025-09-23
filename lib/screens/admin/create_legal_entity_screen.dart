@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../config/app_config.dart';
 import '../../providers/legal_entity_provider.dart';
 import '../../widgets/custom_text_field.dart';
+import '../../widgets/international_phone_field.dart';
 
 class CreateLegalEntityScreen extends StatefulWidget {
   const CreateLegalEntityScreen({super.key});
@@ -21,6 +22,7 @@ class _CreateLegalEntityScreenState extends State<CreateLegalEntityScreen> {
   final _legalRepresentativeController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
+  String _selectedCountryCode = '+39'; // Default to Italy
   final _pecController = TextEditingController();
   final _websiteController = TextEditingController();
   final _addressController = TextEditingController();
@@ -30,7 +32,6 @@ class _CreateLegalEntityScreenState extends State<CreateLegalEntityScreen> {
   final _countryCodeController = TextEditingController();
   bool _isLoading = false;
 
-  String? _selectedCountryCode;
   List<Map<String, String>> _countries = [];
 
   @override
@@ -95,7 +96,7 @@ class _CreateLegalEntityScreenState extends State<CreateLegalEntityScreen> {
       'headquarter_address': _headquartersAddressController.text.trim(),
       'legal_rapresentative': _legalRepresentativeController.text.trim(),
       'email': _emailController.text.trim(),
-      'phone': _phoneController.text.trim(),
+      'phone': '$_selectedCountryCode${_phoneController.text.trim()}',
       'pec': _pecController.text.trim().isEmpty
           ? null
           : _pecController.text.trim(),
@@ -206,7 +207,7 @@ class _CreateLegalEntityScreenState extends State<CreateLegalEntityScreen> {
                       }).toList(),
                       onChanged: (value) {
                         setState(() {
-                          _selectedCountryCode = value;
+                          _selectedCountryCode = value ?? '+39';
                         });
                       },
                       validator: (value) {
@@ -249,11 +250,19 @@ class _CreateLegalEntityScreenState extends State<CreateLegalEntityScreen> {
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: CustomTextField(
+                    child: InternationalPhoneField(
                       controller: _phoneController,
-                      labelText: 'Phone *',
-                      hintText: 'Enter company phone number',
-                      keyboardType: TextInputType.phone,
+                      label: 'Phone *',
+                      hint: 'Enter company phone number',
+                      initialCountryCode: _selectedCountryCode,
+                      onCountryCodeChanged: (countryCode) {
+                        setState(() {
+                          _selectedCountryCode = countryCode;
+                        });
+                      },
+                      onPhoneNumberChanged: (phoneNumber) {
+                        // Il controller viene aggiornato automaticamente
+                      },
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Phone number is required';

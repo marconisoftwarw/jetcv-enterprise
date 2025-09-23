@@ -12,6 +12,7 @@ import '../../providers/pricing_provider.dart';
 
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text_field.dart';
+import '../../widgets/international_phone_field.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/url_parameter_service.dart';
 
@@ -42,6 +43,7 @@ class _LegalEntityPublicRegistrationScreenState
   final _personalNameController = TextEditingController();
   final _personalEmailController = TextEditingController();
   final _personalPhoneController = TextEditingController();
+  String _personalCountryCode = '+39'; // Default to Italy
   File? _personalProfilePicture;
 
   // Legal entity information
@@ -60,6 +62,7 @@ class _LegalEntityPublicRegistrationScreenState
   final _headquarterStateController = TextEditingController();
   final _headquarterCountryController = TextEditingController();
   final _phoneController = TextEditingController();
+  String _entityCountryCode = '+39'; // Default to Italy
   final _pecController = TextEditingController();
   final _websiteController = TextEditingController();
   File? _entityProfilePicture;
@@ -658,10 +661,18 @@ class _LegalEntityPublicRegistrationScreenState
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
-                  child: CustomTextField(
+                  child: InternationalPhoneField(
                     controller: _personalPhoneController,
-                    labelText: AppLocalizations.of(context).getString('phone'),
-                    keyboardType: TextInputType.phone,
+                    label: AppLocalizations.of(context).getString('phone'),
+                    initialCountryCode: _personalCountryCode,
+                    onCountryCodeChanged: (countryCode) {
+                      setState(() {
+                        _personalCountryCode = countryCode;
+                      });
+                    },
+                    onPhoneNumberChanged: (phoneNumber) {
+                      // Il controller viene aggiornato automaticamente
+                    },
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -797,10 +808,18 @@ class _LegalEntityPublicRegistrationScreenState
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
-                  child: CustomTextField(
+                  child: InternationalPhoneField(
                     controller: _phoneController,
-                    labelText: 'Telefono Azienda',
-                    keyboardType: TextInputType.phone,
+                    label: 'Telefono Azienda',
+                    initialCountryCode: _entityCountryCode,
+                    onCountryCodeChanged: (countryCode) {
+                      setState(() {
+                        _entityCountryCode = countryCode;
+                      });
+                    },
+                    onPhoneNumberChanged: (phoneNumber) {
+                      // Il controller viene aggiornato automaticamente
+                    },
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -939,7 +958,7 @@ class _LegalEntityPublicRegistrationScreenState
             ? _personalNameController.text.split(' ').skip(1).join(' ')
             : 'N/A',
         email: _personalEmailController.text,
-        phone: _personalPhoneController.text,
+        phone: '$_personalCountryCode${_personalPhoneController.text}',
         profilePicture: personalProfileUrl,
         fullName: _personalNameController.text,
       );
@@ -962,7 +981,7 @@ class _LegalEntityPublicRegistrationScreenState
         headquarterPostalCode: _headquarterPostalCodeController.text,
         headquarterState: _headquarterStateController.text,
         headquarterCountry: _headquarterCountryController.text,
-        phone: _phoneController.text,
+        phone: '$_entityCountryCode${_phoneController.text}',
         pec: _pecController.text,
         website: _websiteController.text,
         logoPicture: entityProfileUrl,

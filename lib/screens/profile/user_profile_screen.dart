@@ -8,6 +8,7 @@ import '../../widgets/neon_button.dart';
 import '../../widgets/enterprise_text_field.dart';
 import '../../widgets/global_hamburger_menu.dart';
 import '../../widgets/responsive_layout.dart';
+import '../../widgets/international_phone_field.dart';
 import '../../widgets/responsive_card.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -25,6 +26,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   late TextEditingController _firstNameController;
   late TextEditingController _lastNameController;
   late TextEditingController _phoneController;
+  String _selectedCountryCode = '+39'; // Default to Italy
   late TextEditingController _jobTitleController;
   late TextEditingController _departmentController;
   late TextEditingController _addressController;
@@ -69,7 +71,10 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     _currentUser = user;
     _firstNameController.text = user.firstName ?? '';
     _lastNameController.text = user.lastName ?? '';
-    _phoneController.text = user.phone ?? '';
+    // Estrai prefisso e numero dal telefono
+    final phoneData = _extractPhoneData(user.phone ?? '');
+    _selectedCountryCode = phoneData['countryCode'] ?? '+39';
+    _phoneController.text = phoneData['phoneNumber'] ?? '';
     _jobTitleController.text = 'Non specificato';
     _departmentController.text = 'Non specificato';
     _addressController.text = user.address ?? '';
@@ -713,12 +718,19 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 Row(
                   children: [
                     Expanded(
-                      child: EnterpriseTextField(
+                      child: InternationalPhoneField(
                         label: l10n.getString('phone'),
                         controller: _phoneController,
+                        initialCountryCode: _selectedCountryCode,
                         enabled: _isEditing,
-                        keyboardType: TextInputType.phone,
-                        prefixIcon: const Icon(Icons.phone_rounded),
+                        onCountryCodeChanged: (countryCode) {
+                          setState(() {
+                            _selectedCountryCode = countryCode;
+                          });
+                        },
+                        onPhoneNumberChanged: (phoneNumber) {
+                          // Il controller viene aggiornato automaticamente
+                        },
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -948,7 +960,12 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     });
 
     try {
+      // Combina prefisso e numero di telefono
+      final fullPhoneNumber = '$_selectedCountryCode${_phoneController.text}';
+      
       // TODO: Implementare il salvataggio del profilo con Supabase
+      // Includere fullPhoneNumber nel salvataggio
+      print('Saving phone: $fullPhoneNumber');
       await Future.delayed(const Duration(seconds: 1)); // Simulazione
 
       setState(() {
@@ -1169,5 +1186,37 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         Navigator.pushReplacementNamed(context, '/home');
         break;
     }
+  }
+
+  // Funzione per estrarre prefisso e numero dal telefono
+  Map<String, String> _extractPhoneData(String phone) {
+    if (phone.isEmpty) return {'countryCode': '+39', 'phoneNumber': ''};
+    
+    // Lista dei prefissi internazionali comuni (in ordine di lunghezza decrescente)
+    final prefixes = [
+      '+39', '+1', '+44', '+33', '+49', '+34', '+41', '+43', '+31', '+32',
+      '+351', '+30', '+45', '+46', '+47', '+358', '+48', '+420', '+421',
+      '+36', '+40', '+359', '+385', '+386', '+372', '+371', '+370', '+7',
+      '+380', '+375', '+90', '+86', '+81', '+82', '+91', '+61', '+64',
+      '+55', '+52', '+54', '+56', '+57', '+51', '+58', '+27', '+20',
+      '+212', '+213', '+216', '+218', '+249', '+251', '+254', '+234', '+233',
+      '+225', '+221', '+223', '+226', '+227', '+228', '+229', '+230', '+231',
+      '+232', '+235', '+236', '+237', '+238', '+239', '+240', '+241', '+242',
+      '+243', '+244', '+245', '+246', '+248', '+250', '+252', '+253', '+255',
+      '+256', '+257', '+258', '+260', '+261', '+262', '+263', '+264', '+265',
+      '+266', '+267', '+268', '+269', '+290', '+291', '+297', '+298', '+299'
+    ];
+    
+    for (String prefix in prefixes) {
+      if (phone.startsWith(prefix)) {
+        return {
+          'countryCode': prefix,
+          'phoneNumber': phone.substring(prefix.length).trim()
+        };
+      }
+    }
+    
+    // Se non trova un prefisso, assume che sia un numero italiano
+    return {'countryCode': '+39', 'phoneNumber': phone};
   }
 }

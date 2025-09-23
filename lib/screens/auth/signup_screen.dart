@@ -6,6 +6,7 @@ import '../../providers/auth_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/neon_text_field.dart';
 import '../../widgets/neon_button.dart';
+import '../../widgets/international_phone_field.dart';
 import '../../services/veriff_service.dart';
 import '../../services/supabase_service.dart';
 import '../../l10n/app_localizations.dart';
@@ -28,6 +29,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _phoneController = TextEditingController();
+  String _selectedCountryCode = '+39'; // Default to Italy
 
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
@@ -258,7 +260,7 @@ class _SignupScreenState extends State<SignupScreen> {
         'lastName': _lastNameController.text.trim(),
         'additionalFields': {
           'email': _emailController.text.trim(),
-          'phoneNumber': _phoneController.text.trim(),
+          'phoneNumber': '$_selectedCountryCode${_phoneController.text.trim()}',
           'gender': 'M', // TODO: Aggiungere campo gender nel form
           'dateOfBirth':
               '1990-01-01', // TODO: Aggiungere campo dateOfBirth nel form
@@ -1066,12 +1068,19 @@ class _SignupScreenState extends State<SignupScreen> {
                 const SizedBox(height: 20),
 
                 // Phone Field
-                NeonTextField(
+                InternationalPhoneField(
                   controller: _phoneController,
-                  labelText: 'Phone (Optional)',
-                  hintText: 'Enter phone number',
-                  keyboardType: TextInputType.phone,
-                  prefixIcon: const Icon(Icons.phone_outlined),
+                  label: 'Phone (Optional)',
+                  hint: 'Enter phone number',
+                  initialCountryCode: _selectedCountryCode,
+                  onCountryCodeChanged: (countryCode) {
+                    setState(() {
+                      _selectedCountryCode = countryCode;
+                    });
+                  },
+                  onPhoneNumberChanged: (phoneNumber) {
+                    // Il controller viene aggiornato automaticamente
+                  },
                   validator: (value) {
                     if (value != null &&
                         value.isNotEmpty &&
