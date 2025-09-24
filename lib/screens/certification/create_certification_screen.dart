@@ -247,13 +247,102 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
         foregroundColor: AppTheme.textPrimary,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
-        title: Text(
-          l10n.getString('new_certification'),
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-            color: AppTheme.textPrimary,
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.2,
-          ),
+        title: Row(
+          children: [
+            Expanded(
+              child: Text(
+                l10n.getString('new_certification'),
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  color: AppTheme.textPrimary,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.2,
+                ),
+              ),
+            ),
+            if (_legalEntityName != null && _legalEntityName!.isNotEmpty) ...[
+              Container(
+                margin: EdgeInsets.only(left: 16),
+                padding: EdgeInsets.symmetric(
+                  horizontal: isTablet ? 16 : 12,
+                  vertical: isTablet ? 8 : 6,
+                ),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      AppTheme.primaryBlue.withValues(alpha: 0.1),
+                      AppTheme.primaryBlue.withValues(alpha: 0.05),
+                    ],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: AppTheme.primaryBlue.withValues(alpha: 0.2),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.business_rounded,
+                      color: AppTheme.primaryBlue,
+                      size: isTablet ? 18 : 16,
+                    ),
+                    SizedBox(width: isTablet ? 8 : 6),
+                    Flexible(
+                      child: Text(
+                        _legalEntityName!,
+                        style: TextStyle(
+                          color: AppTheme.primaryBlue,
+                          fontSize: isTablet ? 14 : 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ] else if (_isLoadingLegalEntities) ...[
+              Container(
+                margin: EdgeInsets.only(left: 16),
+                padding: EdgeInsets.symmetric(
+                  horizontal: isTablet ? 16 : 12,
+                  vertical: isTablet ? 8 : 6,
+                ),
+                decoration: BoxDecoration(
+                  color: AppTheme.lightGrey.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: isTablet ? 16 : 14,
+                      height: isTablet ? 16 : 14,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppTheme.textSecondary,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: isTablet ? 8 : 6),
+                    Text(
+                      l10n.getString('loading_organization'),
+                      style: TextStyle(
+                        color: AppTheme.textSecondary,
+                        fontSize: isTablet ? 14 : 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
         ),
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: AppTheme.textPrimary),
@@ -294,53 +383,216 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: isTablet ? 32 : 20,
-        vertical: isTablet ? 20 : 16,
+        vertical: isTablet ? 24 : 20,
       ),
       decoration: BoxDecoration(
-        color: AppTheme.pureWhite,
+        gradient: LinearGradient(
+          colors: [
+            AppTheme.pureWhite,
+            AppTheme.pureWhite.withValues(alpha: 0.95),
+          ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 3),
+          ),
+          BoxShadow(
+            color: AppTheme.primaryBlue.withValues(alpha: 0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 0),
           ),
         ],
       ),
-      child: Row(
+      child: Column(
         children: [
-          _buildStepIndicator(
-            0,
-            l10n.getString('general_info'),
-            _currentStep >= 0,
-            _currentStep == 0,
-            isTablet,
+          // Progress bar moderna
+          Container(
+            height: isTablet ? 6 : 4,
+            decoration: BoxDecoration(
+              color: AppTheme.lightGrey.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(isTablet ? 3 : 2),
+            ),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 500),
+              curve: Curves.easeInOutCubic,
+              width:
+                  MediaQuery.of(context).size.width *
+                  ((_currentStep + 1) / 4) *
+                  0.85, // 85% della larghezza disponibile
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppTheme.primaryBlue,
+                    AppTheme.primaryBlue.withValues(alpha: 0.8),
+                    AppTheme.successGreen,
+                  ],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                ),
+                borderRadius: BorderRadius.circular(isTablet ? 3 : 2),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.primaryBlue.withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+            ),
           ),
-          _buildStepConnector(_currentStep > 0, isTablet),
-          _buildStepIndicator(
-            1,
-            l10n.getString('users'),
-            _currentStep >= 1,
-            _currentStep == 1,
-            isTablet,
-          ),
-          _buildStepConnector(_currentStep > 1, isTablet),
-          _buildStepIndicator(
-            2,
-            l10n.getString('results'),
-            _currentStep >= 2,
-            _currentStep == 2,
-            isTablet,
-          ),
-          _buildStepConnector(_currentStep > 2, isTablet),
-          _buildStepIndicator(
-            3,
-            l10n.getString('review'),
-            _currentStep >= 3,
-            _currentStep == 3,
-            isTablet,
+          SizedBox(height: isTablet ? 20 : 16),
+
+          // Step indicators moderni
+          Row(
+            children: [
+              _buildModernStepIndicator(
+                0,
+                l10n.getString('general_info'),
+                _currentStep >= 0,
+                _currentStep == 0,
+                isTablet,
+              ),
+              _buildModernStepConnector(_currentStep > 0, isTablet),
+              _buildModernStepIndicator(
+                1,
+                l10n.getString('users'),
+                _currentStep >= 1,
+                _currentStep == 1,
+                isTablet,
+              ),
+              _buildModernStepConnector(_currentStep > 1, isTablet),
+              _buildModernStepIndicator(
+                2,
+                l10n.getString('results'),
+                _currentStep >= 2,
+                _currentStep == 2,
+                isTablet,
+              ),
+              _buildModernStepConnector(_currentStep > 2, isTablet),
+              _buildModernStepIndicator(
+                3,
+                l10n.getString('review'),
+                _currentStep >= 3,
+                _currentStep == 3,
+                isTablet,
+              ),
+            ],
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildModernStepIndicator(
+    int stepNumber,
+    String label,
+    bool isCompleted,
+    bool isCurrent,
+    bool isTablet,
+  ) {
+    final isActive = isCompleted || isCurrent;
+
+    return Column(
+      children: [
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 400),
+          curve: Curves.easeInOutCubic,
+          width: isTablet ? 52 : 44,
+          height: isTablet ? 52 : 44,
+          decoration: BoxDecoration(
+            gradient: isCompleted
+                ? LinearGradient(
+                    colors: [
+                      AppTheme.successGreen,
+                      AppTheme.successGreen.withValues(alpha: 0.8),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  )
+                : isCurrent
+                ? LinearGradient(
+                    colors: [
+                      AppTheme.primaryBlue,
+                      AppTheme.primaryBlue.withValues(alpha: 0.8),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  )
+                : null,
+            color: isCompleted || isCurrent
+                ? null
+                : AppTheme.lightGrey.withValues(alpha: 0.4),
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: isCurrent
+                  ? AppTheme.primaryBlue
+                  : isCompleted
+                  ? AppTheme.successGreen
+                  : AppTheme.borderGrey.withValues(alpha: 0.4),
+              width: isCurrent || isCompleted ? 2.5 : 1.5,
+            ),
+            boxShadow: (isCurrent || isCompleted)
+                ? [
+                    BoxShadow(
+                      color:
+                          (isCompleted
+                                  ? AppTheme.successGreen
+                                  : AppTheme.primaryBlue)
+                              .withValues(alpha: 0.4),
+                      blurRadius: isCurrent ? 12 : 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Center(
+            child: isCompleted
+                ? Icon(
+                    Icons.check_rounded,
+                    color: AppTheme.pureWhite,
+                    size: isTablet ? 26 : 22,
+                  )
+                : Text(
+                    '${stepNumber + 1}',
+                    style: TextStyle(
+                      color: isCurrent
+                          ? AppTheme.pureWhite
+                          : AppTheme.textSecondary,
+                      fontWeight: FontWeight.w700,
+                      fontSize: isTablet ? 18 : 16,
+                    ),
+                  ),
+          ),
+        ),
+        SizedBox(height: isTablet ? 10 : 8),
+        Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: isTablet ? 8 : 6,
+            vertical: isTablet ? 4 : 3,
+          ),
+          decoration: BoxDecoration(
+            color: isActive
+                ? (isCurrent
+                      ? AppTheme.primaryBlue.withValues(alpha: 0.1)
+                      : AppTheme.successGreen.withValues(alpha: 0.1))
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(isTablet ? 8 : 6),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: isTablet ? 13 : 11,
+              color: isActive ? AppTheme.primaryBlack : AppTheme.textSecondary,
+              fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w600,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ],
     );
   }
 
@@ -424,6 +676,30 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           textAlign: TextAlign.center,
         ),
       ],
+    );
+  }
+
+  Widget _buildModernStepConnector(bool isCompleted, bool isTablet) {
+    return Expanded(
+      child: Container(
+        height: isTablet ? 3 : 2,
+        margin: EdgeInsets.symmetric(horizontal: isTablet ? 18 : 14),
+        decoration: BoxDecoration(
+          gradient: isCompleted
+              ? LinearGradient(
+                  colors: [
+                    AppTheme.successGreen,
+                    AppTheme.successGreen.withValues(alpha: 0.7),
+                    AppTheme.primaryBlue,
+                  ],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                )
+              : null,
+          color: isCompleted ? null : AppTheme.lightGrey.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(isTablet ? 2 : 1),
+        ),
+      ),
     );
   }
 
