@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import '../models/user.dart';
 import '../services/supabase_service.dart';
 import '../services/user_type_service.dart';
+import '../services/update_user_type_service.dart';
 
 class AuthProvider extends ChangeNotifier {
   final SupabaseService _supabaseService = SupabaseService();
@@ -257,6 +258,10 @@ class AuthProvider extends ChangeNotifier {
 
       if (response.user != null) {
         print('AuthProvider: Utente creato in Supabase con successo');
+
+        // Aggiorna il tipo utente a 'certifier' dopo la registrazione
+        print('AuthProvider: Aggiornando tipo utente a certifier...');
+        await _updateUserTypeToCertifier(response.user!.id);
 
         // Non serve caricare dati aggiuntivi dopo la registrazione
         // L'utente è già autenticato e i dati sono disponibili
@@ -722,6 +727,43 @@ class AuthProvider extends ChangeNotifier {
     } catch (e) {
       print('Error extracting last name from "$fullName": $e');
       return '';
+    }
+  }
+
+  /// Aggiorna il tipo utente a 'certifier' dopo la registrazione
+  Future<void> _updateUserTypeToCertifier(String userId) async {
+    try {
+      print(
+        'AuthProvider: Chiamando edge function per aggiornare tipo utente...',
+      );
+
+      final response = await UpdateUserTypeService.updateUserTypeToCertifier(
+        userId: userId,
+      );
+
+      if (UpdateUserTypeService.isUpdateSuccessful(response)) {
+        print(
+          '✅ AuthProvider: Tipo utente aggiornato a certifier con successo',
+        );
+
+        final message = UpdateUserTypeService.getResponseMessage(response);
+        print('✅ AuthProvider: Messaggio: $message');
+
+        if (UpdateUserTypeService.isCertifierCreated(response)) {
+          print('✅ AuthProvider: Record certifier creato con successo');
+        }
+      } else {
+        print(
+          '⚠️ AuthProvider: Fallimento nell\'aggiornamento del tipo utente',
+        );
+        final message = UpdateUserTypeService.getResponseMessage(response);
+        print('⚠️ AuthProvider: Errore: $message');
+      }
+    } catch (e) {
+      print(
+        '❌ AuthProvider: Errore durante l\'aggiornamento del tipo utente: $e',
+      );
+      // Non bloccare il processo di registrazione se l'aggiornamento del tipo fallisce
     }
   }
 }
