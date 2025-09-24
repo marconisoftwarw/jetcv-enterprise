@@ -96,6 +96,8 @@ class CertificationServiceV2 {
     String? closedAt,
     List<Map<String, dynamic>>? media,
     List<Map<String, dynamic>>? certificationUsers,
+    String? esitoValue,
+    String? titoloValue,
   }) async {
     try {
       print('🔍 Creating certification with params:');
@@ -121,6 +123,8 @@ class CertificationServiceV2 {
         if (media != null && media.isNotEmpty) 'media': media,
         if (certificationUsers != null && certificationUsers.isNotEmpty)
           'certification_users': certificationUsers,
+        if (esitoValue != null) 'esito_value': esitoValue,
+        if (titoloValue != null) 'titolo_value': titoloValue,
       };
 
       print('🚀 POST Certification: $_baseUrl/functions/v1/certification-crud');

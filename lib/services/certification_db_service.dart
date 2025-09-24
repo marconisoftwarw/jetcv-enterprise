@@ -20,6 +20,8 @@ class CertificationDBService {
         sentAt: certification.sentAt?.toIso8601String(),
         draftAt: certification.draftAt?.toIso8601String(),
         closedAt: certification.closedAt?.toIso8601String(),
+        esitoValue: "0", // Valore di default per esito
+        titoloValue: "", // Valore di default per titolo (vuoto)
       );
 
       if (result != null) {

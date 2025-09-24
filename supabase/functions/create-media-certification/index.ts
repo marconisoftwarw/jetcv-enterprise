@@ -377,10 +377,12 @@ Deno.serve(async (req) => {
         ];
 
         // Gestione esito e titolo: recupera le informazioni di certificazione
-        console.log(`[${reqId}] Looking for certification information for legal_entity: ${String(cert.id_legal_entity)}`);
-        console.log(`[${reqId}] Users rows count: ${usersRows.length}`);
-        console.log(`[${reqId}] Esito value from body:`, body.esito_value);
-        console.log(`[${reqId}] Titolo value from body:`, body.titolo_value);
+      console.log(`[${reqId}] Looking for certification information for legal_entity: ${String(cert.id_legal_entity)}`);
+      console.log(`[${reqId}] Users rows count: ${usersRows.length}`);
+      console.log(`[${reqId}] Esito value from body:`, body.esito_value);
+      console.log(`[${reqId}] Titolo value from body:`, body.titolo_value);
+      console.log(`[${reqId}] Titolo value type:`, typeof body.titolo_value);
+      console.log(`[${reqId}] Titolo value length:`, body.titolo_value?.length);
         
         // Verifica la struttura della tabella
         const { data: tableInfo, error: tableErr } = await admin
@@ -441,13 +443,14 @@ Deno.serve(async (req) => {
           console.warn(`[${reqId}] Error fetching esito information:`, esitoErr.message);
         } else if (esitoInfo) {
           console.log(`[${reqId}] Found esito information:`, esitoInfo);
+          console.log(`[${reqId}] Esito value from body:`, body.esito_value);
           // Crea i valori di esito per ogni utente
           const esitoValues = usersRows.map((user) => {
             const esitoValue = {
               id_certification_information: esitoInfo.id_certification_information,
               id_certification: certRow.id_certification,
               id_certification_user: user.id_certification_user || null,
-              value: body.esito_value ? String(body.esito_value) : "0"
+              value: body.esito_value !== null && body.esito_value !== undefined ? String(body.esito_value) : "0"
             };
             console.log(`[${reqId}] Mapped esito value for user ${user.id_user}:`, esitoValue);
             return esitoValue;
@@ -460,11 +463,12 @@ Deno.serve(async (req) => {
           console.warn(`[${reqId}] Error fetching titolo information:`, titoloErr.message);
         } else if (titoloInfo) {
           console.log(`[${reqId}] Found titolo information:`, titoloInfo);
+          console.log(`[${reqId}] Titolo value from body:`, body.titolo_value);
           const titoloValue = {
             id_certification_information: titoloInfo.id_certification_information,
             id_certification: certRow.id_certification,
             id_certification_user: null, // Titolo non ha id_certification_user
-            value: body.titolo_value ? String(body.titolo_value) : ""
+            value: body.titolo_value !== null && body.titolo_value !== undefined ? String(body.titolo_value) : ""
           };
           console.log(`[${reqId}] Mapped titolo value:`, titoloValue);
           allValuesToInsert.push(titoloValue);
@@ -518,12 +522,72 @@ Deno.serve(async (req) => {
             }
           }
           
-          informationValues = insertedValues;
-          console.log(`[${reqId}] All values inserted. Total: ${insertedValues.length}`);
+        informationValues = insertedValues;
+        console.log(`[${reqId}] All values inserted. Total: ${insertedValues.length}`);
+      } else {
+        console.log(`[${reqId}] No certification information found for legal_entity: ${String(cert.id_legal_entity)}`);
+        console.log(`[${reqId}] Skipping values creation - no certification_information found`);
+      }
+
+      // Gestione media titles dal media_metadata
+      const mediaMetadataStr = body.media_metadata;
+      if (mediaMetadataStr && Array.isArray(mediaMetadataStr)) {
+        console.log(`[${reqId}] Processing media metadata for titles:`, mediaMetadataStr);
+        
+        // Cerca o crea una certification_information per i titoli dei media
+        const { data: mediaTitleInfo, error: mediaTitleErr } = await admin
+          .from("certification_information")
+          .select("id_certification_information, name, label, type, scope")
+          .or(`id_legal_entity.eq.${String(cert.id_legal_entity)},id_legal_entity.is.null`)
+          .eq("name", "media_title")
+          .maybeSingle();
+
+        if (mediaTitleErr) {
+          console.warn(`[${reqId}] Error fetching media_title information:`, mediaTitleErr.message);
+        } else if (mediaTitleInfo) {
+          console.log(`[${reqId}] Found media_title information:`, mediaTitleInfo);
+          
+          // Crea i valori per ogni titolo media
+          const mediaTitleValues = mediaMetadataStr.map((metadata, index) => {
+            const titleValue = {
+              id_certification_information: mediaTitleInfo.id_certification_information,
+              id_certification: certRow.id_certification,
+              id_certification_user: null, // Media title non ha id_certification_user
+              value: metadata.title || ""
+            };
+            console.log(`[${reqId}] Mapped media title value ${index}:`, titleValue);
+            return titleValue;
+          });
+
+          // Inserisci i valori dei titoli media
+          for (let i = 0; i < mediaTitleValues.length; i++) {
+            const val = mediaTitleValues[i];
+            console.log(`[${reqId}] Inserting media title value ${i + 1}:`, val);
+            
+            const { data: insertedTitle, error: titleError } = await admin
+              .from("certification_information_value")
+              .insert({
+                id_certification_information: val.id_certification_information,
+                id_certification: val.id_certification,
+                id_certification_user: val.id_certification_user,
+                value: val.value
+              })
+              .select("id_certification_information_value, id_certification_information, id_certification, id_certification_user, value, created_at, updated_at")
+              .single();
+
+            if (titleError) {
+              console.error(`[${reqId}] Error inserting media title value ${i + 1}:`, titleError);
+            } else {
+              console.log(`[${reqId}] Successfully inserted media title value ${i + 1}:`, insertedTitle);
+              informationValues.push(insertedTitle);
+            }
+          }
         } else {
-          console.log(`[${reqId}] No certification information found for legal_entity: ${String(cert.id_legal_entity)}`);
-          console.log(`[${reqId}] Skipping values creation - no certification_information found`);
+          console.log(`[${reqId}] No media_title certification_information found, skipping media title values`);
         }
+      } else {
+        console.log(`[${reqId}] No media metadata provided, skipping media title processing`);
+      }
       }
       // Media -> insert (no upload in JSON branch)
       let mediaRows: any[] = [];
@@ -536,8 +600,7 @@ Deno.serve(async (req) => {
           acquisition_type: m.acquisition_type ?? "deferred",
           captured_at: m.captured_at ?? nowIso(),
           id_location: m.id_location ?? null,
-          file_type: m.file_type ?? "document",
-          title: m.title ?? null
+          file_type: m.file_type ?? "document"
         }));
         const { data: ins, error: mErr } = await admin.from("certification_media").insert(payloads).select("*");
         if (mErr) {
@@ -831,6 +894,8 @@ Deno.serve(async (req) => {
       console.log(`[${reqId}] Users rows count: ${usersRows.length}`);
       console.log(`[${reqId}] Esito value from form:`, form.get("esito_value"));
       console.log(`[${reqId}] Titolo value from form:`, form.get("titolo_value"));
+      console.log(`[${reqId}] Titolo value type:`, typeof form.get("titolo_value"));
+      console.log(`[${reqId}] Titolo value length:`, form.get("titolo_value")?.length);
       
       // Recupera sia esito che titolo
       const [{ data: esitoInfo, error: esitoErr }, { data: titoloInfo, error: titoloErr }] = await Promise.all([
@@ -859,13 +924,14 @@ Deno.serve(async (req) => {
         console.warn(`[${reqId}] Error fetching esito information:`, esitoErr.message);
       } else if (esitoInfo) {
         console.log(`[${reqId}] Found esito information:`, esitoInfo);
+        console.log(`[${reqId}] Esito value from form:`, form.get("esito_value"));
         // Crea i valori di esito per ogni utente
         const esitoValues = usersRows.map((user) => {
           const esitoValue = {
             id_certification_information: esitoInfo.id_certification_information,
             id_certification: certRow.id_certification,
             id_certification_user: user.id_certification_user || null,
-            value: form.get("esito_value") ? String(form.get("esito_value")) : "0"
+            value: form.get("esito_value") !== null && form.get("esito_value") !== undefined ? String(form.get("esito_value")) : "0"
           };
           console.log(`[${reqId}] Mapped esito value for user ${user.id_user}:`, esitoValue);
           return esitoValue;
@@ -878,11 +944,12 @@ Deno.serve(async (req) => {
         console.warn(`[${reqId}] Error fetching titolo information:`, titoloErr.message);
       } else if (titoloInfo) {
         console.log(`[${reqId}] Found titolo information:`, titoloInfo);
+        console.log(`[${reqId}] Titolo value from form:`, form.get("titolo_value"));
         const titoloValue = {
           id_certification_information: titoloInfo.id_certification_information,
           id_certification: certRow.id_certification,
           id_certification_user: null, // Titolo non ha id_certification_user
-          value: form.get("titolo_value") ? String(form.get("titolo_value")) : ""
+          value: form.get("titolo_value") !== null && form.get("titolo_value") !== undefined ? String(form.get("titolo_value")) : ""
         };
         console.log(`[${reqId}] Mapped titolo value:`, titoloValue);
         allValuesToInsert.push(titoloValue);
@@ -942,6 +1009,73 @@ Deno.serve(async (req) => {
         console.log(`[${reqId}] No certification information found for legal_entity: ${id_legal_entity}`);
         console.log(`[${reqId}] Skipping values creation - no certification_information found`);
       }
+
+      // Gestione media titles dal media_metadata (multipart)
+      const mediaMetadataStr = form.get("media_metadata");
+      if (mediaMetadataStr) {
+        try {
+          const mediaMetadataArray = JSON.parse(String(mediaMetadataStr));
+          if (Array.isArray(mediaMetadataArray)) {
+            console.log(`[${reqId}] Processing media metadata for titles (multipart):`, mediaMetadataArray);
+            
+            // Cerca o crea una certification_information per i titoli dei media
+            const { data: mediaTitleInfo, error: mediaTitleErr } = await admin
+              .from("certification_information")
+              .select("id_certification_information, name, label, type, scope")
+              .or(`id_legal_entity.eq.${id_legal_entity},id_legal_entity.is.null`)
+              .eq("name", "media_title")
+              .maybeSingle();
+
+            if (mediaTitleErr) {
+              console.warn(`[${reqId}] Error fetching media_title information (multipart):`, mediaTitleErr.message);
+            } else if (mediaTitleInfo) {
+              console.log(`[${reqId}] Found media_title information (multipart):`, mediaTitleInfo);
+              
+              // Crea i valori per ogni titolo media
+              const mediaTitleValues = mediaMetadataArray.map((metadata, index) => {
+                const titleValue = {
+                  id_certification_information: mediaTitleInfo.id_certification_information,
+                  id_certification: certRow.id_certification,
+                  id_certification_user: null, // Media title non ha id_certification_user
+                  value: metadata.title || ""
+                };
+                console.log(`[${reqId}] Mapped media title value ${index} (multipart):`, titleValue);
+                return titleValue;
+              });
+
+              // Inserisci i valori dei titoli media
+              for (let i = 0; i < mediaTitleValues.length; i++) {
+                const val = mediaTitleValues[i];
+                console.log(`[${reqId}] Inserting media title value ${i + 1} (multipart):`, val);
+                
+                const { data: insertedTitle, error: titleError } = await admin
+                  .from("certification_information_value")
+                  .insert({
+                    id_certification_information: val.id_certification_information,
+                    id_certification: val.id_certification,
+                    id_certification_user: val.id_certification_user,
+                    value: val.value
+                  })
+                  .select("id_certification_information_value, id_certification_information, id_certification, id_certification_user, value, created_at, updated_at")
+                  .single();
+
+                if (titleError) {
+                  console.error(`[${reqId}] Error inserting media title value ${i + 1} (multipart):`, titleError);
+                } else {
+                  console.log(`[${reqId}] Successfully inserted media title value ${i + 1} (multipart):`, insertedTitle);
+                  informationValues.push(insertedTitle);
+                }
+              }
+            } else {
+              console.log(`[${reqId}] No media_title certification_information found, skipping media title values (multipart)`);
+            }
+          }
+        } catch (e) {
+          console.warn(`[${reqId}] Failed to parse media metadata (multipart):`, e);
+        }
+      } else {
+        console.log(`[${reqId}] No media metadata provided, skipping media title processing (multipart)`);
+      }
     }
     // Files upload
     const files = form.getAll("files").filter(Boolean);
@@ -973,7 +1107,6 @@ Deno.serve(async (req) => {
         
         // Get media metadata for this specific file
         const mediaMetadataStr = form.get("media_metadata");
-        let fileTitle = title;
         let fileDescription = description;
         
         if (mediaMetadataStr) {
@@ -981,7 +1114,6 @@ Deno.serve(async (req) => {
             const metadataArray = JSON.parse(String(mediaMetadataStr));
             if (Array.isArray(metadataArray) && metadataArray[index]) {
               const metadata = metadataArray[index];
-              fileTitle = metadata.title || title;
               fileDescription = metadata.description || description;
             }
           } catch (e) {
@@ -994,7 +1126,6 @@ Deno.serve(async (req) => {
           id_certification: certRow.id_certification,
           name: key,
           description: fileDescription,
-          title: fileTitle,
           acquisition_type,
           captured_at,
           id_location: id_location_media,

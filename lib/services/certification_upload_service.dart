@@ -110,10 +110,8 @@ class CertificationUploadService {
       }
       // Passa sempre esito_value, anche se null (usa "0" come default)
       request.fields['esito_value'] = esitoValue ?? "0";
-      // Passa titolo_value se fornito
-      if (titoloValue != null) {
-        request.fields['titolo_value'] = titoloValue;
-      }
+      // Passa sempre titolo_value, anche se vuoto
+      request.fields['titolo_value'] = titoloValue ?? "";
       request.fields['return_signed_url'] = 'true';
 
       // Aggiungi i certification_users se presenti
@@ -298,7 +296,7 @@ class CertificationUploadService {
         'users': certificationUsers ?? [],
         'media': <Map<String, dynamic>>[],
         'esito_value': esitoValue ?? "0",
-        'titolo_value': titoloValue,
+        'titolo_value': titoloValue ?? "",
       };
 
       final response = await http.post(
