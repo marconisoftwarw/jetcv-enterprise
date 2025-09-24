@@ -33,7 +33,6 @@ class AppLocalizations {
       'password': 'Password',
       'enter_password': 'Inserisci la password',
       'remember_me': 'Ricordami',
-      'forgot_password': 'Password dimenticata?',
       'signing_in': 'Accesso in corso...',
       'sign_in_with_google': 'Accedi con Google',
       'dont_have_account': 'Non hai un account? ',
@@ -606,6 +605,22 @@ class AppLocalizations {
       'pricing_plans_loading_error': 'Errore nel caricamento dei piani',
       'per_year': '/anno',
       'image_selection_error': 'Errore nella selezione dell\'immagine',
+      'invalid_image_format':
+          'Formato immagine non valido. Usa JPG, PNG, GIF, WebP, AVIF, HEIC, BMP o TIFF',
+      'file_too_large': 'File troppo grande. Dimensione massima: 50MB',
+      'image_upload_info':
+          'Formati supportati: JPG, PNG, GIF, WebP, AVIF, HEIC, BMP, TIFF. Dimensione massima: 50MB',
+      'forgot_password': 'Password Dimenticata',
+      'forgot_password_description':
+          'Inserisci la tua email per ricevere un link per reimpostare la password',
+      'sending_reset_email': 'Invio email di reset...',
+      'reset_email_sent': 'Email Inviata',
+      'reset_email_sent_message':
+          'Ti abbiamo inviato un\'email con le istruzioni per reimpostare la password. Controlla la tua casella di posta.',
+      'reset_email_error': 'Errore Invio Email',
+      'reset_email_error_message':
+          'Si è verificato un errore durante l\'invio dell\'email. Riprova più tardi.',
+      'send_reset_email': 'Invia Email di Reset',
       'registration_error': 'Errore durante la registrazione',
       'user_entity_creation_error':
           'Errore nella creazione dell\'utente e dell\'entità legale',
@@ -836,7 +851,6 @@ class AppLocalizations {
       'enter_email': 'Enter your email',
       'enter_password': 'Enter password',
       'remember_me': 'Remember me',
-      'forgot_password': 'Forgot Password?',
       'signing_in': 'Signing In...',
       'sign_in_with_google': 'Sign In with Google',
       'dont_have_account': 'Don\'t have an account? ',
@@ -1194,6 +1208,22 @@ class AppLocalizations {
       'pricing_plans_loading_error': 'Error loading pricing plans',
       'per_year': '/year',
       'image_selection_error': 'Error selecting image',
+      'invalid_image_format':
+          'Invalid image format. Use JPG, PNG, GIF, WebP, AVIF, HEIC, BMP or TIFF',
+      'file_too_large': 'File too large. Maximum size: 50MB',
+      'image_upload_info':
+          'Supported formats: JPG, PNG, GIF, WebP, AVIF, HEIC, BMP, TIFF. Maximum size: 50MB',
+      'forgot_password': 'Forgot Password',
+      'forgot_password_description':
+          'Enter your email to receive a link to reset your password',
+      'sending_reset_email': 'Sending reset email...',
+      'reset_email_sent': 'Email Sent',
+      'reset_email_sent_message':
+          'We\'ve sent you an email with instructions to reset your password. Check your inbox.',
+      'reset_email_error': 'Email Send Error',
+      'reset_email_error_message':
+          'An error occurred while sending the email. Please try again later.',
+      'send_reset_email': 'Send Reset Email',
       'registration_error': 'Registration error',
       'user_entity_creation_error': 'Error creating user and legal entity',
       'contact_support': 'Contact Support',
@@ -1492,7 +1522,6 @@ class AppLocalizations {
       'enter_email': 'Geben Sie Ihre E-Mail ein',
       'enter_password': 'Passwort eingeben',
       'remember_me': 'Angemeldet bleiben',
-      'forgot_password': 'Passwort vergessen?',
       'signing_in': 'Anmeldung läuft...',
       'sign_in_with_google': 'Mit Google anmelden',
       'dont_have_account': 'Haben Sie kein Konto? ',
@@ -1710,6 +1739,22 @@ class AppLocalizations {
       'pricing_plans_loading_error': 'Fehler beim Laden der Preispläne',
       'per_year': '/Jahr',
       'image_selection_error': 'Fehler bei der Bildauswahl',
+      'invalid_image_format':
+          'Ungültiges Bildformat. Verwenden Sie JPG, PNG, GIF, WebP, AVIF, HEIC, BMP oder TIFF',
+      'file_too_large': 'Datei zu groß. Maximale Größe: 50MB',
+      'image_upload_info':
+          'Unterstützte Formate: JPG, PNG, GIF, WebP, AVIF, HEIC, BMP, TIFF. Maximale Größe: 50MB',
+      'forgot_password': 'Passwort Vergessen',
+      'forgot_password_description':
+          'Geben Sie Ihre E-Mail ein, um einen Link zum Zurücksetzen Ihres Passworts zu erhalten',
+      'sending_reset_email': 'Reset-E-Mail wird gesendet...',
+      'reset_email_sent': 'E-Mail Gesendet',
+      'reset_email_sent_message':
+          'Wir haben Ihnen eine E-Mail mit Anweisungen zum Zurücksetzen Ihres Passworts gesendet. Überprüfen Sie Ihren Posteingang.',
+      'reset_email_error': 'E-Mail-Sendefehler',
+      'reset_email_error_message':
+          'Beim Senden der E-Mail ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.',
+      'send_reset_email': 'Reset-E-Mail Senden',
       'registration_error': 'Registrierungsfehler',
       'user_entity_creation_error':
           'Fehler beim Erstellen von Benutzer und Rechtseinheit',
@@ -2236,6 +2281,22 @@ class AppLocalizations {
           'Erreur de chargement des plans tarifaires',
       'per_year': '/an',
       'image_selection_error': 'Erreur de sélection d\'image',
+      'invalid_image_format':
+          'Format d\'image invalide. Utilisez JPG, PNG, GIF, WebP, AVIF, HEIC, BMP ou TIFF',
+      'file_too_large': 'Fichier trop volumineux. Taille maximale : 50MB',
+      'image_upload_info':
+          'Formats supportés : JPG, PNG, GIF, WebP, AVIF, HEIC, BMP, TIFF. Taille maximale : 50MB',
+
+      'forgot_password_description':
+          'Entrez votre e-mail pour recevoir un lien pour réinitialiser votre mot de passe',
+      'sending_reset_email': 'Envoi de l\'e-mail de réinitialisation...',
+      'reset_email_sent': 'E-mail Envoyé',
+      'reset_email_sent_message':
+          'Nous vous avons envoyé un e-mail avec les instructions pour réinitialiser votre mot de passe. Vérifiez votre boîte de réception.',
+      'reset_email_error': 'Erreur d\'Envoi d\'E-mail',
+      'reset_email_error_message':
+          'Une erreur s\'est produite lors de l\'envoi de l\'e-mail. Veuillez réessayer plus tard.',
+      'send_reset_email': 'Envoyer l\'E-mail de Réinitialisation',
       'registration_error': 'Erreur d\'inscription',
       'user_entity_creation_error':
           'Erreur de création d\'utilisateur et d\'entité légale',

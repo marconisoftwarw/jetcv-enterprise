@@ -17,6 +17,7 @@ import 'screens/splash_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/signup_screen.dart';
 import 'screens/auth/auth_callback_screen.dart';
+import 'screens/auth/forgot_password_screen.dart';
 import 'screens/auth/password_reset_screen.dart';
 import 'screens/auth/password_reset_form_screen.dart';
 import 'screens/auth/set_password_screen.dart';
@@ -248,6 +249,7 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
               },
             ),
             '/login': (context) => const LoginScreen(),
+            '/forgot-password': (context) => const ForgotPasswordScreen(),
             '/password-reset': (context) => const PasswordResetScreen(),
             '/password-reset-form': (context) =>
                 const PasswordResetFormScreen(),

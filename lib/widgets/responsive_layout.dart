@@ -5,6 +5,7 @@ import '../services/user_type_service.dart';
 import '../theme/app_theme.dart';
 import '../l10n/app_localizations.dart';
 import 'global_hamburger_menu.dart';
+import 'mobile_top_bar.dart';
 
 /// Responsive layout wrapper that provides consistent mobile-responsive behavior
 /// across all screens in the app
@@ -117,79 +118,51 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
       );
     }
 
-    // Mobile/Tablet layout - menu hamburger
-    return Stack(
+    // Mobile/Tablet layout - menu hamburger con barra superiore dedicata
+    return Column(
       children: [
-        // Main content
-        widget.child,
-
-        // Navigation Menu - slide in from left on mobile
-        if (_isMenuExpanded)
-          Positioned(
-            left: 0,
-            top: 0,
-            bottom: 0,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-              width: isMobile ? 280 : 320,
-              child: _buildNavigationMenu(
-                isMobile,
-                isTablet,
-                isDesktop,
-                authProvider,
-              ),
-            ),
-          ),
-
-        // Floating hamburger button for mobile when AppBar is hidden
-        // Messo prima dell'overlay per essere sopra
-        if (widget.hideAppBar && !isDesktop)
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 16,
-            left: 16,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 8,
-                    spreadRadius: 0,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(12),
-                  onTap: () {
+        // Barra superiore dedicata per mobile e tablet
+        if (!isDesktop)
+          MobileTopBar(
+            onMenuTap: widget.showMenu
+                ? () {
                     setState(() {
                       _isMenuExpanded = !_isMenuExpanded;
                     });
-                  },
-                  child: Container(
-                    width: 48,
-                    height: 48,
-                    padding: const EdgeInsets.all(12),
-                    child: Icon(
-                      _isMenuExpanded ? Icons.close : Icons.menu,
-                      color: AppTheme.primaryBlue,
-                      size: 24,
+                  }
+                : null,
+            isMenuExpanded: _isMenuExpanded,
+            title: widget.title,
+          ),
+
+        // Contenuto principale con menu
+        Expanded(
+          child: Stack(
+            children: [
+              // Main content
+              widget.child,
+
+              // Navigation Menu - slide in from left on mobile
+              if (_isMenuExpanded)
+                Positioned(
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                    width: isMobile ? 280 : 320,
+                    child: _buildNavigationMenu(
+                      isMobile,
+                      isTablet,
+                      isDesktop,
+                      authProvider,
                     ),
                   ),
                 ),
-              ),
-            ),
+            ],
           ),
-
-        // Overlay scuro rimosso per permettere l'interazione con i pulsanti del menu
-        // La chiusura del menu avviene tramite:
-        // 1. Pulsante X nell'header del menu
-        // 2. Pulsante hamburger flottante
-        // 3. Selezione di una voce del menu (chiusura automatica)
+        ),
       ],
     );
   }
@@ -225,78 +198,28 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
           ),
         ],
       ),
-      child: Column(
-        children: [
-          // Header con pulsante di chiusura per mobile/tablet
-          if (!isDesktop)
-            Container(
-              height: 60,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: AppTheme.primaryBlue,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Menu',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: isMobile ? 18 : 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  IconButton(
-                    icon: Icon(
-                      Icons.close,
-                      color: Colors.white,
-                      size: isMobile ? 24 : 28,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _isMenuExpanded = false;
-                      });
-                    },
-                    tooltip: 'Chiudi menu',
-                  ),
-                ],
-              ),
-            ),
-
-          // Menu principale
-          Expanded(
-            child: GlobalHamburgerMenu(
-              selectedIndex: widget.selectedIndex ?? 0,
-              onDestinationSelected: (index) {
-                // Chiudi il menu su mobile/tablet dopo la selezione
-                if (!isDesktop) {
-                  setState(() {
-                    _isMenuExpanded = false;
-                  });
-                }
-                // Esegui la callback originale
-                if (widget.onDestinationSelected != null) {
-                  widget.onDestinationSelected!(index);
-                }
-              },
-              isExpanded: _isMenuExpanded,
-              onExpansionChanged: (expanded) {
-                setState(() {
-                  _isMenuExpanded = expanded;
-                });
-              },
-              context: context,
-              userType: authProvider.userType,
-            ),
-          ),
-        ],
+      child: GlobalHamburgerMenu(
+        selectedIndex: widget.selectedIndex ?? 0,
+        onDestinationSelected: (index) {
+          // Chiudi il menu su mobile/tablet dopo la selezione
+          if (!isDesktop) {
+            setState(() {
+              _isMenuExpanded = false;
+            });
+          }
+          // Esegui la callback originale
+          if (widget.onDestinationSelected != null) {
+            widget.onDestinationSelected!(index);
+          }
+        },
+        isExpanded: _isMenuExpanded,
+        onExpansionChanged: (expanded) {
+          setState(() {
+            _isMenuExpanded = expanded;
+          });
+        },
+        context: context,
+        userType: authProvider.userType,
       ),
     );
   }

@@ -1,38 +1,167 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import '../config/app_config.dart';
+import 'package:flutter/foundation.dart';
+import 'edge_function_service.dart';
 
+/// Service for handling password operations via Supabase Edge Functions
 class PasswordService {
-  static const String _baseUrl = AppConfig.supabaseUrl;
-  static const String _apiKey = AppConfig.supabaseAnonKey;
+  /// Reset password using a token received via email
+  ///
+  /// [token] - The reset token from the email link
+  /// [newPassword] - The new password to set
+  ///
+  /// Returns a map with success status and message
+  static Future<Map<String, dynamic>> resetPassword({
+    required String token,
+    required String newPassword,
+  }) async {
+    try {
+      debugPrint('🔐 PasswordService: Starting password reset');
 
+      final response = await EdgeFunctionService.invokeFunction(
+        'reset-password',
+        {'token': token, 'password': newPassword},
+      );
+
+      debugPrint('🔐 PasswordService: Reset password response: $response');
+
+      return response;
+    } catch (e) {
+      debugPrint('❌ PasswordService: Password reset error: $e');
+
+      // Return a structured error response
+      return {
+        'ok': false,
+        'status': 500,
+        'message': 'Errore nella reimpostazione della password: $e',
+      };
+    }
+  }
+
+  /// Validate password according to security policy
+  /// Same rules as signup: min 8 chars, uppercase, lowercase, digit, symbol
+  static String? validatePassword(String? password) {
+    if (password == null || password.isEmpty) {
+      return 'La password è obbligatoria';
+    }
+
+    if (password.length < 8) {
+      return 'La password deve essere di almeno 8 caratteri';
+    }
+
+    // Check for uppercase letter
+    if (!RegExp(r'[A-Z]').hasMatch(password)) {
+      return 'La password deve contenere almeno una lettera maiuscola, una minuscola, un numero e un simbolo';
+    }
+
+    // Check for lowercase letter
+    if (!RegExp(r'[a-z]').hasMatch(password)) {
+      return 'La password deve contenere almeno una lettera maiuscola, una minuscola, un numero e un simbolo';
+    }
+
+    // Check for number
+    if (!RegExp(r'[0-9]').hasMatch(password)) {
+      return 'La password deve contenere almeno una lettera maiuscola, una minuscola, un numero e un simbolo';
+    }
+
+    // Check for symbol
+    if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password)) {
+      return 'La password deve contenere almeno una lettera maiuscola, una minuscola, un numero e un simbolo';
+    }
+
+    return null; // Password is valid
+  }
+
+  /// Validate that passwords match
+  static String? validatePasswordConfirmation(
+    String? password,
+    String? confirmPassword,
+  ) {
+    if (confirmPassword == null || confirmPassword.isEmpty) {
+      return 'La conferma password è obbligatoria';
+    }
+
+    if (password != confirmPassword) {
+      return 'Le password non coincidono';
+    }
+
+    return null; // Passwords match
+  }
+
+  /// Send password reset email using edge function
+  ///
+  /// [email] - The user's email address
+  /// [localizedMessages] - Localized error messages for different scenarios
+  ///
+  /// Returns a map with success status and message
+  static Future<Map<String, dynamic>> sendPasswordResetEmail({
+    required String email,
+    Map<String, String>? localizedMessages,
+  }) async {
+    try {
+      debugPrint('🔐 PasswordService: Sending password reset email to: $email');
+      debugPrint('🔐 PasswordService: Calling forgot-password edge function');
+
+      final response = await EdgeFunctionService.invokeFunction(
+        'forgot-password', // Edge function name for sending reset emails
+        {'email': email},
+      );
+
+      debugPrint('🔐 PasswordService: Edge function response: $response');
+      debugPrint('🔐 PasswordService: Response type: ${response.runtimeType}');
+      debugPrint('🔐 PasswordService: Response keys: ${response.keys.toList()}');
+
+      // Map the response to expected format
+      final result = {
+        'success': response['ok'] == true || response['success'] == true,
+        'message': response['message'] ?? 'Email di reset inviata',
+      };
+      
+      debugPrint('🔐 PasswordService: Mapped result: $result');
+      return result;
+    } catch (e) {
+      debugPrint('❌ PasswordService: Send email error: $e');
+      debugPrint('❌ PasswordService: Error type: ${e.runtimeType}');
+
+      // Return a structured error response
+      return {
+        'success': false,
+        'message':
+            localizedMessages?['genericError'] ??
+            'Errore durante l\'invio dell\'email. Riprova più tardi.',
+      };
+    }
+  }
+
+  /// Extract token from browser URL
+  /// Looks for 'token' parameter in the current URL
+  static String? getTokenFromUrl() {
+    try {
+      if (kIsWeb) {
+        final uri = Uri.base;
+        return uri.queryParameters['token'];
+      }
+      return null;
+    } catch (e) {
+      debugPrint('❌ PasswordService: Error extracting token from URL: $e');
+      return null;
+    }
+  }
+
+  // Legacy methods for backward compatibility
   // Valida il token di impostazione password
   Future<bool> validatePasswordSetupToken(String token) async {
     try {
-      print('🔐 Validating password setup token: $token');
+      debugPrint('🔐 Validating password setup token: $token');
 
-      final response = await http.post(
-        Uri.parse('$_baseUrl/functions/v1/validate-password-token'),
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': _apiKey,
-          'Authorization': 'Bearer $_apiKey',
-        },
-        body: json.encode({'token': token}),
+      final response = await EdgeFunctionService.invokeFunction(
+        'validate-password-token',
+        {'token': token},
       );
 
-      print(
-        '📡 Token validation response: ${response.statusCode} - ${response.body}',
-      );
+      debugPrint('🔐 Token validation response: $response');
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        return data['valid'] == true;
-      }
-
-      return false;
+      return response['valid'] == true;
     } catch (e) {
-      print('❌ Error validating password setup token: $e');
+      debugPrint('❌ Error validating password setup token: $e');
       return false;
     }
   }
@@ -43,30 +172,18 @@ class PasswordService {
     required String password,
   }) async {
     try {
-      print('🔐 Setting password for token: $token');
+      debugPrint('🔐 Setting password for token: $token');
 
-      final response = await http.post(
-        Uri.parse('$_baseUrl/functions/v1/set-password'),
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': _apiKey,
-          'Authorization': 'Bearer $_apiKey',
-        },
-        body: json.encode({'token': token, 'password': password}),
+      final response = await EdgeFunctionService.invokeFunction(
+        'set-password',
+        {'token': token, 'password': password},
       );
 
-      print(
-        '📡 Set password response: ${response.statusCode} - ${response.body}',
-      );
+      debugPrint('🔐 Set password response: $response');
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        return data['success'] == true;
-      }
-
-      return false;
+      return response['success'] == true;
     } catch (e) {
-      print('❌ Error setting password: $e');
+      debugPrint('❌ Error setting password: $e');
       return false;
     }
   }

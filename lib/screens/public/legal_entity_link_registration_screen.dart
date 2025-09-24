@@ -244,30 +244,6 @@ class _LegalEntityLinkRegistrationScreenState
           ),
           const SizedBox(height: 24),
 
-          // Profile picture
-          Center(
-            child: Column(
-              children: [
-                CircleAvatar(
-                  radius: 50,
-                  backgroundImage: _personalProfilePicture != null
-                      ? FileImage(_personalProfilePicture!)
-                      : null,
-                  child: _personalProfilePicture == null
-                      ? const Icon(Icons.person, size: 50)
-                      : null,
-                ),
-                const SizedBox(height: 16),
-                CustomButton(
-                  onPressed: _pickPersonalProfilePicture,
-                  text: 'Carica Foto Profilo',
-                  backgroundColor: Colors.grey,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
-
           // Personal information form
           Form(
             key: _personalFormKey,

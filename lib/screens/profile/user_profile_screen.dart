@@ -1139,14 +1139,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        l10n.getString('manage_your_profile'),
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.9),
-                          fontSize: 16,
-                        ),
-                      ),
                     ],
                   );
                 },

@@ -58,8 +58,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _forgotPassword() {
-    // Naviga direttamente alla schermata di reset password form
-    Navigator.pushNamed(context, '/password-reset-form');
+    // Naviga alla schermata di forgot password (invio email)
+    Navigator.pushNamed(context, '/forgot-password');
   }
 
   void _showForgotPasswordDialog() {
@@ -116,7 +116,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              _sendPasswordReset(emailController.text.trim());
+              Navigator.pushNamed(context, '/forgot-password');
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.primaryBlue,
@@ -125,7 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            child: Text(l10n.getString('send')),
+            child: Text(l10n.getString('continue')),
           ),
         ],
       ),

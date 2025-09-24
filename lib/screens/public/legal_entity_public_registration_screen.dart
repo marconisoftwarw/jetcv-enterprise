@@ -9,6 +9,7 @@ import '../../models/legal_entity.dart';
 import '../../services/supabase_service.dart';
 import '../../services/image_upload_service.dart';
 import '../../services/edge_function_service.dart';
+import '../../services/legal_entity_image_service.dart';
 import '../../providers/pricing_provider.dart';
 
 import '../../widgets/custom_button.dart';
@@ -591,33 +592,6 @@ class _LegalEntityPublicRegistrationScreenState
             style: const TextStyle(fontSize: 16, color: Colors.grey),
           ),
           const SizedBox(height: 24),
-
-          // Profile picture
-          Center(
-            child: Column(
-              children: [
-                CircleAvatar(
-                  radius: 50,
-                  backgroundImage: _personalProfilePicture != null
-                      ? FileImage(_personalProfilePicture!)
-                      : null,
-                  child: _personalProfilePicture == null
-                      ? const Icon(Icons.person, size: 50)
-                      : null,
-                ),
-                const SizedBox(height: 16),
-                CustomButton(
-                  onPressed: _pickPersonalProfilePicture,
-                  text: AppLocalizations.of(
-                    context,
-                  ).getString('upload_profile_photo'),
-                  backgroundColor: Colors.grey,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
-
           // Personal information form
           Form(
             key: _personalFormKey,
@@ -694,56 +668,146 @@ class _LegalEntityPublicRegistrationScreenState
                 const SizedBox(height: 16),
 
                 // Company pictures
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        children: [
-                          CircleAvatar(
-                            radius: 40,
-                            backgroundImage: _entityProfilePicture != null
-                                ? FileImage(_entityProfilePicture!)
-                                : null,
-                            child: _entityProfilePicture == null
-                                ? const Icon(Icons.business, size: 40)
-                                : null,
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isMobile = constraints.maxWidth < 600;
+                    final imageSize = isMobile ? 60.0 : 80.0;
+                    final buttonHeight = isMobile ? 40.0 : 48.0;
+
+                    return Column(
+                      children: [
+                        // Logo and Company Picture in a row
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  Container(
+                                    width: imageSize * 2,
+                                    height: imageSize * 2,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Colors.grey.shade300,
+                                        width: 2,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.grey.withOpacity(0.3),
+                                          spreadRadius: 2,
+                                          blurRadius: 5,
+                                          offset: const Offset(0, 3),
+                                        ),
+                                      ],
+                                    ),
+                                    child: ClipOval(
+                                      child: _entityProfilePicture != null
+                                          ? Image.file(
+                                              _entityProfilePicture!,
+                                              fit: BoxFit.cover,
+                                              width: imageSize * 2,
+                                              height: imageSize * 2,
+                                            )
+                                          : Container(
+                                              color: Colors.grey.shade100,
+                                              child: Icon(
+                                                Icons.business,
+                                                size: imageSize,
+                                                color: Colors.grey.shade600,
+                                              ),
+                                            ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    height: buttonHeight,
+                                    child: CustomButton(
+                                      onPressed: _pickEntityProfilePicture,
+                                      text: AppLocalizations.of(
+                                        context,
+                                      ).getString('company_logo_label'),
+                                      backgroundColor: Colors.blue.shade600,
+                                      foregroundColor: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  Container(
+                                    width: imageSize * 2,
+                                    height: imageSize * 2,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Colors.grey.shade300,
+                                        width: 2,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.grey.withOpacity(0.3),
+                                          spreadRadius: 2,
+                                          blurRadius: 5,
+                                          offset: const Offset(0, 3),
+                                        ),
+                                      ],
+                                    ),
+                                    child: ClipOval(
+                                      child: _entityCompanyPicture != null
+                                          ? Image.file(
+                                              _entityCompanyPicture!,
+                                              fit: BoxFit.cover,
+                                              width: imageSize * 2,
+                                              height: imageSize * 2,
+                                            )
+                                          : Container(
+                                              color: Colors.grey.shade100,
+                                              child: Icon(
+                                                Icons.photo_camera,
+                                                size: imageSize,
+                                                color: Colors.grey.shade600,
+                                              ),
+                                            ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    height: buttonHeight,
+                                    child: CustomButton(
+                                      onPressed: _pickEntityCompanyPicture,
+                                      text: AppLocalizations.of(
+                                        context,
+                                      ).getString('company_photo_label'),
+                                      backgroundColor: Colors.green.shade600,
+                                      foregroundColor: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        // Image info text
+                        Text(
+                          AppLocalizations.of(
+                            context,
+                          ).getString('image_upload_info'),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade600,
+                            fontStyle: FontStyle.italic,
                           ),
-                          const SizedBox(height: 8),
-                          CustomButton(
-                            onPressed: _pickEntityProfilePicture,
-                            text: AppLocalizations.of(
-                              context,
-                            ).getString('company_logo_label'),
-                            backgroundColor: Colors.grey,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        children: [
-                          CircleAvatar(
-                            radius: 40,
-                            backgroundImage: _entityCompanyPicture != null
-                                ? FileImage(_entityCompanyPicture!)
-                                : null,
-                            child: _entityCompanyPicture == null
-                                ? const Icon(Icons.photo_camera, size: 40)
-                                : null,
-                          ),
-                          const SizedBox(height: 8),
-                          CustomButton(
-                            onPressed: _pickEntityCompanyPicture,
-                            text: AppLocalizations.of(
-                              context,
-                            ).getString('company_photo_label'),
-                            backgroundColor: Colors.grey,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    );
+                  },
                 ),
                 const SizedBox(height: 24),
 
@@ -958,16 +1022,6 @@ class _LegalEntityPublicRegistrationScreenState
           _personalProfilePicture!,
         );
       }
-      if (_entityProfilePicture != null) {
-        entityProfileUrl = await _imageUploadService.uploadEntityProfilePicture(
-          _entityProfilePicture!,
-        );
-      }
-      if (_entityCompanyPicture != null) {
-        entityCompanyUrl = await _imageUploadService.uploadEntityCompanyPicture(
-          _entityCompanyPicture!,
-        );
-      }
 
       // 2. Create user first using Supabase service
       final user = AppUser(
@@ -984,8 +1038,9 @@ class _LegalEntityPublicRegistrationScreenState
       );
 
       // 3. Prepare legal entity data for edge function
+      final legalEntityId = const Uuid().v4();
       final legalEntityData = {
-        'id_legal_entity': const Uuid().v4(),
+        'id_legal_entity': legalEntityId,
         'id_legal_entity_hash': const Uuid().v4(),
         'legal_name': _legalNameController.text,
         'identifier_code': _identifierCodeController.text,
@@ -1005,8 +1060,8 @@ class _LegalEntityPublicRegistrationScreenState
         'pec': _pecController.text,
         'website': _websiteController.text,
         'status': 'pending',
-        'logo_picture': entityProfileUrl,
-        'company_picture': entityCompanyUrl,
+        'logo_picture': null, // Will be uploaded after creation
+        'company_picture': null, // Will be uploaded after creation
         'created_at': DateTime.now().toIso8601String(),
         'created_by_id_user': user.idUser,
       };
@@ -1026,7 +1081,40 @@ class _LegalEntityPublicRegistrationScreenState
 
       final createdEntity = edgeFunctionResult['data']['legalEntity'];
 
-      // 5. Handle pricing if selected
+      // 5. Upload entity images using edge functions
+      if (_entityProfilePicture != null) {
+        try {
+          entityProfileUrl =
+              await LegalEntityImageService.uploadLegalEntityLogoPicture(
+                imageFile: _entityProfilePicture!,
+                legalEntityId: legalEntityId,
+                filename:
+                    'logo_${_legalNameController.text.replaceAll(' ', '_').toLowerCase()}.jpg',
+              );
+          print('✅ Logo uploaded successfully: $entityProfileUrl');
+        } catch (e) {
+          print('❌ Error uploading logo: $e');
+          // Continue without logo - don't fail the entire registration
+        }
+      }
+
+      if (_entityCompanyPicture != null) {
+        try {
+          entityCompanyUrl =
+              await LegalEntityImageService.uploadLegalEntityCompanyPicture(
+                imageFile: _entityCompanyPicture!,
+                legalEntityId: legalEntityId,
+                filename:
+                    'company_${_legalNameController.text.replaceAll(' ', '_').toLowerCase()}.jpg',
+              );
+          print('✅ Company picture uploaded successfully: $entityCompanyUrl');
+        } catch (e) {
+          print('❌ Error uploading company picture: $e');
+          // Continue without company picture - don't fail the entire registration
+        }
+      }
+
+      // 6. Handle pricing if selected
       if (_selectedPricing != null) {
         // TODO: Implement actual pricing purchase and database storage
         print(
@@ -1100,14 +1188,33 @@ class _LegalEntityPublicRegistrationScreenState
     try {
       final XFile? image = await _imagePicker.pickImage(
         source: ImageSource.gallery,
-        maxWidth: 512,
-        maxHeight: 512,
-        imageQuality: 80,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
       );
 
       if (image != null) {
+        final file = File(image.path);
+
+        // Validate image file
+        if (!LegalEntityImageService.validateImageFile(file)) {
+          _showError(
+            AppLocalizations.of(context).getString('invalid_image_format'),
+          );
+          return;
+        }
+
+        // Check file size (50MB limit for edge functions)
+        if (!await LegalEntityImageService.isFileSizeValid(
+          file,
+          maxSizeMB: 50.0,
+        )) {
+          _showError(AppLocalizations.of(context).getString('file_too_large'));
+          return;
+        }
+
         setState(() {
-          _entityProfilePicture = File(image.path);
+          _entityProfilePicture = file;
         });
       }
     } catch (e) {
@@ -1121,14 +1228,33 @@ class _LegalEntityPublicRegistrationScreenState
     try {
       final XFile? image = await _imagePicker.pickImage(
         source: ImageSource.gallery,
-        maxWidth: 512,
-        maxHeight: 512,
-        imageQuality: 80,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
       );
 
       if (image != null) {
+        final file = File(image.path);
+
+        // Validate image file
+        if (!LegalEntityImageService.validateImageFile(file)) {
+          _showError(
+            AppLocalizations.of(context).getString('invalid_image_format'),
+          );
+          return;
+        }
+
+        // Check file size (50MB limit for edge functions)
+        if (!await LegalEntityImageService.isFileSizeValid(
+          file,
+          maxSizeMB: 50.0,
+        )) {
+          _showError(AppLocalizations.of(context).getString('file_too_large'));
+          return;
+        }
+
         setState(() {
-          _entityCompanyPicture = File(image.path);
+          _entityCompanyPicture = file;
         });
       }
     } catch (e) {

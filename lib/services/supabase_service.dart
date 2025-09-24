@@ -32,22 +32,49 @@ class SupabaseService {
   late final GoTrueClient _auth;
 
   Future<void> initialize() async {
-    await Supabase.initialize(
-      url: AppConfig.supabaseUrl,
-      anonKey: AppConfig.supabaseAnonKey,
-    );
+    try {
+      debugPrint('🔧 Initializing Supabase...');
+      debugPrint('🌐 URL: ${AppConfig.supabaseUrl}');
+      debugPrint('🔑 Using anon key: ${AppConfig.supabaseAnonKey.substring(0, 20)}...');
 
-    _client = Supabase.instance.client;
-    _auth = _client.auth;
+      await Supabase.initialize(
+        url: AppConfig.supabaseUrl,
+        anonKey: AppConfig.supabaseAnonKey,
+        debug: kDebugMode,
+        authOptions: const FlutterAuthClientOptions(
+          authFlowType: AuthFlowType.pkce,
+        ),
+        realtimeClientOptions: const RealtimeClientOptions(
+          logLevel: RealtimeLogLevel.info,
+        ),
+      ).timeout(
+        const Duration(seconds: 15),
+        onTimeout: () {
+          debugPrint('❌ Supabase initialization timeout');
+          throw Exception('Timeout durante l\'inizializzazione di Supabase');
+        },
+      );
 
-    // Listen to auth state changes
-    _auth.onAuthStateChange.listen((data) {
-      print('Auth state changed: ${data.event}');
-    });
+      _client = Supabase.instance.client;
+      _auth = _client.auth;
+
+      debugPrint('✅ Supabase initialized successfully!');
+
+      // Listen to auth state changes
+      _auth.onAuthStateChange.listen((data) {
+        debugPrint('Auth state changed: ${data.event}');
+      });
+    } catch (e) {
+      debugPrint('❌ Failed to initialize Supabase: $e');
+      rethrow;
+    }
   }
 
   SupabaseClient get client => _client;
   GoTrueClient get auth => _auth;
+  
+  // Static properties for easy access
+  static String get supabaseUrl => AppConfig.supabaseUrl;
 
   // Authentication methods
   Future<AuthResponse> signUpWithEmail({

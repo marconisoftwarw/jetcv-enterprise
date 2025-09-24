@@ -445,7 +445,7 @@ class _LegalEntityManagementScreenState
                 LayoutBuilder(
                   builder: (context, constraints) {
                     final isMobile = constraints.maxWidth < 600;
-                    
+
                     if (isMobile) {
                       // Layout verticale per mobile
                       return Column(
@@ -513,9 +513,9 @@ class _LegalEntityManagementScreenState
                               },
                             ),
                           ),
-                          
+
                           const SizedBox(height: 12),
-                          
+
                           // Seconda riga: pulsanti
                           Row(
                             children: [
@@ -540,19 +540,28 @@ class _LegalEntityManagementScreenState
                                       borderRadius: BorderRadius.circular(25),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: const Color(0xFF2563EB).withOpacity(0.3),
+                                          color: const Color(
+                                            0xFF2563EB,
+                                          ).withOpacity(0.3),
                                           blurRadius: 8,
                                           offset: const Offset(0, 2),
                                         ),
                                       ],
                                     ),
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
-                                        Icon(Icons.add, color: Colors.white, size: 18),
+                                        Icon(
+                                          Icons.add,
+                                          color: Colors.white,
+                                          size: 18,
+                                        ),
                                         const SizedBox(width: 6),
                                         Text(
-                                          AppLocalizations.of(context).getString('new'),
+                                          AppLocalizations.of(
+                                            context,
+                                          ).getString('new'),
                                           style: TextStyle(
                                             color: Colors.white,
                                             fontWeight: FontWeight.w600,
@@ -564,12 +573,13 @@ class _LegalEntityManagementScreenState
                                   ),
                                 ),
                               ),
-                              
+
                               const SizedBox(width: 12),
-                              
+
                               Expanded(
                                 child: GestureDetector(
-                                  onTap: () => _showSendRegistrationLinkDialog(context),
+                                  onTap: () =>
+                                      _showSendRegistrationLinkDialog(context),
                                   child: Container(
                                     height: 48,
                                     padding: const EdgeInsets.symmetric(
@@ -588,21 +598,30 @@ class _LegalEntityManagementScreenState
                                       borderRadius: BorderRadius.circular(25),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: const Color(0xFF10B981).withOpacity(0.3),
+                                          color: const Color(
+                                            0xFF10B981,
+                                          ).withOpacity(0.3),
                                           blurRadius: 8,
                                           offset: const Offset(0, 2),
                                         ),
                                       ],
                                     ),
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
-                                        Icon(Icons.link, color: Colors.white, size: 18),
+                                        Icon(
+                                          Icons.link,
+                                          color: Colors.white,
+                                          size: 18,
+                                        ),
                                         const SizedBox(width: 6),
                                         Text(
                                           AppLocalizations.of(
                                             context,
-                                          ).getString('send_registration_link_short'),
+                                          ).getString(
+                                            'send_registration_link_short',
+                                          ),
                                           style: TextStyle(
                                             color: Colors.white,
                                             fontWeight: FontWeight.w600,
@@ -709,7 +728,9 @@ class _LegalEntityManagementScreenState
                                 borderRadius: BorderRadius.circular(25),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(0xFF2563EB).withOpacity(0.3),
+                                    color: const Color(
+                                      0xFF2563EB,
+                                    ).withOpacity(0.3),
                                     blurRadius: 8,
                                     offset: const Offset(0, 2),
                                   ),
@@ -718,10 +739,16 @@ class _LegalEntityManagementScreenState
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.add, color: Colors.white, size: 20),
+                                  Icon(
+                                    Icons.add,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    AppLocalizations.of(context).getString('new'),
+                                    AppLocalizations.of(
+                                      context,
+                                    ).getString('new'),
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w600,
@@ -737,7 +764,8 @@ class _LegalEntityManagementScreenState
 
                           // Pulsante Invia Link Registrazione
                           GestureDetector(
-                            onTap: () => _showSendRegistrationLinkDialog(context),
+                            onTap: () =>
+                                _showSendRegistrationLinkDialog(context),
                             child: Container(
                               height: 48,
                               padding: const EdgeInsets.symmetric(
@@ -756,7 +784,9 @@ class _LegalEntityManagementScreenState
                                 borderRadius: BorderRadius.circular(25),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(0xFF10B981).withOpacity(0.3),
+                                    color: const Color(
+                                      0xFF10B981,
+                                    ).withOpacity(0.3),
                                     blurRadius: 8,
                                     offset: const Offset(0, 2),
                                   ),
@@ -765,7 +795,11 @@ class _LegalEntityManagementScreenState
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.link, color: Colors.white, size: 20),
+                                  Icon(
+                                    Icons.link,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
                                   const SizedBox(width: 8),
                                   Text(
                                     AppLocalizations.of(
