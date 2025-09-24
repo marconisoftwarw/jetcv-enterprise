@@ -148,7 +148,11 @@ class AppLocalizations {
       'invitation_resent_success': 'Invito rinviato',
       'confirm_password': 'Conferma Password',
       'first_name': 'Nome',
+      'enter_first_name': 'Inserisci il nome',
+      'first_name_too_long': 'Il nome è troppo lungo',
       'last_name': 'Cognome',
+      'enter_last_name': 'Inserisci il cognome',
+      'last_name_too_long': 'Il cognome è troppo lungo',
       'country': 'Paese',
       'submit': 'Invia',
       'save': 'Salva',
@@ -800,6 +804,23 @@ class AppLocalizations {
       'help_center': 'Help Center',
       'report_bug': 'Report Bug',
       'rate_app': 'Rate App',
+      'complete_registration_verify_identity':
+          'Per completare la registrazione, è necessario verificare la tua identità. Vuoi procedere ora con la verifica?',
+      'verification_in_progress': 'Verifica in corso...',
+      'create_account': 'Crea Account',
+      'sign_up_with_google': 'Registrati con Google',
+      'already_have_account': 'Hai già un account? ',
+
+      'enter_your_email': 'Inserisci la tua email',
+      'email_too_long': 'Email troppo lunga',
+      'phone_optional': 'Telefono (Opzionale)',
+      'enter_phone_number': 'Inserisci il numero di telefono',
+      'phone_number_too_long': 'Numero di telefono troppo lungo',
+
+      'please_confirm_password': 'Conferma la tua password',
+      'i_accept_the': 'Accetto i ',
+      'join_professional_certification_platform':
+          'Unisciti alla nostra piattaforma di certificazione professionale',
     },
     'en': {
       'app_title': 'JetCV Enterprise',

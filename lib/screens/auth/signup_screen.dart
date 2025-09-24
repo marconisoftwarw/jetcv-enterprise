@@ -185,9 +185,10 @@ class _SignupScreenState extends State<SignupScreen> {
               context,
             ).getString('identity_verification_short'),
           ),
-          content: const Text(
-            'Per completare la registrazione, è necessario verificare la tua identità. '
-            'Vuoi procedere ora con la verifica?',
+          content: Text(
+            AppLocalizations.of(
+              context,
+            ).getString('complete_registration_verify_identity'),
           ),
           actions: [
             TextButton(
@@ -556,6 +557,8 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     // Se la verifica Veriff è attiva, mostra la bellissima schermata di verifica
     if (_showVeriffWebView && _veriffUrl != null) {
       return Scaffold(
@@ -981,13 +984,15 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                       const SizedBox(height: 24),
                       Text(
-                        'Create Account',
+                        l10n.getString('create_account'),
                         style: Theme.of(context).textTheme.headlineMedium
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Join our professional certification platform',
+                        l10n.getString(
+                          'join_professional_certification_platform',
+                        ),
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           color: Colors.grey[600],
                         ),
@@ -1005,15 +1010,15 @@ class _SignupScreenState extends State<SignupScreen> {
                     Expanded(
                       child: NeonTextField(
                         controller: _firstNameController,
-                        labelText: 'First Name',
-                        hintText: 'Enter first name',
+                        labelText: l10n.getString('first_name'),
+                        hintText: l10n.getString('enter_first_name'),
                         prefixIcon: const Icon(Icons.person_outline),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'First name is required';
+                            return l10n.getString('first_name_required');
                           }
                           if (value.length > AppConfig.maxNameLength) {
-                            return 'First name too long';
+                            return l10n.getString('first_name_too_long');
                           }
                           return null;
                         },
@@ -1023,15 +1028,15 @@ class _SignupScreenState extends State<SignupScreen> {
                     Expanded(
                       child: NeonTextField(
                         controller: _lastNameController,
-                        labelText: 'Last Name',
-                        hintText: 'Enter last name',
+                        labelText: l10n.getString('last_name'),
+                        hintText: l10n.getString('enter_last_name'),
                         prefixIcon: const Icon(Icons.person_outline),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Last name is required';
+                            return l10n.getString('last_name_required');
                           }
                           if (value.length > AppConfig.maxNameLength) {
-                            return 'Last name too long';
+                            return l10n.getString('last_name_too_long');
                           }
                           return null;
                         },
@@ -1045,21 +1050,21 @@ class _SignupScreenState extends State<SignupScreen> {
                 // Email Field
                 NeonTextField(
                   controller: _emailController,
-                  labelText: 'Email',
-                  hintText: 'Enter your email',
+                  labelText: l10n.getString('email'),
+                  hintText: l10n.getString('enter_your_email'),
                   keyboardType: TextInputType.emailAddress,
                   prefixIcon: const Icon(Icons.email_outlined),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Email is required';
+                      return l10n.getString('email_required');
                     }
                     if (!RegExp(
                       r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
                     ).hasMatch(value)) {
-                      return 'Please enter a valid email';
+                      return l10n.getString('email_invalid');
                     }
                     if (value.length > AppConfig.maxEmailLength) {
-                      return 'Email too long';
+                      return l10n.getString('email_too_long');
                     }
                     return null;
                   },
@@ -1070,8 +1075,8 @@ class _SignupScreenState extends State<SignupScreen> {
                 // Phone Field
                 InternationalPhoneField(
                   controller: _phoneController,
-                  label: 'Phone (Optional)',
-                  hint: 'Enter phone number',
+                  label: l10n.getString('phone_optional'),
+                  hint: l10n.getString('enter_phone_number'),
                   initialCountryCode: _selectedCountryCode,
                   onCountryCodeChanged: (countryCode) {
                     setState(() {
@@ -1085,7 +1090,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     if (value != null &&
                         value.isNotEmpty &&
                         value.length > AppConfig.maxPhoneLength) {
-                      return 'Phone number too long';
+                      return l10n.getString('phone_number_too_long');
                     }
                     return null;
                   },
@@ -1099,8 +1104,8 @@ class _SignupScreenState extends State<SignupScreen> {
                     Expanded(
                       child: NeonTextField(
                         controller: _passwordController,
-                        labelText: 'Password',
-                        hintText: 'Enter password',
+                        labelText: l10n.getString('password'),
+                        hintText: l10n.getString('enter_password'),
                         obscureText: _obscurePassword,
                         prefixIcon: const Icon(Icons.lock_outlined),
                         suffixIcon: IconButton(
@@ -1117,10 +1122,10 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Password is required';
+                            return l10n.getString('password_required');
                           }
                           if (value.length < AppConfig.minPasswordLength) {
-                            return 'Password must be at least ${AppConfig.minPasswordLength} characters';
+                            return l10n.getString('password_min_length');
                           }
                           return null;
                         },
@@ -1130,8 +1135,8 @@ class _SignupScreenState extends State<SignupScreen> {
                     Expanded(
                       child: NeonTextField(
                         controller: _confirmPasswordController,
-                        labelText: 'Confirm Password',
-                        hintText: 'Confirm password',
+                        labelText: l10n.getString('confirm_password'),
+                        hintText: l10n.getString('confirm_password'),
                         obscureText: _obscureConfirmPassword,
                         prefixIcon: const Icon(Icons.lock_outlined),
                         suffixIcon: IconButton(
@@ -1149,10 +1154,10 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please confirm your password';
+                            return l10n.getString('please_confirm_password');
                           }
                           if (value != _passwordController.text) {
-                            return 'Passwords do not match';
+                            return l10n.getString('passwords_do_not_match');
                           }
                           return null;
                         },
@@ -1185,11 +1190,11 @@ class _SignupScreenState extends State<SignupScreen> {
                             },
                             child: RichText(
                               text: TextSpan(
-                                text: 'I accept the ',
+                                text: l10n.getString('i_accept_the'),
                                 style: TextStyle(color: Colors.grey[700]),
                                 children: [
                                   TextSpan(
-                                    text: 'Terms of Service',
+                                    text: l10n.getString('terms_of_service'),
                                     style: TextStyle(
                                       color: Color(AppConfig.primaryColorValue),
                                       decoration: TextDecoration.underline,
@@ -1221,11 +1226,11 @@ class _SignupScreenState extends State<SignupScreen> {
                             },
                             child: RichText(
                               text: TextSpan(
-                                text: 'I accept the ',
+                                text: l10n.getString('i_accept_the'),
                                 style: TextStyle(color: Colors.grey[700]),
                                 children: [
                                   TextSpan(
-                                    text: 'Privacy Policy',
+                                    text: l10n.getString('privacy_policy'),
                                     style: TextStyle(
                                       color: Color(AppConfig.primaryColorValue),
                                       decoration: TextDecoration.underline,
@@ -1249,8 +1254,8 @@ class _SignupScreenState extends State<SignupScreen> {
                     return NeonButton(
                       onPressed: _signUp,
                       text: _isVeriffLoading
-                          ? 'Verifica in corso...'
-                          : 'Create Account',
+                          ? l10n.getString('verification_in_progress')
+                          : l10n.getString('create_account'),
                       icon: _isVeriffLoading
                           ? Icons.hourglass_empty
                           : Icons.person_add,
@@ -1269,7 +1274,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
-                        'OR',
+                        l10n.getString('or'),
                         style: TextStyle(
                           color: AppTheme.primaryBlack,
                           fontWeight: FontWeight.w500,
@@ -1289,7 +1294,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       onPressed: authProvider.isLoading
                           ? null
                           : _signInWithGoogle,
-                      text: 'Sign Up with Google',
+                      text: l10n.getString('sign_up_with_google'),
                       icon: Icons.g_mobiledata,
                       isLoading: authProvider.isLoading,
                       isOutlined: true,
@@ -1305,14 +1310,14 @@ class _SignupScreenState extends State<SignupScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Already have an account? ',
+                      l10n.getString('already_have_account'),
                       style: TextStyle(color: AppTheme.primaryBlack),
                     ),
                     TextButton(
                       onPressed: () =>
                           Navigator.pushReplacementNamed(context, '/login'),
                       child: Text(
-                        'Sign In',
+                        l10n.getString('sign_in'),
                         style: TextStyle(color: AppTheme.accentGreen),
                       ),
                     ),
