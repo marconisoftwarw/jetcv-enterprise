@@ -2770,14 +2770,22 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
 
       // Raccogli tutti i media (di contesto + degli utenti)
       List<MediaItem> allMedia = [];
+      List<String> mediaUserIds =
+          []; // Lista parallela per identificare i media degli utenti
 
-      // Aggiungi i media di contesto
-      allMedia.addAll(_mediaFiles);
+      // Aggiungi i media di contesto (con user ID vuoto)
+      for (int i = 0; i < _mediaFiles.length; i++) {
+        allMedia.add(_mediaFiles[i]);
+        mediaUserIds.add(''); // Media di contesto hanno user ID vuoto
+      }
 
       // Aggiungi i media degli utenti
       for (String userId in _userCertificationMedia.keys) {
         final userMedia = _userCertificationMedia[userId] ?? [];
-        allMedia.addAll(userMedia);
+        for (int i = 0; i < userMedia.length; i++) {
+          allMedia.add(userMedia[i]);
+          mediaUserIds.add(userId); // Media degli utenti hanno il loro user ID
+        }
       }
 
       if (allMedia.isNotEmpty) {
@@ -2808,6 +2816,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               )
               .toList(),
           acquisitionType: 'deferred',
+          userIds: mediaUserIds,
         );
       } else {
         // Se non ci sono media, usa il servizio certificazioni standard
@@ -3094,15 +3103,23 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
 
       // Raccogli tutti i media (di contesto + degli utenti)
       List<MediaItem> allMedia = [];
+      List<String> mediaUserIds =
+          []; // Lista parallela per identificare i media degli utenti
 
-      // Aggiungi i media di contesto
-      allMedia.addAll(_mediaFiles);
+      // Aggiungi i media di contesto (con user ID vuoto)
+      for (int i = 0; i < _mediaFiles.length; i++) {
+        allMedia.add(_mediaFiles[i]);
+        mediaUserIds.add(''); // Media di contesto hanno user ID vuoto
+      }
       print('📁 Context media files: ${_mediaFiles.length}');
 
       // Aggiungi i media degli utenti
       for (String userId in _userCertificationMedia.keys) {
         final userMedia = _userCertificationMedia[userId] ?? [];
-        allMedia.addAll(userMedia);
+        for (int i = 0; i < userMedia.length; i++) {
+          allMedia.add(userMedia[i]);
+          mediaUserIds.add(userId); // Media degli utenti hanno il loro user ID
+        }
         print('📁 User $userId media files: ${userMedia.length}');
       }
 
@@ -3130,6 +3147,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 .toList(),
             acquisitionType: 'deferred',
             capturedAt: DateTime.now().toIso8601String(),
+            userIds: mediaUserIds,
           );
 
       if (result != null) {

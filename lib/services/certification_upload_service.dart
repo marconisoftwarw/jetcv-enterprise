@@ -32,6 +32,8 @@ class CertificationUploadService {
     String? capturedAt,
     String? description,
     String? fileTypeOverride,
+    List<String>?
+    userIds, // Lista degli user IDs per distinguere media degli utenti
   }) async {
     try {
       print('🚀 Creating certification with media upload...');
@@ -116,8 +118,19 @@ class CertificationUploadService {
         for (int j = 0; j < mediaMetadata.length; j++) {
           print('  📝 Metadata $j: ${mediaMetadata[j]}');
         }
+        // Invia i metadati come JSON array
+        request.fields['media_metadata'] = json.encode(mediaMetadata);
+        print(
+          '📝 Sent media metadata as JSON: ${request.fields['media_metadata']}',
+        );
       } else {
         print('⚠️ No media metadata provided');
+      }
+
+      // Aggiungi informazioni sui media degli utenti se disponibili
+      if (userIds != null && userIds.isNotEmpty) {
+        request.fields['user_ids'] = json.encode(userIds);
+        print('📝 Sent user IDs for media distinction: $userIds');
       }
 
       for (int i = 0; i < mediaFiles.length; i++) {
@@ -159,28 +172,23 @@ class CertificationUploadService {
 
           request.files.add(multipartFile);
 
-          // Aggiungi i metadati per questo file
-          if (metadata != null) {
-            if (metadata['title'] != null && metadata['title']!.isNotEmpty) {
-              final newTitle = request.fields['media_titles'] != null
-                  ? '${request.fields['media_titles']},${metadata['title']}'
-                  : metadata['title']!;
-              request.fields['media_titles'] = newTitle;
-              print('📝 Added title to request: "$newTitle"');
-            }
-            if (metadata['description'] != null &&
-                metadata['description']!.isNotEmpty) {
-              final newDescription =
-                  request.fields['media_descriptions'] != null
-                  ? '${request.fields['media_descriptions']},${metadata['description']}'
-                  : metadata['description']!;
-              request.fields['media_descriptions'] = newDescription;
-              print('📝 Added description to request: "$newDescription"');
+          // Determina se questo è un media di un utente specifico
+          if (userIds != null && i < userIds.length) {
+            final userId = userIds[i];
+            if (userId.isNotEmpty) {
+              // Questo è un media di un utente specifico
+              request.fields['is_user_media_$i'] = 'true';
+              request.fields['user_id_$i'] = userId;
+              print('📝 File $i is user media for user: $userId');
+            } else {
+              // Questo è un media di contesto
+              request.fields['is_user_media_$i'] = 'false';
+              print('📝 File $i is context media');
             }
           } else {
-            print(
-              '⚠️ No metadata available for file $i, skipping title/description',
-            );
+            // Nessuna informazione sugli utenti, assume media di contesto
+            request.fields['is_user_media_$i'] = 'false';
+            print('📝 File $i is context media (no user info)');
           }
 
           print(
