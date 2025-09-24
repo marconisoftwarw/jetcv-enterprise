@@ -14,10 +14,10 @@ class PasswordService {
     required String newPassword,
   }) async {
     try {
-      debugPrint('🔐 PasswordService: Starting password reset');
+      debugPrint('🔐 PasswordService: Starting password reset with token');
 
       final response = await EdgeFunctionService.invokeFunction(
-        'reset-password',
+        'reset-password', // This might need to be updated based on the actual edge function name
         {'token': token, 'password': newPassword},
       );
 
@@ -98,11 +98,26 @@ class PasswordService {
   }) async {
     try {
       debugPrint('🔐 PasswordService: Sending password reset email to: $email');
-      debugPrint('🔐 PasswordService: Calling forgot-password edge function');
+      debugPrint('🔐 PasswordService: Calling send-password-reset-email edge function');
+
+      // Get the current origin for the reset link
+      String origin;
+      if (kIsWeb) {
+        final uri = Uri.base;
+        origin = '${uri.scheme}://${uri.host}${uri.port != 80 && uri.port != 443 ? ':${uri.port}' : ''}';
+      } else {
+        // For mobile, use a default origin or get from config
+        origin = 'https://jetcv.app'; // Update this with your actual domain
+      }
+
+      debugPrint('🔐 PasswordService: Using origin: $origin');
 
       final response = await EdgeFunctionService.invokeFunction(
-        'forgot-password', // Edge function name for sending reset emails
-        {'email': email},
+        'send-password-reset-email', // Correct edge function name
+        {
+          'email': email,
+          'origin': origin,
+        },
       );
 
       debugPrint('🔐 PasswordService: Edge function response: $response');
