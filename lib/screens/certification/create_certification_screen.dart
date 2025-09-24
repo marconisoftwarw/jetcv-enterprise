@@ -716,7 +716,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 hint: l10n.getString('certification_title'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Inserisci il titolo della certificazione';
+                    return l10n.getString('enter_certification_title');
                   }
                   return null;
                 },
@@ -835,7 +835,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 maxLines: 4,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Inserisci una descrizione';
+                    return l10n.getString('enter_description');
                   }
                   return null;
                 },
@@ -864,7 +864,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                     label: l10n.getString('location'),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Inserisci il luogo della certificazione';
+                        return l10n.getString('enter_certification_location');
                       }
                       return null;
                     },
@@ -927,8 +927,10 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                               const SizedBox(width: 8),
                               Text(
                                 _isLoadingLocation
-                                    ? 'Rilevamento posizione...'
-                                    : 'Rileva posizione automaticamente',
+                                    ? l10n.getString('detecting_location')
+                                    : l10n.getString(
+                                        'detect_location_automatically',
+                                      ),
                                 style: TextStyle(
                                   color: AppTheme.pureWhite,
                                   fontSize: 14,
@@ -1070,7 +1072,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                       ),
                       SizedBox(height: isTablet ? 2 : 1),
                       Text(
-                        'Aggiungi foto e video per documentare la certificazione',
+                        l10n.getString('add_photos_videos_description'),
                         style: TextStyle(
                           fontSize: isTablet ? 14 : 12,
                           color: AppTheme.textSecondary,
@@ -1173,7 +1175,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                         ),
                         SizedBox(height: isTablet ? 4 : 2),
                         Text(
-                          'Trascina qui i file o clicca per selezionare',
+                          l10n.getString('drag_files_or_click'),
                           style: TextStyle(
                             color: AppTheme.textSecondary.withValues(
                               alpha: 0.7,
@@ -1270,7 +1272,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                                       Text(
                                         mediaItem.title.isNotEmpty
                                             ? mediaItem.title
-                                            : 'Senza titolo',
+                                            : l10n.getString('no_title'),
                                         style: TextStyle(
                                           fontSize: isTablet ? 16 : 14,
                                           fontWeight: FontWeight.w700,
@@ -1282,7 +1284,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                                       Text(
                                         mediaItem.description.isNotEmpty
                                             ? mediaItem.description
-                                            : 'Nessuna descrizione',
+                                            : l10n.getString('no_description'),
                                         style: TextStyle(
                                           fontSize: isTablet ? 14 : 12,
                                           color: AppTheme.textSecondary,
@@ -1318,7 +1320,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                                           color: AppTheme.primaryBlue,
                                           size: isTablet ? 20 : 18,
                                         ),
-                                        tooltip: 'Modifica',
+                                        tooltip: l10n.getString('edit'),
                                       ),
                                     ),
                                     SizedBox(height: isTablet ? 8 : 6),
@@ -1336,7 +1338,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                                           color: AppTheme.errorRed,
                                           size: isTablet ? 20 : 18,
                                         ),
-                                        tooltip: 'Rimuovi',
+                                        tooltip: l10n.getString('remove'),
                                       ),
                                     ),
                                   ],
@@ -1481,7 +1483,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                             ),
                             SizedBox(width: isTablet ? 8 : 6),
                             Text(
-                              'Indietro',
+                              l10n.getString('back'),
                               style: TextStyle(
                                 color: AppTheme.textSecondary,
                                 fontSize: isTablet ? 16 : 14,
@@ -1699,7 +1701,9 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               SizedBox(width: isTablet ? 16 : 12),
               NeonButton(
                 onPressed: _isVerifyingOtp ? null : _addUserByOTP,
-                text: _isVerifyingOtp ? 'Verificando...' : 'Aggiungi',
+                text: _isVerifyingOtp
+                    ? l10n.getString('verifying')
+                    : l10n.getString('add'),
               ),
             ],
           ),
@@ -1731,7 +1735,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Scansiona codice QR',
+                      l10n.getString('scan_qr_code'),
                       style: TextStyle(
                         fontSize: isTablet ? 16 : 14,
                         fontWeight: FontWeight.w600,
@@ -1739,7 +1743,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                       ),
                     ),
                     Text(
-                      'Scansiona il QR code dall\'app utente',
+                      l10n.getString('scan_qr_from_app'),
                       style: TextStyle(
                         fontSize: isTablet ? 14 : 12,
                         color: AppTheme.textSecondary,
@@ -1750,7 +1754,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               ),
               NeonButton(
                 onPressed: _scanQRCode,
-                text: 'Scansiona',
+                text: l10n.getString('scan'),
                 icon: Icons.qr_code_scanner,
               ),
             ],
@@ -2796,9 +2800,13 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
         print('📁 Total media files: ${allMedia.length}');
         print('📁 Media order:');
         for (int i = 0; i < allMedia.length; i++) {
-          final userId = i < mediaUserIds.length ? mediaUserIds[i] : 'NO_USER_ID';
+          final userId = i < mediaUserIds.length
+              ? mediaUserIds[i]
+              : 'NO_USER_ID';
           final isUserMedia = userId.isNotEmpty;
-          print('  File $i: ${allMedia[i].file.name} - User: ${isUserMedia ? userId : "CONTEXT"}');
+          print(
+            '  File $i: ${allMedia[i].file.name} - User: ${isUserMedia ? userId : "CONTEXT"}',
+          );
         }
 
         result = await CertificationUploadService.createCertificationWithMedia(
@@ -3138,7 +3146,9 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
       for (int i = 0; i < allMedia.length; i++) {
         final userId = i < mediaUserIds.length ? mediaUserIds[i] : 'NO_USER_ID';
         final isUserMedia = userId.isNotEmpty;
-        print('  File $i: ${allMedia[i].file.name} - User: ${isUserMedia ? userId : "CONTEXT"}');
+        print(
+          '  File $i: ${allMedia[i].file.name} - User: ${isUserMedia ? userId : "CONTEXT"}',
+        );
       }
 
       // Usa il servizio di upload unificato che supporta metadati
@@ -3523,7 +3533,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                         ),
                         SizedBox(height: isTablet ? 4 : 2),
                         Text(
-                          'Trascina qui i file o clicca per selezionare',
+                          l10n.getString('drag_files_or_click'),
                           style: TextStyle(
                             color: AppTheme.textSecondary.withValues(
                               alpha: 0.7,
@@ -3620,7 +3630,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                                       Text(
                                         mediaItem.title.isNotEmpty
                                             ? mediaItem.title
-                                            : 'Senza titolo',
+                                            : l10n.getString('no_title'),
                                         style: TextStyle(
                                           fontSize: isTablet ? 16 : 14,
                                           fontWeight: FontWeight.w700,
@@ -3632,7 +3642,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                                       Text(
                                         mediaItem.description.isNotEmpty
                                             ? mediaItem.description
-                                            : 'Nessuna descrizione',
+                                            : l10n.getString('no_description'),
                                         style: TextStyle(
                                           fontSize: isTablet ? 14 : 12,
                                           color: AppTheme.textSecondary,
@@ -3670,7 +3680,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                                           color: AppTheme.primaryBlue,
                                           size: isTablet ? 20 : 18,
                                         ),
-                                        tooltip: 'Modifica',
+                                        tooltip: l10n.getString('edit'),
                                       ),
                                     ),
                                     SizedBox(height: isTablet ? 8 : 6),
@@ -3692,7 +3702,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                                           color: AppTheme.errorRed,
                                           size: isTablet ? 20 : 18,
                                         ),
-                                        tooltip: 'Rimuovi',
+                                        tooltip: l10n.getString('remove'),
                                       ),
                                     ),
                                   ],

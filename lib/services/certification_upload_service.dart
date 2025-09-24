@@ -131,7 +131,9 @@ class CertificationUploadService {
       if (userIds != null && userIds.isNotEmpty) {
         request.fields['user_ids'] = json.encode(userIds);
         print('📝 Sent user IDs for media distinction: $userIds');
-        print('📝 Total files: ${mediaFiles.length}, Total user IDs: ${userIds.length}');
+        print(
+          '📝 Total files: ${mediaFiles.length}, Total user IDs: ${userIds.length}',
+        );
       }
 
       for (int i = 0; i < mediaFiles.length; i++) {
@@ -180,7 +182,9 @@ class CertificationUploadService {
               // Questo è un media di un utente specifico
               request.fields['is_user_media_$i'] = 'true';
               request.fields['user_id_$i'] = userId;
-              print('📝 File $i (${xFile.name}) is user media for user: $userId');
+              print(
+                '📝 File $i (${xFile.name}) is user media for user: $userId',
+              );
             } else {
               // Questo è un media di contesto
               request.fields['is_user_media_$i'] = 'false';

@@ -90,7 +90,6 @@ class AppLocalizations {
       'approved_status': 'Approvate',
       'rejected_status': 'Rifiutate',
       'details': 'Dettagli',
-      'edit': 'Modifica',
       'send_invitation': 'Invia Invito',
       'delete': 'Elimina',
       'close': 'Chiudi',
@@ -181,6 +180,102 @@ class AppLocalizations {
       'drafts_in_progress': 'Bozze e In Corso',
       'new_certification': 'Nuova',
       'general_info': 'Info Generali',
+
+      // Certification creation form
+      'enter_certification_title': 'Inserisci il titolo della certificazione',
+      'enter_description': 'Inserisci una descrizione',
+      'enter_certification_location': 'Inserisci il luogo della certificazione',
+      'detecting_location': 'Rilevamento posizione...',
+      'detect_location_automatically': 'Rileva posizione automaticamente',
+      'add_photos_videos_description':
+          'Aggiungi foto e video per documentare la certificazione',
+      'drag_files_or_click': 'Trascina qui i file o clicca per selezionare',
+      'no_title': 'Senza titolo',
+      'no_description': 'Nessuna descrizione',
+      'edit': 'Modifica',
+      'remove': 'Rimuovi',
+
+      'continue_to_review': 'Continua alla Revisione',
+      'verifying': 'Verificando...',
+      'scan_qr_code': 'Scansiona codice QR',
+      'scan_qr_from_app': 'Scansiona il QR code dall\'app utente',
+      'scan': 'Scansiona',
+      'select_legal_entity_first': 'Seleziona prima una Legal Entity',
+      'select_legal_entity_description':
+          'Per cercare utenti esistenti è necessario selezionare una Legal Entity nella sezione "Informazioni Generali"',
+      'add_user': 'Aggiungi Utente',
+      'user_added': 'Utente Aggiunto',
+      'no_user_added_instruction':
+          'Nessun utente aggiunto. Inserisci un codice OTP per aggiungere un utente.',
+      'confirm_certification': 'Conferma Certificazione',
+      'media_count': 'Media',
+      'users_count': 'Utenti',
+      'no_user_added_to_certification':
+          'Nessun utente aggiunto alla certificazione',
+      'added': 'Aggiunto',
+      'confirm_send': 'Conferma Invio',
+      'certification_send_warning':
+          'Una volta inviata, la certificazione verrà inviata agli utenti destinatari e non sarà più modificabile. Una volta che gli utenti accetteranno la certificazione, questa verrà notarizzata sulla blockchain. Questa azione non può essere annullata.',
+      'confirm_send_details':
+          'Confermo di aver verificato tutti i dettagli e di voler procedere con l\'invio della certificazione',
+      'no_category_selected': 'Nessuna categoria selezionata',
+      'user_not_authenticated': 'Utente non autenticato',
+      'select_legal_entity_first_error':
+          'Seleziona una legal entity prima di procedere.',
+      'error_retrieving_data':
+          'Errore nel recupero dei dati necessari. Riprova più tardi.',
+      'connection_error': 'Errore di connessione al server. Riprova più tardi.',
+      'certification_created_successfully':
+          'Certificazione e media caricati con successo!',
+      'certification_creation_error':
+          'Errore nella creazione della certificazione',
+      'file_upload_error':
+          'Errore nel caricamento del file. Riprova con un altro file.',
+      'image_selection_error':
+          'Errore nella selezione dell\'immagine. Riprova.',
+      'enter_title_hint': 'Inserisci il titolo...',
+      'enter_description_hint': 'Inserisci la descrizione...',
+      'user_specific_media': 'Media specifici per questo utente',
+      'edit_media': 'Modifica Media',
+      'title': 'Titolo',
+      'description': 'Descrizione',
+      'enter_media_title_hint': 'Inserisci un titolo per il media',
+      'enter_media_description_hint': 'Inserisci una descrizione per il media',
+
+      'enter_valid_otp': 'Inserisci un codice OTP valido',
+      'user_already_added': 'Questo utente è già stato aggiunto',
+      'user_added_successfully': 'Utente aggiunto con successo!',
+      'otp_verification_error': 'Errore durante la verifica OTP',
+      'connection_error_detailed': 'Errore di connessione',
+      'scan_cancelled': 'Scansione annullata',
+      'scan_error': 'Errore nella scansione',
+      'user_already_added_to_certification':
+          'Utente già aggiunto alla certificazione',
+      'user_added_from_qr': 'Utente aggiunto',
+      'qr_data_title': 'Dati QR Scansionati',
+      'qr_content': 'Contenuto del codice QR',
+      'qr_data_invalid':
+          'Questi dati non sembrano contenere informazioni utente valide. Puoi copiare il contenuto e usarlo manualmente.',
+
+      'location_services_disabled':
+          'I servizi di localizzazione sono disabilitati. Abilitali nelle impostazioni.',
+      'location_permission_denied':
+          'I permessi di localizzazione sono stati negati.',
+      'location_permission_denied_forever':
+          'I permessi di localizzazione sono stati negati permanentemente. Utilizzato Roma come posizione predefinita.',
+      'invalid_coordinates': 'Coordinate non valide ricevute',
+      'location_detection_error': 'Errore nel rilevamento della posizione.',
+      'location_timeout_error':
+          'Timeout nel rilevamento della posizione. Utilizzo Roma come posizione predefinita.',
+      'location_permission_error':
+          'Permessi di localizzazione non concessi. Utilizzo Roma come posizione predefinita.',
+      'location_service_unavailable':
+          'Servizio di localizzazione non disponibile. Utilizzo Roma come posizione predefinita.',
+      'location_fallback_error':
+          'Errore nel rilevamento della posizione. Utilizzato Roma come posizione predefinita.',
+      'default_location': 'Roma, Italia',
+      'enter_otp_code_hint': 'Inserisci codice OTP...',
+      'enter_otp_user_label': 'Inserisci codice OTP utente',
 
       'my_certifications': 'Le Mie Certificazioni',
       'manage_certifications': 'Gestisci le tue certificazioni',
