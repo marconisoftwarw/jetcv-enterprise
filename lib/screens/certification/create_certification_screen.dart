@@ -49,6 +49,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   final _descriptionController = TextEditingController();
   final _otpController = TextEditingController();
   final _locationController = TextEditingController();
+  final _esitoController = TextEditingController();
+  final _titoloController = TextEditingController();
   String _selectedActivityType = '';
   List<MediaItem> _mediaFiles = [];
 
