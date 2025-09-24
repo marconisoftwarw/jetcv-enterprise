@@ -441,169 +441,350 @@ class _LegalEntityManagementScreenState
 
                 const SizedBox(height: 16),
 
-                // Tutti i controlli sulla stessa riga
-                Row(
-                  children: [
-                    // Filtro stato
-                    Container(
-                      height: 48, // Altezza fissa per tutti
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[50],
-                        borderRadius: BorderRadius.circular(25),
-                        border: Border.all(color: Colors.grey[200]!),
-                      ),
-                      child: DropdownButton<String?>(
-                        value: _selectedStatus,
-                        hint: Text(
-                          AppLocalizations.of(
-                            context,
-                          ).getString('all_statuses'),
-                          style: TextStyle(color: Colors.grey[500]),
-                        ),
-                        underline: const SizedBox(),
-                        items: [
-                          DropdownMenuItem(
-                            value: null,
-                            child: Text(
-                              AppLocalizations.of(
-                                context,
-                              ).getString('all_statuses_short'),
+                // Tutti i controlli responsive
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isMobile = constraints.maxWidth < 600;
+                    
+                    if (isMobile) {
+                      // Layout verticale per mobile
+                      return Column(
+                        children: [
+                          // Prima riga: filtro stato
+                          Container(
+                            height: 48,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[50],
+                              borderRadius: BorderRadius.circular(25),
+                              border: Border.all(color: Colors.grey[200]!),
+                            ),
+                            child: DropdownButton<String?>(
+                              value: _selectedStatus,
+                              hint: Text(
+                                AppLocalizations.of(
+                                  context,
+                                ).getString('all_statuses'),
+                                style: TextStyle(color: Colors.grey[500]),
+                              ),
+                              underline: const SizedBox(),
+                              items: [
+                                DropdownMenuItem(
+                                  value: null,
+                                  child: Text(
+                                    AppLocalizations.of(
+                                      context,
+                                    ).getString('all_statuses_short'),
+                                  ),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'pending',
+                                  child: Text(
+                                    AppLocalizations.of(
+                                      context,
+                                    ).getString('pending_short'),
+                                  ),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'approved',
+                                  child: Text(
+                                    AppLocalizations.of(
+                                      context,
+                                    ).getString('approved_short'),
+                                  ),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'rejected',
+                                  child: Text(
+                                    AppLocalizations.of(
+                                      context,
+                                    ).getString('rejected_short'),
+                                  ),
+                                ),
+                              ],
+                              onChanged: (value) {
+                                setState(() {
+                                  _selectedStatus = value;
+                                });
+                                _filterEntities();
+                              },
                             ),
                           ),
-                          DropdownMenuItem(
-                            value: 'pending',
-                            child: Text(
-                              AppLocalizations.of(
-                                context,
-                              ).getString('pending_short'),
+                          
+                          const SizedBox(height: 12),
+                          
+                          // Seconda riga: pulsanti
+                          Row(
+                            children: [
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () => _showCreateEntityDialog(context),
+                                  child: Container(
+                                    height: 48,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 12,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          const Color(0xFF2563EB),
+                                          const Color(0xFF1D4ED8),
+                                        ],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      ),
+                                      borderRadius: BorderRadius.circular(25),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: const Color(0xFF2563EB).withOpacity(0.3),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.add, color: Colors.white, size: 18),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          AppLocalizations.of(context).getString('new'),
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              
+                              const SizedBox(width: 12),
+                              
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () => _showSendRegistrationLinkDialog(context),
+                                  child: Container(
+                                    height: 48,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 12,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          const Color(0xFF10B981),
+                                          const Color(0xFF059669),
+                                        ],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      ),
+                                      borderRadius: BorderRadius.circular(25),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: const Color(0xFF10B981).withOpacity(0.3),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.link, color: Colors.white, size: 18),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          AppLocalizations.of(
+                                            context,
+                                          ).getString('send_registration_link_short'),
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      );
+                    } else {
+                      // Layout orizzontale per tablet e desktop
+                      return Row(
+                        children: [
+                          // Filtro stato
+                          Container(
+                            height: 48,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[50],
+                              borderRadius: BorderRadius.circular(25),
+                              border: Border.all(color: Colors.grey[200]!),
+                            ),
+                            child: DropdownButton<String?>(
+                              value: _selectedStatus,
+                              hint: Text(
+                                AppLocalizations.of(
+                                  context,
+                                ).getString('all_statuses'),
+                                style: TextStyle(color: Colors.grey[500]),
+                              ),
+                              underline: const SizedBox(),
+                              items: [
+                                DropdownMenuItem(
+                                  value: null,
+                                  child: Text(
+                                    AppLocalizations.of(
+                                      context,
+                                    ).getString('all_statuses_short'),
+                                  ),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'pending',
+                                  child: Text(
+                                    AppLocalizations.of(
+                                      context,
+                                    ).getString('pending_short'),
+                                  ),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'approved',
+                                  child: Text(
+                                    AppLocalizations.of(
+                                      context,
+                                    ).getString('approved_short'),
+                                  ),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'rejected',
+                                  child: Text(
+                                    AppLocalizations.of(
+                                      context,
+                                    ).getString('rejected_short'),
+                                  ),
+                                ),
+                              ],
+                              onChanged: (value) {
+                                setState(() {
+                                  _selectedStatus = value;
+                                });
+                                _filterEntities();
+                              },
                             ),
                           ),
-                          DropdownMenuItem(
-                            value: 'approved',
-                            child: Text(
-                              AppLocalizations.of(
-                                context,
-                              ).getString('approved_short'),
+
+                          const SizedBox(width: 12),
+
+                          // Pulsante Nuova Entità
+                          GestureDetector(
+                            onTap: () => _showCreateEntityDialog(context),
+                            child: Container(
+                              height: 48,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 12,
+                              ),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    const Color(0xFF2563EB),
+                                    const Color(0xFF1D4ED8),
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(25),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFF2563EB).withOpacity(0.3),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.add, color: Colors.white, size: 20),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    AppLocalizations.of(context).getString('new'),
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                          DropdownMenuItem(
-                            value: 'rejected',
-                            child: Text(
-                              AppLocalizations.of(
-                                context,
-                              ).getString('rejected_short'),
+
+                          const SizedBox(width: 12),
+
+                          // Pulsante Invia Link Registrazione
+                          GestureDetector(
+                            onTap: () => _showSendRegistrationLinkDialog(context),
+                            child: Container(
+                              height: 48,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 12,
+                              ),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    const Color(0xFF10B981),
+                                    const Color(0xFF059669),
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(25),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFF10B981).withOpacity(0.3),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.link, color: Colors.white, size: 20),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    AppLocalizations.of(
+                                      context,
+                                    ).getString('send_registration_link_short'),
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ],
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedStatus = value;
-                          });
-                          _filterEntities();
-                        },
-                      ),
-                    ),
-
-                    const SizedBox(width: 12),
-
-                    // Pulsante Nuova Entità
-                    GestureDetector(
-                      onTap: () => _showCreateEntityDialog(context),
-                      child: Container(
-                        height: 48, // Altezza fissa per tutti
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 12,
-                        ),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              const Color(0xFF2563EB),
-                              const Color(0xFF1D4ED8),
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(25),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFF2563EB).withOpacity(0.3),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.add, color: Colors.white, size: 20),
-                            const SizedBox(width: 8),
-                            Text(
-                              AppLocalizations.of(context).getString('new'),
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(width: 12),
-
-                    // Pulsante Invia Link Registrazione (ultimo a destra)
-                    GestureDetector(
-                      onTap: () => _showSendRegistrationLinkDialog(context),
-                      child: Container(
-                        height: 48, // Altezza fissa per tutti
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 12,
-                        ),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              const Color(0xFF10B981),
-                              const Color(0xFF059669),
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(25),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFF10B981).withOpacity(0.3),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.link, color: Colors.white, size: 20),
-                            const SizedBox(width: 8),
-                            Text(
-                              AppLocalizations.of(
-                                context,
-                              ).getString('send_registration_link_short'),
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
+                      );
+                    }
+                  },
                 ),
               ],
             ),
