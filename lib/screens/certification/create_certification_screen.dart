@@ -247,10 +247,11 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
         foregroundColor: AppTheme.textPrimary,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
-        title: Row(
-          children: [
-            Expanded(
-              child: Text(
+        title: Center(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
                 l10n.getString('new_certification'),
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   color: AppTheme.textPrimary,
@@ -258,91 +259,89 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                   letterSpacing: -0.2,
                 ),
               ),
-            ),
-            if (_legalEntityName != null && _legalEntityName!.isNotEmpty) ...[
-              Container(
-                margin: EdgeInsets.only(left: 16),
-                padding: EdgeInsets.symmetric(
-                  horizontal: isTablet ? 16 : 12,
-                  vertical: isTablet ? 8 : 6,
-                ),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppTheme.primaryBlue.withValues(alpha: 0.1),
-                      AppTheme.primaryBlue.withValues(alpha: 0.05),
-                    ],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
+              if (_legalEntityName != null && _legalEntityName!.isNotEmpty) ...[
+                SizedBox(width: isTablet ? 16 : 12),
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isTablet ? 12 : 10,
+                    vertical: isTablet ? 6 : 4,
                   ),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: AppTheme.primaryBlue.withValues(alpha: 0.2),
-                    width: 1,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.business_rounded,
-                      color: AppTheme.primaryBlue,
-                      size: isTablet ? 18 : 16,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        AppTheme.primaryBlue.withValues(alpha: 0.1),
+                        AppTheme.primaryBlue.withValues(alpha: 0.05),
+                      ],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
                     ),
-                    SizedBox(width: isTablet ? 8 : 6),
-                    Flexible(
-                      child: Text(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: AppTheme.primaryBlue.withValues(alpha: 0.2),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.business_rounded,
+                        color: AppTheme.primaryBlue,
+                        size: isTablet ? 14 : 12,
+                      ),
+                      SizedBox(width: isTablet ? 6 : 4),
+                      Text(
                         _legalEntityName!,
                         style: TextStyle(
                           color: AppTheme.primaryBlue,
-                          fontSize: isTablet ? 14 : 12,
+                          fontSize: isTablet ? 12 : 10,
                           fontWeight: FontWeight.w600,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ] else if (_isLoadingLegalEntities) ...[
-              Container(
-                margin: EdgeInsets.only(left: 16),
-                padding: EdgeInsets.symmetric(
-                  horizontal: isTablet ? 16 : 12,
-                  vertical: isTablet ? 8 : 6,
-                ),
-                decoration: BoxDecoration(
-                  color: AppTheme.lightGrey.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SizedBox(
-                      width: isTablet ? 16 : 14,
-                      height: isTablet ? 16 : 14,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          AppTheme.textSecondary,
+              ] else if (_isLoadingLegalEntities) ...[
+                SizedBox(width: isTablet ? 16 : 12),
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isTablet ? 12 : 10,
+                    vertical: isTablet ? 6 : 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppTheme.lightGrey.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: isTablet ? 12 : 10,
+                        height: isTablet ? 12 : 10,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            AppTheme.textSecondary,
+                          ),
                         ),
                       ),
-                    ),
-                    SizedBox(width: isTablet ? 8 : 6),
-                    Text(
-                      l10n.getString('loading_organization'),
-                      style: TextStyle(
-                        color: AppTheme.textSecondary,
-                        fontSize: isTablet ? 14 : 12,
-                        fontWeight: FontWeight.w500,
+                      SizedBox(width: isTablet ? 6 : 4),
+                      Text(
+                        l10n.getString('loading_organization'),
+                        style: TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: isTablet ? 12 : 10,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
+              ],
             ],
-          ],
+          ),
         ),
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: AppTheme.textPrimary),
