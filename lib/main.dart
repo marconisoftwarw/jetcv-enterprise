@@ -251,10 +251,9 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
             ),
             '/login': (context) => const LoginScreen(),
             '/forgot-password': (context) => const ForgotPasswordScreen(),
-            '/password-reset': (context) => const PasswordResetWithTokenScreen(),
+            '/set-password': (context) => const SetPasswordScreen(),
             '/password-reset-form': (context) =>
                 const PasswordResetFormScreen(),
-            '/set-password': (context) => const SetPasswordScreen(),
             '/signup': (context) {
               // Estrai parametri URL per signup (es. email precompilata)
               print('🔍 Handling /signup route in static routes');
