@@ -63,14 +63,19 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 0,
-      leading: widget.showMenu && isMobile
+      leading: widget.showMenu && !isDesktop
           ? IconButton(
-              icon: Icon(Icons.menu, color: Colors.black),
+              icon: Icon(
+                Icons.menu,
+                color: Colors.black,
+                size: isMobile ? 24 : 28,
+              ),
               onPressed: () {
                 setState(() {
                   _isMenuExpanded = !_isMenuExpanded;
                 });
               },
+              tooltip: 'Apri menu',
             )
           : null,
       title: widget.title != null
@@ -79,12 +84,16 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
               style: TextStyle(
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
-                fontSize: isMobile ? 18 : 20,
+                fontSize: isMobile
+                    ? 18
+                    : isTablet
+                    ? 20
+                    : 22,
               ),
             )
           : null,
       actions: widget.actions ?? [],
-      centerTitle: isMobile,
+      centerTitle: isMobile || isTablet,
     );
   }
 
@@ -98,31 +107,89 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
       return widget.child;
     }
 
+    // Desktop layout - sidebar sempre visibile
+    if (isDesktop) {
+      return Row(
+        children: [
+          _buildNavigationMenu(isMobile, isTablet, isDesktop, authProvider),
+          Expanded(child: widget.child),
+        ],
+      );
+    }
+
+    // Mobile/Tablet layout - menu hamburger
     return Stack(
       children: [
-        Row(
-          children: [
-            // Navigation Menu - Show on desktop or when expanded on mobile
-            if (!isMobile || _isMenuExpanded)
-              _buildNavigationMenu(isMobile, isTablet, isDesktop, authProvider),
+        // Main content
+        widget.child,
 
-            // Main Content
-            Expanded(child: widget.child),
-          ],
-        ),
-
-        // Dark overlay on mobile when menu is open
-        if (isMobile && _isMenuExpanded)
-          Positioned.fill(
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  _isMenuExpanded = false;
-                });
-              },
-              child: Container(color: Colors.black.withOpacity(0.5)),
+        // Navigation Menu - slide in from left on mobile
+        if (_isMenuExpanded)
+          Positioned(
+            left: 0,
+            top: 0,
+            bottom: 0,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              width: isMobile ? 280 : 320,
+              child: _buildNavigationMenu(
+                isMobile,
+                isTablet,
+                isDesktop,
+                authProvider,
+              ),
             ),
           ),
+
+        // Floating hamburger button for mobile when AppBar is hidden
+        // Messo prima dell'overlay per essere sopra
+        if (widget.hideAppBar && !isDesktop)
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 16,
+            left: 16,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 8,
+                    spreadRadius: 0,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: () {
+                    setState(() {
+                      _isMenuExpanded = !_isMenuExpanded;
+                    });
+                  },
+                  child: Container(
+                    width: 48,
+                    height: 48,
+                    padding: const EdgeInsets.all(12),
+                    child: Icon(
+                      _isMenuExpanded ? Icons.close : Icons.menu,
+                      color: AppTheme.primaryBlue,
+                      size: 24,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+        // Overlay scuro rimosso per permettere l'interazione con i pulsanti del menu
+        // La chiusura del menu avviene tramite:
+        // 1. Pulsante X nell'header del menu
+        // 2. Pulsante hamburger flottante
+        // 3. Selezione di una voce del menu (chiusura automatica)
       ],
     );
   }
@@ -137,36 +204,99 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
     if (isDesktop) {
       menuWidth = 280;
     } else if (isTablet) {
-      menuWidth = 260;
+      menuWidth = 320;
     } else {
-      menuWidth = 260; // Mobile expanded width
+      menuWidth = 280; // Mobile expanded width
     }
 
     return Container(
       width: menuWidth,
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(right: BorderSide(color: Colors.grey[200]!, width: 1)),
+        border: isDesktop
+            ? Border(right: BorderSide(color: Colors.grey[200]!, width: 1))
+            : null,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
+            color: Colors.black.withOpacity(isDesktop ? 0.05 : 0.2),
+            blurRadius: isDesktop ? 8 : 16,
             spreadRadius: 0,
-            offset: const Offset(2, 0),
+            offset: Offset(isDesktop ? 2 : 4, 0),
           ),
         ],
       ),
-      child: GlobalHamburgerMenu(
-        selectedIndex: widget.selectedIndex ?? 0,
-        onDestinationSelected: widget.onDestinationSelected ?? (index) {},
-        isExpanded: _isMenuExpanded,
-        onExpansionChanged: (expanded) {
-          setState(() {
-            _isMenuExpanded = expanded;
-          });
-        },
-        context: context,
-        userType: authProvider.userType,
+      child: Column(
+        children: [
+          // Header con pulsante di chiusura per mobile/tablet
+          if (!isDesktop)
+            Container(
+              height: 60,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryBlue,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Menu',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: isMobile ? 18 : 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      Icons.close,
+                      color: Colors.white,
+                      size: isMobile ? 24 : 28,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _isMenuExpanded = false;
+                      });
+                    },
+                    tooltip: 'Chiudi menu',
+                  ),
+                ],
+              ),
+            ),
+
+          // Menu principale
+          Expanded(
+            child: GlobalHamburgerMenu(
+              selectedIndex: widget.selectedIndex ?? 0,
+              onDestinationSelected: (index) {
+                // Chiudi il menu su mobile/tablet dopo la selezione
+                if (!isDesktop) {
+                  setState(() {
+                    _isMenuExpanded = false;
+                  });
+                }
+                // Esegui la callback originale
+                if (widget.onDestinationSelected != null) {
+                  widget.onDestinationSelected!(index);
+                }
+              },
+              isExpanded: _isMenuExpanded,
+              onExpansionChanged: (expanded) {
+                setState(() {
+                  _isMenuExpanded = expanded;
+                });
+              },
+              context: context,
+              userType: authProvider.userType,
+            ),
+          ),
+        ],
       ),
     );
   }

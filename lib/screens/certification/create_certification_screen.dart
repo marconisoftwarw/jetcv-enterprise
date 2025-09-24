@@ -237,8 +237,39 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
-    final isTablet = screenWidth > 768;
-    // final isDesktop = screenWidth > 1024;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    // Responsive breakpoints
+    final isMobile = screenWidth < 768;
+    final isTablet = screenWidth >= 768 && screenWidth < 1024;
+    final isDesktop = screenWidth >= 1024;
+
+    // Responsive values
+    final horizontalPadding = isMobile
+        ? 20.0
+        : isTablet
+        ? 32.0
+        : 48.0;
+    final verticalPadding = isMobile
+        ? 16.0
+        : isTablet
+        ? 24.0
+        : 32.0;
+    final cardPadding = isMobile
+        ? 16.0
+        : isTablet
+        ? 20.0
+        : 24.0;
+    final fontSize = isMobile
+        ? 14.0
+        : isTablet
+        ? 16.0
+        : 18.0;
+    final titleFontSize = isMobile
+        ? 18.0
+        : isTablet
+        ? 20.0
+        : 24.0;
 
     return Scaffold(
       backgroundColor: AppTheme.offWhite,
@@ -253,18 +284,33 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             children: [
               Text(
                 l10n.getString('new_certification'),
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                style: TextStyle(
                   color: AppTheme.textPrimary,
                   fontWeight: FontWeight.w700,
+                  fontSize: titleFontSize,
                   letterSpacing: -0.2,
                 ),
               ),
               if (_legalEntityName != null && _legalEntityName!.isNotEmpty) ...[
-                SizedBox(width: isTablet ? 16 : 12),
+                SizedBox(
+                  width: isMobile
+                      ? 8
+                      : isTablet
+                      ? 12
+                      : 16,
+                ),
                 Container(
                   padding: EdgeInsets.symmetric(
-                    horizontal: isTablet ? 12 : 10,
-                    vertical: isTablet ? 6 : 4,
+                    horizontal: isMobile
+                        ? 8
+                        : isTablet
+                        ? 10
+                        : 12,
+                    vertical: isMobile
+                        ? 3
+                        : isTablet
+                        ? 4
+                        : 6,
                   ),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
@@ -287,14 +333,28 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                       Icon(
                         Icons.business_rounded,
                         color: AppTheme.primaryBlue,
-                        size: isTablet ? 14 : 12,
+                        size: isMobile
+                            ? 12
+                            : isTablet
+                            ? 14
+                            : 16,
                       ),
-                      SizedBox(width: isTablet ? 6 : 4),
+                      SizedBox(
+                        width: isMobile
+                            ? 4
+                            : isTablet
+                            ? 6
+                            : 8,
+                      ),
                       Text(
                         _legalEntityName!,
                         style: TextStyle(
                           color: AppTheme.primaryBlue,
-                          fontSize: isTablet ? 12 : 10,
+                          fontSize: isMobile
+                              ? 10
+                              : isTablet
+                              ? 12
+                              : 14,
                           fontWeight: FontWeight.w600,
                         ),
                         maxLines: 1,
@@ -304,11 +364,25 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                   ),
                 ),
               ] else if (_isLoadingLegalEntities) ...[
-                SizedBox(width: isTablet ? 16 : 12),
+                SizedBox(
+                  width: isMobile
+                      ? 8
+                      : isTablet
+                      ? 12
+                      : 16,
+                ),
                 Container(
                   padding: EdgeInsets.symmetric(
-                    horizontal: isTablet ? 12 : 10,
-                    vertical: isTablet ? 6 : 4,
+                    horizontal: isMobile
+                        ? 8
+                        : isTablet
+                        ? 10
+                        : 12,
+                    vertical: isMobile
+                        ? 3
+                        : isTablet
+                        ? 4
+                        : 6,
                   ),
                   decoration: BoxDecoration(
                     color: AppTheme.lightGrey.withValues(alpha: 0.3),
