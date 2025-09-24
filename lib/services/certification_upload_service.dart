@@ -34,8 +34,9 @@ class CertificationUploadService {
     String? fileTypeOverride,
     List<String>?
     userIds, // Lista degli user IDs per distinguere media degli utenti
-    String? esitoValue, // Valore dell'esito per tutti gli utenti
+    String? esitoValue, // Valore dell'esito per tutti gli utenti (deprecato)
     String? titoloValue, // Valore del titolo della certificazione
+    Map<String, String>? userEsitoValues, // Esiti per ogni utente (user_id -> esito_value)
   }) async {
     try {
       print('🚀 Creating certification with media upload...');
@@ -64,6 +65,7 @@ class CertificationUploadService {
           certificationUsers: certificationUsers,
           esitoValue: esitoValue,
           titoloValue: titoloValue,
+          userEsitoValues: userEsitoValues,
         );
       }
 
@@ -117,6 +119,12 @@ class CertificationUploadService {
       // Aggiungi i certification_users se presenti
       if (certificationUsers != null && certificationUsers.isNotEmpty) {
         request.fields['users_json'] = json.encode(certificationUsers);
+      }
+      
+      // Aggiungi gli esiti per utente se presenti
+      if (userEsitoValues != null && userEsitoValues.isNotEmpty) {
+        request.fields['user_esito_values'] = json.encode(userEsitoValues);
+        print('📊 Sending user esito values: $userEsitoValues');
       }
 
       // Aggiungi i file media con metadati
@@ -278,6 +286,7 @@ class CertificationUploadService {
     List<Map<String, dynamic>>? certificationUsers,
     String? esitoValue,
     String? titoloValue,
+    Map<String, String>? userEsitoValues,
   }) async {
     try {
       print(
@@ -297,6 +306,7 @@ class CertificationUploadService {
         'media': <Map<String, dynamic>>[],
         'esito_value': esitoValue ?? "0",
         'titolo_value': titoloValue ?? "",
+        'user_esito_values': userEsitoValues ?? {},
       };
 
       final response = await http.post(

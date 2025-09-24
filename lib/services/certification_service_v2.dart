@@ -98,6 +98,7 @@ class CertificationServiceV2 {
     List<Map<String, dynamic>>? certificationUsers,
     String? esitoValue,
     String? titoloValue,
+    Map<String, String>? userEsitoValues,
   }) async {
     try {
       print('🔍 Creating certification with params:');
@@ -125,6 +126,7 @@ class CertificationServiceV2 {
           'certification_users': certificationUsers,
         if (esitoValue != null) 'esito_value': esitoValue,
         if (titoloValue != null) 'titolo_value': titoloValue,
+        if (userEsitoValues != null) 'user_esito_values': userEsitoValues,
       };
 
       print('🚀 POST Certification: $_baseUrl/functions/v1/certification-crud');

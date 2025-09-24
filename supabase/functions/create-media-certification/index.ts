@@ -383,6 +383,8 @@ Deno.serve(async (req) => {
       console.log(`[${reqId}] Titolo value from body:`, body.titolo_value);
       console.log(`[${reqId}] Titolo value type:`, typeof body.titolo_value);
       console.log(`[${reqId}] Titolo value length:`, body.titolo_value?.length);
+      console.log(`[${reqId}] User esito values from body:`, body.user_esito_values);
+      console.log(`[${reqId}] User esito values type:`, typeof body.user_esito_values);
         
         // Verifica la struttura della tabella
         const { data: tableInfo, error: tableErr } = await admin
@@ -444,15 +446,30 @@ Deno.serve(async (req) => {
         } else if (esitoInfo) {
           console.log(`[${reqId}] Found esito information:`, esitoInfo);
           console.log(`[${reqId}] Esito value from body:`, body.esito_value);
+          console.log(`[${reqId}] User esito values from body:`, body.user_esito_values);
+          
           // Crea i valori di esito per ogni utente
           const esitoValues = usersRows.map((user) => {
+            // Usa l'esito specifico per l'utente se disponibile, altrimenti usa il valore di default
+            let esitoValueForUser = "0"; // Valore di default
+            
+            if (body.user_esito_values && typeof body.user_esito_values === 'object') {
+              const userEsitoValue = body.user_esito_values[user.id_user];
+              if (userEsitoValue !== null && userEsitoValue !== undefined) {
+                esitoValueForUser = String(userEsitoValue);
+              }
+            } else if (body.esito_value !== null && body.esito_value !== undefined) {
+              // Fallback al valore globale se non ci sono esiti per utente
+              esitoValueForUser = String(body.esito_value);
+            }
+            
             const esitoValue = {
               id_certification_information: esitoInfo.id_certification_information,
               id_certification: certRow.id_certification,
               id_certification_user: user.id_certification_user || null,
-              value: body.esito_value !== null && body.esito_value !== undefined ? String(body.esito_value) : "0"
+              value: esitoValueForUser
             };
-            console.log(`[${reqId}] Mapped esito value for user ${user.id_user}:`, esitoValue);
+            console.log(`[${reqId}] Mapped esito value for user ${user.id_user}: ${esitoValueForUser}`, esitoValue);
             return esitoValue;
           });
           allValuesToInsert.push(...esitoValues);
@@ -896,6 +913,8 @@ Deno.serve(async (req) => {
       console.log(`[${reqId}] Titolo value from form:`, form.get("titolo_value"));
       console.log(`[${reqId}] Titolo value type:`, typeof form.get("titolo_value"));
       console.log(`[${reqId}] Titolo value length:`, form.get("titolo_value")?.length);
+      console.log(`[${reqId}] User esito values from form:`, form.get("user_esito_values"));
+      console.log(`[${reqId}] User esito values type:`, typeof form.get("user_esito_values"));
       
       // Recupera sia esito che titolo
       const [{ data: esitoInfo, error: esitoErr }, { data: titoloInfo, error: titoloErr }] = await Promise.all([
@@ -925,15 +944,42 @@ Deno.serve(async (req) => {
       } else if (esitoInfo) {
         console.log(`[${reqId}] Found esito information:`, esitoInfo);
         console.log(`[${reqId}] Esito value from form:`, form.get("esito_value"));
+        console.log(`[${reqId}] User esito values from form:`, form.get("user_esito_values"));
+        
+        // Parse user esito values se presente
+        let userEsitoValues = null;
+        try {
+          const userEsitoValuesStr = form.get("user_esito_values");
+          if (userEsitoValuesStr) {
+            userEsitoValues = JSON.parse(String(userEsitoValuesStr));
+            console.log(`[${reqId}] Parsed user esito values:`, userEsitoValues);
+          }
+        } catch (e) {
+          console.warn(`[${reqId}] Error parsing user esito values:`, e);
+        }
+        
         // Crea i valori di esito per ogni utente
         const esitoValues = usersRows.map((user) => {
+          // Usa l'esito specifico per l'utente se disponibile, altrimenti usa il valore di default
+          let esitoValueForUser = "0"; // Valore di default
+          
+          if (userEsitoValues && typeof userEsitoValues === 'object') {
+            const userEsitoValue = userEsitoValues[user.id_user];
+            if (userEsitoValue !== null && userEsitoValue !== undefined) {
+              esitoValueForUser = String(userEsitoValue);
+            }
+          } else if (form.get("esito_value") !== null && form.get("esito_value") !== undefined) {
+            // Fallback al valore globale se non ci sono esiti per utente
+            esitoValueForUser = String(form.get("esito_value"));
+          }
+          
           const esitoValue = {
             id_certification_information: esitoInfo.id_certification_information,
             id_certification: certRow.id_certification,
             id_certification_user: user.id_certification_user || null,
-            value: form.get("esito_value") !== null && form.get("esito_value") !== undefined ? String(form.get("esito_value")) : "0"
+            value: esitoValueForUser
           };
-          console.log(`[${reqId}] Mapped esito value for user ${user.id_user}:`, esitoValue);
+          console.log(`[${reqId}] Mapped esito value for user ${user.id_user}: ${esitoValueForUser}`, esitoValue);
           return esitoValue;
         });
         allValuesToInsert.push(...esitoValues);

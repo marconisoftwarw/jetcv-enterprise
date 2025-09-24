@@ -2937,11 +2937,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     print('🚀 Creating certification with unified upload service...');
     print('📝 Title from controller: "${_titleController.text.trim()}"');
 
-    // Valida il form prima di procedere
-    if (!_formKey.currentState!.validate()) {
-      print('❌ Form validation failed');
-      return;
-    }
+ 
 
     // Mostra alert di conferma prima di inviare
     final shouldProceed = await _showConfirmationDialog();
@@ -3035,6 +3031,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
 
       // Prepara l'array certification_users
       List<Map<String, dynamic>> certificationUsers = [];
+      Map<String, String> userEsitoValues = {}; // user_id -> esito_value
+      
       if (_addedUsers.isNotEmpty) {
         for (final user in _addedUsers) {
           final otpData = _usedOtps.firstWhere(
@@ -3048,8 +3046,23 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             'status': 'pending',
             'rejection_reason': null,
           });
+          
+          // Raccogli l'esito per questo utente se presente
+          final userFieldValues = _userFieldValues[user.idUser];
+          if (userFieldValues != null) {
+            // Cerca il campo "esito" tra i campi dell'utente
+            for (final field in _certificationUserFields) {
+              if (field.name == 'esito' && userFieldValues.containsKey('esito')) {
+                userEsitoValues[user.idUser] = userFieldValues['esito'] ?? "0";
+                print('📊 Esito per utente ${user.idUser}: ${userFieldValues['esito']}');
+                break;
+              }
+            }
+          }
         }
       }
+      
+      print('📊 User esito values collected: $userEsitoValues');
 
       // Test della connessione prima di creare
       final connectionTest = await CertificationEdgeService.testConnection();
@@ -3125,8 +3138,9 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               .toList(),
           acquisitionType: 'deferred',
           userIds: mediaUserIds,
-          esitoValue: "0", // Valore di default per esito
+          esitoValue: "0", // Valore di default per esito (deprecato)
           titoloValue: _titleController.text.trim(), // Titolo inserito dall'utente
+          userEsitoValues: userEsitoValues, // Esiti per ogni utente
         );
       } else {
         // Se non ci sono media, usa il servizio certificazioni standard
@@ -3143,8 +3157,9 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           certificationUsers: certificationUsers.isNotEmpty
               ? certificationUsers
               : null,
-          esitoValue: "0", // Valore di default per esito
+          esitoValue: "0", // Valore di default per esito (deprecato)
           titoloValue: _titleController.text.trim(), // Titolo inserito dall'utente
+          userEsitoValues: userEsitoValues, // Esiti per ogni utente
         );
       }
 
