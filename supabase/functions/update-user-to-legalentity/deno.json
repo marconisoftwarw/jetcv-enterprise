@@ -1,0 +1,6 @@
+{
+  "compilerOptions": {
+    "lib": ["esnext", "dom"],
+    "types": ["./node_modules/@deno/types/web/lib.deno.d.ts"]
+  }
+}

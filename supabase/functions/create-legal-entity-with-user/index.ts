@@ -213,7 +213,34 @@ serve(async (req) => {
 
       console.log('✅ Legal entity created successfully:', entityResult.id_legal_entity)
 
-      // 3. Create certifier relationship (optional - user becomes certifier for their own entity)
+      // 3. Update user type to 'legal_entity'
+      console.log('🔄 Updating user type to legal_entity...')
+      try {
+        const updateUserResponse = await fetch(`${supabaseUrl}/functions/v1/update-user-to-legalentity`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${supabaseServiceKey}`,
+          },
+          body: JSON.stringify({
+            user_id: userData.idUser,
+            legal_entity_id: entityResult.id_legal_entity
+          })
+        })
+
+        if (updateUserResponse.ok) {
+          const updateResult = await updateUserResponse.json()
+          console.log('✅ User type updated to legal_entity successfully:', updateResult)
+        } else {
+          console.warn('⚠️ Warning: Could not update user type to legal_entity:', await updateUserResponse.text())
+          // Don't fail the entire operation for this
+        }
+      } catch (updateError) {
+        console.warn('⚠️ Warning: Error calling update-user-to-legalentity:', updateError)
+        // Don't fail the entire operation for this
+      }
+
+      // 4. Create certifier relationship (optional - user becomes certifier for their own entity)
       console.log('🔗 Creating certifier relationship...')
       const certifierData = {
         id_certifier: crypto.randomUUID(),

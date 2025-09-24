@@ -1359,138 +1359,321 @@ class _LegalEntityManagementScreenState
 
             const SizedBox(height: 12),
 
-            // Azioni
-            Wrap(
-              alignment: WrapAlignment.end,
-              spacing: 8,
-              runSpacing: 4,
-              children: [
-                TextButton.icon(
-                  onPressed: () => _showEntityDetails(entity),
-                  icon: const Icon(Icons.visibility),
-                  label: Text(
-                    AppLocalizations.of(context).getString('details_short'),
-                  ),
-                ),
+            // Azioni - Layout responsivo per mobile e tablet
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final isMobile = constraints.maxWidth < 600;
+                final isTablet =
+                    constraints.maxWidth >= 600 && constraints.maxWidth < 1024;
 
-                TextButton.icon(
-                  onPressed: () => _showEditEntityDialog(entity),
-                  icon: const Icon(Icons.edit),
-                  label: Text(
-                    AppLocalizations.of(context).getString('edit_short'),
-                  ),
-                ),
-
-                TextButton.icon(
-                  onPressed: () => _showSendInvitationDialog(entity),
-                  icon: const Icon(Icons.email),
-                  label: Text(
-                    AppLocalizations.of(
-                      context,
-                    ).getString('send_invitation_short'),
-                  ),
-                  style: TextButton.styleFrom(foregroundColor: Colors.blue),
-                ),
-
-                PopupMenuButton<LegalEntityStatus>(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey[300]!),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.swap_horiz,
-                          size: 16,
-                          color: _getStatusColor(entity.status),
+                if (isMobile) {
+                  // Layout verticale per mobile
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Prima riga - Azioni principali
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          TextButton.icon(
+                            onPressed: () => _showEntityDetails(entity),
+                            icon: const Icon(Icons.visibility, size: 16),
+                            label: Text(
+                              AppLocalizations.of(
+                                context,
+                              ).getString('details_short'),
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                          ),
+                          TextButton.icon(
+                            onPressed: () => _showEditEntityDialog(entity),
+                            icon: const Icon(Icons.edit, size: 16),
+                            label: Text(
+                              AppLocalizations.of(
+                                context,
+                              ).getString('edit_short'),
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      // Seconda riga - Azioni secondarie
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          TextButton.icon(
+                            onPressed: () => _showSendInvitationDialog(entity),
+                            icon: const Icon(Icons.email, size: 16),
+                            label: Text(
+                              AppLocalizations.of(
+                                context,
+                              ).getString('send_invitation_short'),
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.blue,
+                            ),
+                          ),
+                          PopupMenuButton<LegalEntityStatus>(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey[300]!),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.swap_horiz,
+                                    size: 14,
+                                    color: _getStatusColor(entity.status),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'Cambia Stato',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: _getStatusColor(entity.status),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            itemBuilder: (context) => [
+                              PopupMenuItem(
+                                value: LegalEntityStatus.pending,
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.schedule,
+                                      color: _getStatusColor(
+                                        LegalEntityStatus.pending,
+                                      ),
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      AppLocalizations.of(
+                                        context,
+                                      ).getString('pending_short'),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              PopupMenuItem(
+                                value: LegalEntityStatus.approved,
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.check_circle,
+                                      color: _getStatusColor(
+                                        LegalEntityStatus.approved,
+                                      ),
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      AppLocalizations.of(
+                                        context,
+                                      ).getString('approved_short'),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              PopupMenuItem(
+                                value: LegalEntityStatus.rejected,
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.cancel,
+                                      color: _getStatusColor(
+                                        LegalEntityStatus.rejected,
+                                      ),
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      AppLocalizations.of(
+                                        context,
+                                      ).getString('rejected_short'),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                            onSelected: (newStatus) =>
+                                _changeEntityStatus(entity, newStatus),
+                          ),
+                          TextButton.icon(
+                            onPressed: () => _showDeleteDialog(entity),
+                            icon: const Icon(Icons.delete, size: 16),
+                            label: Text(
+                              AppLocalizations.of(
+                                context,
+                              ).getString('delete_short'),
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.red,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  );
+                } else {
+                  // Layout originale per tablet e desktop
+                  return Wrap(
+                    alignment: WrapAlignment.end,
+                    spacing: 8,
+                    runSpacing: 4,
+                    children: [
+                      TextButton.icon(
+                        onPressed: () => _showEntityDetails(entity),
+                        icon: const Icon(Icons.visibility),
+                        label: Text(
+                          AppLocalizations.of(
+                            context,
+                          ).getString('details_short'),
                         ),
-                        const SizedBox(width: 4),
-                        Text(
-                          'Cambia Stato',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: _getStatusColor(entity.status),
+                      ),
+                      TextButton.icon(
+                        onPressed: () => _showEditEntityDialog(entity),
+                        icon: const Icon(Icons.edit),
+                        label: Text(
+                          AppLocalizations.of(context).getString('edit_short'),
+                        ),
+                      ),
+                      TextButton.icon(
+                        onPressed: () => _showSendInvitationDialog(entity),
+                        icon: const Icon(Icons.email),
+                        label: Text(
+                          AppLocalizations.of(
+                            context,
+                          ).getString('send_invitation_short'),
+                        ),
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.blue,
+                        ),
+                      ),
+                      PopupMenuButton<LegalEntityStatus>(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey[300]!),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.swap_horiz,
+                                size: 16,
+                                color: _getStatusColor(entity.status),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Cambia Stato',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: _getStatusColor(entity.status),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                  itemBuilder: (context) => [
-                    PopupMenuItem(
-                      value: LegalEntityStatus.pending,
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.schedule,
-                            color: _getStatusColor(LegalEntityStatus.pending),
-                            size: 20,
+                        itemBuilder: (context) => [
+                          PopupMenuItem(
+                            value: LegalEntityStatus.pending,
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.schedule,
+                                  color: _getStatusColor(
+                                    LegalEntityStatus.pending,
+                                  ),
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  AppLocalizations.of(
+                                    context,
+                                  ).getString('pending_short'),
+                                ),
+                              ],
+                            ),
                           ),
-                          const SizedBox(width: 8),
-                          Text(
-                            AppLocalizations.of(
-                              context,
-                            ).getString('pending_short'),
+                          PopupMenuItem(
+                            value: LegalEntityStatus.approved,
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.check_circle,
+                                  color: _getStatusColor(
+                                    LegalEntityStatus.approved,
+                                  ),
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  AppLocalizations.of(
+                                    context,
+                                  ).getString('approved_short'),
+                                ),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: LegalEntityStatus.rejected,
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.cancel,
+                                  color: _getStatusColor(
+                                    LegalEntityStatus.rejected,
+                                  ),
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  AppLocalizations.of(
+                                    context,
+                                  ).getString('rejected_short'),
+                                ),
+                              ],
+                            ),
                           ),
                         ],
+                        onSelected: (newStatus) =>
+                            _changeEntityStatus(entity, newStatus),
                       ),
-                    ),
-                    PopupMenuItem(
-                      value: LegalEntityStatus.approved,
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.check_circle,
-                            color: _getStatusColor(LegalEntityStatus.approved),
-                            size: 20,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            AppLocalizations.of(
-                              context,
-                            ).getString('approved_short'),
-                          ),
-                        ],
+                      const SizedBox(width: 8),
+                      TextButton.icon(
+                        onPressed: () => _showDeleteDialog(entity),
+                        icon: const Icon(Icons.delete),
+                        label: Text(
+                          AppLocalizations.of(
+                            context,
+                          ).getString('delete_short'),
+                        ),
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.red,
+                        ),
                       ),
-                    ),
-                    PopupMenuItem(
-                      value: LegalEntityStatus.rejected,
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.cancel,
-                            color: _getStatusColor(LegalEntityStatus.rejected),
-                            size: 20,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            AppLocalizations.of(
-                              context,
-                            ).getString('rejected_short'),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                  onSelected: (newStatus) =>
-                      _changeEntityStatus(entity, newStatus),
-                ),
-
-                const SizedBox(width: 8),
-                TextButton.icon(
-                  onPressed: () => _showDeleteDialog(entity),
-                  icon: const Icon(Icons.delete),
-                  label: Text(
-                    AppLocalizations.of(context).getString('delete_short'),
-                  ),
-                  style: TextButton.styleFrom(foregroundColor: Colors.red),
-                ),
-              ],
+                    ],
+                  );
+                }
+              },
             ),
           ],
         ),
@@ -2207,99 +2390,220 @@ class _LegalEntityManagementScreenState
           ],
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(AppLocalizations.of(context).getString('cancel_short')),
-          ),
-          CustomButton(
-            text: 'Invia Invito',
-            onPressed: () async {
-              // Validazione
-              if (emailController.text.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Inserisci un\'email valida'),
-                    backgroundColor: Colors.red,
-                  ),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final isMobile = constraints.maxWidth < 600;
+
+              if (isMobile) {
+                // Layout verticale per mobile
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    CustomButton(
+                      text: 'Invia Invito',
+                      onPressed: () async {
+                        // Validazione
+                        if (emailController.text.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Inserisci un\'email valida'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                          return;
+                        }
+
+                        if (!RegExp(
+                          r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                        ).hasMatch(emailController.text)) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Inserisci un\'email valida'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                          return;
+                        }
+
+                        Navigator.of(context).pop();
+
+                        // Salva il ScaffoldMessenger prima dell'operazione asincrona
+                        final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+                        // Invia l'invito
+                        final authProvider = context.read<AuthProvider>();
+
+                        // Ottieni l'ID dell'utente corrente
+                        String? adminId;
+
+                        // Prima prova a ottenere l'ID dall'utente già caricato
+                        if (authProvider.currentUser != null) {
+                          adminId = authProvider.currentUser!.idUser;
+                        } else {
+                          // Se non è caricato, prova a ottenere l'ID direttamente da Supabase
+                          adminId = await authProvider.getCurrentUserId();
+                        }
+
+                        if (adminId == null) {
+                          if (mounted) {
+                            scaffoldMessenger.showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Errore: utente non autenticato. Riprova dopo aver effettuato il login.',
+                                ),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                          return;
+                        }
+
+                        final success = await context
+                            .read<LegalEntityProvider>()
+                            .sendEmailInvitation(
+                              email: emailController.text.trim(),
+                              legalEntityId: entity.idLegalEntity,
+                              inviterId: adminId!,
+                            );
+
+                        if (mounted) {
+                          if (success) {
+                            scaffoldMessenger.showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Invito inviato con successo a ${emailController.text.trim()}',
+                                ),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          } else {
+                            scaffoldMessenger.showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Errore nell\'invio dell\'invito',
+                                ),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        }
+                      },
+                      isLoading: context.watch<LegalEntityProvider>().isLoading,
+                      icon: Icons.send,
+                    ),
+                    const SizedBox(height: 12),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: Text(
+                        AppLocalizations.of(context).getString('cancel_short'),
+                      ),
+                    ),
+                  ],
                 );
-                return;
-              }
-
-              if (!RegExp(
-                r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-              ).hasMatch(emailController.text)) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Inserisci un\'email valida'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-                return;
-              }
-
-              Navigator.of(context).pop();
-
-              // Salva il ScaffoldMessenger prima dell'operazione asincrona
-              final scaffoldMessenger = ScaffoldMessenger.of(context);
-
-              // Invia l'invito
-              final authProvider = context.read<AuthProvider>();
-
-              // Ottieni l'ID dell'utente corrente
-              String? adminId;
-
-              // Prima prova a ottenere l'ID dall'utente già caricato
-              if (authProvider.currentUser != null) {
-                adminId = authProvider.currentUser!.idUser;
               } else {
-                // Se non è caricato, prova a ottenere l'ID direttamente da Supabase
-                adminId = await authProvider.getCurrentUserId();
-              }
-
-              if (adminId == null) {
-                if (mounted) {
-                  scaffoldMessenger.showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Errore: utente non autenticato. Riprova dopo aver effettuato il login.',
+                // Layout orizzontale per tablet e desktop
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: Text(
+                        AppLocalizations.of(context).getString('cancel_short'),
                       ),
-                      backgroundColor: Colors.red,
                     ),
-                  );
-                }
-                return;
-              }
+                    const SizedBox(width: 16),
+                    CustomButton(
+                      text: 'Invia Invito',
+                      onPressed: () async {
+                        // Validazione
+                        if (emailController.text.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Inserisci un\'email valida'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                          return;
+                        }
 
-              final success = await context
-                  .read<LegalEntityProvider>()
-                  .sendEmailInvitation(
-                    email: emailController.text.trim(),
-                    legalEntityId: entity.idLegalEntity,
-                    inviterId: adminId!,
-                  );
+                        if (!RegExp(
+                          r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                        ).hasMatch(emailController.text)) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Inserisci un\'email valida'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                          return;
+                        }
 
-              if (mounted) {
-                if (success) {
-                  scaffoldMessenger.showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Invito inviato con successo a ${emailController.text.trim()}',
-                      ),
-                      backgroundColor: Colors.green,
+                        Navigator.of(context).pop();
+
+                        // Salva il ScaffoldMessenger prima dell'operazione asincrona
+                        final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+                        // Invia l'invito
+                        final authProvider = context.read<AuthProvider>();
+
+                        // Ottieni l'ID dell'utente corrente
+                        String? adminId;
+
+                        // Prima prova a ottenere l'ID dall'utente già caricato
+                        if (authProvider.currentUser != null) {
+                          adminId = authProvider.currentUser!.idUser;
+                        } else {
+                          // Se non è caricato, prova a ottenere l'ID direttamente da Supabase
+                          adminId = await authProvider.getCurrentUserId();
+                        }
+
+                        if (adminId == null) {
+                          if (mounted) {
+                            scaffoldMessenger.showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Errore: utente non autenticato. Riprova dopo aver effettuato il login.',
+                                ),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                          return;
+                        }
+
+                        final success = await context
+                            .read<LegalEntityProvider>()
+                            .sendEmailInvitation(
+                              email: emailController.text.trim(),
+                              legalEntityId: entity.idLegalEntity,
+                              inviterId: adminId!,
+                            );
+
+                        if (success) {
+                          scaffoldMessenger.showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Invito inviato con successo a ${emailController.text.trim()}',
+                              ),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                        } else {
+                          scaffoldMessenger.showSnackBar(
+                            const SnackBar(
+                              content: Text('Errore nell\'invio dell\'invito'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      },
+                      isLoading: context.watch<LegalEntityProvider>().isLoading,
+                      icon: Icons.send,
                     ),
-                  );
-                } else {
-                  scaffoldMessenger.showSnackBar(
-                    const SnackBar(
-                      content: Text('Errore nell\'invio dell\'invito'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
+                  ],
+                );
               }
             },
-            isLoading: context.watch<LegalEntityProvider>().isLoading,
-            icon: Icons.send,
           ),
         ],
       ),
@@ -2973,23 +3277,59 @@ class _LegalEntityFormDialogState extends State<LegalEntityFormDialog> {
 
             const Divider(),
 
-            // Pulsanti di azione
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text(
-                    AppLocalizations.of(context).getString('cancel_short'),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                CustomButton(
-                  text: isEditing ? 'Salva Modifiche' : 'Crea Entità',
-                  onPressed: _saveEntity,
-                  isLoading: context.watch<LegalEntityProvider>().isLoading,
-                ),
-              ],
+            // Pulsanti di azione - Layout responsivo
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final isMobile = constraints.maxWidth < 600;
+
+                if (isMobile) {
+                  // Layout verticale per mobile
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      CustomButton(
+                        text: isEditing ? 'Salva Modifiche' : 'Crea Entità',
+                        onPressed: _saveEntity,
+                        isLoading: context
+                            .watch<LegalEntityProvider>()
+                            .isLoading,
+                      ),
+                      const SizedBox(height: 12),
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: Text(
+                          AppLocalizations.of(
+                            context,
+                          ).getString('cancel_short'),
+                        ),
+                      ),
+                    ],
+                  );
+                } else {
+                  // Layout orizzontale per tablet e desktop
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: Text(
+                          AppLocalizations.of(
+                            context,
+                          ).getString('cancel_short'),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      CustomButton(
+                        text: isEditing ? 'Salva Modifiche' : 'Crea Entità',
+                        onPressed: _saveEntity,
+                        isLoading: context
+                            .watch<LegalEntityProvider>()
+                            .isLoading,
+                      ),
+                    ],
+                  );
+                }
+              },
             ),
           ],
         ),
