@@ -35,7 +35,9 @@ class SupabaseService {
     try {
       debugPrint('🔧 Initializing Supabase...');
       debugPrint('🌐 URL: ${AppConfig.supabaseUrl}');
-      debugPrint('🔑 Using anon key: ${AppConfig.supabaseAnonKey.substring(0, 20)}...');
+      debugPrint(
+        '🔑 Using anon key: ${AppConfig.supabaseAnonKey.substring(0, 20)}...',
+      );
 
       await Supabase.initialize(
         url: AppConfig.supabaseUrl,
@@ -72,7 +74,7 @@ class SupabaseService {
 
   SupabaseClient get client => _client;
   GoTrueClient get auth => _auth;
-  
+
   // Static properties for easy access
   static String get supabaseUrl => AppConfig.supabaseUrl;
 

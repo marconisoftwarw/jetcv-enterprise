@@ -34,6 +34,8 @@ class CertificationUploadService {
     String? fileTypeOverride,
     List<String>?
     userIds, // Lista degli user IDs per distinguere media degli utenti
+    String? esitoValue, // Valore dell'esito per tutti gli utenti
+    String? titoloValue, // Valore del titolo della certificazione
   }) async {
     try {
       print('🚀 Creating certification with media upload...');
@@ -60,6 +62,8 @@ class CertificationUploadService {
           draftAt: draftAt,
           closedAt: closedAt,
           certificationUsers: certificationUsers,
+          esitoValue: esitoValue,
+          titoloValue: titoloValue,
         );
       }
 
@@ -103,6 +107,12 @@ class CertificationUploadService {
       }
       if (fileTypeOverride != null) {
         request.fields['file_type'] = fileTypeOverride;
+      }
+      // Passa sempre esito_value, anche se null (usa "0" come default)
+      request.fields['esito_value'] = esitoValue ?? "0";
+      // Passa titolo_value se fornito
+      if (titoloValue != null) {
+        request.fields['titolo_value'] = titoloValue;
       }
       request.fields['return_signed_url'] = 'true';
 
@@ -268,6 +278,8 @@ class CertificationUploadService {
     String? draftAt,
     String? closedAt,
     List<Map<String, dynamic>>? certificationUsers,
+    String? esitoValue,
+    String? titoloValue,
   }) async {
     try {
       print(
@@ -285,6 +297,8 @@ class CertificationUploadService {
         },
         'users': certificationUsers ?? [],
         'media': <Map<String, dynamic>>[],
+        'esito_value': esitoValue ?? "0",
+        'titolo_value': titoloValue,
       };
 
       final response = await http.post(

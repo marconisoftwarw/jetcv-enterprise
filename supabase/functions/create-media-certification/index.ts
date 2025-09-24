@@ -147,6 +147,20 @@ Deno.serve(async (req) => {
       const cert = body.certification || {};
       const usersIn = Array.isArray(body.users) ? body.users : [];
       const mediaIn = Array.isArray(body.media) ? body.media : [];
+      
+      // Verifica che certification esista e abbia i campi richiesti
+      if (!body.certification) {
+        return new Response(JSON.stringify({
+          error: "Missing certification object in request body"
+        }), {
+          headers: {
+            "Content-Type": "application/json",
+            ...corsHeaders()
+          },
+          status: 400
+        });
+      }
+      
       const required = [
         cert.id_certifier,
         cert.id_legal_entity,
@@ -246,7 +260,9 @@ Deno.serve(async (req) => {
       }
       // Users -> pending (claim OTP prima di inserire certification_user)
       const mappedUsers = usersIn.map(pickUserOtp).filter(Boolean);
-      let usersRows = [];
+      let usersRows: any[] = [];
+      let informationValues: any[] = [];
+      
       if (mappedUsers.length) {
         // dedup & FK
         const seen = new Set();
@@ -311,7 +327,7 @@ Deno.serve(async (req) => {
           });
         }
         // 1) leggi coppie già presenti
-        const { data: existingCu, error: selErr } = await admin.from("certification_user").select("id_user,id_otp").eq("id_certification", certRow.id_certification).in("id_user", uniqUsers).in("id_otp", uniqOtps);
+        const { data: existingCu, error: selErr } = await admin.from("certification_user").select("id_user,id_otp,id_certification_user").eq("id_certification", certRow.id_certification).in("id_user", uniqUsers).in("id_otp", uniqOtps);
         if (selErr) {
           return new Response(JSON.stringify({
             error: `Failed to check existing certification_user: ${selErr.message}`
@@ -353,24 +369,174 @@ Deno.serve(async (req) => {
             id_certification: certRow.id_certification,
             id_user: r.id_user,
             id_otp: r.id_otp,
+            id_certification_user: r.id_certification_user,
             status: "pending",
             rejection_reason: null
           })),
           ...cuDataAll
         ];
+
+        // Gestione esito e titolo: recupera le informazioni di certificazione
+        console.log(`[${reqId}] Looking for certification information for legal_entity: ${String(cert.id_legal_entity)}`);
+        console.log(`[${reqId}] Users rows count: ${usersRows.length}`);
+        console.log(`[${reqId}] Esito value from body:`, body.esito_value);
+        console.log(`[${reqId}] Titolo value from body:`, body.titolo_value);
+        
+        // Verifica la struttura della tabella
+        const { data: tableInfo, error: tableErr } = await admin
+          .from("certification_information_value")
+          .select("*")
+          .limit(1);
+        console.log(`[${reqId}] Table structure check:`, { tableInfo, tableErr });
+        
+        // Verifica la struttura della tabella con una query di test
+        try {
+          const { data: testInsert, error: testErr } = await admin
+            .from("certification_information_value")
+            .insert({
+              id_certification_information: "00000000-0000-0000-0000-000000000000",
+              id_certification: "00000000-0000-0000-0000-000000000000",
+              id_certification_user: null,
+              value: "TEST_VALUE"
+            })
+            .select("*")
+            .single();
+          console.log(`[${reqId}] Test insert result:`, { testInsert, testErr });
+          
+          // Cancella il record di test
+          if (testInsert) {
+            await admin
+              .from("certification_information_value")
+              .delete()
+              .eq("id_certification_information_value", testInsert.id_certification_information_value);
+          }
+        } catch (testError) {
+          console.log(`[${reqId}] Test insert failed:`, testError);
+        }
+        
+        // Recupera sia esito che titolo
+        const [{ data: esitoInfo, error: esitoErr }, { data: titoloInfo, error: titoloErr }] = await Promise.all([
+          admin
+            .from("certification_information")
+            .select("id_certification_information, name, label, type, scope")
+            .or(`id_legal_entity.eq.${String(cert.id_legal_entity)},id_legal_entity.is.null`)
+            .eq("name", "esito")
+            .maybeSingle(),
+          admin
+            .from("certification_information")
+            .select("id_certification_information, name, label, type, scope")
+            .or(`id_legal_entity.eq.${String(cert.id_legal_entity)},id_legal_entity.is.null`)
+            .eq("name", "titolo")
+            .maybeSingle()
+        ]);
+
+        console.log(`[${reqId}] Esito info query result:`, { esitoInfo, esitoErr });
+        console.log(`[${reqId}] Titolo info query result:`, { titoloInfo, titoloErr });
+
+        // Crea array per tutti i valori da inserire
+        const allValuesToInsert = [];
+
+        // Gestione esito (per ogni utente)
+        if (esitoErr) {
+          console.warn(`[${reqId}] Error fetching esito information:`, esitoErr.message);
+        } else if (esitoInfo) {
+          console.log(`[${reqId}] Found esito information:`, esitoInfo);
+          // Crea i valori di esito per ogni utente
+          const esitoValues = usersRows.map((user) => {
+            const esitoValue = {
+              id_certification_information: esitoInfo.id_certification_information,
+              id_certification: certRow.id_certification,
+              id_certification_user: user.id_certification_user || null,
+              value: body.esito_value ? String(body.esito_value) : "0"
+            };
+            console.log(`[${reqId}] Mapped esito value for user ${user.id_user}:`, esitoValue);
+            return esitoValue;
+          });
+          allValuesToInsert.push(...esitoValues);
+        }
+
+        // Gestione titolo (una sola volta, senza id_certification_user)
+        if (titoloErr) {
+          console.warn(`[${reqId}] Error fetching titolo information:`, titoloErr.message);
+        } else if (titoloInfo) {
+          console.log(`[${reqId}] Found titolo information:`, titoloInfo);
+          const titoloValue = {
+            id_certification_information: titoloInfo.id_certification_information,
+            id_certification: certRow.id_certification,
+            id_certification_user: null, // Titolo non ha id_certification_user
+            value: body.titolo_value ? String(body.titolo_value) : ""
+          };
+          console.log(`[${reqId}] Mapped titolo value:`, titoloValue);
+          allValuesToInsert.push(titoloValue);
+        }
+
+        if (allValuesToInsert.length > 0) {
+          console.log(`[${reqId}] Prepared all values to insert:`, allValuesToInsert);
+
+          // Inserisci tutti i valori uno alla volta
+          console.log(`[${reqId}] Attempting to insert ${allValuesToInsert.length} values one by one...`);
+          
+          const insertedValues = [];
+          
+          for (let i = 0; i < allValuesToInsert.length; i++) {
+            const val = allValuesToInsert[i];
+            // Prova insert con valori espliciti nell'ordine corretto
+            const singleInsertData = {
+              value: val.value,
+              id_certification_information: val.id_certification_information,
+              id_certification: val.id_certification,
+              id_certification_user: val.id_certification_user
+            };
+            
+            console.log(`[${reqId}] ===== INSERTING VALUE ${i + 1}/${allValuesToInsert.length} =====`);
+            console.log(`[${reqId}] Single insert data:`, singleInsertData);
+            console.log(`[${reqId}] Value field specifically:`, val.value);
+            console.log(`[${reqId}] About to insert into certification_information_value...`);
+            
+            // Prova insert con specifica esplicita dei campi nell'ordine corretto
+            console.log(`[${reqId}] Inserting with explicit field order...`);
+            
+            const { data: singleInserted, error: singleError } = await admin
+              .from("certification_information_value")
+              .insert({
+                id_certification_information: val.id_certification_information,
+                id_certification: val.id_certification,
+                id_certification_user: val.id_certification_user,
+                value: val.value
+              })
+              .select("id_certification_information_value, id_certification_information, id_certification, id_certification_user, value, created_at, updated_at")
+              .single();
+
+            if (singleError) {
+              console.error(`[${reqId}] Error inserting single value ${i + 1}:`, singleError);
+              console.error(`[${reqId}] Error details:`, JSON.stringify(singleError, null, 2));
+            } else {
+              console.log(`[${reqId}] Successfully inserted single value ${i + 1}:`, singleInserted);
+              console.log(`[${reqId}] Inserted value field:`, singleInserted?.value);
+              console.log(`[${reqId}] Inserted ID field:`, singleInserted?.id_certification_information_value);
+              insertedValues.push(singleInserted);
+            }
+          }
+          
+          informationValues = insertedValues;
+          console.log(`[${reqId}] All values inserted. Total: ${insertedValues.length}`);
+        } else {
+          console.log(`[${reqId}] No certification information found for legal_entity: ${String(cert.id_legal_entity)}`);
+          console.log(`[${reqId}] Skipping values creation - no certification_information found`);
+        }
       }
       // Media -> insert (no upload in JSON branch)
-      let mediaRows = [];
+      let mediaRows: any[] = [];
       if (mediaIn.length) {
         const payloads = mediaIn.map((m) => ({
           id_media_hash: m.id_media_hash ?? crypto.randomUUID(),
           id_certification: certRow.id_certification,
           name: m.name ?? null,
           description: m.description ?? null,
-          acquisition_type: m.acquisition_type ?? "upload",
+          acquisition_type: m.acquisition_type ?? "deferred",
           captured_at: m.captured_at ?? nowIso(),
           id_location: m.id_location ?? null,
-          file_type: m.file_type ?? "file",
+          file_type: m.file_type ?? "document",
           title: m.title ?? null
         }));
         const { data: ins, error: mErr } = await admin.from("certification_media").insert(payloads).select("*");
@@ -396,7 +562,8 @@ Deno.serve(async (req) => {
         data: {
           ...certRow,
           users: usersRows,
-          media: mediaRows
+          media: mediaRows,
+          information_values: informationValues
         }
       }), {
         headers: {
@@ -515,7 +682,7 @@ Deno.serve(async (req) => {
       });
     }
     // Users from fields
-    const usersToUpsert = [];
+    const usersToUpsert: any[] = [];
     const f_id_user = form.get("id_user");
     const f_id_otp = form.get("id_otp");
     if (f_id_user && f_id_otp) {
@@ -545,7 +712,8 @@ Deno.serve(async (req) => {
         }
       } catch { }
     }
-    let usersRows = [];
+    let usersRows: any[] = [];
+    let informationValues: any[] = [];
     if (usersToUpsert.length) {
       const seen = new Set();
       const dedup = usersToUpsert.filter((u) => {
@@ -609,7 +777,7 @@ Deno.serve(async (req) => {
         });
       }
       // 1) leggi coppie già presenti
-      const { data: existingCu, error: selErr } = await admin.from("certification_user").select("id_user,id_otp").eq("id_certification", certRow.id_certification).in("id_user", uniqUsers).in("id_otp", uniqOtps);
+      const { data: existingCu, error: selErr } = await admin.from("certification_user").select("id_user,id_otp,id_certification_user").eq("id_certification", certRow.id_certification).in("id_user", uniqUsers).in("id_otp", uniqOtps);
       if (selErr) {
         return new Response(JSON.stringify({
           error: `Failed to check existing certification_user: ${selErr.message}`
@@ -651,24 +819,142 @@ Deno.serve(async (req) => {
           id_certification: certRow.id_certification,
           id_user: r.id_user,
           id_otp: r.id_otp,
+          id_certification_user: r.id_certification_user,
           status: "pending",
           rejection_reason: null
         })),
         ...cuDataAll
       ];
+
+      // Gestione esito e titolo per multipart: recupera le informazioni di certificazione
+      console.log(`[${reqId}] Looking for certification information for legal_entity: ${id_legal_entity}`);
+      console.log(`[${reqId}] Users rows count: ${usersRows.length}`);
+      console.log(`[${reqId}] Esito value from form:`, form.get("esito_value"));
+      console.log(`[${reqId}] Titolo value from form:`, form.get("titolo_value"));
+      
+      // Recupera sia esito che titolo
+      const [{ data: esitoInfo, error: esitoErr }, { data: titoloInfo, error: titoloErr }] = await Promise.all([
+        admin
+          .from("certification_information")
+          .select("id_certification_information, name, label, type, scope")
+          .or(`id_legal_entity.eq.${id_legal_entity},id_legal_entity.is.null`)
+          .eq("name", "esito")
+          .maybeSingle(),
+        admin
+          .from("certification_information")
+          .select("id_certification_information, name, label, type, scope")
+          .or(`id_legal_entity.eq.${id_legal_entity},id_legal_entity.is.null`)
+          .eq("name", "titolo")
+          .maybeSingle()
+      ]);
+
+      console.log(`[${reqId}] Esito info query result:`, { esitoInfo, esitoErr });
+      console.log(`[${reqId}] Titolo info query result:`, { titoloInfo, titoloErr });
+
+      // Crea array per tutti i valori da inserire
+      const allValuesToInsert = [];
+
+      // Gestione esito (per ogni utente)
+      if (esitoErr) {
+        console.warn(`[${reqId}] Error fetching esito information:`, esitoErr.message);
+      } else if (esitoInfo) {
+        console.log(`[${reqId}] Found esito information:`, esitoInfo);
+        // Crea i valori di esito per ogni utente
+        const esitoValues = usersRows.map((user) => {
+          const esitoValue = {
+            id_certification_information: esitoInfo.id_certification_information,
+            id_certification: certRow.id_certification,
+            id_certification_user: user.id_certification_user || null,
+            value: form.get("esito_value") ? String(form.get("esito_value")) : "0"
+          };
+          console.log(`[${reqId}] Mapped esito value for user ${user.id_user}:`, esitoValue);
+          return esitoValue;
+        });
+        allValuesToInsert.push(...esitoValues);
+      }
+
+      // Gestione titolo (una sola volta, senza id_certification_user)
+      if (titoloErr) {
+        console.warn(`[${reqId}] Error fetching titolo information:`, titoloErr.message);
+      } else if (titoloInfo) {
+        console.log(`[${reqId}] Found titolo information:`, titoloInfo);
+        const titoloValue = {
+          id_certification_information: titoloInfo.id_certification_information,
+          id_certification: certRow.id_certification,
+          id_certification_user: null, // Titolo non ha id_certification_user
+          value: form.get("titolo_value") ? String(form.get("titolo_value")) : ""
+        };
+        console.log(`[${reqId}] Mapped titolo value:`, titoloValue);
+        allValuesToInsert.push(titoloValue);
+      }
+
+      if (allValuesToInsert.length > 0) {
+        console.log(`[${reqId}] Prepared all values to insert:`, allValuesToInsert);
+
+        // Inserisci tutti i valori uno alla volta
+        console.log(`[${reqId}] Attempting to insert ${allValuesToInsert.length} values one by one...`);
+        
+        const insertedValues = [];
+        
+        for (let i = 0; i < allValuesToInsert.length; i++) {
+          const val = allValuesToInsert[i];
+          // Prova insert con valori espliciti nell'ordine corretto
+          const singleInsertData = {
+            value: val.value,
+            id_certification_information: val.id_certification_information,
+            id_certification: val.id_certification,
+            id_certification_user: val.id_certification_user
+          };
+          
+          console.log(`[${reqId}] ===== INSERTING VALUE ${i + 1}/${allValuesToInsert.length} =====`);
+          console.log(`[${reqId}] Single insert data:`, singleInsertData);
+          console.log(`[${reqId}] Value field specifically:`, val.value);
+          console.log(`[${reqId}] About to insert into certification_information_value...`);
+          
+          // Prova insert con specifica esplicita dei campi nell'ordine corretto
+          console.log(`[${reqId}] Inserting with explicit field order...`);
+          
+          const { data: singleInserted, error: singleError } = await admin
+            .from("certification_information_value")
+            .insert({
+              id_certification_information: val.id_certification_information,
+              id_certification: val.id_certification,
+              id_certification_user: val.id_certification_user,
+              value: val.value
+            })
+            .select("id_certification_information_value, id_certification_information, id_certification, id_certification_user, value, created_at, updated_at")
+            .single();
+
+          if (singleError) {
+            console.error(`[${reqId}] Error inserting single value ${i + 1}:`, singleError);
+            console.error(`[${reqId}] Error details:`, JSON.stringify(singleError, null, 2));
+          } else {
+            console.log(`[${reqId}] Successfully inserted single value ${i + 1}:`, singleInserted);
+            console.log(`[${reqId}] Inserted value field:`, singleInserted?.value);
+            console.log(`[${reqId}] Inserted ID field:`, singleInserted?.id_certification_information_value);
+            insertedValues.push(singleInserted);
+          }
+        }
+        
+        informationValues = insertedValues;
+        console.log(`[${reqId}] All values inserted. Total: ${insertedValues.length}`);
+      } else {
+        console.log(`[${reqId}] No certification information found for legal_entity: ${id_legal_entity}`);
+        console.log(`[${reqId}] Skipping values creation - no certification_information found`);
+      }
     }
     // Files upload
     const files = form.getAll("files").filter(Boolean);
     const single = form.get("file");
     if (!files.length && single) files.push(single);
-    const acquisition_type = String(form.get("acquisition_type") || "upload");
+    const acquisition_type = String(form.get("acquisition_type") || "deferred");
     const file_type_override = form.get("file_type") ? String(form.get("file_type")) : undefined;
     const captured_at_str = String(form.get("captured_at") || "");
     const id_location_media = form.get("id_location_media") ? String(form.get("id_location_media")) : null;
     const description = form.get("description") ? String(form.get("description")) : null;
     const title = form.get("title") ? String(form.get("title")) : null;
     const wantSigned = qbool(String(form.get("return_signed_url") || ""));
-    let mediaRows = [];
+    let mediaRows: any[] = [];
     if (files.length) {
       const bucket = admin.storage.from("media");
       const nowStr = nowIso();
@@ -772,7 +1058,8 @@ Deno.serve(async (req) => {
       data: {
         ...certRow,
         users: usersRows,
-        media: mediaRows
+        media: mediaRows,
+        information_values: informationValues
       }
     }), {
       headers: {

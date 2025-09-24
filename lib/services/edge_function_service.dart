@@ -92,7 +92,9 @@ class EdgeFunctionService {
         '🚀 EdgeFunctionService: Session exists: ${_client.auth.currentSession != null}',
       );
 
-      debugPrint('🚀 EdgeFunctionService: About to call _client.functions.invoke...');
+      debugPrint(
+        '🚀 EdgeFunctionService: About to call _client.functions.invoke...',
+      );
       final response = await _client.functions.invoke(functionName, body: body);
       debugPrint('🚀 EdgeFunctionService: Edge function call completed');
 

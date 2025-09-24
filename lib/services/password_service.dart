@@ -98,13 +98,16 @@ class PasswordService {
   }) async {
     try {
       debugPrint('🔐 PasswordService: Sending password reset email to: $email');
-      debugPrint('🔐 PasswordService: Calling send-password-reset-email edge function');
+      debugPrint(
+        '🔐 PasswordService: Calling send-password-reset-email edge function',
+      );
 
       // Get the current origin for the reset link
       String origin;
       if (kIsWeb) {
         final uri = Uri.base;
-        origin = '${uri.scheme}://${uri.host}${uri.port != 80 && uri.port != 443 ? ':${uri.port}' : ''}';
+        origin =
+            '${uri.scheme}://${uri.host}${uri.port != 80 && uri.port != 443 ? ':${uri.port}' : ''}';
       } else {
         // For mobile, use a default origin or get from config
         origin = 'https://jetcv.app'; // Update this with your actual domain
@@ -114,22 +117,21 @@ class PasswordService {
 
       final response = await EdgeFunctionService.invokeFunction(
         'send-password-reset-email', // Correct edge function name
-        {
-          'email': email,
-          'origin': origin,
-        },
+        {'email': email, 'origin': origin},
       );
 
       debugPrint('🔐 PasswordService: Edge function response: $response');
       debugPrint('🔐 PasswordService: Response type: ${response.runtimeType}');
-      debugPrint('🔐 PasswordService: Response keys: ${response.keys.toList()}');
+      debugPrint(
+        '🔐 PasswordService: Response keys: ${response.keys.toList()}',
+      );
 
       // Map the response to expected format
       final result = {
         'success': response['ok'] == true || response['success'] == true,
         'message': response['message'] ?? 'Email di reset inviata',
       };
-      
+
       debugPrint('🔐 PasswordService: Mapped result: $result');
       return result;
     } catch (e) {

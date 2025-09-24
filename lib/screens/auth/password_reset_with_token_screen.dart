@@ -12,10 +12,12 @@ class PasswordResetWithTokenScreen extends StatefulWidget {
   const PasswordResetWithTokenScreen({super.key});
 
   @override
-  State<PasswordResetWithTokenScreen> createState() => _PasswordResetWithTokenScreenState();
+  State<PasswordResetWithTokenScreen> createState() =>
+      _PasswordResetWithTokenScreenState();
 }
 
-class _PasswordResetWithTokenScreenState extends State<PasswordResetWithTokenScreen> {
+class _PasswordResetWithTokenScreenState
+    extends State<PasswordResetWithTokenScreen> {
   final _formKey = GlobalKey<FormState>();
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -44,11 +46,15 @@ class _PasswordResetWithTokenScreenState extends State<PasswordResetWithTokenScr
       if (kIsWeb) {
         final uri = Uri.base;
         _token = uri.queryParameters['token'];
-        debugPrint('🔐 PasswordResetWithTokenScreen: Extracted token from URL: ${_token?.substring(0, 10)}...');
+        debugPrint(
+          '🔐 PasswordResetWithTokenScreen: Extracted token from URL: ${_token?.substring(0, 10)}...',
+        );
       } else {
         // For mobile, we might need to handle this differently
         // For now, we'll assume the token is passed as a parameter
-        debugPrint('🔐 PasswordResetWithTokenScreen: Running on mobile - token handling needed');
+        debugPrint(
+          '🔐 PasswordResetWithTokenScreen: Running on mobile - token handling needed',
+        );
       }
     } catch (e) {
       debugPrint('❌ PasswordResetWithTokenScreen: Error extracting token: $e');
@@ -76,9 +82,11 @@ class _PasswordResetWithTokenScreenState extends State<PasswordResetWithTokenScr
 
     try {
       final l10n = AppLocalizations.of(context);
-      
-      debugPrint('🔐 PasswordResetWithTokenScreen: Starting password reset with token');
-      
+
+      debugPrint(
+        '🔐 PasswordResetWithTokenScreen: Starting password reset with token',
+      );
+
       final result = await PasswordService.resetPassword(
         token: _token!,
         newPassword: _newPasswordController.text.trim(),
@@ -96,7 +104,8 @@ class _PasswordResetWithTokenScreenState extends State<PasswordResetWithTokenScr
         } else {
           setState(() {
             _isLoading = false;
-            _errorMessage = result['message'] ?? 'Errore durante il reset della password';
+            _errorMessage =
+                result['message'] ?? 'Errore durante il reset della password';
           });
         }
       }
@@ -105,7 +114,8 @@ class _PasswordResetWithTokenScreenState extends State<PasswordResetWithTokenScr
       if (mounted) {
         setState(() {
           _isLoading = false;
-          _errorMessage = 'Errore di connessione. Verifica la tua connessione internet e riprova.';
+          _errorMessage =
+              'Errore di connessione. Verifica la tua connessione internet e riprova.';
         });
       }
     }
@@ -144,19 +154,19 @@ class _PasswordResetWithTokenScreenState extends State<PasswordResetWithTokenScr
                         // Success Message
                         Text(
                           _successMessage!,
-                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.textPrimary,
-                          ),
+                          style: Theme.of(context).textTheme.headlineMedium
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.textPrimary,
+                              ),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 16),
 
                         Text(
                           l10n.getString('password_reset_success_message'),
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppTheme.textGray,
-                          ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: AppTheme.textGray),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 32),
@@ -209,19 +219,19 @@ class _PasswordResetWithTokenScreenState extends State<PasswordResetWithTokenScr
                         // Error Message
                         Text(
                           'Link non valido',
-                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.textPrimary,
-                          ),
+                          style: Theme.of(context).textTheme.headlineMedium
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.textPrimary,
+                              ),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 16),
 
                         Text(
                           'Il link di reset password non è valido o è scaduto. Richiedi un nuovo link.',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppTheme.textGray,
-                          ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: AppTheme.textGray),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 32),
@@ -275,17 +285,19 @@ class _PasswordResetWithTokenScreenState extends State<PasswordResetWithTokenScr
                               children: [
                                 Text(
                                   l10n.getString('reset_password'),
-                                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: AppTheme.textPrimary,
-                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: AppTheme.textPrimary,
+                                      ),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   'Inserisci la tua nuova password',
-                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: AppTheme.textGray,
-                                  ),
+                                  style: Theme.of(context).textTheme.bodyMedium
+                                      ?.copyWith(color: AppTheme.textGray),
                                 ),
                               ],
                             ),
@@ -318,9 +330,8 @@ class _PasswordResetWithTokenScreenState extends State<PasswordResetWithTokenScr
                               Expanded(
                                 child: Text(
                                   _errorMessage!,
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: AppTheme.errorRed,
-                                  ),
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(color: AppTheme.errorRed),
                                 ),
                               ),
                             ],
@@ -354,12 +365,16 @@ class _PasswordResetWithTokenScreenState extends State<PasswordResetWithTokenScr
                               ),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return l10n.getString('new_password_required');
+                                  return l10n.getString(
+                                    'new_password_required',
+                                  );
                                 }
                                 if (value.length < 8) {
                                   return 'La password deve essere di almeno 8 caratteri';
                                 }
-                                if (!RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]').hasMatch(value)) {
+                                if (!RegExp(
+                                  r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]',
+                                ).hasMatch(value)) {
                                   return 'La password deve contenere almeno: 1 minuscola, 1 maiuscola, 1 numero, 1 simbolo';
                                 }
                                 return null;
@@ -382,16 +397,21 @@ class _PasswordResetWithTokenScreenState extends State<PasswordResetWithTokenScr
                                 ),
                                 onPressed: () {
                                   setState(() {
-                                    _obscureConfirmPassword = !_obscureConfirmPassword;
+                                    _obscureConfirmPassword =
+                                        !_obscureConfirmPassword;
                                   });
                                 },
                               ),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return l10n.getString('confirm_password_required');
+                                  return l10n.getString(
+                                    'confirm_password_required',
+                                  );
                                 }
                                 if (value != _newPasswordController.text) {
-                                  return l10n.getString('passwords_do_not_match');
+                                  return l10n.getString(
+                                    'passwords_do_not_match',
+                                  );
                                 }
                                 return null;
                               },
@@ -416,10 +436,11 @@ class _PasswordResetWithTokenScreenState extends State<PasswordResetWithTokenScr
                         },
                         child: Text(
                           l10n.getString('back_to_login'),
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppTheme.primaryBlue,
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: AppTheme.primaryBlue,
+                                fontWeight: FontWeight.w500,
+                              ),
                         ),
                       ),
                     ],

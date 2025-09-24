@@ -122,6 +122,7 @@ class CertificationEdgeService {
     String? draftAt,
     String? closedAt,
     List<Map<String, dynamic>>? media,
+    String? esitoValue,
   }) async {
     try {
       print('🔍 Creating certification with params:');
@@ -144,6 +145,7 @@ class CertificationEdgeService {
         if (draftAt != null) 'draft_at': draftAt,
         if (closedAt != null) 'closed_at': closedAt,
         if (media != null) 'media': media,
+        if (esitoValue != null) 'esito_value': esitoValue,
       };
 
       print('📤 Sending POST request to: $_baseUrl');
