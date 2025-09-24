@@ -369,7 +369,7 @@ class _LegalEntityManagementScreenState
             // Statistiche con indicatore di caricamento
             if (provider.isLoading && provider.legalEntities.isNotEmpty)
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(12),
                 margin: const EdgeInsets.only(bottom: 20),
                 decoration: BoxDecoration(
                   color: Colors.blue[50],
@@ -653,7 +653,7 @@ class _LegalEntityManagementScreenState
 
   Widget _buildStatCard(String label, int value, Color color) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(16),
@@ -823,7 +823,7 @@ class _LegalEntityManagementScreenState
           children: [
             // Header con status
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: statusColor.withOpacity(0.1),
                 borderRadius: const BorderRadius.only(
@@ -928,7 +928,7 @@ class _LegalEntityManagementScreenState
             // Contenuto principale
             Flexible(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
@@ -941,20 +941,20 @@ class _LegalEntityManagementScreenState
                       style: TextStyle(
                         color: Colors.black,
                         fontWeight: FontWeight.w700,
-                        fontSize: 16,
+                        fontSize: 14,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 4),
                     Text(
                       entity.identifierCode ??
                           AppLocalizations.of(
                             context,
                           ).getString('code_not_specified'),
-                      style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     if (entity.email != null)
                       Text(
                         entity.email!,
@@ -962,7 +962,7 @@ class _LegalEntityManagementScreenState
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     Row(
                       children: [
                         Icon(
@@ -1007,7 +1007,7 @@ class _LegalEntityManagementScreenState
 
   Widget _buildHeader(LegalEntityProvider provider) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -1148,7 +1148,7 @@ class _LegalEntityManagementScreenState
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       itemCount: _filteredEntities.length,
       itemBuilder: (context, index) {
         final entity = _filteredEntities[index];
@@ -1159,9 +1159,9 @@ class _LegalEntityManagementScreenState
 
   Widget _buildEntityCard(LegalEntity entity, LegalEntityProvider provider) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 8),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -1178,17 +1178,17 @@ class _LegalEntityManagementScreenState
                               context,
                             ).getString('name_not_specified'),
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 2),
                       Text(
                         entity.identifierCode ??
                             AppLocalizations.of(
                               context,
                             ).getString('code_not_specified'),
-                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       ),
                     ],
                   ),
@@ -1198,8 +1198,8 @@ class _LegalEntityManagementScreenState
                 PopupMenuButton<LegalEntityStatus>(
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
+                      horizontal: 6,
+                      vertical: 3,
                     ),
                     decoration: BoxDecoration(
                       color: _getStatusColor(entity.status).withOpacity(0.1),
