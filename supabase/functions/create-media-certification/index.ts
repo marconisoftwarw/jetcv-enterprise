@@ -716,9 +716,11 @@ Deno.serve(async (req) => {
         }).select("*").single();
         if (insErr) throw insErr;
         
-        // Determine if this is context media or user media based on metadata
-        const isUserMedia = form.get("is_user_media") ? qbool(String(form.get("is_user_media"))) : false;
-        const userId = form.get("user_id") ? String(form.get("user_id")) : null;
+        // Determine if this is context media or user media based on per-file metadata
+        const isUserMedia = form.get(`is_user_media_${index}`) ? qbool(String(form.get(`is_user_media_${index}`))) : false;
+        const userId = form.get(`user_id_${index}`) ? String(form.get(`user_id_${index}`)) : null;
+        
+        console.log(`[${reqId}] File ${index}: isUserMedia=${isUserMedia}, userId=${userId}`);
         
         if (isUserMedia && userId) {
           // Find the certification_user record for this user
@@ -728,6 +730,8 @@ Deno.serve(async (req) => {
             .eq("id_user", userId)
             .maybeSingle();
             
+          console.log(`[${reqId}] Found certification_user for user ${userId}:`, certUser);
+            
           if (certUser) {
             // Insert into certification_has_media with both id_certification and id_certification_user
             await admin.from("certification_has_media").insert({
@@ -735,8 +739,10 @@ Deno.serve(async (req) => {
               id_certification_user: certUser.id_certification_user,
               id_certification_media: mRow.id_certification_media
             });
+            console.log(`[${reqId}] Linked user media to certification_user ${certUser.id_certification_user}`);
           } else {
             // Fallback: insert only with id_certification
+            console.warn(`[${reqId}] No certification_user found for user ${userId}, linking as context media`);
             await admin.from("certification_has_media").insert({
               id_certification: certRow.id_certification,
               id_certification_media: mRow.id_certification_media
@@ -744,6 +750,7 @@ Deno.serve(async (req) => {
           }
         } else {
           // Context media: insert only with id_certification
+          console.log(`[${reqId}] Linking as context media`);
           await admin.from("certification_has_media").insert({
             id_certification: certRow.id_certification,
             id_certification_media: mRow.id_certification_media

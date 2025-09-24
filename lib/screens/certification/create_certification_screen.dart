@@ -2794,6 +2794,12 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
         print('📁 Context media files: ${_mediaFiles.length}');
         print('📁 User media files: ${allMedia.length - _mediaFiles.length}');
         print('📁 Total media files: ${allMedia.length}');
+        print('📁 Media order:');
+        for (int i = 0; i < allMedia.length; i++) {
+          final userId = i < mediaUserIds.length ? mediaUserIds[i] : 'NO_USER_ID';
+          final isUserMedia = userId.isNotEmpty;
+          print('  File $i: ${allMedia[i].file.name} - User: ${isUserMedia ? userId : "CONTEXT"}');
+        }
 
         result = await CertificationUploadService.createCertificationWithMedia(
           idCertifier: certifierId,
@@ -3126,6 +3132,13 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
       if (allMedia.isEmpty) {
         print('ℹ️ No media files to upload');
         return;
+      }
+
+      print('📁 Media upload order:');
+      for (int i = 0; i < allMedia.length; i++) {
+        final userId = i < mediaUserIds.length ? mediaUserIds[i] : 'NO_USER_ID';
+        final isUserMedia = userId.isNotEmpty;
+        print('  File $i: ${allMedia[i].file.name} - User: ${isUserMedia ? userId : "CONTEXT"}');
       }
 
       // Usa il servizio di upload unificato che supporta metadati
