@@ -5,7 +5,7 @@ import '../../theme/app_theme.dart';
 import '../../widgets/linkedin_card.dart';
 import '../../widgets/linkedin_button.dart';
 import '../../widgets/linkedin_text_field.dart';
-import '../../widgets/appbar_language_dropdown.dart';
+import '../../widgets/global_floating_language_button.dart';
 
 class CVListScreen extends StatefulWidget {
   const CVListScreen({super.key});
@@ -165,17 +165,26 @@ class _CVListScreenState extends State<CVListScreen> {
         backgroundColor: AppTheme.primaryBlue,
         foregroundColor: AppTheme.white,
         elevation: 0,
-        actions: const [AppBarLanguageDropdown()],
       ),
-      body: Column(
+      body: Stack(
         children: [
-          _buildSearchAndFilters(),
-          Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _filteredCVs.isEmpty
-                ? _buildEmptyState()
-                : _buildCVList(),
+          Column(
+            children: [
+              _buildSearchAndFilters(),
+              Expanded(
+                child: _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : _filteredCVs.isEmpty
+                    ? _buildEmptyState()
+                    : _buildCVList(),
+              ),
+            ],
+          ),
+          // Floating language button positioned in bottom right
+          Positioned(
+            bottom: 20,
+            right: 20,
+            child: const GlobalFloatingLanguageButton(),
           ),
         ],
       ),
