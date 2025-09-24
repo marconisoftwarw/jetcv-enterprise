@@ -195,31 +195,24 @@ class AppLocalizations {
       'edit': 'Modifica',
       'remove': 'Rimuovi',
 
-      'continue_to_review': 'Continua alla Revisione',
       'verifying': 'Verificando...',
-      'scan_qr_code': 'Scansiona codice QR',
-      'scan_qr_from_app': 'Scansiona il QR code dall\'app utente',
-      'scan': 'Scansiona',
       'select_legal_entity_first': 'Seleziona prima una Legal Entity',
       'select_legal_entity_description':
           'Per cercare utenti esistenti è necessario selezionare una Legal Entity nella sezione "Informazioni Generali"',
-      'add_user': 'Aggiungi Utente',
       'user_added': 'Utente Aggiunto',
       'no_user_added_instruction':
           'Nessun utente aggiunto. Inserisci un codice OTP per aggiungere un utente.',
       'confirm_certification': 'Conferma Certificazione',
       'media_count': 'Media',
-      'users_count': 'Utenti',
       'no_user_added_to_certification':
           'Nessun utente aggiunto alla certificazione',
       'added': 'Aggiunto',
-      'confirm_send': 'Conferma Invio',
       'certification_send_warning':
           'Una volta inviata, la certificazione verrà inviata agli utenti destinatari e non sarà più modificabile. Una volta che gli utenti accetteranno la certificazione, questa verrà notarizzata sulla blockchain. Questa azione non può essere annullata.',
       'confirm_send_details':
           'Confermo di aver verificato tutti i dettagli e di voler procedere con l\'invio della certificazione',
       'no_category_selected': 'Nessuna categoria selezionata',
-      'user_not_authenticated': 'Utente non autenticato',
+
       'select_legal_entity_first_error':
           'Seleziona una legal entity prima di procedere.',
       'error_retrieving_data':
@@ -231,14 +224,12 @@ class AppLocalizations {
           'Errore nella creazione della certificazione',
       'file_upload_error':
           'Errore nel caricamento del file. Riprova con un altro file.',
-      'image_selection_error':
-          'Errore nella selezione dell\'immagine. Riprova.',
+
       'enter_title_hint': 'Inserisci il titolo...',
       'enter_description_hint': 'Inserisci la descrizione...',
       'user_specific_media': 'Media specifici per questo utente',
       'edit_media': 'Modifica Media',
       'title': 'Titolo',
-      'description': 'Descrizione',
       'enter_media_title_hint': 'Inserisci un titolo per il media',
       'enter_media_description_hint': 'Inserisci una descrizione per il media',
 
@@ -291,7 +282,6 @@ class AppLocalizations {
       'certification_title': 'Titolo',
       'certification_description': 'Descrizione',
       'unknown_category': 'Categoria sconosciuta',
-      'no_description': 'Nessuna descrizione disponibile',
       'no_title_available': 'Titolo non disponibile',
       'certified_users': 'Utenti certificati',
       'unknown_user': 'Utente sconosciuto',
@@ -377,8 +367,6 @@ class AppLocalizations {
       'monthly_average': 'Media Mensile',
       'growth': 'Crescita',
       'change_password': 'Cambia Password',
-      'update_password_description':
-          'Aggiorna la tua password per maggiore sicurezza',
       'notification_settings': 'Impostazioni Notifiche',
       'manage_notification_preferences': 'Gestisci le preferenze di notifica',
       'export_data': 'Esporta Dati',
@@ -395,6 +383,8 @@ class AppLocalizations {
       'account_preferences': 'Preferenze Account',
       'customize_account_settings':
           'Personalizza le impostazioni dell\'account',
+      'update_password_description':
+          'Aggiorna la tua password per maggiore sicurezza',
       'please_enter_email': 'Inserisci prima il tuo indirizzo email',
       'reset_password': 'Reimposta Password',
       'reset_password_form_description':
@@ -427,10 +417,10 @@ class AppLocalizations {
       'updating_data': 'Aggiornamento dati in corso...',
       'must_agree_terms': 'Devi accettare i termini e condizioni',
       'must_agree_privacy': 'Devi accettare la privacy policy',
-      'user_not_authenticated':
-          'Utente non autenticato. Effettua il login per continuare.',
       'results': 'Risultati',
       'review': 'Revisione',
+      'user_not_authenticated':
+          'Utente non autenticato. Effettua il login per continuare.',
       'general_information': 'Informazioni Generali',
       'enter_main_details':
           'Inserisci i dettagli principali della certificazione',
@@ -457,20 +447,22 @@ class AppLocalizations {
       'add_photos_videos': 'Aggiungi foto e video',
       'add': 'Aggiungi',
       'continue': 'Continua',
+      'scan_qr_code': 'Scansiona codice QR',
+      'scan_qr_from_app': 'Scansiona il QR code dall\'app utente',
+      'scan': 'Scansiona',
       'add_users': 'Aggiungi Utenti',
       'enter_participants': 'Inserisci i partecipanti alla certificazione',
       'enter_user_otp': 'Inserisci codice OTP utente',
       'enter_otp_code': 'Inserisci codice OT...',
-      'scan_qr_code': 'Scansiona codice QR',
-      'scan_qr_from_app': 'Scansiona il QR code dall\'app utente',
-      'scan': 'Scansiona',
       'added_users': 'Utenti Aggiunti',
+      'add_user': 'Aggiungi Utente',
       'remove_all': 'Rimuovi Tutti',
       'user_results': 'Risultati Utenti',
       'enter_results_for_each': 'Inserisci i risultati per ogni utente',
       'fill_fields_for_participants':
           'Compila i campi per ogni partecipante alla certificazione',
       'result': 'Risultato',
+      'users_count': 'Utenti',
       'passed': 'Superato',
       'score': 'Punteggio',
       'evaluation': 'Valutazione',
@@ -478,11 +470,17 @@ class AppLocalizations {
       'certification_review': 'Revisione Certificazione',
       'check_details_before_sending':
           'Controlla tutti i dettagli prima di inviare la certificazione',
+      'confirm_send': 'Conferma Invio',
+      'continue_to_review': 'Continua alla Revisione',
       'review_and_send': 'Revisione e Invio',
       'general_info_lower': 'Informazioni Generali',
       'real_time_media': 'Media Real-time',
       'no_general_media': 'Nessun media generale allegato',
       'no_media_attached': 'Nessun media allegato',
+      'no_users_found_certification':
+          'Nessun utente trovato per questa certificazione',
+      'try_different_search':
+          'Prova con termini di ricerca diversi o clicca "Mostra tutti"',
 
       // User Search translations
       'search_existing_users': 'Cerca Utenti Esistenti',
@@ -493,8 +491,6 @@ class AppLocalizations {
       'show_all': 'Mostra tutti',
       'searching_users': 'Ricerca in corso...',
       'no_users_found': 'Nessun utente trovato',
-      'try_different_search':
-          'Prova con termini di ricerca diversi o clicca "Mostra tutti"',
       'search_users_hint':
           'Digita per cercare utenti oppure clicca "Mostra tutti" per vedere tutti gli utenti disponibili',
       'add_user_with_otp': 'Aggiungi con OTP',
@@ -517,20 +513,15 @@ class AppLocalizations {
       'no_reason_provided': 'Nessuna motivazione fornita',
       'responded_on': 'Risposto il',
       'added_on': 'Aggiunto il',
-      'no_users_found_certification':
-          'Nessun utente trovato per questa certificazione',
       'total_users': 'Totale utenti',
       'acceptance_rate': 'Tasso di accettazione',
       'response_rate': 'Tasso di risposta',
-      'users_count': 'Utenti',
       'certifier_media': 'Media del Certificatore',
-      'confirm_send': 'Conferma Invio',
       'once_sent_warning':
           'Una volta inviata, la certificazione verrà inviata agli utenti destinatari e non sarà più modificabile. Una volta che gli utenti accetteranno la certificazione, questa verrà notarizzata sulla blockchain. Questa azione non può essere annullata.',
       'confirm_verification':
           'Confermo di aver verificato tutti i dettagli e di voler procedere con l\'invio della certificazione',
       'send_certification': 'Invia Certificazione',
-      'continue_to_review': 'Continua alla Revisione',
       'certification_sent': 'Certificazione Inviata!',
       'certification_sent_success':
           'La certificazione "Corso Platform Management in-place" è stata inviato con successo.',
@@ -552,14 +543,14 @@ class AppLocalizations {
       'month_apr': 'Apr',
       'month_may': 'Mag',
       'month_jun': 'Giu',
-      'enterprise_certification_platform':
-          'Piattaforma di Certificazione Aziendale',
       'please_login_to_create': 'Effettua l\'accesso per creare certificazioni',
       'trusted_by_thousands': 'Affidato da migliaia di aziende',
       'certifications_issued': 'Certificazioni emesse',
       'companies_verified': 'Aziende verificate',
       'uptime_guarantee': 'Garanzia di uptime',
       'support_available': 'Supporto disponibile',
+      'enterprise_certification_platform':
+          'Piattaforma di Certificazione Aziendale',
       'what_our_customers_say': 'Cosa dicono i nostri clienti',
       'testimonial_text':
           'Piattaforma eccellente per la gestione delle certificazioni aziendali. Facile da usare e molto affidabile.',
@@ -639,7 +630,6 @@ class AppLocalizations {
       'certification_attachments': 'Allegati',
       'certification_users': 'Utenti',
       'certification_result': 'Esito',
-      'add_user': 'Aggiungi Utente',
       'user_info': 'Informazioni Utente',
       'qr_scan': 'Scansione QR',
       'otp_verification': 'Verifica OTP',
@@ -685,16 +675,6 @@ class AppLocalizations {
         'type_15': 'Tipo 15',
 
         // Chiavi mancanti per l'italiano
-        'customize_account_settings': 'Personalizza impostazioni account',
-        'enterprise_certification_platform':
-            'Piattaforma di Certificazione Enterprise',
-        'logout_confirmation_message': 'Sei sicuro di voler uscire?',
-        'no_certifiers_for_entity': 'Nessun certificatore per questa entità',
-        'no_users_found_certification':
-            'Nessun utente trovato per la certificazione',
-        'try_different_search': 'Prova una ricerca diversa',
-        'update_password_description':
-            'Aggiorna la tua password per mantenere la sicurezza',
       },
 
       // Additional missing keys
