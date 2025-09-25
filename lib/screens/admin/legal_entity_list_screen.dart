@@ -63,12 +63,23 @@ class _LegalEntityListScreenState extends State<LegalEntityListScreen> {
                           ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     CustomButton(
-                      onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const CreateLegalEntityScreen(),
-                        ),
-                      ),
+                      onPressed: () async {
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const CreateLegalEntityScreen(),
+                          ),
+                        );
+                        if (result == true) {
+                          // Refresh the legal entities list if creation was successful
+                          if (mounted) {
+                            final provider = context
+                                .read<LegalEntityProvider>();
+                            await provider.refreshLegalEntities();
+                          }
+                        }
+                      },
                       text: 'Add New Entity',
                       icon: Icons.add,
                       variant: ButtonVariant.filled,
@@ -138,14 +149,22 @@ class _LegalEntityListScreenState extends State<LegalEntityListScreen> {
                 Row(
                   children: [
                     CustomButton(
-                      onPressed: () {
-                        Navigator.push(
+                      onPressed: () async {
+                        final result = await Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) =>
                                 const CreateLegalEntityScreen(),
                           ),
                         );
+                        if (result == true) {
+                          // Refresh the legal entities list if creation was successful
+                          if (mounted) {
+                            final provider = context
+                                .read<LegalEntityProvider>();
+                            await provider.refreshLegalEntities();
+                          }
+                        }
                       },
                       text: 'Add New Entity',
                       icon: Icons.add,

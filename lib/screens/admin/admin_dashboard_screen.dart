@@ -66,12 +66,21 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               bottom: 16,
               right: 16,
               child: FloatingActionButton(
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const CreateLegalEntityScreen(),
-                  ),
-                ),
+                onPressed: () async {
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const CreateLegalEntityScreen(),
+                    ),
+                  );
+                  if (result == true) {
+                    // Refresh the legal entities list if creation was successful
+                    if (mounted) {
+                      final provider = context.read<LegalEntityProvider>();
+                      await provider.refreshLegalEntities();
+                    }
+                  }
+                },
                 backgroundColor: AppTheme.accentGreen,
                 foregroundColor: AppTheme.pureWhite,
                 elevation: 8,
@@ -550,14 +559,20 @@ class _DashboardContent extends StatelessWidget {
                     child: GlassCard(
                       isHoverable: true,
                       child: InkWell(
-                        onTap: () {
-                          Navigator.push(
+                        onTap: () async {
+                          final result = await Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
                                   const CreateLegalEntityScreen(),
                             ),
                           );
+                          if (result == true) {
+                            // Refresh the legal entities list if creation was successful
+                            final provider = context
+                                .read<LegalEntityProvider>();
+                            await provider.refreshLegalEntities();
+                          }
                         },
                         borderRadius: BorderRadius.circular(16),
                         child: Padding(

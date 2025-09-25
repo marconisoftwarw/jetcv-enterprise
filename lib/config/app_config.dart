@@ -99,6 +99,30 @@ class AppConfig {
     'tiff',
   ];
 
+  static const List<String> supportedVideoFormats = [
+    'mp4',
+    'mov',
+    'avi',
+    'webm',
+    'mkv',
+  ];
+
+  static const List<String> supportedAudioFormats = [
+    'mp3',
+    'wav',
+    'aac',
+    'ogg',
+    'm4a',
+    'flac',
+  ];
+
+  static const List<String> supportedDocumentFormats = [
+    'pdf',
+    'doc',
+    'docx',
+    'txt',
+  ];
+
   // Validation rules
   static const int minPasswordLength = 8;
   static const int maxNameLength = 100;

@@ -202,6 +202,16 @@ class CertificationMediaService {
         return 'video/quicktime';
       case 'avi':
         return 'video/x-msvideo';
+      case 'mp3':
+        return 'audio/mpeg';
+      case 'wav':
+        return 'audio/wav';
+      case 'aac':
+        return 'audio/aac';
+      case 'ogg':
+        return 'audio/ogg';
+      case 'm4a':
+        return 'audio/mp4';
       case 'pdf':
         return 'application/pdf';
       default:

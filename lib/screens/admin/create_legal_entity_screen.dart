@@ -114,7 +114,7 @@ class _CreateLegalEntityScreenState extends State<CreateLegalEntityScreen> {
           backgroundColor: Colors.green,
         ),
       );
-      Navigator.pop(context);
+      Navigator.pop(context, true); // Pass true to indicate success
     }
   }
 

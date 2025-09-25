@@ -911,9 +911,9 @@ class _LegalEntityManagementScreenState
       sliver: SliverGrid(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: crossAxisCount,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-          childAspectRatio: isTablet ? 1.2 : 1.1,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: isTablet ? 2.0 : 1.8,
         ),
         delegate: SliverChildBuilderDelegate((context, index) {
           final entity = _filteredEntities[index];
@@ -1038,7 +1038,7 @@ class _LegalEntityManagementScreenState
           children: [
             // Header con status
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
               decoration: BoxDecoration(
                 color: statusColor.withOpacity(0.1),
                 borderRadius: const BorderRadius.only(
@@ -1063,7 +1063,7 @@ class _LegalEntityManagementScreenState
                       style: TextStyle(
                         color: statusColor,
                         fontWeight: FontWeight.w600,
-                        fontSize: 12,
+                        fontSize: 11,
                       ),
                     ),
                   ),
@@ -1071,7 +1071,7 @@ class _LegalEntityManagementScreenState
                     icon: Icon(
                       Icons.more_vert,
                       color: Colors.grey[600],
-                      size: 20,
+                      size: 18,
                     ),
                     itemBuilder: (context) => [
                       PopupMenuItem(
@@ -1141,12 +1141,12 @@ class _LegalEntityManagementScreenState
             ),
 
             // Contenuto principale
-            Flexible(
+            Expanded(
               child: Padding(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(8),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
                       entity.legalName ??
@@ -1155,42 +1155,46 @@ class _LegalEntityManagementScreenState
                           ).getString('name_not_specified'),
                       style: TextStyle(
                         color: Colors.black,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
                       ),
-                      maxLines: 2,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     Text(
                       entity.identifierCode ??
                           AppLocalizations.of(
                             context,
                           ).getString('code_not_specified'),
-                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                      style: TextStyle(color: Colors.grey[600], fontSize: 11),
+                      textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 1),
                     if (entity.email != null)
                       Text(
                         entity.email!,
-                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                        style: TextStyle(color: Colors.grey[600], fontSize: 11),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
                       ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 4),
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
                           Icons.access_time,
                           color: Colors.grey[500],
-                          size: 14,
+                          size: 12,
                         ),
-                        const SizedBox(width: 4),
+                        const SizedBox(width: 3),
                         Text(
                           _formatDate(entity.createdAt),
                           style: TextStyle(
                             color: Colors.grey[500],
-                            fontSize: 12,
+                            fontSize: 11,
                           ),
                         ),
                       ],
@@ -2219,22 +2223,6 @@ class _LegalEntityManagementScreenState
                 fontWeight: FontWeight.bold,
               ),
             ),
-            if (newStatus == LegalEntityStatus.rejected) ...[
-              const SizedBox(height: 16),
-              const Text(
-                'Motivo del rifiuto (opzionale):',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: TextEditingController(),
-                maxLines: 2,
-                decoration: const InputDecoration(
-                  hintText: 'Inserisci il motivo del rifiuto...',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-            ],
           ],
         ),
         actions: [

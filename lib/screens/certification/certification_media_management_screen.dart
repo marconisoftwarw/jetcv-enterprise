@@ -490,13 +490,136 @@ class _AddCertificationMediaScreenState
   }
 
   Future<void> _pickFile() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    // Mostra dialog per selezionare tipo di media
+    final mediaType = await _showMediaTypeSelectionDialog();
+    if (mediaType == null) return;
 
-    if (pickedFile != null) {
+    XFile? selectedFile;
+    final ImagePicker picker = ImagePicker();
+
+    switch (mediaType) {
+      case 'image':
+        selectedFile = await picker.pickImage(source: ImageSource.gallery);
+        break;
+      case 'video':
+        selectedFile = await picker.pickVideo(source: ImageSource.gallery);
+        break;
+      case 'audio':
+        // Per audio, usiamo la galleria come fallback
+        selectedFile = await picker.pickImage(source: ImageSource.gallery);
+        break;
+    }
+
+    if (selectedFile != null) {
       setState(() {
-        _selectedFile = File(pickedFile.path);
+        _selectedFile = File(selectedFile.path);
+        _selectedFileType = _getFileTypeFromString(mediaType);
       });
+    }
+  }
+
+  // Dialog per selezionare il tipo di media
+  Future<String?> _showMediaTypeSelectionDialog() async {
+    return await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            'Seleziona tipo di media',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.primaryBlack,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildMediaTypeOption(
+                context,
+                'image',
+                'Immagine',
+                Icons.image,
+                AppTheme.primaryBlue,
+              ),
+              const SizedBox(height: 12),
+              _buildMediaTypeOption(
+                context,
+                'video',
+                'Video',
+                Icons.videocam,
+                AppTheme.errorRed,
+              ),
+              const SizedBox(height: 12),
+              _buildMediaTypeOption(
+                context,
+                'audio',
+                'Audio',
+                Icons.audiotrack,
+                AppTheme.successGreen,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'Annulla',
+                style: TextStyle(color: AppTheme.textSecondary),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildMediaTypeOption(
+    BuildContext context,
+    String type,
+    String label,
+    IconData icon,
+    Color color,
+  ) {
+    return InkWell(
+      onTap: () => Navigator.of(context).pop(type),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: color, size: 24),
+            const SizedBox(width: 12),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.primaryBlack,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Helper per convertire stringa in FileType
+  FileType _getFileTypeFromString(String type) {
+    switch (type) {
+      case 'image':
+        return FileType.image;
+      case 'video':
+        return FileType.video;
+      case 'audio':
+        return FileType.audio;
+      default:
+        return FileType.image;
     }
   }
 

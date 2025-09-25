@@ -3631,28 +3631,48 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
 
   void _addMedia() async {
     try {
+      // Mostra dialog per selezionare tipo di media
+      final mediaType = await _showMediaTypeSelectionDialog();
+      if (mediaType == null) return;
+
+      XFile? selectedFile;
       final ImagePicker picker = ImagePicker();
-      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-      if (image != null) {
+
+      switch (mediaType) {
+        case 'image':
+          selectedFile = await picker.pickImage(source: ImageSource.gallery);
+          break;
+        case 'video':
+          selectedFile = await picker.pickVideo(source: ImageSource.gallery);
+          break;
+        case 'audio':
+          // Per audio, usiamo la galleria come fallback
+          selectedFile = await picker.pickImage(source: ImageSource.gallery);
+          break;
+      }
+
+      if (selectedFile != null) {
         // Su web, usiamo direttamente XFile per evitare problemi con File
         try {
           // Testiamo se il file può essere letto
-          await image.readAsBytes();
+          await selectedFile.readAsBytes();
 
           setState(() {
-            _mediaFiles.add(MediaItem(file: image));
+            _mediaFiles.add(MediaItem(file: selectedFile!, type: mediaType));
           });
-          print('✅ Media file added successfully: ${image.name}');
+          print(
+            '✅ Media file added successfully: ${selectedFile.name} (${mediaType})',
+          );
         } catch (fileError) {
-          print('❌ Error with file ${image.name}: $fileError');
+          print('❌ Error with file ${selectedFile.name}: $fileError');
           _showErrorDialog(
             'Errore nel caricamento del file. Riprova con un altro file.',
           );
         }
       }
     } catch (e) {
-      print('❌ Error picking image: $e');
-      _showErrorDialog('Errore nella selezione dell\'immagine. Riprova.');
+      print('❌ Error adding media: $e');
+      _showErrorDialog('Errore nella selezione del file. Riprova.');
     }
   }
 
@@ -3665,10 +3685,33 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   // Metodi per gestire i media certificativi per utente
   void _addUserCertificationMedia(String userId) async {
     try {
+      // Mostra dialog per selezionare tipo di media
+      final mediaType = await _showMediaTypeSelectionDialog();
+      if (mediaType == null) return;
+
+      XFile? selectedFile;
       final ImagePicker picker = ImagePicker();
-      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-      if (image != null) {
-        final mediaItem = MediaItem(file: image, title: '', description: '');
+
+      switch (mediaType) {
+        case 'image':
+          selectedFile = await picker.pickImage(source: ImageSource.gallery);
+          break;
+        case 'video':
+          selectedFile = await picker.pickVideo(source: ImageSource.gallery);
+          break;
+        case 'audio':
+          // Per audio, usiamo la galleria come fallback
+          selectedFile = await picker.pickImage(source: ImageSource.gallery);
+          break;
+      }
+
+      if (selectedFile != null) {
+        final mediaItem = MediaItem(
+          file: selectedFile!,
+          title: '',
+          description: '',
+          type: mediaType,
+        );
 
         setState(() {
           if (_userCertificationMedia[userId] == null) {
@@ -3685,8 +3728,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
         );
       }
     } catch (e) {
-      print('❌ Error picking image for user $userId: $e');
-      _showErrorDialog('Errore nella selezione dell\'immagine. Riprova.');
+      print('❌ Error picking media for user $userId: $e');
+      _showErrorDialog('Errore nella selezione del file. Riprova.');
     }
   }
 
@@ -3694,6 +3737,97 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     setState(() {
       _userCertificationMedia[userId]?.removeAt(index);
     });
+  }
+
+  // Dialog per selezionare il tipo di media
+  Future<String?> _showMediaTypeSelectionDialog() async {
+    return await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            'Seleziona tipo di media',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.primaryBlack,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildMediaTypeOption(
+                context,
+                'image',
+                'Immagine',
+                Icons.image,
+                AppTheme.primaryBlue,
+              ),
+              const SizedBox(height: 12),
+              _buildMediaTypeOption(
+                context,
+                'video',
+                'Video',
+                Icons.videocam,
+                AppTheme.errorRed,
+              ),
+              const SizedBox(height: 12),
+              _buildMediaTypeOption(
+                context,
+                'audio',
+                'Audio',
+                Icons.audiotrack,
+                AppTheme.successGreen,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'Annulla',
+                style: TextStyle(color: AppTheme.textSecondary),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildMediaTypeOption(
+    BuildContext context,
+    String type,
+    String label,
+    IconData icon,
+    Color color,
+  ) {
+    return InkWell(
+      onTap: () => Navigator.of(context).pop(type),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: color, size: 24),
+            const SizedBox(width: 12),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.primaryBlack,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _showUserMediaEditDialog(String userId, MediaItem mediaItem, int index) {
@@ -3945,7 +4079,6 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                           ),
                           child: Row(
                             children: [
-                              // Anteprima immagine
                               Container(
                                 width: isTablet ? 90 : 80,
                                 height: isTablet ? 90 : 80,
@@ -4784,5 +4917,74 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
         ),
       ),
     );
+  }
+
+  // Helper per visualizzare preview dei media
+  Widget _buildMediaPreview(MediaItem mediaItem, bool isTablet) {
+    final mediaType = mediaItem.type ?? 'image';
+
+    switch (mediaType) {
+      case 'image':
+        return FutureBuilder<Uint8List>(
+          future: mediaItem.file.readAsBytes(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return Image.memory(
+                snapshot.data!,
+                width: isTablet ? 90 : 80,
+                height: isTablet ? 90 : 80,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Icon(
+                    Icons.error_outline_rounded,
+                    color: AppTheme.errorRed,
+                    size: isTablet ? 28 : 24,
+                  );
+                },
+              );
+            } else {
+              return Icon(
+                Icons.image_outlined,
+                color: AppTheme.textSecondary,
+                size: isTablet ? 28 : 24,
+              );
+            }
+          },
+        );
+      case 'video':
+        return Container(
+          width: isTablet ? 90 : 80,
+          height: isTablet ? 90 : 80,
+          decoration: BoxDecoration(
+            color: AppTheme.errorRed.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            Icons.play_circle_filled,
+            color: AppTheme.errorRed,
+            size: isTablet ? 40 : 36,
+          ),
+        );
+      case 'audio':
+        return Container(
+          width: isTablet ? 90 : 80,
+          height: isTablet ? 90 : 80,
+          decoration: BoxDecoration(
+            color: AppTheme.successGreen.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            Icons.audiotrack,
+            color: AppTheme.successGreen,
+            size: isTablet ? 40 : 36,
+          ),
+        );
+      default:
+        return Icon(
+          Icons.insert_drive_file,
+          color: AppTheme.textSecondary,
+          size: isTablet ? 40 : 36,
+        );
+    }
   }
 }
