@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
 import '../models/legal_entity_invitation.dart';
 import '../config/app_config.dart';
 
@@ -7,6 +8,26 @@ class EmailService {
   static final EmailService _instance = EmailService._internal();
   factory EmailService() => _instance;
   EmailService._internal();
+
+  // Ottiene dinamicamente l'URL dell'applicazione
+  String _getDynamicAppUrl() {
+    if (kIsWeb) {
+      // Su web, usa l'URL corrente della pagina
+      try {
+        final uri = Uri.base;
+        final dynamicUrl = '${uri.scheme}://${uri.host}${uri.port != 80 && uri.port != 443 ? ':${uri.port}' : ''}';
+        print('🔗 Dynamic URL detected: $dynamicUrl');
+        return dynamicUrl;
+      } catch (e) {
+        print('❌ Error getting dynamic URL on web: $e');
+        print('🔗 Using fallback URL: ${AppConfig.productionUrl}');
+        return AppConfig.productionUrl; // Fallback per produzione
+      }
+    } else {
+      // Su mobile/desktop, usa la configurazione
+      return AppConfig.productionUrl; // URL di produzione
+    }
+  }
 
   // Configurazione email
   static const String _fromEmail = "jjectcvuser@gmail.com";
@@ -239,7 +260,8 @@ Questo è un messaggio automatico, non rispondere a questa email.
     LegalEntityInvitation invitation,
     Map<String, dynamic>? legalEntityData,
   ) {
-    final baseUrl = AppConfig.appUrl;
+    // Usa l'URL dinamico dell'applicazione invece di _getDynamicAppUrl()
+    final baseUrl = _getDynamicAppUrl();
     final token = invitation.invitationToken;
 
     // Costruisci l'URL base per la registrazione dell'entità legale
@@ -820,7 +842,7 @@ Questo è un messaggio automatico, non rispondere a questa email.
     required String passwordSetupToken,
   }) {
     final passwordSetupUrl =
-        '${AppConfig.appUrl}/#/set-password?token=$passwordSetupToken';
+        '${_getDynamicAppUrl()}/#/set-password?token=$passwordSetupToken';
 
     return '''
     <!DOCTYPE html>
@@ -893,7 +915,7 @@ Questo è un messaggio automatico, non rispondere a questa email.
     required String passwordSetupToken,
   }) {
     final passwordSetupUrl =
-        '${AppConfig.appUrl}/#/set-password?token=$passwordSetupToken';
+        '${_getDynamicAppUrl()}/#/set-password?token=$passwordSetupToken';
 
     return '''
     Benvenuto in JetCV Enterprise!
@@ -926,7 +948,7 @@ Questo è un messaggio automatico, non rispondere a questa email.
     required String legalEntityName,
   }) async {
     try {
-      final signupUrl = '${AppConfig.appUrl}/#/signup';
+      final signupUrl = '${_getDynamicAppUrl()}/#/signup';
 
       final emailData = {
         'to': email,
