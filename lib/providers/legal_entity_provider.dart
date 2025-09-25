@@ -125,7 +125,6 @@ class LegalEntityProvider extends ChangeNotifier {
           );
           _legalEntities[existingIndex] = entity;
         } else {
-          // Add new entity at the beginning
           print('🔄 LegalEntityProvider: Adding new entity at beginning');
           _legalEntities.insert(0, entity);
         }

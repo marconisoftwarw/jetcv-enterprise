@@ -3490,7 +3490,9 @@ class _LegalEntityFormDialogState extends State<LegalEntityFormDialog> {
 
     // Assicurati che il campo status sia sempre presente per le nuove entità
     if (widget.entity == null && !entityData.containsKey('status')) {
-      entityData['status'] = 'pending';
+      // Se viene creato da admin (dialog), lo status deve essere 'approved'
+      // Se viene creato da registrazione pubblica, lo status deve essere 'pending'
+      entityData['status'] = 'approved'; // Admin creation - auto-approved
     }
 
     bool success;

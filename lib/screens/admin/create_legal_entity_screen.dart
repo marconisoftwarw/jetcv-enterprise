@@ -79,7 +79,7 @@ class _CreateLegalEntityScreenState extends State<CreateLegalEntityScreen> {
     final provider = context.read<LegalEntityProvider>();
 
     final entityData = {
-      'status': 'pending', // Campo richiesto dalla Edge Function
+      'status': 'approved', // Admin creation - auto-approved
       'legal_name': _legalNameController.text.trim(),
       'identifier_code': _identifierCodeController.text.trim(),
       'operational_address': _operationalAddressController.text.trim(),
