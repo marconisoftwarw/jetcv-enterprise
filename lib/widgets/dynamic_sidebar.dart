@@ -242,15 +242,22 @@ class DynamicSidebar extends StatelessWidget {
             ElevatedButton(
               onPressed: () async {
                 Navigator.of(context).pop();
-
+                
                 try {
                   await authProvider.signOut();
 
-                  // Navigate to public home after logout
+                  // Force navigation immediately after logout
                   if (context.mounted) {
-                    Navigator.of(
-                      context,
-                    ).pushNamedAndRemoveUntil('/', (route) => false);
+                    // Use pushNamedAndRemoveUntil to clear all routes and go to root
+                    Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+                    
+                    // Additional fallback: force navigation after auth state change
+                    Future.delayed(const Duration(milliseconds: 200), () {
+                      if (context.mounted && !authProvider.isAuthenticated) {
+                        print('🔄 Dynamic Sidebar: Forcing navigation to public home after logout');
+                        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+                      }
+                    });
                   }
                 } catch (e) {
                   print('Error during logout: $e');

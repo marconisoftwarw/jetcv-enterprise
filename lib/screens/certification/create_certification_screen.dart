@@ -5432,38 +5432,6 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Anteprima immagine
-                Container(
-                  height: 120,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: AppTheme.lightGrey,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppTheme.borderGrey),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: FutureBuilder<Uint8List>(
-                      future: mediaItem.file.readAsBytes(),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          return Image.memory(
-                            snapshot.data!,
-                            width: double.infinity,
-                            height: double.infinity,
-                            fit: BoxFit.cover,
-                          );
-                        } else {
-                          return Icon(
-                            Icons.image,
-                            size: 48,
-                            color: AppTheme.textSecondary,
-                          );
-                        }
-                      },
-                    ),
-                  ),
-                ),
                 SizedBox(height: isTablet ? 20 : 16),
 
                 // Campo titolo
