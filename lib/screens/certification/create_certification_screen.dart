@@ -1613,7 +1613,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
                                     topLeft: Radius.circular(16),
                                     bottomLeft: Radius.circular(16),
                                   ),
-                                  child: _buildMediaPreview(
+                                  child: _buildMediaIconOnly(
                                     mediaItem,
                                     isTablet,
                                   ),
@@ -4271,6 +4271,37 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
     );
   }
 
+  /// Costruisce solo l'icona del media senza preview (per popup di modifica)
+  Widget _buildMediaIconOnly(MediaItem mediaItem, bool isTablet) {
+    return Container(
+      width: isTablet ? 90 : 80,
+      height: isTablet ? 90 : 80,
+      decoration: BoxDecoration(
+        color: _getMediaColor(mediaItem.type).withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Icon(
+        _getMediaIcon(mediaItem.type ?? 'unknown'),
+        color: _getMediaColor(mediaItem.type),
+        size: isTablet ? 28 : 24,
+      ),
+    );
+  }
+
+  /// Ottiene il colore appropriato per il tipo di media
+  Color _getMediaColor(String? type) {
+    switch (type) {
+      case 'image':
+        return AppTheme.primaryBlue;
+      case 'video':
+        return AppTheme.primaryBlue;
+      case 'audio':
+        return AppTheme.successGreen;
+      default:
+        return AppTheme.textSecondary;
+    }
+  }
+
   /// Costruisce un punto animato per l'indicatore di caricamento
   Widget _buildAnimatedDot(int index) {
     // Inizializza le animazioni se necessario
@@ -4816,7 +4847,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
                                     topLeft: Radius.circular(16),
                                     bottomLeft: Radius.circular(16),
                                   ),
-                                  child: _buildMediaPreview(
+                                  child: _buildMediaIconOnly(
                                     mediaItem,
                                     isTablet,
                                   ),
