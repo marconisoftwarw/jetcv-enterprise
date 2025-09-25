@@ -120,6 +120,9 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
       print('🔍 Current URL: ${uri.toString()}');
       print('🔍 Current path: ${uri.path}');
       print('🔍 Current query: ${uri.query}');
+      print('🔍 Current fragment: ${uri.fragment}');
+      print('🔍 Current host: ${uri.host}');
+      print('🔍 Current port: ${uri.port}');
 
       // If the current URL is /password-reset (with or without token), return that route
       if (uri.path == '/password-reset') {
