@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import '../models/legal_entity_invitation.dart';
 import '../config/app_config.dart';
+import 'supabase_service.dart';
 
 class EmailService {
   static final EmailService _instance = EmailService._internal();
@@ -15,7 +16,8 @@ class EmailService {
       // Su web, usa l'URL corrente della pagina
       try {
         final uri = Uri.base;
-        final dynamicUrl = '${uri.scheme}://${uri.host}${uri.port != 80 && uri.port != 443 ? ':${uri.port}' : ''}';
+        final dynamicUrl =
+            '${uri.scheme}://${uri.host}${uri.port != 80 && uri.port != 443 ? ':${uri.port}' : ''}';
         print('🔗 Dynamic URL detected: $dynamicUrl');
         return dynamicUrl;
       } catch (e) {
@@ -82,20 +84,48 @@ class EmailService {
     }
   }
 
-  // Metodo per inviare via API locale
+  // Metodo per inviare via Supabase Edge Function
   Future<bool> _sendViaExternalService(Map<String, dynamic> emailData) async {
     try {
-      return await _sendViaLocalAPI(emailData);
+      return await _sendViaSupabaseEdgeFunction(emailData);
     } catch (e) {
       print('❌ Error sending email: $e');
+      return false;
+    }
+  }
 
-      // Fallback: simulazione per test
-      print('🔄 Falling back to simulation for testing...');
-      await Future.delayed(const Duration(seconds: 1));
-      print(
-        '✅ Email sent successfully (simulated) to ${emailData['to']}: ${emailData['subject']}',
+  // Metodo per inviare via Supabase Edge Function
+  Future<bool> _sendViaSupabaseEdgeFunction(
+    Map<String, dynamic> emailData,
+  ) async {
+    try {
+      print('📧 Sending email via Supabase Edge Function...');
+
+      final supabaseService = SupabaseService();
+      final response = await supabaseService.client.functions.invoke(
+        'send-email-force',
+        body: emailData,
       );
-      return true;
+
+      print('📧 Edge Function response status: ${response.status}');
+      print('📧 Edge Function response data: ${response.data}');
+
+      if (response.status == 200) {
+        final responseData = response.data as Map<String, dynamic>;
+        if (responseData['ok'] == true) {
+          print('✅ Email sent successfully via Edge Function');
+          return true;
+        } else {
+          print('❌ Edge Function returned error: ${responseData['message']}');
+          return false;
+        }
+      } else {
+        print('❌ Edge Function failed with status: ${response.status}');
+        return false;
+      }
+    } catch (e) {
+      print('❌ Error calling Supabase Edge Function: $e');
+      return false;
     }
   }
 
@@ -357,12 +387,9 @@ Questo è un messaggio automatico, non rispondere a questa email.
   // Metodo per testare la configurazione email
   Future<bool> testEmailConfiguration() async {
     try {
-      print('🧪 Testing Local API configuration...');
+      print('🧪 Testing Supabase Edge Function configuration...');
 
-      final apiUrl = 'http://18.102.14.247:4000/api/email/send';
       final fromEmail = _fromEmail;
-
-      print('API URL: $apiUrl');
       print('From Email: $fromEmail');
 
       // Test con email di prova
@@ -373,6 +400,7 @@ Questo è un messaggio automatico, non rispondere a questa email.
             '<h1>Test Email</h1><p>This is a test email to verify email configuration.</p>',
         'text':
             'Test Email\n\nThis is a test email to verify email configuration.',
+        'from': fromEmail,
       };
 
       final result = await _sendViaExternalService(testEmailData);
