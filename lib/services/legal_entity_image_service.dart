@@ -151,7 +151,22 @@ class LegalEntityImageService {
   /// Validates image file
   static bool validateImageFile(File imageFile) {
     try {
-      final fileName = imageFile.path.split('/').last.toLowerCase();
+      final filePath = imageFile.path;
+      print('🔍 LegalEntityImageService: Validating file path: $filePath');
+
+      // Check if it's a blob URL (web platform)
+      if (filePath.startsWith('blob:')) {
+        print(
+          '🔍 LegalEntityImageService: Detected blob URL, using XFile validation',
+        );
+        // For blob URLs, we need to validate using the XFile name instead
+        // This will be handled by the calling code
+        return true; // Assume valid for blob URLs, let the calling code handle it
+      }
+
+      final fileName = filePath.split('/').last.toLowerCase();
+      print('🔍 LegalEntityImageService: File name: $fileName');
+
       final validExtensions = [
         '.jpg',
         '.jpeg',
@@ -163,8 +178,21 @@ class LegalEntityImageService {
         '.bmp',
         '.tiff',
       ];
-      return validExtensions.any((ext) => fileName.endsWith(ext));
+
+      final isValid = validExtensions.any((ext) => fileName.endsWith(ext));
+      print('🔍 LegalEntityImageService: File validation result: $isValid');
+
+      if (!isValid) {
+        print(
+          '❌ LegalEntityImageService: File does not match any valid extension',
+        );
+        print('❌ Valid extensions: $validExtensions');
+        print('❌ File name: $fileName');
+      }
+
+      return isValid;
     } catch (e) {
+      print('❌ LegalEntityImageService: Error validating file: $e');
       return false;
     }
   }

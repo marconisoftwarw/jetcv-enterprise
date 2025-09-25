@@ -91,7 +91,12 @@ class AppConfig {
     'jpg',
     'jpeg',
     'png',
+    'gif',
     'webp',
+    'avif',
+    'heic',
+    'bmp',
+    'tiff',
   ];
 
   // Validation rules

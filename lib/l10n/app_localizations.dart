@@ -609,7 +609,16 @@ class AppLocalizations {
           'Formato immagine non valido. Usa JPG, PNG, GIF, WebP, AVIF, HEIC, BMP o TIFF',
       'file_too_large': 'File troppo grande. Dimensione massima: 50MB',
       'image_upload_info':
-          'Formati supportati: JPG, PNG, GIF, WebP, AVIF, HEIC, BMP, TIFF. Dimensione massima: 50MB',
+          'Le immagini verranno caricate e inviate solo quando clicchi su "Completa Registrazione"',
+      'logo_loaded_successfully': 'Logo caricato con successo!',
+      'company_photo_loaded_successfully':
+          'Foto azienda caricata con successo!',
+      'logo_removed': 'Logo rimosso',
+      'company_photo_removed': 'Foto azienda rimossa',
+      'change_logo': 'Cambia Logo',
+      'change_company_photo': 'Cambia Foto',
+      'ready_to_upload': 'Pronto per l\'invio',
+      'ready_for_preview': 'Pronto per anteprima',
       'forgot_password': 'Password Dimenticata',
       'forgot_password_description':
           'Inserisci la tua email per ricevere un link per reimpostare la password',

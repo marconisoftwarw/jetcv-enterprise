@@ -158,6 +158,14 @@ class ImageUploadService {
         return 'image/gif';
       case 'webp':
         return 'image/webp';
+      case 'avif':
+        return 'image/avif';
+      case 'heic':
+        return 'image/heic';
+      case 'bmp':
+        return 'image/bmp';
+      case 'tiff':
+        return 'image/tiff';
       default:
         return 'image/jpeg';
     }
@@ -188,7 +196,17 @@ class ImageUploadService {
   bool validateImageFile(File imageFile) {
     try {
       final fileName = imageFile.path.split('/').last.toLowerCase();
-      final validExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+      final validExtensions = [
+        '.jpg',
+        '.jpeg',
+        '.png',
+        '.gif',
+        '.webp',
+        '.avif',
+        '.heic',
+        '.bmp',
+        '.tiff',
+      ];
 
       return validExtensions.any((ext) => fileName.endsWith(ext));
     } catch (e) {

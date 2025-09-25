@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
@@ -70,8 +72,13 @@ class _LegalEntityPublicRegistrationScreenState
   File? _entityProfilePicture;
   File? _entityCompanyPicture;
 
+  // For web platform - store image data as Uint8List
+  Uint8List? _entityProfilePictureData;
+  Uint8List? _entityCompanyPictureData;
+
   // Loading states
   bool _isLoading = false;
+  bool _isPickingImage = false;
 
   // Services
   final SupabaseService _supabaseService = SupabaseService();
@@ -682,55 +689,158 @@ class _LegalEntityPublicRegistrationScreenState
                             Expanded(
                               child: Column(
                                 children: [
-                                  Container(
-                                    width: imageSize * 2,
-                                    height: imageSize * 2,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: Colors.grey.shade300,
-                                        width: 2,
-                                      ),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.grey.withOpacity(0.3),
-                                          spreadRadius: 2,
-                                          blurRadius: 5,
-                                          offset: const Offset(0, 3),
+                                  Stack(
+                                    children: [
+                                      Container(
+                                        width: imageSize * 2,
+                                        height: imageSize * 2,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: _entityProfilePicture != null
+                                                ? Colors.green.shade400
+                                                : Colors.grey.shade300,
+                                            width: 2,
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.grey.withOpacity(
+                                                0.3,
+                                              ),
+                                              spreadRadius: 2,
+                                              blurRadius: 5,
+                                              offset: const Offset(0, 3),
+                                            ),
+                                          ],
                                         ),
-                                      ],
-                                    ),
-                                    child: ClipOval(
-                                      child: _entityProfilePicture != null
-                                          ? Image.file(
-                                              _entityProfilePicture!,
-                                              fit: BoxFit.cover,
-                                              width: imageSize * 2,
-                                              height: imageSize * 2,
-                                            )
-                                          : Container(
-                                              color: Colors.grey.shade100,
-                                              child: Icon(
-                                                Icons.business,
-                                                size: imageSize,
-                                                color: Colors.grey.shade600,
+                                        child: ClipOval(
+                                          child: _entityProfilePicture != null
+                                              ? kIsWeb &&
+                                                        _entityProfilePictureData !=
+                                                            null
+                                                    ? Image.memory(
+                                                        _entityProfilePictureData!,
+                                                        fit: BoxFit.cover,
+                                                        width: imageSize * 2,
+                                                        height: imageSize * 2,
+                                                      )
+                                                    : Image.file(
+                                                        _entityProfilePicture!,
+                                                        fit: BoxFit.cover,
+                                                        width: imageSize * 2,
+                                                        height: imageSize * 2,
+                                                      )
+                                              : Container(
+                                                  color: Colors.grey.shade100,
+                                                  child: Icon(
+                                                    Icons.business,
+                                                    size: imageSize,
+                                                    color: Colors.grey.shade600,
+                                                  ),
+                                                ),
+                                        ),
+                                      ),
+                                      // Remove button (only show when image is loaded)
+                                      if (_entityProfilePicture != null)
+                                        Positioned(
+                                          top: 0,
+                                          right: 0,
+                                          child: GestureDetector(
+                                            onTap: _removeEntityProfilePicture,
+                                            child: Container(
+                                              padding: const EdgeInsets.all(4),
+                                              decoration: const BoxDecoration(
+                                                color: Colors.red,
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: const Icon(
+                                                Icons.close,
+                                                color: Colors.white,
+                                                size: 16,
                                               ),
                                             ),
-                                    ),
+                                          ),
+                                        ),
+                                      // Loading indicator
+                                      if (_isPickingImage)
+                                        Positioned.fill(
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              color: Colors.black.withOpacity(
+                                                0.5,
+                                              ),
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: const Center(
+                                              child: CircularProgressIndicator(
+                                                color: Colors.white,
+                                                strokeWidth: 2,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                    ],
                                   ),
                                   const SizedBox(height: 12),
-                                  SizedBox(
-                                    width: double.infinity,
-                                    height: buttonHeight,
-                                    child: CustomButton(
-                                      onPressed: _pickEntityProfilePicture,
-                                      text: AppLocalizations.of(
-                                        context,
-                                      ).getString('company_logo_label'),
-                                      backgroundColor: Colors.blue.shade600,
-                                      foregroundColor: Colors.white,
-                                    ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: SizedBox(
+                                          height: buttonHeight,
+                                          child: CustomButton(
+                                            onPressed: _isPickingImage
+                                                ? null
+                                                : _pickEntityProfilePicture,
+                                            text: _entityProfilePicture != null
+                                                ? AppLocalizations.of(
+                                                        context,
+                                                      ).getString(
+                                                        'change_logo',
+                                                      ) ??
+                                                      'Cambia Logo'
+                                                : AppLocalizations.of(
+                                                    context,
+                                                  ).getString(
+                                                    'company_logo_label',
+                                                  ),
+                                            backgroundColor:
+                                                _entityProfilePicture != null
+                                                ? Colors.orange.shade600
+                                                : Colors.blue.shade600,
+                                            foregroundColor: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                      if (_entityProfilePicture != null) ...[
+                                        const SizedBox(width: 8),
+                                        SizedBox(
+                                          height: buttonHeight,
+                                          child: CustomButton(
+                                            onPressed:
+                                                _removeEntityProfilePicture,
+                                            text: '✕',
+                                            backgroundColor:
+                                                Colors.red.shade600,
+                                            foregroundColor: Colors.white,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
                                   ),
+                                  // Status indicator
+                                  if (_entityProfilePicture != null)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 4),
+                                      child: Text(
+                                        '✓ ${AppLocalizations.of(context).getString('ready_for_preview') ?? 'Pronto per anteprima'}',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          color: Colors.blue.shade600,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
                                 ],
                               ),
                             ),
@@ -738,55 +848,158 @@ class _LegalEntityPublicRegistrationScreenState
                             Expanded(
                               child: Column(
                                 children: [
-                                  Container(
-                                    width: imageSize * 2,
-                                    height: imageSize * 2,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: Colors.grey.shade300,
-                                        width: 2,
-                                      ),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.grey.withOpacity(0.3),
-                                          spreadRadius: 2,
-                                          blurRadius: 5,
-                                          offset: const Offset(0, 3),
+                                  Stack(
+                                    children: [
+                                      Container(
+                                        width: imageSize * 2,
+                                        height: imageSize * 2,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: _entityCompanyPicture != null
+                                                ? Colors.green.shade400
+                                                : Colors.grey.shade300,
+                                            width: 2,
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.grey.withOpacity(
+                                                0.3,
+                                              ),
+                                              spreadRadius: 2,
+                                              blurRadius: 5,
+                                              offset: const Offset(0, 3),
+                                            ),
+                                          ],
                                         ),
-                                      ],
-                                    ),
-                                    child: ClipOval(
-                                      child: _entityCompanyPicture != null
-                                          ? Image.file(
-                                              _entityCompanyPicture!,
-                                              fit: BoxFit.cover,
-                                              width: imageSize * 2,
-                                              height: imageSize * 2,
-                                            )
-                                          : Container(
-                                              color: Colors.grey.shade100,
-                                              child: Icon(
-                                                Icons.photo_camera,
-                                                size: imageSize,
-                                                color: Colors.grey.shade600,
+                                        child: ClipOval(
+                                          child: _entityCompanyPicture != null
+                                              ? kIsWeb &&
+                                                        _entityCompanyPictureData !=
+                                                            null
+                                                    ? Image.memory(
+                                                        _entityCompanyPictureData!,
+                                                        fit: BoxFit.cover,
+                                                        width: imageSize * 2,
+                                                        height: imageSize * 2,
+                                                      )
+                                                    : Image.file(
+                                                        _entityCompanyPicture!,
+                                                        fit: BoxFit.cover,
+                                                        width: imageSize * 2,
+                                                        height: imageSize * 2,
+                                                      )
+                                              : Container(
+                                                  color: Colors.grey.shade100,
+                                                  child: Icon(
+                                                    Icons.photo_camera,
+                                                    size: imageSize,
+                                                    color: Colors.grey.shade600,
+                                                  ),
+                                                ),
+                                        ),
+                                      ),
+                                      // Remove button (only show when image is loaded)
+                                      if (_entityCompanyPicture != null)
+                                        Positioned(
+                                          top: 0,
+                                          right: 0,
+                                          child: GestureDetector(
+                                            onTap: _removeEntityCompanyPicture,
+                                            child: Container(
+                                              padding: const EdgeInsets.all(4),
+                                              decoration: const BoxDecoration(
+                                                color: Colors.red,
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: const Icon(
+                                                Icons.close,
+                                                color: Colors.white,
+                                                size: 16,
                                               ),
                                             ),
-                                    ),
+                                          ),
+                                        ),
+                                      // Loading indicator
+                                      if (_isPickingImage)
+                                        Positioned.fill(
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              color: Colors.black.withOpacity(
+                                                0.5,
+                                              ),
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: const Center(
+                                              child: CircularProgressIndicator(
+                                                color: Colors.white,
+                                                strokeWidth: 2,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                    ],
                                   ),
                                   const SizedBox(height: 12),
-                                  SizedBox(
-                                    width: double.infinity,
-                                    height: buttonHeight,
-                                    child: CustomButton(
-                                      onPressed: _pickEntityCompanyPicture,
-                                      text: AppLocalizations.of(
-                                        context,
-                                      ).getString('company_photo_label'),
-                                      backgroundColor: Colors.green.shade600,
-                                      foregroundColor: Colors.white,
-                                    ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: SizedBox(
+                                          height: buttonHeight,
+                                          child: CustomButton(
+                                            onPressed: _isPickingImage
+                                                ? null
+                                                : _pickEntityCompanyPicture,
+                                            text: _entityCompanyPicture != null
+                                                ? AppLocalizations.of(
+                                                        context,
+                                                      ).getString(
+                                                        'change_company_photo',
+                                                      ) ??
+                                                      'Cambia Foto'
+                                                : AppLocalizations.of(
+                                                    context,
+                                                  ).getString(
+                                                    'company_photo_label',
+                                                  ),
+                                            backgroundColor:
+                                                _entityCompanyPicture != null
+                                                ? Colors.orange.shade600
+                                                : Colors.green.shade600,
+                                            foregroundColor: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                      if (_entityCompanyPicture != null) ...[
+                                        const SizedBox(width: 8),
+                                        SizedBox(
+                                          height: buttonHeight,
+                                          child: CustomButton(
+                                            onPressed:
+                                                _removeEntityCompanyPicture,
+                                            text: '✕',
+                                            backgroundColor:
+                                                Colors.red.shade600,
+                                            foregroundColor: Colors.white,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
                                   ),
+                                  // Status indicator
+                                  if (_entityCompanyPicture != null)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 4),
+                                      child: Text(
+                                        '✓ ${AppLocalizations.of(context).getString('ready_for_preview') ?? 'Pronto per anteprima'}',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          color: Colors.blue.shade600,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
                                 ],
                               ),
                             ),
@@ -794,16 +1007,50 @@ class _LegalEntityPublicRegistrationScreenState
                         ),
                         const SizedBox(height: 16),
                         // Image info text
-                        Text(
-                          AppLocalizations.of(
-                            context,
-                          ).getString('image_upload_info'),
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey.shade600,
-                            fontStyle: FontStyle.italic,
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade50,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.blue.shade200),
                           ),
-                          textAlign: TextAlign.center,
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.info_outline,
+                                    size: 16,
+                                    color: Colors.blue.shade600,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    AppLocalizations.of(
+                                          context,
+                                        ).getString('image_upload_info') ??
+                                        'Le immagini verranno caricate dopo il login. Puoi selezionarle ora per l\'anteprima.',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.blue.shade700,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Formati supportati: JPG, PNG, GIF, WebP, AVIF, HEIC, BMP, TIFF',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.blue.shade600,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     );
@@ -1081,38 +1328,10 @@ class _LegalEntityPublicRegistrationScreenState
 
       final createdEntity = edgeFunctionResult['data']['legalEntity'];
 
-      // 5. Upload entity images using edge functions
-      if (_entityProfilePicture != null) {
-        try {
-          entityProfileUrl =
-              await LegalEntityImageService.uploadLegalEntityLogoPicture(
-                imageFile: _entityProfilePicture!,
-                legalEntityId: legalEntityId,
-                filename:
-                    'logo_${_legalNameController.text.replaceAll(' ', '_').toLowerCase()}.jpg',
-              );
-          print('✅ Logo uploaded successfully: $entityProfileUrl');
-        } catch (e) {
-          print('❌ Error uploading logo: $e');
-          // Continue without logo - don't fail the entire registration
-        }
-      }
-
-      if (_entityCompanyPicture != null) {
-        try {
-          entityCompanyUrl =
-              await LegalEntityImageService.uploadLegalEntityCompanyPicture(
-                imageFile: _entityCompanyPicture!,
-                legalEntityId: legalEntityId,
-                filename:
-                    'company_${_legalNameController.text.replaceAll(' ', '_').toLowerCase()}.jpg',
-              );
-          print('✅ Company picture uploaded successfully: $entityCompanyUrl');
-        } catch (e) {
-          print('❌ Error uploading company picture: $e');
-          // Continue without company picture - don't fail the entire registration
-        }
-      }
+      // 5. Note: Entity images will be uploaded after user authentication
+      // For public registration, we skip image upload and let user upload them after login
+      print('ℹ️ Entity images will be uploaded after user authentication');
+      print('ℹ️ User can upload logo and company photo after logging in');
 
       // 6. Handle pricing if selected
       if (_selectedPricing != null) {
@@ -1134,9 +1353,11 @@ class _LegalEntityPublicRegistrationScreenState
             content: Text(
               AppLocalizations.of(
                 context,
-              ).getString('registration_completed_successfully'),
+              ).getString('registration_completed_successfully') ?? 
+              'Registrazione completata con successo! Puoi caricare logo e foto azienda dopo il login.',
             ),
             backgroundColor: Colors.green,
+            duration: const Duration(seconds: 5),
           ),
         );
 
@@ -1185,6 +1406,12 @@ class _LegalEntityPublicRegistrationScreenState
   }
 
   Future<void> _pickEntityProfilePicture() async {
+    if (_isPickingImage) return; // Prevent multiple simultaneous picks
+
+    setState(() {
+      _isPickingImage = true;
+    });
+
     try {
       final XFile? image = await _imagePicker.pickImage(
         source: ImageSource.gallery,
@@ -1196,8 +1423,36 @@ class _LegalEntityPublicRegistrationScreenState
       if (image != null) {
         final file = File(image.path);
 
-        // Validate image file
-        if (!LegalEntityImageService.validateImageFile(file)) {
+        // Debug: Print file information (can be removed in production)
+        print('🔍 Selected image path: ${image.path}');
+        print('🔍 File name: ${image.name}');
+        print('🔍 File extension: ${image.name.split('.').last.toLowerCase()}');
+
+        // Validate image file using XFile name for web blob URLs
+        bool isValidFormat = false;
+        if (image.path.startsWith('blob:')) {
+          // For web blob URLs, validate using XFile name
+          final fileName = image.name.toLowerCase();
+          final validExtensions = [
+            '.jpg',
+            '.jpeg',
+            '.png',
+            '.gif',
+            '.webp',
+            '.avif',
+            '.heic',
+            '.bmp',
+            '.tiff',
+          ];
+          isValidFormat = validExtensions.any((ext) => fileName.endsWith(ext));
+          print('🔍 Web blob validation result: $isValidFormat');
+        } else {
+          // For regular file paths, use the existing validation
+          isValidFormat = LegalEntityImageService.validateImageFile(file);
+        }
+
+        if (!isValidFormat) {
+          print('❌ Image validation failed for: ${image.path}');
           _showError(
             AppLocalizations.of(context).getString('invalid_image_format'),
           );
@@ -1211,20 +1466,73 @@ class _LegalEntityPublicRegistrationScreenState
         )) {
           _showError(AppLocalizations.of(context).getString('file_too_large'));
           return;
+        }
+
+        // Load image data for web platform
+        Uint8List? imageData;
+        if (kIsWeb) {
+          imageData = await image.readAsBytes();
         }
 
         setState(() {
           _entityProfilePicture = file;
+          if (kIsWeb) {
+            _entityProfilePictureData = imageData;
+          }
         });
+
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(
+                    context,
+                  ).getString('logo_loaded_successfully') ??
+                  'Logo caricato con successo!',
+            ),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
       }
     } catch (e) {
       _showError(
         '${AppLocalizations.of(context).getString('image_selection_error')}: $e',
       );
+    } finally {
+      setState(() {
+        _isPickingImage = false;
+      });
     }
   }
 
+  void _removeEntityProfilePicture() {
+    setState(() {
+      _entityProfilePicture = null;
+      if (kIsWeb) {
+        _entityProfilePictureData = null;
+      }
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          AppLocalizations.of(context).getString('logo_removed') ??
+              'Logo rimosso',
+        ),
+        backgroundColor: Colors.orange,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
   Future<void> _pickEntityCompanyPicture() async {
+    if (_isPickingImage) return; // Prevent multiple simultaneous picks
+
+    setState(() {
+      _isPickingImage = true;
+    });
+
     try {
       final XFile? image = await _imagePicker.pickImage(
         source: ImageSource.gallery,
@@ -1236,8 +1544,36 @@ class _LegalEntityPublicRegistrationScreenState
       if (image != null) {
         final file = File(image.path);
 
-        // Validate image file
-        if (!LegalEntityImageService.validateImageFile(file)) {
+        // Debug: Print file information (can be removed in production)
+        print('🔍 Selected company image path: ${image.path}');
+        print('🔍 File name: ${image.name}');
+        print('🔍 File extension: ${image.name.split('.').last.toLowerCase()}');
+
+        // Validate image file using XFile name for web blob URLs
+        bool isValidFormat = false;
+        if (image.path.startsWith('blob:')) {
+          // For web blob URLs, validate using XFile name
+          final fileName = image.name.toLowerCase();
+          final validExtensions = [
+            '.jpg',
+            '.jpeg',
+            '.png',
+            '.gif',
+            '.webp',
+            '.avif',
+            '.heic',
+            '.bmp',
+            '.tiff',
+          ];
+          isValidFormat = validExtensions.any((ext) => fileName.endsWith(ext));
+          print('🔍 Web blob validation result: $isValidFormat');
+        } else {
+          // For regular file paths, use the existing validation
+          isValidFormat = LegalEntityImageService.validateImageFile(file);
+        }
+
+        if (!isValidFormat) {
+          print('❌ Company image validation failed for: ${image.path}');
           _showError(
             AppLocalizations.of(context).getString('invalid_image_format'),
           );
@@ -1253,14 +1589,61 @@ class _LegalEntityPublicRegistrationScreenState
           return;
         }
 
+        // Load image data for web platform
+        Uint8List? imageData;
+        if (kIsWeb) {
+          imageData = await image.readAsBytes();
+        }
+
         setState(() {
           _entityCompanyPicture = file;
+          if (kIsWeb) {
+            _entityCompanyPictureData = imageData;
+          }
         });
+
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(
+                    context,
+                  ).getString('company_photo_loaded_successfully') ??
+                  'Foto azienda caricata con successo!',
+            ),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
       }
     } catch (e) {
       _showError(
         '${AppLocalizations.of(context).getString('image_selection_error')}: $e',
       );
+    } finally {
+      setState(() {
+        _isPickingImage = false;
+      });
     }
+  }
+
+  void _removeEntityCompanyPicture() {
+    setState(() {
+      _entityCompanyPicture = null;
+      if (kIsWeb) {
+        _entityCompanyPictureData = null;
+      }
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          AppLocalizations.of(context).getString('company_photo_removed') ??
+              'Foto azienda rimossa',
+        ),
+        backgroundColor: Colors.orange,
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 }

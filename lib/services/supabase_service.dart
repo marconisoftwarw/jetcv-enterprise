@@ -486,6 +486,28 @@ class SupabaseService {
     }
   }
 
+  // Helper method to ensure user is authenticated before function calls
+  Future<bool> ensureUserAuthenticated() async {
+    try {
+      // First refresh the session if needed
+      await refreshSessionIfNeeded();
+
+      // Check if user is authenticated
+      if (!isUserAuthenticated) {
+        print(
+          '❌ SupabaseService: User not authenticated. Please log in first.',
+        );
+        return false;
+      }
+
+      print('✅ SupabaseService: User is authenticated');
+      return true;
+    } catch (e) {
+      print('❌ SupabaseService: Error checking authentication: $e');
+      return false;
+    }
+  }
+
   // Handle OAuth callback and PKCE exchange
   Future<bool> handleOAuthCallback() async {
     try {
@@ -718,6 +740,14 @@ class SupabaseService {
     Map<String, dynamic> updates,
   ) async {
     try {
+      // Ensure user is authenticated
+      if (!await ensureUserAuthenticated()) {
+        print(
+          '❌ SupabaseService: User not authenticated for updateUserViaEdgeFunction',
+        );
+        return null;
+      }
+
       print('🔄 SupabaseService: Updating user via Edge Function: $userId');
 
       final response = await _client.functions.invoke(

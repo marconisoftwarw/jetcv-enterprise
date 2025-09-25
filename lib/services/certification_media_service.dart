@@ -188,6 +188,14 @@ class CertificationMediaService {
         return 'image/gif';
       case 'webp':
         return 'image/webp';
+      case 'avif':
+        return 'image/avif';
+      case 'heic':
+        return 'image/heic';
+      case 'bmp':
+        return 'image/bmp';
+      case 'tiff':
+        return 'image/tiff';
       case 'mp4':
         return 'video/mp4';
       case 'mov':

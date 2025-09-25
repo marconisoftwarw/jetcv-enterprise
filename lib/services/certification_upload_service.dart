@@ -36,7 +36,8 @@ class CertificationUploadService {
     userIds, // Lista degli user IDs per distinguere media degli utenti
     String? esitoValue, // Valore dell'esito per tutti gli utenti (deprecato)
     String? titoloValue, // Valore del titolo della certificazione
-    Map<String, String>? userEsitoValues, // Esiti per ogni utente (user_id -> esito_value)
+    Map<String, String>?
+    userEsitoValues, // Esiti per ogni utente (user_id -> esito_value)
   }) async {
     try {
       print('🚀 Creating certification with media upload...');
@@ -120,7 +121,7 @@ class CertificationUploadService {
       if (certificationUsers != null && certificationUsers.isNotEmpty) {
         request.fields['users_json'] = json.encode(certificationUsers);
       }
-      
+
       // Aggiungi gli esiti per utente se presenti
       if (userEsitoValues != null && userEsitoValues.isNotEmpty) {
         request.fields['user_esito_values'] = json.encode(userEsitoValues);

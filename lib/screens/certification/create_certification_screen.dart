@@ -238,18 +238,38 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     final l10n = AppLocalizations.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    
+
     // Responsive breakpoints
     final isMobile = screenWidth < 768;
     final isTablet = screenWidth >= 768 && screenWidth < 1024;
     final isDesktop = screenWidth >= 1024;
-    
+
     // Responsive values
-    final horizontalPadding = isMobile ? 20.0 : isTablet ? 32.0 : 48.0;
-    final verticalPadding = isMobile ? 16.0 : isTablet ? 24.0 : 32.0;
-    final cardPadding = isMobile ? 16.0 : isTablet ? 20.0 : 24.0;
-    final fontSize = isMobile ? 14.0 : isTablet ? 16.0 : 18.0;
-    final titleFontSize = isMobile ? 18.0 : isTablet ? 20.0 : 24.0;
+    final horizontalPadding = isMobile
+        ? 20.0
+        : isTablet
+        ? 32.0
+        : 48.0;
+    final verticalPadding = isMobile
+        ? 16.0
+        : isTablet
+        ? 24.0
+        : 32.0;
+    final cardPadding = isMobile
+        ? 16.0
+        : isTablet
+        ? 20.0
+        : 24.0;
+    final fontSize = isMobile
+        ? 14.0
+        : isTablet
+        ? 16.0
+        : 18.0;
+    final titleFontSize = isMobile
+        ? 18.0
+        : isTablet
+        ? 20.0
+        : 24.0;
 
     return Scaffold(
       backgroundColor: AppTheme.offWhite,
@@ -272,11 +292,25 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 ),
               ),
               if (_legalEntityName != null && _legalEntityName!.isNotEmpty) ...[
-                SizedBox(width: isMobile ? 8 : isTablet ? 12 : 16),
+                SizedBox(
+                  width: isMobile
+                      ? 8
+                      : isTablet
+                      ? 12
+                      : 16,
+                ),
                 Container(
                   padding: EdgeInsets.symmetric(
-                    horizontal: isMobile ? 8 : isTablet ? 10 : 12,
-                    vertical: isMobile ? 3 : isTablet ? 4 : 6,
+                    horizontal: isMobile
+                        ? 8
+                        : isTablet
+                        ? 10
+                        : 12,
+                    vertical: isMobile
+                        ? 3
+                        : isTablet
+                        ? 4
+                        : 6,
                   ),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
@@ -299,14 +333,28 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                       Icon(
                         Icons.business_rounded,
                         color: AppTheme.primaryBlue,
-                        size: isMobile ? 12 : isTablet ? 14 : 16,
+                        size: isMobile
+                            ? 12
+                            : isTablet
+                            ? 14
+                            : 16,
                       ),
-                      SizedBox(width: isMobile ? 4 : isTablet ? 6 : 8),
+                      SizedBox(
+                        width: isMobile
+                            ? 4
+                            : isTablet
+                            ? 6
+                            : 8,
+                      ),
                       Text(
                         _legalEntityName!,
                         style: TextStyle(
                           color: AppTheme.primaryBlue,
-                          fontSize: isMobile ? 10 : isTablet ? 12 : 14,
+                          fontSize: isMobile
+                              ? 10
+                              : isTablet
+                              ? 12
+                              : 14,
                           fontWeight: FontWeight.w600,
                         ),
                         maxLines: 1,
@@ -316,11 +364,25 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                   ),
                 ),
               ] else if (_isLoadingLegalEntities) ...[
-                SizedBox(width: isMobile ? 8 : isTablet ? 12 : 16),
+                SizedBox(
+                  width: isMobile
+                      ? 8
+                      : isTablet
+                      ? 12
+                      : 16,
+                ),
                 Container(
                   padding: EdgeInsets.symmetric(
-                    horizontal: isMobile ? 8 : isTablet ? 10 : 12,
-                    vertical: isMobile ? 3 : isTablet ? 4 : 6,
+                    horizontal: isMobile
+                        ? 8
+                        : isTablet
+                        ? 10
+                        : 12,
+                    vertical: isMobile
+                        ? 3
+                        : isTablet
+                        ? 4
+                        : 6,
                   ),
                   decoration: BoxDecoration(
                     color: AppTheme.lightGrey.withValues(alpha: 0.3),
@@ -2937,8 +2999,6 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     print('🚀 Creating certification with unified upload service...');
     print('📝 Title from controller: "${_titleController.text.trim()}"');
 
- 
-
     // Mostra alert di conferma prima di inviare
     final shouldProceed = await _showConfirmationDialog();
     if (!shouldProceed) {
@@ -3032,7 +3092,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
       // Prepara l'array certification_users
       List<Map<String, dynamic>> certificationUsers = [];
       Map<String, String> userEsitoValues = {}; // user_id -> esito_value
-      
+
       if (_addedUsers.isNotEmpty) {
         for (final user in _addedUsers) {
           final otpData = _usedOtps.firstWhere(
@@ -3046,22 +3106,25 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             'status': 'pending',
             'rejection_reason': null,
           });
-          
+
           // Raccogli l'esito per questo utente se presente
           final userFieldValues = _userFieldValues[user.idUser];
           if (userFieldValues != null) {
             // Cerca il campo "esito" tra i campi dell'utente
             for (final field in _certificationUserFields) {
-              if (field.name == 'esito' && userFieldValues.containsKey('esito')) {
+              if (field.name == 'esito' &&
+                  userFieldValues.containsKey('esito')) {
                 userEsitoValues[user.idUser] = userFieldValues['esito'] ?? "0";
-                print('📊 Esito per utente ${user.idUser}: ${userFieldValues['esito']}');
+                print(
+                  '📊 Esito per utente ${user.idUser}: ${userFieldValues['esito']}',
+                );
                 break;
               }
             }
           }
         }
       }
-      
+
       print('📊 User esito values collected: $userEsitoValues');
 
       // Test della connessione prima di creare
@@ -3139,7 +3202,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           acquisitionType: 'deferred',
           userIds: mediaUserIds,
           esitoValue: "0", // Valore di default per esito (deprecato)
-          titoloValue: _titleController.text.trim(), // Titolo inserito dall'utente
+          titoloValue: _titleController.text
+              .trim(), // Titolo inserito dall'utente
           userEsitoValues: userEsitoValues, // Esiti per ogni utente
         );
       } else {
@@ -3158,7 +3222,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               ? certificationUsers
               : null,
           esitoValue: "0", // Valore di default per esito (deprecato)
-          titoloValue: _titleController.text.trim(), // Titolo inserito dall'utente
+          titoloValue: _titleController.text
+              .trim(), // Titolo inserito dall'utente
           userEsitoValues: userEsitoValues, // Esiti per ogni utente
         );
       }
