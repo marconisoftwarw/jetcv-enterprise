@@ -256,7 +256,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
       // Prepara i dati per l'API Veriff
       final veriffData = {
-        'callback': 'https://skqsuxmdfqxbkhmselaz.supabase.co/home',
+        'callback': AppConfig.veriffCallbackUrl,
         'firstName': _firstNameController.text.trim(),
         'lastName': _lastNameController.text.trim(),
         'additionalFields': {
