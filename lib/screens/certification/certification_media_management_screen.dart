@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 import '../../models/certification_db.dart';
 import '../../services/certification_db_service.dart';
@@ -505,8 +506,17 @@ class _AddCertificationMediaScreenState
         selectedFile = await picker.pickVideo(source: ImageSource.gallery);
         break;
       case 'audio':
-        // Per audio, usiamo la galleria come fallback
-        selectedFile = await picker.pickImage(source: ImageSource.gallery);
+        // Per audio, usiamo file_picker per selezionare file audio
+        final result = await FilePicker.platform.pickFiles(
+          type: FileType.audio,
+          allowMultiple: false,
+        );
+        if (result != null && result.files.isNotEmpty) {
+          final platformFile = result.files.first;
+          if (platformFile.path != null) {
+            selectedFile = XFile(platformFile.path!);
+          }
+        }
         break;
     }
 

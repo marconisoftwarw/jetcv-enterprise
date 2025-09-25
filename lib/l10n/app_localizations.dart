@@ -266,7 +266,7 @@ class AppLocalizations {
           'Servizio di localizzazione non disponibile. Utilizzo Roma come posizione predefinita.',
       'location_fallback_error':
           'Errore nel rilevamento della posizione. Utilizzato Roma come posizione predefinita.',
-      'default_location': 'Roma, Italia',
+      'default_location': 'Italia',
       'enter_otp_code_hint': 'Inserisci codice OTP...',
       'enter_otp_user_label': 'Inserisci codice OTP utente',
 

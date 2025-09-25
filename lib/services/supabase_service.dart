@@ -793,7 +793,6 @@ class SupabaseService {
       if (user != null) {
         return user;
       }
-
       // Se non esiste, crealo automaticamente se abbiamo i dati di Supabase
       if (supabaseUser != null) {
         print('Creating missing user record for: $userId');

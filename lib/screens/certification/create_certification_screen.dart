@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:convert';
@@ -15,10 +16,9 @@ import '../../widgets/neon_button.dart';
 import '../../widgets/enterprise_text_field.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/user.dart';
-import '../../services/certification_edge_service.dart';
 import '../../services/certification_media_service.dart';
 import '../../services/certification_upload_service.dart';
-import '../../services/certification_service_v2.dart';
+import '../../services/certification_unified_service.dart';
 import '../../services/otp_service.dart';
 import '../../services/certification_category_edge_service.dart';
 import '../../services/certification_information_service.dart';
@@ -271,180 +271,233 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
         ? 20.0
         : 24.0;
 
-    return Scaffold(
-      backgroundColor: AppTheme.offWhite,
-      appBar: AppBar(
-        backgroundColor: AppTheme.pureWhite,
-        foregroundColor: AppTheme.textPrimary,
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        title: Center(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
+    return Stack(
+      children: [
+        Scaffold(
+          backgroundColor: AppTheme.offWhite,
+          appBar: AppBar(
+            backgroundColor: AppTheme.pureWhite,
+            foregroundColor: AppTheme.textPrimary,
+            elevation: 0,
+            surfaceTintColor: Colors.transparent,
+            title: Center(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    l10n.getString('new_certification'),
+                    style: TextStyle(
+                      color: AppTheme.textPrimary,
+                      fontWeight: FontWeight.w700,
+                      fontSize: titleFontSize,
+                      letterSpacing: -0.2,
+                    ),
+                  ),
+                  if (_legalEntityName != null &&
+                      _legalEntityName!.isNotEmpty) ...[
+                    SizedBox(
+                      width: isMobile
+                          ? 8
+                          : isTablet
+                          ? 12
+                          : 16,
+                    ),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isMobile
+                            ? 8
+                            : isTablet
+                            ? 10
+                            : 12,
+                        vertical: isMobile
+                            ? 3
+                            : isTablet
+                            ? 4
+                            : 6,
+                      ),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            AppTheme.primaryBlue.withValues(alpha: 0.1),
+                            AppTheme.primaryBlue.withValues(alpha: 0.05),
+                          ],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: AppTheme.primaryBlue.withValues(alpha: 0.2),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.business_rounded,
+                            color: AppTheme.primaryBlue,
+                            size: isMobile
+                                ? 12
+                                : isTablet
+                                ? 14
+                                : 16,
+                          ),
+                          SizedBox(
+                            width: isMobile
+                                ? 4
+                                : isTablet
+                                ? 6
+                                : 8,
+                          ),
+                          Text(
+                            _legalEntityName!,
+                            style: TextStyle(
+                              color: AppTheme.primaryBlue,
+                              fontSize: isMobile
+                                  ? 10
+                                  : isTablet
+                                  ? 12
+                                  : 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ] else if (_isLoadingLegalEntities) ...[
+                    SizedBox(
+                      width: isMobile
+                          ? 8
+                          : isTablet
+                          ? 12
+                          : 16,
+                    ),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isMobile
+                            ? 8
+                            : isTablet
+                            ? 10
+                            : 12,
+                        vertical: isMobile
+                            ? 3
+                            : isTablet
+                            ? 4
+                            : 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppTheme.lightGrey.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(
+                            width: isTablet ? 12 : 10,
+                            height: isTablet ? 12 : 10,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                AppTheme.textSecondary,
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: isTablet ? 6 : 4),
+                          Text(
+                            l10n.getString('loading_organization'),
+                            style: TextStyle(
+                              color: AppTheme.textSecondary,
+                              fontSize: isTablet ? 12 : 10,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: AppTheme.textPrimary),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
+          body: Column(
             children: [
-              Text(
-                l10n.getString('new_certification'),
-                style: TextStyle(
-                  color: AppTheme.textPrimary,
-                  fontWeight: FontWeight.w700,
-                  fontSize: titleFontSize,
-                  letterSpacing: -0.2,
+              _buildProgressIndicator(),
+              Expanded(
+                child: PageView(
+                  controller: _pageController,
+                  physics:
+                      const NeverScrollableScrollPhysics(), // Disabilita lo swipe
+                  onPageChanged: (index) {
+                    setState(() {
+                      _currentStep = index;
+                    });
+                  },
+                  children: [
+                    _buildGeneralInfoStep(),
+                    _buildUsersStep(),
+                    _buildResultsStep(),
+                    _buildReviewStep(),
+                  ],
                 ),
               ),
-              if (_legalEntityName != null && _legalEntityName!.isNotEmpty) ...[
-                SizedBox(
-                  width: isMobile
-                      ? 8
-                      : isTablet
-                      ? 12
-                      : 16,
-                ),
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: isMobile
-                        ? 8
-                        : isTablet
-                        ? 10
-                        : 12,
-                    vertical: isMobile
-                        ? 3
-                        : isTablet
-                        ? 4
-                        : 6,
-                  ),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        AppTheme.primaryBlue.withValues(alpha: 0.1),
-                        AppTheme.primaryBlue.withValues(alpha: 0.05),
-                      ],
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: AppTheme.primaryBlue.withValues(alpha: 0.2),
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.business_rounded,
-                        color: AppTheme.primaryBlue,
-                        size: isMobile
-                            ? 12
-                            : isTablet
-                            ? 14
-                            : 16,
-                      ),
-                      SizedBox(
-                        width: isMobile
-                            ? 4
-                            : isTablet
-                            ? 6
-                            : 8,
-                      ),
-                      Text(
-                        _legalEntityName!,
-                        style: TextStyle(
-                          color: AppTheme.primaryBlue,
-                          fontSize: isMobile
-                              ? 10
-                              : isTablet
-                              ? 12
-                              : 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-              ] else if (_isLoadingLegalEntities) ...[
-                SizedBox(
-                  width: isMobile
-                      ? 8
-                      : isTablet
-                      ? 12
-                      : 16,
-                ),
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: isMobile
-                        ? 8
-                        : isTablet
-                        ? 10
-                        : 12,
-                    vertical: isMobile
-                        ? 3
-                        : isTablet
-                        ? 4
-                        : 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppTheme.lightGrey.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(
-                        width: isTablet ? 12 : 10,
-                        height: isTablet ? 12 : 10,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            AppTheme.textSecondary,
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: isTablet ? 6 : 4),
-                      Text(
-                        l10n.getString('loading_organization'),
-                        style: TextStyle(
-                          color: AppTheme.textSecondary,
-                          fontSize: isTablet ? 12 : 10,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
             ],
           ),
         ),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppTheme.textPrimary),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: Column(
-        children: [
-          _buildProgressIndicator(),
-          Expanded(
-            child: PageView(
-              controller: _pageController,
-              physics:
-                  const NeverScrollableScrollPhysics(), // Disabilita lo swipe
-              onPageChanged: (index) {
-                setState(() {
-                  _currentStep = index;
-                });
-              },
-              children: [
-                _buildGeneralInfoStep(),
-                _buildUsersStep(),
-                _buildResultsStep(),
-                _buildReviewStep(),
-              ],
+        // Overlay di loading durante la creazione
+        if (_isCreating)
+          Container(
+            color: Colors.black.withValues(alpha: 0.5),
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: AppTheme.pureWhite,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        AppTheme.primaryBlue,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Creazione certificazione in corso...',
+                      style: TextStyle(
+                        color: AppTheme.textPrimary,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Attendere prego...',
+                      style: TextStyle(
+                        color: AppTheme.textSecondary,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
-        ],
-      ),
+      ],
     );
   }
 
@@ -2548,9 +2601,12 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               SizedBox(width: isTablet ? 20 : 16),
               Expanded(
                 child: NeonButton(
-                  onPressed: _handleSendCertification,
-                  text: 'Conferma Certificazione',
-                  icon: Icons.check_circle,
+                  onPressed: _isCreating ? null : _handleSendCertification,
+                  text: _isCreating
+                      ? 'Creazione in corso...'
+                      : 'Conferma Certificazione',
+                  icon: _isCreating ? null : Icons.check_circle,
+                  isLoading: _isCreating,
                 ),
               ),
             ],
@@ -3133,17 +3189,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
 
       print('📊 User esito values collected: $userEsitoValues');
 
-      // Test della connessione prima di creare
-      final connectionTest = await CertificationEdgeService.testConnection();
-      print('🔗 Connection test result: $connectionTest');
-
-      if (!connectionTest) {
-        setState(() {
-          _isCreating = false;
-          _errorMessage = 'Errore di connessione al server. Riprova più tardi.';
-        });
-        return;
-      }
+      // Test della connessione prima di creare (semplificato)
+      print('🔗 Testing connection to unified service...');
 
       // Scegli il servizio appropriato in base alla presenza di media
       Map<String, dynamic>? result;
@@ -3185,18 +3232,21 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           );
         }
 
-        result = await CertificationUploadService.createCertificationWithMedia(
+        // Usa il servizio unificato per creare certificazione con media
+        result = await CertificationUnifiedService.createCertificationUnified(
           idCertifier: certifierId,
           idLegalEntity: legalEntityId,
           idLocation: locationId,
-          nUsers: _addedUsers.isNotEmpty ? 1 : 0,
+          nUsers: _addedUsers.isNotEmpty ? _addedUsers.length : 0,
           idCertificationCategory: categoryId,
-          status: 'pending',
+          status: 'sent',
           draftAt: DateTime.now().toIso8601String(),
+          sentAt: DateTime.now().toIso8601String(),
+          closedAt: null,
           certificationUsers: certificationUsers.isNotEmpty
               ? certificationUsers
               : null,
-          mediaFiles: allMedia.map((item) => item.file).toList(),
+          mediaFiles: allMedia.isNotEmpty ? allMedia : null,
           mediaMetadata: allMedia
               .map(
                 (item) => {
@@ -3205,50 +3255,35 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 },
               )
               .toList(),
-          acquisitionType: 'deferred',
-          userIds: mediaUserIds,
-          esitoValue: "0", // Valore di default per esito (deprecato)
-          titoloValue: _titleController.text
-              .trim(), // Titolo inserito dall'utente
-          userEsitoValues: userEsitoValues, // Esiti per ogni utente
         );
       } else {
-        // Se non ci sono media, usa il servizio certificazioni standard
+        // Se non ci sono media, usa il servizio unificato senza media
         print('🚀 Creating certification without media...');
 
-        result = await CertificationServiceV2.createCertification(
+        result = await CertificationUnifiedService.createCertificationUnified(
           idCertifier: certifierId,
           idLegalEntity: legalEntityId,
           idLocation: locationId,
-          nUsers: _addedUsers.isNotEmpty ? 1 : 0,
+          nUsers: _addedUsers.isNotEmpty ? _addedUsers.length : 0,
           idCertificationCategory: categoryId,
-          status: 'pending',
+          status: 'sent',
           draftAt: DateTime.now().toIso8601String(),
+          sentAt: DateTime.now().toIso8601String(),
+          closedAt: null,
           certificationUsers: certificationUsers.isNotEmpty
               ? certificationUsers
               : null,
-          esitoValue: "0", // Valore di default per esito (deprecato)
-          titoloValue: _titleController.text
-              .trim(), // Titolo inserito dall'utente
-          userEsitoValues: userEsitoValues, // Esiti per ogni utente
+          mediaFiles: null,
+          mediaMetadata: null,
         );
       }
 
       if (result != null) {
-        print('✅ Certification created successfully with media: $result');
+        print(
+          '✅ Certification created successfully via unified service: $result',
+        );
 
-        // Blocca gli OTP utilizzati dopo la creazione della certificazione
-        if (_addedUsers.isNotEmpty) {
-          await _blockUsedOtps(result['data']['id_certification'], {
-            'id_certification': result['data']['id_certification'],
-            'id_certifier': certifierId,
-            'id_legal_entity': legalEntityId,
-            'id_location': locationId,
-            'n_users': _addedUsers.length,
-            'id_certification_category': categoryId,
-            'status': 'pending',
-          });
-        }
+        // Gli OTP sono già stati bloccati dal servizio unificato
 
         setState(() {
           _successMessage = 'Certificazione e media caricati con successo!';
@@ -3263,7 +3298,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               'La certificazione è stata inviata con successo e non può più essere modificata.',
         );
       } else {
-        throw Exception('Failed to create certification with media');
+        throw Exception('Failed to create certification via unified service');
       }
     } catch (e) {
       print('💥 Error creating certification: $e');
@@ -3957,8 +3992,17 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           selectedFile = await picker.pickVideo(source: ImageSource.gallery);
           break;
         case 'audio':
-          // Per audio, usiamo la galleria come fallback
-          selectedFile = await picker.pickImage(source: ImageSource.gallery);
+          // Per audio, usiamo file_picker per selezionare file audio
+          final result = await FilePicker.platform.pickFiles(
+            type: FileType.audio,
+            allowMultiple: false,
+          );
+          if (result != null && result.files.isNotEmpty) {
+            final platformFile = result.files.first;
+            if (platformFile.path != null) {
+              selectedFile = XFile(platformFile.path!);
+            }
+          }
           break;
       }
 
@@ -4011,8 +4055,17 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           selectedFile = await picker.pickVideo(source: ImageSource.gallery);
           break;
         case 'audio':
-          // Per audio, usiamo la galleria come fallback
-          selectedFile = await picker.pickImage(source: ImageSource.gallery);
+          // Per audio, usiamo file_picker per selezionare file audio
+          final result = await FilePicker.platform.pickFiles(
+            type: FileType.audio,
+            allowMultiple: false,
+          );
+          if (result != null && result.files.isNotEmpty) {
+            final platformFile = result.files.first;
+            if (platformFile.path != null) {
+              selectedFile = XFile(platformFile.path!);
+            }
+          }
           break;
       }
 
@@ -4570,7 +4623,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
 
       if (permission == LocationPermission.deniedForever) {
         setState(() {
-          _locationController.text = 'Roma, Italia';
+          _locationController.text = 'Italia';
         });
         _showErrorDialog(
           'I permessi di localizzazione sono stati negati permanentemente. Utilizzato Roma come posizione predefinita.',
@@ -4615,7 +4668,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             'Timeout nel rilevamento della posizione. Utilizzo Roma come posizione predefinita.';
         // Imposta Roma come posizione predefinita
         setState(() {
-          _locationController.text = 'Roma, Italia';
+          _locationController.text = 'Italia';
         });
         return;
       } else if (e.toString().contains('permission')) {
@@ -4623,7 +4676,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             'Permessi di localizzazione non concessi. Utilizzo Roma come posizione predefinita.';
         // Imposta Roma come posizione predefinita
         setState(() {
-          _locationController.text = 'Roma, Italia';
+          _locationController.text = 'Italia';
         });
         return;
       } else if (e.toString().contains('service')) {
@@ -4631,14 +4684,14 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             'Servizio di localizzazione non disponibile. Utilizzo Roma come posizione predefinita.';
         // Imposta Roma come posizione predefinita
         setState(() {
-          _locationController.text = 'Roma, Italia';
+          _locationController.text = 'Italia';
         });
         return;
       }
 
       // Fallback generale: usa Roma
       setState(() {
-        _locationController.text = 'Roma, Italia';
+        _locationController.text = 'Italia';
       });
       _showErrorDialog(
         'Errore nel rilevamento della posizione. Utilizzato Roma come posizione predefinita.',
@@ -4653,7 +4706,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
         print(
           '❌ Coordinate non valide per reverse geocoding: lat=$lat, lng=$lng',
         );
-        return 'Roma, Italia';
+        return 'Italia';
       }
 
       // Su web, usa un fallback più robusto
@@ -4684,11 +4737,11 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
         }
 
         String address = addressParts.join(', ');
-        return address.isNotEmpty ? address : 'Roma, Italia';
+        return address.isNotEmpty ? address : 'Italia';
       }
 
       print('⚠️ Nessun risultato dal reverse geocoding per lat=$lat, lng=$lng');
-      return 'Roma, Italia';
+      return 'Italia';
     } catch (e) {
       print('❌ Errore nel reverse geocoding: $e');
 
@@ -4703,10 +4756,10 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
 
       // Fallback per web
       if (kIsWeb) {
-        return 'Roma, Italia';
+        return 'Italia';
       }
 
-      return 'Roma, Italia';
+      return 'Italia';
     }
   }
 
@@ -4737,15 +4790,15 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
         }
 
         String address = addressParts.join(', ');
-        return address.isNotEmpty ? address : 'Roma, Italia';
+        return address.isNotEmpty ? address : 'Italia';
       }
 
       // Se non funziona, restituisci Roma
-      return 'Roma, Italia';
+      return 'Italia';
     } catch (e) {
       print('❌ Errore nel reverse geocoding web: $e');
       // Fallback finale: restituisci Roma
-      return 'Roma, Italia';
+      return 'Italia';
     }
   }
 
