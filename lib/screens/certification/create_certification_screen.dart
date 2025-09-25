@@ -2548,7 +2548,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               SizedBox(width: isTablet ? 20 : 16),
               Expanded(
                 child: NeonButton(
-                  onPressed: _sendCertification,
+                  onPressed: _handleSendCertification,
                   text: 'Conferma Certificazione',
                   icon: Icons.check_circle,
                 ),
@@ -3306,7 +3306,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                   SizedBox(width: isTablet ? 12 : 8),
                   Expanded(
                     child: Text(
-                      'Conferma Invio Certificazione',
+                      'Invia Certificazione',
                       style: TextStyle(
                         fontSize: isTablet ? 20 : 18,
                         fontWeight: FontWeight.bold,
@@ -3321,7 +3321,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Sei sicuro di voler inviare questa certificazione?',
+                    'Riepilogo della certificazione che stai per inviare:',
                     style: TextStyle(
                       fontSize: isTablet ? 16 : 14,
                       color: AppTheme.primaryBlack,
@@ -3444,7 +3444,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                     ),
                   ),
                   child: Text(
-                    'Invia Certificazione',
+                    'Conferma e Invia',
                     style: TextStyle(
                       fontSize: isTablet ? 16 : 14,
                       fontWeight: FontWeight.w600,
@@ -5148,86 +5148,6 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     });
 
     _showSuccessDialog('Utente aggiunto con successo!');
-  }
-
-  void _sendCertification() {
-    final l10n = AppLocalizations.of(context);
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.check_circle, color: AppTheme.successGreen, size: 64),
-            const SizedBox(height: 16),
-            Text(
-              AppLocalizations.of(context).getString('certification_sent'),
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.primaryBlack,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              AppLocalizations.of(
-                context,
-              ).getString('certification_sent_success'),
-              textAlign: TextAlign.center,
-              style: TextStyle(color: AppTheme.textSecondary),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              AppLocalizations.of(context).getString('recipients_notification'),
-              textAlign: TextAlign.center,
-              style: TextStyle(color: AppTheme.textSecondary, fontSize: 14),
-            ),
-            const SizedBox(height: 24),
-
-            // Error message
-            if (_errorMessage != null) ...[
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppTheme.errorRed.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: AppTheme.errorRed.withValues(alpha: 0.3),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.error_outline,
-                      color: AppTheme.errorRed,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        _errorMessage!,
-                        style: TextStyle(
-                          color: AppTheme.errorRed,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-            ],
-
-            NeonButton(
-              onPressed: _isCreating ? null : _handleSendCertification,
-              text: _isCreating
-                  ? l10n.getString('sending_in_progress')
-                  : l10n.getString('send_certification'),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   // Helper per visualizzare preview dei media
