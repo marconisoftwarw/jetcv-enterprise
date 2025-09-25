@@ -38,7 +38,7 @@ class AppConfig {
   // Veriff KYC configuration
   static const String veriffCallbackUrl = String.fromEnvironment(
     'VERIFF_CALLBACK_URL',
-    defaultValue: 'https://jectcv.netlify.app/#/login',
+    defaultValue: 'https://jectcv.netlify.app/login',
   );
 
   // Gmail SMTP configuration
