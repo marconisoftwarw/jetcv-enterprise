@@ -448,17 +448,8 @@ class AuthProvider extends ChangeNotifier {
       _clearError();
       print('🔄 AuthProvider: User data cleared, notifying listeners...');
       
-      // Force immediate notification instead of using _safeNotifyListeners
-      notifyListeners();
-      
-      // Also use the safe method as backup
+      // Use safe notification to avoid issues during build
       _safeNotifyListeners();
-      
-      // Additional notification after a short delay to ensure state is updated
-      Future.delayed(const Duration(milliseconds: 50), () {
-        print('🔄 AuthProvider: Sending additional notification after signOut');
-        notifyListeners();
-      });
       
       print('✅ AuthProvider: SignOut completed successfully');
     } catch (e) {

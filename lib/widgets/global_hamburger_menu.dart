@@ -667,16 +667,24 @@ class GlobalHamburgerMenu extends StatelessWidget {
 
                 // Force navigation immediately after logout
                 if (context.mounted) {
-                  // Use pushNamedAndRemoveUntil to clear all routes and go to root
-                  Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
-                  
-                  // Additional fallback: force navigation after auth state change
-                  Future.delayed(const Duration(milliseconds: 200), () {
-                    if (context.mounted && !authProvider.isAuthenticated) {
-                      print('🔄 Global Menu: Forcing navigation to public home after logout');
-                      Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
-                    }
-                  });
+                  try {
+                    // Use pushNamedAndRemoveUntil to clear all routes and go to root
+                    Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+                    print('✅ Global Menu: Navigation to public home successful');
+                  } catch (navError) {
+                    print('❌ Global Menu: Navigation error: $navError');
+                    // Fallback: try to navigate after a delay
+                    Future.delayed(const Duration(milliseconds: 300), () {
+                      if (context.mounted) {
+                        try {
+                          Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+                          print('✅ Global Menu: Fallback navigation successful');
+                        } catch (fallbackError) {
+                          print('❌ Global Menu: Fallback navigation failed: $fallbackError');
+                        }
+                      }
+                    });
+                  }
                 }
               } catch (e) {
                 print('Error during logout: $e');

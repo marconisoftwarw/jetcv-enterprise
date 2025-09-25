@@ -178,16 +178,6 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
               setState(() {});
-              
-              // Force navigation to public home if user is not authenticated
-              if (!authProvider.isAuthenticated) {
-                print('🔄 Main: Auth state changed - user not authenticated, forcing navigation to public home');
-                Future.delayed(const Duration(milliseconds: 100), () {
-                  if (mounted) {
-                    Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
-                  }
-                });
-              }
             }
           });
         }
