@@ -1832,7 +1832,7 @@ class _UserSettingsContentState extends State<UserSettingsContent> {
               if (context.mounted) {
                 Navigator.of(
                   context,
-                ).pushNamedAndRemoveUntil('/public', (route) => false);
+                ).pushNamedAndRemoveUntil('/', (route) => false);
               }
             },
             style: TextButton.styleFrom(foregroundColor: AppTheme.errorRed),

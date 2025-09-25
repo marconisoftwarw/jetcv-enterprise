@@ -669,7 +669,7 @@ class GlobalHamburgerMenu extends StatelessWidget {
                 if (context.mounted) {
                   Navigator.of(
                     context,
-                  ).pushNamedAndRemoveUntil('/public', (route) => false);
+                  ).pushNamedAndRemoveUntil('/', (route) => false);
                 }
               } catch (e) {
                 print('Error during logout: $e');

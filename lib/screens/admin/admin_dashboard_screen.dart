@@ -201,7 +201,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 if (context.mounted) {
                   Navigator.of(
                     context,
-                  ).pushNamedAndRemoveUntil('/public', (route) => false);
+                  ).pushNamedAndRemoveUntil('/', (route) => false);
                 }
               },
             ),

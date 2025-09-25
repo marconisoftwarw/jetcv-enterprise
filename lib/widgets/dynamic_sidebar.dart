@@ -248,7 +248,7 @@ class DynamicSidebar extends StatelessWidget {
                 if (context.mounted) {
                   Navigator.of(
                     context,
-                  ).pushNamedAndRemoveUntil('/public', (route) => false);
+                  ).pushNamedAndRemoveUntil('/', (route) => false);
                 }
               },
               style: ElevatedButton.styleFrom(
