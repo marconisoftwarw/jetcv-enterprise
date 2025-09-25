@@ -496,8 +496,30 @@ class AppLocalizations {
       'search_users_hint':
           'Digita per cercare utenti oppure clicca "Mostra tutti" per vedere tutti gli utenti disponibili',
       'add_user_with_otp': 'Aggiungi con OTP',
+      'add_user_with_otp_description': 'Aggiungi utente con codice OTP',
       'add_existing_user': 'Aggiungi Utente Esistente',
+      'add_existing_user_description': 'Cerca tra utenti esistenti',
       'user_selection_mode': 'Modalità Selezione Utente',
+      'enter_otp_hint': 'Inserisci codice OTP...',
+      'search_users_legal_entity_required':
+          'Per cercare utenti esistenti è necessario selezionare una Legal Entity nella sezione "Informazioni Generali"',
+      'no_users_added_otp_instruction':
+          'Nessun utente aggiunto. Inserisci un codice OTP per aggiungere un utente.',
+      'certification_sent_confirmation': 'Certificazione Inviata!',
+      'certification_sent_description':
+          'La certificazione è stata inviata con successo e non può più essere modificata.',
+      'certification_summary':
+          'Riepilogo della certificazione che stai per inviare:',
+      'sent_not_modifiable': 'Inviata (non modificabile)',
+      'send_date': 'Data invio:',
+      'once_sent_not_modifiable':
+          'Una volta inviata, la certificazione non potrà più essere modificata.',
+      'confirm_and_send': 'Conferma e Invia',
+      'attention': 'Attenzione',
+      'add_user_otp_required':
+          'Devi aggiungere almeno un utente con OTP per procedere al terzo step.',
+      'enter_title_media': 'Inserisci il titolo...',
+      'enter_description_media': 'Inserisci la descrizione...',
 
       // Certification Details and User Outcomes
       'certification_details': 'Dettagli Certificazione',
@@ -1111,8 +1133,30 @@ class AppLocalizations {
       'search_users_hint':
           'Type to search users or click "Show all" to see all available users',
       'add_user_with_otp': 'Add with OTP',
+      'add_user_with_otp_description': 'Add user with OTP code',
       'add_existing_user': 'Add Existing User',
+      'add_existing_user_description': 'Search among existing users',
       'user_selection_mode': 'User Selection Mode',
+      'enter_otp_hint': 'Enter OTP code...',
+      'search_users_legal_entity_required':
+          'To search existing users, you need to select a Legal Entity in the "General Information" section',
+      'no_users_added_otp_instruction':
+          'No users added. Enter an OTP code to add a user.',
+      'certification_sent_confirmation': 'Certification Sent!',
+      'certification_sent_description':
+          'The certification has been sent successfully and can no longer be modified.',
+      'certification_summary':
+          'Summary of the certification you are about to send:',
+      'sent_not_modifiable': 'Sent (not modifiable)',
+      'send_date': 'Send date:',
+      'once_sent_not_modifiable':
+          'Once sent, the certification cannot be modified.',
+      'confirm_and_send': 'Confirm and Send',
+      'attention': 'Attention',
+      'add_user_otp_required':
+          'You must add at least one user with OTP to proceed to the third step.',
+      'enter_title_media': 'Enter title...',
+      'enter_description_media': 'Enter description...',
 
       // Certification Details and User Outcomes
       'certification_details': 'Certification Details',

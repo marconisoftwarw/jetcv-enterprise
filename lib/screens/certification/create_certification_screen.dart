@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:flutter/foundation.dart';
@@ -4961,6 +4962,12 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
     });
 
     try {
+      // Su web, usa un approccio diverso per la geolocalizzazione
+      if (kIsWeb) {
+        await _getCurrentLocationWeb();
+        return;
+      }
+
       // Verifica se i servizi di localizzazione sono abilitati
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
@@ -5055,6 +5062,128 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
       _showErrorDialog(
         'Errore nel rilevamento della posizione. Utilizzato Roma come posizione predefinita.',
       );
+    }
+  }
+
+  /// Metodo specifico per la geolocalizzazione su web
+  Future<void> _getCurrentLocationWeb() async {
+    try {
+      // Su web, usa l'API di geolocalizzazione del browser
+      if (kIsWeb) {
+        // Prova prima con l'API di geolocalizzazione del browser
+        final position = await _getBrowserGeolocation();
+        if (position != null) {
+          String address = await _getAddressFromCoordinatesWeb(
+            position['latitude'] as double,
+            position['longitude'] as double,
+          );
+          
+          setState(() {
+            _locationController.text = address;
+            _isLoadingLocation = false;
+          });
+          
+          print('📍 Posizione web ottenuta: $address');
+          return;
+        }
+      }
+
+      // Fallback: usa Geolocator anche su web
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.lowest,
+        timeLimit: const Duration(seconds: 10),
+      );
+
+      String address = await _getAddressFromCoordinatesWeb(
+        position.latitude,
+        position.longitude,
+      );
+
+      setState(() {
+        _locationController.text = address;
+        _isLoadingLocation = false;
+      });
+
+      print('📍 Posizione web ottenuta: $address');
+    } catch (e) {
+      print('❌ Errore geolocalizzazione web: $e');
+      
+      // Fallback finale: usa IP geolocation
+      try {
+        String city = await _getCityFromIP();
+        setState(() {
+          _locationController.text = city;
+          _isLoadingLocation = false;
+        });
+        print('📍 Città ottenuta da IP: $city');
+      } catch (ipError) {
+        print('❌ Errore IP geolocation: $ipError');
+        setState(() {
+          _locationController.text = 'Italia';
+          _isLoadingLocation = false;
+        });
+      }
+    }
+  }
+
+  /// Ottiene la posizione usando l'API di geolocalizzazione del browser
+  Future<Map<String, double>?> _getBrowserGeolocation() async {
+    try {
+      // Usa l'API di geolocalizzazione del browser tramite JavaScript
+      final result = await _callJavaScriptGeolocation();
+      return result;
+    } catch (e) {
+      print('❌ Errore browser geolocation: $e');
+      return null;
+    }
+  }
+
+  /// Chiama l'API di geolocalizzazione del browser tramite JavaScript
+  Future<Map<String, double>?> _callJavaScriptGeolocation() async {
+    try {
+      // Su web, usa direttamente Geolocator che funziona meglio
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.lowest,
+        timeLimit: const Duration(seconds: 8),
+      );
+      
+      return {
+        'latitude': position.latitude,
+        'longitude': position.longitude,
+      };
+    } catch (e) {
+      print('❌ Errore JavaScript geolocation: $e');
+      return null;
+    }
+  }
+
+  /// Ottiene la città dall'IP dell'utente come fallback
+  Future<String> _getCityFromIP() async {
+    try {
+      // Usa un servizio di IP geolocation
+      final response = await http.get(
+        Uri.parse('https://ipapi.co/json/'),
+        headers: {'User-Agent': 'JetCV-Enterprise/1.0'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final city = data['city'] as String?;
+        final country = data['country_name'] as String?;
+        
+        if (city != null && country != null) {
+          return '$city, $country';
+        } else if (city != null) {
+          return city;
+        } else if (country != null) {
+          return country;
+        }
+      }
+      
+      return 'Italia';
+    } catch (e) {
+      print('❌ Errore IP geolocation: $e');
+      return 'Italia';
     }
   }
 
