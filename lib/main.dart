@@ -235,6 +235,11 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
             '/': (context) => FutureBuilder(
               future: _initializationFuture,
               builder: (context, snapshot) {
+                // Se l'utente non è autenticato, mostra immediatamente la home pubblica
+                if (!authProvider.isAuthenticated || authProvider.currentUser == null) {
+                  return const PublicHomeScreen();
+                }
+
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const SplashScreen();
                 }
@@ -253,13 +258,26 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
                   return const HomeScreen();
                 }
 
-                // Se l'utente non è autenticato, mostra la home pubblica
+                // Fallback: mostra la home pubblica
                 return const PublicHomeScreen();
               },
             ),
             '/#/': (context) => FutureBuilder(
               future: _initializationFuture,
               builder: (context, snapshot) {
+                // Se l'utente non è autenticato, mostra immediatamente la home pubblica
+                if (!authProvider.isAuthenticated || authProvider.currentUser == null) {
+                  return const PublicHomeScreen();
+                }
+
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const SplashScreen();
+                }
+
+                if (snapshot.hasError) {
+                  return const SplashScreen();
+                }
+
                 // Se l'utente è autenticato e ha un utente valido, mostra la schermata appropriata
                 if (authProvider.isAuthenticated &&
                     authProvider.currentUser != null) {
@@ -270,7 +288,7 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
                   return const HomeScreen();
                 }
 
-                // Se l'utente non è autenticato, mostra la home pubblica
+                // Fallback: mostra la home pubblica
                 return const PublicHomeScreen();
               },
             ),
@@ -644,10 +662,21 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
                 return MaterialPageRoute(
                   builder: (context) {
                     final authProvider = context.read<AuthProvider>();
+                    // Se l'utente non è autenticato, mostra immediatamente la home pubblica
+                    if (!authProvider.isAuthenticated || authProvider.currentUser == null) {
+                      return const PublicHomeScreen();
+                    }
+                    
                     if (authProvider.isAuthenticated &&
                         authProvider.currentUser != null) {
+                      // Check if user is admin
+                      if (authProvider.currentUser?.type == UserType.admin) {
+                        return const AdminDashboardScreen();
+                      }
                       return const HomeScreen();
                     }
+                    
+                    // Fallback: mostra la home pubblica
                     return const PublicHomeScreen();
                   },
                 );
