@@ -2995,15 +2995,21 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     }
   }
 
-  Future<void> _createCertification() async {
-    print('🚀 Creating certification with unified upload service...');
-    print('📝 Title from controller: "${_titleController.text.trim()}"');
-
-    // Mostra alert di conferma prima di inviare
-    final shouldProceed = await _showConfirmationDialog();
+  /// Gestisce il click del pulsante "Invia Certificazione" con dialog di conferma
+  Future<void> _handleSendCertification() async {
+    // Mostra dialog di conferma unificato
+    final shouldProceed = await _showUnifiedConfirmationDialog();
     if (!shouldProceed) {
       return;
     }
+
+    // Se l'utente conferma, procedi con la creazione
+    await _createCertification();
+  }
+
+  Future<void> _createCertification() async {
+    print('🚀 Creating certification with unified upload service...');
+    print('📝 Title from controller: "${_titleController.text.trim()}"');
 
     setState(() {
       _isCreating = true;
@@ -3250,7 +3256,12 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
         });
 
         // Mostra messaggio di successo e chiudi
-        _showSuccessDialog();
+        _showUnifiedResultDialog(
+          isSuccess: true,
+          title: 'Certificazione Inviata!',
+          message:
+              'La certificazione è stata inviata con successo e non può più essere modificata.',
+        );
       } else {
         throw Exception('Failed to create certification with media');
       }
@@ -3260,10 +3271,194 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
         _errorMessage = 'Errore nella creazione della certificazione: $e';
         _isCreating = false;
       });
+
+      // Mostra dialog di errore unificato
+      _showUnifiedResultDialog(
+        isSuccess: false,
+        title: 'Errore nell\'Invio',
+        message:
+            'Si è verificato un errore durante l\'invio della certificazione. Riprova più tardi.',
+      );
     }
   }
 
-  /// Mostra dialog di conferma per l'invio della certificazione
+  /// Mostra dialog di conferma unificato per l'invio della certificazione
+  Future<bool> _showUnifiedConfirmationDialog() async {
+    final l10n = AppLocalizations.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 768;
+
+    return await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              title: Row(
+                children: [
+                  Icon(
+                    Icons.send_rounded,
+                    color: AppTheme.primaryBlue,
+                    size: isTablet ? 28 : 24,
+                  ),
+                  SizedBox(width: isTablet ? 12 : 8),
+                  Expanded(
+                    child: Text(
+                      'Conferma Invio Certificazione',
+                      style: TextStyle(
+                        fontSize: isTablet ? 20 : 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.primaryBlack,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Sei sicuro di voler inviare questa certificazione?',
+                    style: TextStyle(
+                      fontSize: isTablet ? 16 : 14,
+                      color: AppTheme.primaryBlack,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  SizedBox(height: isTablet ? 16 : 12),
+
+                  // Riepilogo certificazione
+                  Container(
+                    padding: EdgeInsets.all(isTablet ? 16 : 12),
+                    decoration: BoxDecoration(
+                      color: AppTheme.lightGrey.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: AppTheme.primaryBlue.withValues(alpha: 0.2),
+                        width: 1,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Riepilogo Certificazione:',
+                          style: TextStyle(
+                            fontSize: isTablet ? 14 : 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.primaryBlack,
+                          ),
+                        ),
+                        SizedBox(height: isTablet ? 8 : 6),
+                        if (_selectedCategoryName != null)
+                          _buildDetailRow(
+                            'Categoria:',
+                            _selectedCategoryName!,
+                            isTablet,
+                          ),
+                        if (_addedUsers.isNotEmpty)
+                          _buildDetailRow(
+                            'Utenti:',
+                            '${_addedUsers.length} utenti aggiunti',
+                            isTablet,
+                          ),
+                        _buildDetailRow(
+                          'Titolo:',
+                          _titleController.text.trim().isNotEmpty
+                              ? _titleController.text.trim()
+                              : 'Nessun titolo specificato',
+                          isTablet,
+                        ),
+                        _buildDetailRow(
+                          'Stato:',
+                          'Inviata (non modificabile)',
+                          isTablet,
+                        ),
+                        _buildDetailRow('Data invio:', 'Ora', isTablet),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: isTablet ? 16 : 12),
+
+                  // Avviso importante
+                  Container(
+                    padding: EdgeInsets.all(isTablet ? 12 : 10),
+                    decoration: BoxDecoration(
+                      color: AppTheme.warningOrange.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: AppTheme.warningOrange.withValues(alpha: 0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.warning_amber_rounded,
+                          color: AppTheme.warningOrange,
+                          size: isTablet ? 20 : 18,
+                        ),
+                        SizedBox(width: isTablet ? 8 : 6),
+                        Expanded(
+                          child: Text(
+                            'Una volta inviata, la certificazione non potrà più essere modificata.',
+                            style: TextStyle(
+                              fontSize: isTablet ? 13 : 11,
+                              color: AppTheme.warningOrange,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: Text(
+                    'Annulla',
+                    style: TextStyle(
+                      color: AppTheme.textSecondary,
+                      fontSize: isTablet ? 16 : 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                SizedBox(width: isTablet ? 8 : 4),
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryBlue,
+                    foregroundColor: AppTheme.pureWhite,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isTablet ? 24 : 20,
+                      vertical: isTablet ? 12 : 10,
+                    ),
+                  ),
+                  child: Text(
+                    'Invia Certificazione',
+                    style: TextStyle(
+                      fontSize: isTablet ? 16 : 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
+  }
+
+  /// Mostra dialog di conferma per l'invio della certificazione (DEPRECATO)
   Future<bool> _showConfirmationDialog() async {
     final l10n = AppLocalizations.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
@@ -3560,6 +3755,122 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
       print('💥 Error uploading media: $e');
       // Non bloccare la creazione della certificazione per errori sui media
     }
+  }
+
+  /// Mostra dialog di risultato unificato (successo o errore)
+  void _showUnifiedResultDialog({
+    required bool isSuccess,
+    required String title,
+    required String message,
+  }) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 768;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(
+              isSuccess ? Icons.check_circle : Icons.error,
+              color: isSuccess ? AppTheme.successGreen : AppTheme.errorRed,
+              size: isTablet ? 28 : 24,
+            ),
+            SizedBox(width: isTablet ? 12 : 8),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: isTablet ? 20 : 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.primaryBlack,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              message,
+              style: TextStyle(
+                fontSize: isTablet ? 16 : 14,
+                color: AppTheme.primaryBlack,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            if (isSuccess) ...[
+              SizedBox(height: isTablet ? 16 : 12),
+              Container(
+                padding: EdgeInsets.all(isTablet ? 12 : 10),
+                decoration: BoxDecoration(
+                  color: AppTheme.successGreen.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: AppTheme.successGreen.withValues(alpha: 0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      color: AppTheme.successGreen,
+                      size: isTablet ? 18 : 16,
+                    ),
+                    SizedBox(width: isTablet ? 8 : 6),
+                    Expanded(
+                      child: Text(
+                        'La certificazione è stata inviata e non può più essere modificata.',
+                        style: TextStyle(
+                          fontSize: isTablet ? 13 : 11,
+                          color: AppTheme.successGreen,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              if (isSuccess) {
+                // Chiudi la schermata e torna alla lista certificazioni
+                Navigator.of(context).pop(true);
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: isSuccess
+                  ? AppTheme.successGreen
+                  : AppTheme.errorRed,
+              foregroundColor: AppTheme.pureWhite,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              padding: EdgeInsets.symmetric(
+                horizontal: isTablet ? 24 : 20,
+                vertical: isTablet ? 12 : 10,
+              ),
+            ),
+            child: Text(
+              isSuccess ? 'Chiudi' : 'Riprova',
+              style: TextStyle(
+                fontSize: isTablet ? 16 : 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showSuccessDialog([String? message]) {
@@ -4908,7 +5219,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             ],
 
             NeonButton(
-              onPressed: _isCreating ? null : _createCertification,
+              onPressed: _isCreating ? null : _handleSendCertification,
               text: _isCreating
                   ? l10n.getString('sending_in_progress')
                   : l10n.getString('send_certification'),
