@@ -240,7 +240,7 @@ class GlobalHamburgerMenu extends StatelessWidget {
                                               );
                                             } else if (value == 'logout') {
                                               // Logout
-                                              authProvider.signOut();
+                                              _showLogoutDialog(context, l10n);
                                             }
                                           },
                                           itemBuilder: (context) => [

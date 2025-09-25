@@ -90,7 +90,7 @@ class AppLocalizations {
       'details': 'Dettagli',
       'send_invitation': 'Invia Invito',
       'delete': 'Elimina',
-      'close': 'Chiudi',
+
       'entity_approved_successfully': 'Entità approvata con successo',
       'reject_entity': 'Rifiuta Entità',
       'enter_rejection_reason': 'Inserisci il motivo del rifiuto:',
@@ -213,7 +213,6 @@ class AppLocalizations {
           'Una volta inviata, la certificazione verrà inviata agli utenti destinatari e non sarà più modificabile. Una volta che gli utenti accetteranno la certificazione, questa verrà notarizzata sulla blockchain. Questa azione non può essere annullata.',
       'confirm_send_details':
           'Confermo di aver verificato tutti i dettagli e di voler procedere con l\'invio della certificazione',
-      'no_category_selected': 'Nessuna categoria selezionata',
 
       'select_legal_entity_first_error':
           'Seleziona una legal entity prima di procedere.',
@@ -510,7 +509,7 @@ class AppLocalizations {
           'La certificazione è stata inviata con successo e non può più essere modificata.',
       'certification_summary':
           'Riepilogo della certificazione che stai per inviare:',
-      'sent_not_modifiable': 'Inviata (non modificabile)',
+
       'send_date': 'Data invio:',
       'once_sent_not_modifiable':
           'Una volta inviata, la certificazione non potrà più essere modificata.',
@@ -520,6 +519,41 @@ class AppLocalizations {
           'Devi aggiungere almeno un utente con OTP per procedere al terzo step.',
       'enter_title_media': 'Inserisci il titolo...',
       'enter_description_media': 'Inserisci la descrizione...',
+      'na': 'N/A',
+      'creating_in_progress': 'Creazione in corso...',
+      'no_users_added': 'Nessun utente aggiunto alla certificazione',
+
+      'select_legal_entity_before_proceeding':
+          'Seleziona una legal entity prima di procedere.',
+      'error_retrieving_data_retry':
+          'Errore nel recupero dei dati necessari. Riprova più tardi.',
+      'certification_sent_title': 'Certificazione Inviata!',
+      'certification_sent_message':
+          'La certificazione è stata inviata con successo e non può più essere modificata.',
+
+      'certification_summary_title':
+          'Riepilogo della certificazione che stai per inviare:',
+      'certification_review_title': 'Riepilogo Certificazione:',
+      'category_label': 'Categoria:',
+      'users_label': 'Utenti:',
+      'title_label': 'Titolo:',
+      'no_title_specified': 'Nessun titolo specificato',
+      'status_label': 'Stato:',
+      'sent_not_modifiable': 'Inviata (non modificabile)',
+      'send_date_label': 'Data invio:',
+      'time_label': 'Ora',
+
+      'close': 'Chiudi',
+
+      'error_loading_file_retry':
+          'Errore nel caricamento del file. Riprova con un altro file.',
+      'error_selecting_file_retry': 'Errore nella selezione del file. Riprova.',
+      'unable_detect_location_default':
+          'Impossibile rilevare la posizione. Utilizzata posizione predefinita.',
+
+      'qr_data_scanned': 'Dati QR Scansionati',
+      'file_too_large':
+          'Il file è troppo grande. La dimensione massima consentita è 15MB. Dimensione attuale:',
 
       // Certification Details and User Outcomes
       'certification_details': 'Dettagli Certificazione',
@@ -629,7 +663,7 @@ class AppLocalizations {
       'image_selection_error': 'Errore nella selezione dell\'immagine',
       'invalid_image_format':
           'Formato immagine non valido. Usa JPG, PNG, GIF, WebP, AVIF, HEIC, BMP o TIFF',
-      'file_too_large': 'File troppo grande. Dimensione massima: 50MB',
+
       'image_upload_info':
           'Le immagini verranno caricate e inviate solo quando clicchi su "Completa Registrazione"',
       'logo_loaded_successfully': 'Logo caricato con successo!',
@@ -933,7 +967,7 @@ class AppLocalizations {
 
       // Legal Entity Management
       'legal_entity_registration': 'Legal Entity Registration',
-      'retry': 'Retry',
+
       'registration_completed_successfully':
           'Registration completed successfully!',
       'all_statuses': 'All Statuses',
@@ -1147,16 +1181,52 @@ class AppLocalizations {
           'The certification has been sent successfully and can no longer be modified.',
       'certification_summary':
           'Summary of the certification you are about to send:',
-      'sent_not_modifiable': 'Sent (not modifiable)',
+
       'send_date': 'Send date:',
-      'once_sent_not_modifiable':
-          'Once sent, the certification cannot be modified.',
       'confirm_and_send': 'Confirm and Send',
       'attention': 'Attention',
       'add_user_otp_required':
           'You must add at least one user with OTP to proceed to the third step.',
       'enter_title_media': 'Enter title...',
       'enter_description_media': 'Enter description...',
+      'na': 'N/A',
+      'creating_in_progress': 'Creating in progress...',
+      'no_users_added': 'No users added to certification',
+      'select_legal_entity_before_proceeding':
+          'Select a legal entity before proceeding.',
+      'error_retrieving_data_retry':
+          'Error retrieving necessary data. Please try again later.',
+      'certification_sent_title': 'Certification Sent!',
+      'certification_sent_message':
+          'The certification has been sent successfully and can no longer be modified.',
+      'send_certification': 'Send Certification',
+      'certification_summary_title':
+          'Summary of the certification you are about to send:',
+      'certification_review_title': 'Certification Review:',
+      'category_label': 'Category:',
+      'users_label': 'Users:',
+      'title_label': 'Title:',
+      'no_title_specified': 'No title specified',
+      'status_label': 'Status:',
+      'sent_not_modifiable': 'Sent (not modifiable)',
+      'send_date_label': 'Send date:',
+      'time_label': 'Time',
+      'once_sent_not_modifiable':
+          'Once sent, the certification cannot be modified.',
+      'confirm_send_details':
+          'I confirm that I have verified all details and want to proceed with sending the certification',
+
+      'retry': 'Retry',
+      'error_loading_file_retry': 'Error loading file. Try with another file.',
+      'error_selecting_file_retry': 'Error selecting file. Try again.',
+      'unable_detect_location_default':
+          'Unable to detect location. Using default position.',
+      'scan_cancelled': 'Scan cancelled',
+      'user_already_added': 'User already added to certification',
+      'qr_data_scanned': 'QR Data Scanned',
+      'qr_content': 'QR Code Content:',
+      'file_too_large':
+          'File is too large. Maximum allowed size is 15MB. Current size:',
 
       // Certification Details and User Outcomes
       'certification_details': 'Certification Details',
@@ -1278,7 +1348,7 @@ class AppLocalizations {
       'image_selection_error': 'Error selecting image',
       'invalid_image_format':
           'Invalid image format. Use JPG, PNG, GIF, WebP, AVIF, HEIC, BMP or TIFF',
-      'file_too_large': 'File too large. Maximum size: 50MB',
+
       'image_upload_info':
           'Supported formats: JPG, PNG, GIF, WebP, AVIF, HEIC, BMP, TIFF. Maximum size: 50MB',
       'forgot_password': 'Forgot Password',
@@ -1564,7 +1634,6 @@ class AppLocalizations {
       'search_placeholder': 'Search...',
       'seminar': 'Seminar',
       'send': 'Send',
-      'send_certification': 'Send Certification',
       'specific_course': 'Specific Course',
       'total': 'Total',
       'try_again': 'Try Again',

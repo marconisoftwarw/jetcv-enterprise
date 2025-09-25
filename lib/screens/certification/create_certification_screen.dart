@@ -1328,6 +1328,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
                 ],
               ),
             ),
+
             const SizedBox(height: 24),
 
             _buildMediaSection(),
@@ -1892,7 +1893,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              'Continua alla Revisione',
+                              l10n.getString('continue_to_review'),
                               style: TextStyle(
                                 color: AppTheme.pureWhite,
                                 fontSize: isTablet ? 16 : 14,
@@ -1955,7 +1956,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
                   isSelected: _isOtpMode,
                   icon: Icons.numbers,
                   title: l10n.getString('add_user_with_otp'),
-                  description: 'Aggiungi utente con codice OTP',
+                  description: l10n.getString('add_user_with_otp_description'),
                   onTap: () => setState(() => _isOtpMode = true),
                   isTablet: isTablet,
                 ),
@@ -1966,7 +1967,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
                   isSelected: !_isOtpMode,
                   icon: Icons.search,
                   title: l10n.getString('add_existing_user'),
-                  description: 'Cerca tra utenti esistenti',
+                  description: l10n.getString('add_existing_user_description'),
                   onTap: () => setState(() => _isOtpMode = false),
                   isTablet: isTablet,
                 ),
@@ -2053,8 +2054,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
               Expanded(
                 child: EnterpriseTextField(
                   controller: _otpController,
-                  label: 'Inserisci codice OTP utente',
-                  hint: 'Inserisci codice OTP...',
+                  label: l10n.getString('enter_otp_code'),
+                  hint: l10n.getString('enter_otp_hint'),
                   prefixIcon: Icon(Icons.numbers),
                 ),
               ),
@@ -2074,7 +2075,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
-                  'oppure',
+                  l10n.getString('or'),
                   style: TextStyle(color: AppTheme.textSecondary),
                 ),
               ),
@@ -2138,7 +2139,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
               ),
               const SizedBox(height: 16),
               Text(
-                'Seleziona prima una Legal Entity',
+                l10n.getString('select_legal_entity_first'),
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -2148,7 +2149,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
               ),
               const SizedBox(height: 8),
               Text(
-                'Per cercare utenti esistenti è necessario selezionare una Legal Entity nella sezione "Informazioni Generali"',
+                l10n.getString('search_users_legal_entity_required'),
                 style: TextStyle(fontSize: 14, color: AppTheme.textSecondary),
                 textAlign: TextAlign.center,
               ),
@@ -2167,6 +2168,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
 
   Widget _buildUsersList() {
     final isTablet = MediaQuery.of(context).size.width > 768;
+    final l10n = AppLocalizations.of(context);
 
     return EnterpriseCard(
       child: Column(
@@ -2177,7 +2179,9 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                _addedUsers.isEmpty ? 'Aggiungi Utente' : 'Utente Aggiunto',
+                _addedUsers.isEmpty
+                    ? l10n.getString('add_user')
+                    : l10n.getString('user_added'),
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -2203,7 +2207,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
               padding: const EdgeInsets.all(20),
               child: Center(
                 child: Text(
-                  'Nessun utente aggiunto. Inserisci un codice OTP per aggiungere un utente.',
+                  l10n.getString('no_users_added_otp_instruction'),
                   style: TextStyle(color: AppTheme.textSecondary, fontSize: 16),
                 ),
               ),
@@ -2216,6 +2220,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
   }
 
   Widget _buildUserItem(UserData user) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -2235,7 +2240,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  user.fullName ?? 'N/A',
+                  user.fullName ?? l10n.getString('na'),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -2412,7 +2417,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      user.fullName ?? 'N/A',
+                      user.fullName ?? l10n.getString('na'),
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -2561,8 +2566,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
                 child: NeonButton(
                   onPressed: _isCreating ? null : _handleSendCertification,
                   text: _isCreating
-                      ? 'Creazione in corso...'
-                      : 'Conferma Certificazione',
+                      ? l10n.getString('creating_in_progress')
+                      : l10n.getString('confirm_certification'),
                   icon: _isCreating ? null : Icons.check_circle,
                   isLoading: _isCreating,
                 ),
@@ -2639,7 +2644,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
               Icon(Icons.camera_alt, color: AppTheme.primaryBlue),
               const SizedBox(width: 8),
               Text(
-                'Media (${_mediaFiles.length})',
+                '${l10n.getString('media_count')} (${_mediaFiles.length})',
                 style: TextStyle(
                   fontSize: isTablet ? 18 : 16,
                   fontWeight: FontWeight.bold,
@@ -2792,7 +2797,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
               Icon(Icons.people, color: AppTheme.primaryBlue),
               const SizedBox(width: 8),
               Text(
-                'Utenti (${_addedUsers.length})',
+                '${l10n.getString('users_count')} (${_addedUsers.length})',
                 style: TextStyle(
                   fontSize: isTablet ? 18 : 16,
                   fontWeight: FontWeight.bold,
@@ -2822,7 +2827,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
                   SizedBox(width: isTablet ? 12 : 8),
                   Expanded(
                     child: Text(
-                      'Nessun utente aggiunto alla certificazione',
+                      l10n.getString('no_users_added'),
                       style: TextStyle(
                         fontSize: isTablet ? 14 : 12,
                         color: AppTheme.textSecondary,
@@ -2903,7 +2908,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
                             ),
                           ),
                           child: Text(
-                            'Aggiunto',
+                            l10n.getString('added'),
                             style: TextStyle(
                               fontSize: isTablet ? 12 : 10,
                               color: AppTheme.successGreen,
@@ -2922,6 +2927,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
   }
 
   Widget _buildConfirmationCard() {
+    final l10n = AppLocalizations.of(context);
     return EnterpriseCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2931,7 +2937,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
               Icon(Icons.warning, color: AppTheme.warningOrange),
               const SizedBox(width: 8),
               Text(
-                'Conferma Invio',
+                l10n.getString('confirm_send'),
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -2995,9 +3001,10 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
     // Validazione obbligatoria per il terzo step (risultati)
     if (_currentStep == 1) {
       if (_addedUsers.isEmpty) {
+        final l10n = AppLocalizations.of(context);
         _showErrorDialog(
-          'Attenzione',
-          'Devi aggiungere almeno un utente con OTP per procedere al terzo step.',
+          l10n.getString('attention'),
+          l10n.getString('add_user_otp_required'),
         );
         return;
       }
@@ -3043,12 +3050,14 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
     });
 
     try {
+      final l10n = AppLocalizations.of(context);
+
       // Usa l'ID della categoria selezionata
       final categoryId = _selectedCategoryId;
       if (categoryId == null) {
         setState(() {
           _isCreating = false;
-          _errorMessage = 'Nessuna categoria selezionata';
+          _errorMessage = l10n.getString('no_category_selected');
         });
         return;
       }
@@ -3064,7 +3073,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
       if (currentUserId == null) {
         setState(() {
           _isCreating = false;
-          _errorMessage = 'Utente non autenticato';
+          _errorMessage = l10n.getString('user_not_authenticated');
         });
         return;
       }
@@ -3076,7 +3085,9 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
         print('❌ No legal entity selected');
         setState(() {
           _isCreating = false;
-          _errorMessage = 'Seleziona una legal entity prima di procedere.';
+          _errorMessage = l10n.getString(
+            'select_legal_entity_before_proceeding',
+          );
         });
         return;
       }
@@ -3088,8 +3099,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
         print('❌ Could not get valid certifier and legal entity');
         setState(() {
           _isCreating = false;
-          _errorMessage =
-              'Errore nel recupero dei dati necessari. Riprova più tardi.';
+          _errorMessage = l10n.getString('error_retrieving_data_retry');
         });
         return;
       }
@@ -3272,9 +3282,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
         // Mostra messaggio di successo e chiudi
         _showUnifiedResultDialog(
           isSuccess: true,
-          title: 'Certificazione Inviata!',
-          message:
-              'La certificazione è stata inviata con successo e non può più essere modificata.',
+          title: l10n.getString('certification_sent_title'),
+          message: l10n.getString('certification_sent_message'),
         );
       } else {
         throw Exception('Failed to create certification via unified service');
@@ -3320,7 +3329,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
                   SizedBox(width: isTablet ? 12 : 8),
                   Expanded(
                     child: Text(
-                      'Invia Certificazione',
+                      l10n.getString('send_certification'),
                       style: TextStyle(
                         fontSize: isTablet ? 20 : 18,
                         fontWeight: FontWeight.bold,
@@ -3335,7 +3344,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Riepilogo della certificazione che stai per inviare:',
+                    l10n.getString('certification_summary_title'),
                     style: TextStyle(
                       fontSize: isTablet ? 16 : 14,
                       color: AppTheme.primaryBlack,
@@ -3359,7 +3368,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Riepilogo Certificazione:',
+                          l10n.getString('certification_review_title'),
                           style: TextStyle(
                             fontSize: isTablet ? 14 : 12,
                             fontWeight: FontWeight.w600,
@@ -3369,29 +3378,33 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
                         SizedBox(height: isTablet ? 8 : 6),
                         if (_selectedCategoryName != null)
                           _buildDetailRow(
-                            'Categoria:',
+                            l10n.getString('category_label'),
                             _selectedCategoryName!,
                             isTablet,
                           ),
                         if (_addedUsers.isNotEmpty)
                           _buildDetailRow(
-                            'Utenti:',
+                            l10n.getString('users_label'),
                             '${_addedUsers.length} utenti aggiunti',
                             isTablet,
                           ),
                         _buildDetailRow(
-                          'Titolo:',
+                          l10n.getString('title_label'),
                           _titleController.text.trim().isNotEmpty
                               ? _titleController.text.trim()
-                              : 'Nessun titolo specificato',
+                              : l10n.getString('no_title_specified'),
                           isTablet,
                         ),
                         _buildDetailRow(
-                          'Stato:',
-                          'Inviata (non modificabile)',
+                          l10n.getString('status_label'),
+                          l10n.getString('sent_not_modifiable'),
                           isTablet,
                         ),
-                        _buildDetailRow('Data invio:', 'Ora', isTablet),
+                        _buildDetailRow(
+                          l10n.getString('send_date_label'),
+                          l10n.getString('time_label'),
+                          isTablet,
+                        ),
                       ],
                     ),
                   ),
@@ -3418,7 +3431,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
                         SizedBox(width: isTablet ? 8 : 6),
                         Expanded(
                           child: Text(
-                            'Una volta inviata, la certificazione non potrà più essere modificata.',
+                            l10n.getString('once_sent_not_modifiable'),
                             style: TextStyle(
                               fontSize: isTablet ? 13 : 11,
                               color: AppTheme.warningOrange,
@@ -3435,7 +3448,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(false),
                   child: Text(
-                    'Annulla',
+                    l10n.getString('cancel'),
                     style: TextStyle(
                       color: AppTheme.textSecondary,
                       fontSize: isTablet ? 16 : 14,
@@ -3458,7 +3471,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
                     ),
                   ),
                   child: Text(
-                    'Conferma e Invia',
+                    l10n.getString('confirm_and_send'),
                     style: TextStyle(
                       fontSize: isTablet ? 16 : 14,
                       fontWeight: FontWeight.w600,
@@ -3779,6 +3792,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
   }) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 768;
+    final l10n = AppLocalizations.of(context);
 
     showDialog(
       context: context,
@@ -3875,7 +3889,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
               ),
             ),
             child: Text(
-              isSuccess ? 'Chiudi' : 'Riprova',
+              isSuccess ? l10n.getString('close') : l10n.getString('retry'),
               style: TextStyle(
                 fontSize: isTablet ? 16 : 14,
                 fontWeight: FontWeight.w600,
@@ -4380,6 +4394,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
 
   void _addMedia() async {
     try {
+      final l10n = AppLocalizations.of(context);
+
       // Mostra dialog per selezionare tipo di media
       final mediaType = await _showMediaTypeSelectionDialog();
       if (mediaType == null) return;
@@ -4402,25 +4418,31 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
       if (selectedFile != null) {
         // Su web, usiamo direttamente XFile per evitare problemi con File
         try {
-          // Testiamo se il file può essere letto
-          await selectedFile.readAsBytes();
+          // Testiamo se il file può essere letto e controlliamo la dimensione
+          final bytes = await selectedFile.readAsBytes();
+
+          // Controlla la dimensione del file (15MB = 15 * 1024 * 1024 bytes)
+          const int maxFileSize = 15 * 1024 * 1024; // 15MB
+          if (bytes.length > maxFileSize) {
+            _showErrorDialog(
+              '${l10n.getString('file_too_large')} ${(bytes.length / (1024 * 1024)).toStringAsFixed(1)}MB',
+            );
+            return;
+          }
 
           setState(() {
             _mediaFiles.add(MediaItem(file: selectedFile!, type: mediaType));
           });
           print(
-            '✅ Media file added successfully: ${selectedFile.name} (${mediaType})',
+            '✅ Media file added successfully: ${selectedFile.name} (${mediaType}) - Size: ${(bytes.length / (1024 * 1024)).toStringAsFixed(1)}MB',
           );
         } catch (fileError) {
           print('❌ Error with file ${selectedFile.name}: $fileError');
-          _showErrorDialog(
-            'Errore nel caricamento del file. Riprova con un altro file.',
-          );
+          _showErrorDialog(l10n.getString('error_loading_file_retry'));
         }
       }
     } catch (e) {
       print('❌ Error adding media: $e');
-      _showErrorDialog('Errore nella selezione del file. Riprova.');
     }
   }
 
@@ -4433,6 +4455,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
   // Metodi per gestire i media certificativi per utente
   void _addUserCertificationMedia(String userId) async {
     try {
+      final l10n = AppLocalizations.of(context);
+
       // Mostra dialog per selezionare tipo di media
       final mediaType = await _showMediaTypeSelectionDialog();
       if (mediaType == null) return;
@@ -4453,30 +4477,48 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
       }
 
       if (selectedFile != null) {
-        final mediaItem = MediaItem(
-          file: selectedFile!,
-          title: '',
-          description: '',
-          type: mediaType,
-        );
+        try {
+          // Controlla la dimensione del file
+          final bytes = await selectedFile.readAsBytes();
 
-        setState(() {
-          if (_userCertificationMedia[userId] == null) {
-            _userCertificationMedia[userId] = [];
+          // Controlla la dimensione del file (15MB = 15 * 1024 * 1024 bytes)
+          const int maxFileSize = 15 * 1024 * 1024; // 15MB
+          if (bytes.length > maxFileSize) {
+            _showErrorDialog(
+              '${l10n.getString('file_too_large')} ${(bytes.length / (1024 * 1024)).toStringAsFixed(1)}MB',
+            );
+            return;
           }
-          _userCertificationMedia[userId]!.add(mediaItem);
-        });
 
-        // Mostra dialog per modificare titolo e descrizione
-        _showUserMediaEditDialog(
-          userId,
-          mediaItem,
-          _userCertificationMedia[userId]!.length - 1,
-        );
+          final mediaItem = MediaItem(
+            file: selectedFile!,
+            title: '',
+            description: '',
+            type: mediaType,
+          );
+
+          setState(() {
+            if (_userCertificationMedia[userId] == null) {
+              _userCertificationMedia[userId] = [];
+            }
+            _userCertificationMedia[userId]!.add(mediaItem);
+          });
+
+          // Mostra dialog per modificare titolo e descrizione
+          _showUserMediaEditDialog(
+            userId,
+            mediaItem,
+            _userCertificationMedia[userId]!.length - 1,
+          );
+        } catch (fileError) {
+          print(
+            '❌ Error with user media file ${selectedFile.name}: $fileError',
+          );
+          _showErrorDialog(l10n.getString('error_loading_file_retry'));
+        }
       }
     } catch (e) {
       print('❌ Error picking media for user $userId: $e');
-      _showErrorDialog('Errore nella selezione del file. Riprova.');
     }
   }
 
@@ -5068,30 +5110,17 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
   /// Metodo specifico per la geolocalizzazione su web
   Future<void> _getCurrentLocationWeb() async {
     try {
-      // Su web, usa l'API di geolocalizzazione del browser
-      if (kIsWeb) {
-        // Prova prima con l'API di geolocalizzazione del browser
-        final position = await _getBrowserGeolocation();
-        if (position != null) {
-          String address = await _getAddressFromCoordinatesWeb(
-            position['latitude'] as double,
-            position['longitude'] as double,
-          );
-          
-          setState(() {
-            _locationController.text = address;
-            _isLoadingLocation = false;
-          });
-          
-          print('📍 Posizione web ottenuta: $address');
-          return;
-        }
-      }
+      final l10n = AppLocalizations.of(context);
+      print('🌐 Tentativo geolocalizzazione web...');
 
-      // Fallback: usa Geolocator anche su web
+      // Prova prima con Geolocator (funziona meglio su web moderni)
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.lowest,
-        timeLimit: const Duration(seconds: 10),
+        timeLimit: const Duration(seconds: 8),
+      );
+
+      print(
+        '📍 Coordinate ottenute: ${position.latitude}, ${position.longitude}',
       );
 
       String address = await _getAddressFromCoordinatesWeb(
@@ -5105,24 +5134,29 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
       });
 
       print('📍 Posizione web ottenuta: $address');
+      return;
     } catch (e) {
       print('❌ Errore geolocalizzazione web: $e');
-      
-      // Fallback finale: usa IP geolocation
+
+      // Fallback: usa IP geolocation
       try {
+        print('🌐 Tentativo IP geolocation...');
         String city = await _getCityFromIP();
         setState(() {
           _locationController.text = city;
           _isLoadingLocation = false;
         });
         print('📍 Città ottenuta da IP: $city');
+        return;
       } catch (ipError) {
         print('❌ Errore IP geolocation: $ipError');
-        setState(() {
-          _locationController.text = 'Italia';
-          _isLoadingLocation = false;
-        });
       }
+
+      // Fallback finale: usa una posizione predefinita
+      setState(() {
+        _locationController.text = 'Italia';
+        _isLoadingLocation = false;
+      });
     }
   }
 
@@ -5146,11 +5180,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
         desiredAccuracy: LocationAccuracy.lowest,
         timeLimit: const Duration(seconds: 8),
       );
-      
-      return {
-        'latitude': position.latitude,
-        'longitude': position.longitude,
-      };
+
+      return {'latitude': position.latitude, 'longitude': position.longitude};
     } catch (e) {
       print('❌ Errore JavaScript geolocation: $e');
       return null;
@@ -5169,17 +5200,27 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final city = data['city'] as String?;
+        final region = data['region'] as String?;
         final country = data['country_name'] as String?;
-        
-        if (city != null && country != null) {
-          return '$city, $country';
-        } else if (city != null) {
-          return city;
-        } else if (country != null) {
-          return country;
+
+        // Costruisci l'indirizzo con priorità alla città
+        List<String> addressParts = [];
+
+        if (city != null && city.isNotEmpty) {
+          addressParts.add(city);
+        } else if (region != null && region.isNotEmpty) {
+          addressParts.add(region);
+        }
+
+        if (country != null && country.isNotEmpty) {
+          addressParts.add(country);
+        }
+
+        if (addressParts.isNotEmpty) {
+          return addressParts.join(', ');
         }
       }
-      
+
       return 'Italia';
     } catch (e) {
       print('❌ Errore IP geolocation: $e');
@@ -5254,39 +5295,114 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
   /// Fallback method per geocoding su web
   Future<String> _getAddressFromCoordinatesWeb(double lat, double lng) async {
     try {
+      print('🌐 Tentativo reverse geocoding web: $lat, $lng');
+
       // Prova prima con il geocoding normale
       List<Placemark> placemarks = await placemarkFromCoordinates(lat, lng);
 
       if (placemarks.isNotEmpty) {
         Placemark place = placemarks[0];
+        print('📍 Placemark ottenuto: ${place.toString()}');
 
-        // Costruisci l'indirizzo in formato leggibile
+        // Costruisci l'indirizzo in formato leggibile, dando priorità alla città
         List<String> addressParts = [];
 
-        if (place.street != null && place.street!.isNotEmpty) {
-          addressParts.add(place.street!);
-        }
+        // Priorità: città (locality) -> regione (administrativeArea) -> paese (country)
         if (place.locality != null && place.locality!.isNotEmpty) {
           addressParts.add(place.locality!);
-        }
-        if (place.administrativeArea != null &&
+        } else if (place.subLocality != null && place.subLocality!.isNotEmpty) {
+          // Se non c'è locality, prova subLocality
+          addressParts.add(place.subLocality!);
+        } else if (place.administrativeArea != null &&
             place.administrativeArea!.isNotEmpty) {
+          // Se non c'è città, usa la regione
           addressParts.add(place.administrativeArea!);
         }
+
+        // Aggiungi la regione se diversa dalla città
+        if (place.administrativeArea != null &&
+            place.administrativeArea!.isNotEmpty &&
+            place.locality != null &&
+            place.locality!.isNotEmpty &&
+            place.administrativeArea != place.locality) {
+          addressParts.add(place.administrativeArea!);
+        }
+
+        // Aggiungi il paese
         if (place.country != null && place.country!.isNotEmpty) {
           addressParts.add(place.country!);
         }
 
         String address = addressParts.join(', ');
-        return address.isNotEmpty ? address : 'Italia';
+        if (address.isNotEmpty) {
+          print('📍 Indirizzo costruito: $address');
+          return address;
+        }
       }
 
-      // Se non funziona, restituisci Roma
+      // Se non funziona, prova con un servizio di geocoding alternativo
+      try {
+        String address = await _getAddressFromExternalService(lat, lng);
+        if (address.isNotEmpty) {
+          return address;
+        }
+      } catch (e) {
+        print('❌ Errore servizio esterno: $e');
+      }
+
+      // Fallback finale: restituisci Italia
       return 'Italia';
     } catch (e) {
       print('❌ Errore nel reverse geocoding web: $e');
-      // Fallback finale: restituisci Roma
       return 'Italia';
+    }
+  }
+
+  /// Usa un servizio esterno per il reverse geocoding
+  Future<String> _getAddressFromExternalService(double lat, double lng) async {
+    try {
+      // Usa OpenStreetMap Nominatim API (gratuita)
+      final response = await http.get(
+        Uri.parse(
+          'https://nominatim.openstreetmap.org/reverse?format=json&lat=$lat&lon=$lng&accept-language=it',
+        ),
+        headers: {'User-Agent': 'JetCV-Enterprise/1.0'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final displayName = data['display_name'] as String?;
+        final city = data['city'] as String?;
+        final state = data['state'] as String?;
+        final country = data['country'] as String?;
+
+        // Prova prima con i campi specifici
+        if (city != null && city.isNotEmpty) {
+          List<String> addressParts = [city];
+          if (state != null && state.isNotEmpty && state != city) {
+            addressParts.add(state);
+          }
+          if (country != null && country.isNotEmpty) {
+            addressParts.add(country);
+          }
+          return addressParts.join(', ');
+        }
+
+        // Fallback: usa display_name
+        if (displayName != null && displayName.isNotEmpty) {
+          // Estrai solo città e paese
+          List<String> parts = displayName.split(', ');
+          if (parts.length >= 2) {
+            return '${parts[0]}, ${parts[parts.length - 1]}';
+          }
+          return displayName;
+        }
+      }
+
+      return '';
+    } catch (e) {
+      print('❌ Errore servizio esterno geocoding: $e');
+      return '';
     }
   }
 
@@ -5461,6 +5577,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
 
   Future<void> _scanQRCode() async {
     try {
+      final l10n = AppLocalizations.of(context);
+
       // Naviga alla schermata di scansione QR
       final String? scannedData = await Navigator.push<String>(
         context,
@@ -5475,7 +5593,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text('Scansione annullata'),
+              content: Text(l10n.getString('scan_cancelled')),
               backgroundColor: AppTheme.textSecondary,
             ),
           );
@@ -5554,6 +5672,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
 
   Future<void> _addUserFromQR(Map<String, dynamic> userData) async {
     try {
+      final l10n = AppLocalizations.of(context);
+
       // Crea un oggetto UserData dai dati QR
       final user = UserData(
         idUser: userData['user_id'] ?? userData['userId'] ?? const Uuid().v4(),
@@ -5572,7 +5692,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text('Utente già aggiunto alla certificazione'),
+              content: Text(l10n.getString('user_already_added')),
               backgroundColor: AppTheme.warningOrange,
             ),
           );
@@ -5615,13 +5735,13 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
       builder: (BuildContext context) {
         final l10n = AppLocalizations.of(context);
         return AlertDialog(
-          title: const Text('Dati QR Scansionati'),
+          title: Text(l10n.getString('qr_data_scanned')),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Contenuto del codice QR:'),
+                Text(l10n.getString('qr_content')),
                 const SizedBox(height: 8),
                 Container(
                   padding: const EdgeInsets.all(12),
@@ -5649,7 +5769,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen>
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Chiudi'),
+              child: Text(l10n.getString('close')),
             ),
           ],
         );
