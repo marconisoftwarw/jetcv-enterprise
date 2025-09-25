@@ -81,7 +81,7 @@ class CertifierService {
           'Content-Type': 'application/json',
           'apikey': _apiKey,
           'Authorization': 'Bearer $_apiKey',
-          'Origin': 'http://localhost:8080',
+          'Origin': AppConfig.appUrl,
         },
       );
 
@@ -143,7 +143,7 @@ class CertifierService {
           'Content-Type': 'application/json',
           'apikey': _apiKey,
           'Authorization': 'Bearer $_apiKey',
-          'Origin': 'http://localhost:8080',
+          'Origin': AppConfig.appUrl,
         },
       );
 
@@ -214,7 +214,7 @@ class CertifierService {
           'Content-Type': 'application/json',
           'apikey': _apiKey,
           'Authorization': 'Bearer $_apiKey',
-          'Origin': 'http://localhost:8080',
+          'Origin': AppConfig.appUrl,
         },
         body: json.encode({'operation': 'create', 'data': certifier.toJson()}),
       );
@@ -253,7 +253,7 @@ class CertifierService {
           'Content-Type': 'application/json',
           'apikey': _apiKey,
           'Authorization': 'Bearer $_apiKey',
-          'Origin': 'http://localhost:8080',
+          'Origin': AppConfig.appUrl,
         },
         body: json.encode({
           'operation': 'create_with_user',
@@ -556,7 +556,7 @@ class CertifierService {
           'Content-Type': 'application/json',
           'apikey': _apiKey,
           'Authorization': 'Bearer $_apiKey',
-          'Origin': 'http://localhost:8080',
+          'Origin': AppConfig.appUrl,
         },
       );
 
@@ -677,7 +677,7 @@ class CertifierService {
           'Content-Type': 'application/json',
           'apikey': _apiKey,
           'Authorization': 'Bearer $_apiKey',
-          'Origin': 'http://localhost:8080',
+          'Origin': AppConfig.appUrl,
         },
       );
 

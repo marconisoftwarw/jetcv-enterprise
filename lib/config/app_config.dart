@@ -5,7 +5,7 @@ class AppConfig {
   // App configuration
   static const String appUrl = String.fromEnvironment(
     'APP_URL',
-    defaultValue: 'http://localhost:8080',
+    defaultValue: 'https://jectcv.netlify.app',
   );
 
   // Production URL for fallback
