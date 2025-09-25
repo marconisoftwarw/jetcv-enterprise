@@ -673,6 +673,17 @@ class GlobalHamburgerMenu extends StatelessWidget {
                 }
               } catch (e) {
                 print('Error during logout: $e');
+                // Show error message to user
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        l10n.getString('logout_error') ?? 'Logout failed',
+                      ),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
               }
             },
             style: ElevatedButton.styleFrom(

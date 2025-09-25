@@ -393,7 +393,9 @@ class SupabaseService {
   }
 
   Future<void> signOut() async {
+    print('🔄 SupabaseService: Starting signOut...');
     await _auth.signOut();
+    print('✅ SupabaseService: signOut completed');
   }
 
   Future<void> resetPassword(String email) async {

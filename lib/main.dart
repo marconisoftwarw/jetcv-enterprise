@@ -239,9 +239,16 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
             '/': (context) => FutureBuilder(
               future: _initializationFuture,
               builder: (context, snapshot) {
+                print(
+                  '🔄 Main: Route builder called - isAuthenticated: ${authProvider.isAuthenticated}, currentUser: ${authProvider.currentUser != null}',
+                );
+
                 // Se l'utente non è autenticato, mostra immediatamente la home pubblica
                 if (!authProvider.isAuthenticated ||
                     authProvider.currentUser == null) {
+                  print(
+                    '🔄 Main: User not authenticated, showing PublicHomeScreen',
+                  );
                   return const PublicHomeScreen();
                 }
 
@@ -270,9 +277,16 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
             '/#/': (context) => FutureBuilder(
               future: _initializationFuture,
               builder: (context, snapshot) {
+                print(
+                  '🔄 Main: Hash route builder called - isAuthenticated: ${authProvider.isAuthenticated}, currentUser: ${authProvider.currentUser != null}',
+                );
+
                 // Se l'utente non è autenticato, mostra immediatamente la home pubblica
                 if (!authProvider.isAuthenticated ||
                     authProvider.currentUser == null) {
+                  print(
+                    '🔄 Main: User not authenticated in hash route, showing PublicHomeScreen',
+                  );
                   return const PublicHomeScreen();
                 }
 

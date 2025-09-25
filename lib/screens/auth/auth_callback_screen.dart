@@ -42,9 +42,9 @@ class _AuthCallbackScreenState extends State<AuthCallbackScreen> {
           Navigator.of(context).pushReplacementNamed('/home');
         }
       } else if (event == AuthChangeEvent.signedOut) {
-        // User signed out, redirect to login
+        // User signed out, redirect to public home
         if (mounted) {
-          Navigator.of(context).pushReplacementNamed('/login');
+          Navigator.of(context).pushReplacementNamed('/');
         }
       }
     });

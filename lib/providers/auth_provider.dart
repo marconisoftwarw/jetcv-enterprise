@@ -441,12 +441,16 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> signOut() async {
     try {
+      print('🔄 AuthProvider: Starting signOut process...');
       await _supabaseService.signOut();
       _currentUser = null;
       _userType = null;
       _clearError();
+      print('🔄 AuthProvider: User data cleared, notifying listeners...');
       _safeNotifyListeners();
+      print('✅ AuthProvider: SignOut completed successfully');
     } catch (e) {
+      print('❌ AuthProvider: SignOut error: $e');
       _setError('Sign out failed: $e');
     }
   }

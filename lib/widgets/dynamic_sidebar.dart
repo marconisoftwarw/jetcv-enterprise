@@ -242,13 +242,29 @@ class DynamicSidebar extends StatelessWidget {
             ElevatedButton(
               onPressed: () async {
                 Navigator.of(context).pop();
-                await authProvider.signOut();
 
-                // Navigate to public home after logout
-                if (context.mounted) {
-                  Navigator.of(
-                    context,
-                  ).pushNamedAndRemoveUntil('/', (route) => false);
+                try {
+                  await authProvider.signOut();
+
+                  // Navigate to public home after logout
+                  if (context.mounted) {
+                    Navigator.of(
+                      context,
+                    ).pushNamedAndRemoveUntil('/', (route) => false);
+                  }
+                } catch (e) {
+                  print('Error during logout: $e');
+                  // Show error message to user
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          l10n.getString('logout_error') ?? 'Logout failed',
+                        ),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
                 }
               },
               style: ElevatedButton.styleFrom(
