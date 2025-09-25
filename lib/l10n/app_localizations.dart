@@ -619,6 +619,21 @@ class AppLocalizations {
       'change_company_photo': 'Cambia Foto',
       'ready_to_upload': 'Pronto per l\'invio',
       'ready_for_preview': 'Pronto per anteprima',
+      'image_upload_after_registration': 'Logo e foto azienda',
+      'image_upload_after_registration_info':
+          'Potrai caricare il logo azienda e la foto azienda dopo aver completato la registrazione e aver effettuato l\'accesso al portale.',
+      'upload_company_images': 'Carica Immagini Azienda',
+      'upload_images_title': 'Carica Logo e Foto Azienda',
+      'upload_images_subtitle':
+          'Carica il logo azienda e una foto rappresentativa della tua azienda.',
+      'upload_images': 'Carica Immagini',
+      'uploading': 'Caricamento...',
+      'change': 'Cambia',
+      'select': 'Seleziona',
+      'image_selected_successfully': 'Immagine selezionata con successo!',
+      'select_at_least_one_image': 'Seleziona almeno un\'immagine da caricare',
+      'images_uploaded_successfully': 'Immagini caricate con successo!',
+      'upload_error': 'Errore nel caricamento',
       'forgot_password': 'Password Dimenticata',
       'forgot_password_description':
           'Inserisci la tua email per ricevere un link per reimpostare la password',

@@ -114,6 +114,27 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
     }
   }
 
+  String? _getInitialRoute() {
+    try {
+      final uri = Uri.base;
+      print('🔍 Current URL: ${uri.toString()}');
+      print('🔍 Current path: ${uri.path}');
+      print('🔍 Current query: ${uri.query}');
+
+      // If the current URL is /password-reset (with or without token), return that route
+      if (uri.path == '/password-reset') {
+        print('🔍 Detected password reset URL, returning /password-reset');
+        return '/password-reset';
+      }
+
+      // For all other cases, return null to use default routing
+      return null;
+    } catch (e) {
+      print('🔍 Error getting initial route: $e');
+      return null;
+    }
+  }
+
   Future<void> _initializeApp() async {
     try {
       print('🚀 Initializing app...');
@@ -198,14 +219,18 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
           darkTheme: AppTheme.darkTheme,
           themeMode: themeProvider.themeMode,
           builder: (context, child) {
+            // Hide global language button when unauthenticated to avoid duplication on public pages
+            final isAuthenticated = context
+                .read<AuthProvider>()
+                .isAuthenticated;
             return Stack(
               children: [
                 child ?? const SizedBox(),
-                const GlobalFloatingLanguageButton(),
+                if (isAuthenticated) const GlobalFloatingLanguageButton(),
               ],
             );
           },
-          initialRoute: '/',
+          initialRoute: _getInitialRoute(),
           routes: {
             '/': (context) => FutureBuilder(
               future: _initializationFuture,
@@ -294,6 +319,12 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
           onGenerateRoute: (settings) {
             // Handle direct URL access and ensure authentication state is restored
             print('🔄 Handling route: ${settings.name}');
+
+            // Handle initial route - only for root path
+            if (settings.name == null || settings.name == '/') {
+              // Let the default route handler manage this
+              return null;
+            }
 
             // Check if this is a protected route
             final protectedRoutes = [
@@ -433,8 +464,32 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
                   settings: settings,
                 );
               case '/password-reset':
+                // Extract token from query parameters
+                String? token;
+                try {
+                  // First try to get token from the route name itself
+                  final uri = Uri.parse(settings.name ?? '');
+                  token = uri.queryParameters['token'];
+                  print('🔍 Password reset URL: ${settings.name}');
+                  print('🔍 Extracted token from route: $token');
+
+                  // If no token in route name, try to get from current URL
+                  if (token == null) {
+                    final currentUri = Uri.base;
+                    if (currentUri.path == '/password-reset') {
+                      token = currentUri.queryParameters['token'];
+                      print('🔍 Extracted token from current URL: $token');
+                    }
+                  }
+                } catch (e) {
+                  print(
+                    '🔍 Error extracting token from password reset URL: $e',
+                  );
+                }
+
                 return MaterialPageRoute(
-                  builder: (_) => const PasswordResetWithTokenScreen(),
+                  builder: (_) => PasswordResetWithTokenScreen(token: token),
+                  settings: settings,
                 );
               case '/auth/callback':
                 return MaterialPageRoute(

@@ -9,7 +9,9 @@ import '../../widgets/page_with_floating_language.dart';
 import '../../l10n/app_localizations.dart';
 
 class PasswordResetWithTokenScreen extends StatefulWidget {
-  const PasswordResetWithTokenScreen({super.key});
+  final String? token;
+
+  const PasswordResetWithTokenScreen({super.key, this.token});
 
   @override
   State<PasswordResetWithTokenScreen> createState() =>
@@ -31,7 +33,12 @@ class _PasswordResetWithTokenScreenState
   @override
   void initState() {
     super.initState();
-    _extractTokenFromUrl();
+    // Use token from constructor if provided, otherwise extract from URL
+    if (widget.token != null) {
+      _token = widget.token;
+    } else {
+      _extractTokenFromUrl();
+    }
   }
 
   @override

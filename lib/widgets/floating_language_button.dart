@@ -4,7 +4,14 @@ import '../providers/locale_provider.dart';
 import '../theme/app_theme.dart';
 
 class FloatingLanguageButton extends StatefulWidget {
-  const FloatingLanguageButton({super.key});
+  final double? topPosition;
+  final double? rightPosition;
+
+  const FloatingLanguageButton({
+    super.key,
+    this.topPosition,
+    this.rightPosition,
+  });
 
   @override
   State<FloatingLanguageButton> createState() => _FloatingLanguageButtonState();
@@ -89,8 +96,8 @@ class _FloatingLanguageButtonState extends State<FloatingLanguageButton>
             : localeProvider.getSupportedLanguages();
 
         return Positioned(
-          top: 20,
-          right: 20,
+          top: widget.topPosition ?? 20,
+          right: widget.rightPosition ?? 20,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.end,
