@@ -19,14 +19,20 @@
  *           "status": "sent",
  *           "draft_at": string (ISO),
  *           "sent_at": string (ISO),
- *           "closed_at": string (ISO) | null
+ *           "closed_at": string (ISO) | null,
+ *           "duration_h": number | null,
+ *           "start_timestamp": string (ISO) | null,
+ *           "end_timestamp": string (ISO) | null
  *         },
  *         "certification_users": [
  *           {
  *             "id_user": string,
  *             "id_otp": string,
  *             "status": "pending",
- *             "rejection_reason": string | null
+ *             "rejection_reason": string | null,
+ *             "duration_h": number | null,
+ *             "start_timestamp": string (ISO) | null,
+ *             "end_timestamp": string (ISO) | null
  *           }
  *         ],
  *         "media": [
@@ -39,7 +45,8 @@
  *             "id_location": string | null,
  *             "file_type": "image" | "video" | "audio" | "document" | null,
  *             "file_data": string (base64) | null,
- *             "mime_type": string | null
+ *             "mime_type": string | null,
+ *             "title": string | null
  *           }
  *         ],
  *         "media_metadata": [
@@ -47,11 +54,19 @@
  *             "title": string | null,
  *             "description": string | null
  *           }
+ *         ],
+ *         "certification_information_values": [
+ *           {
+ *             "id_certification_information": string,
+ *             "value": string,
+ *             "id_certification_user": string | null  // null for general certification values
+ *           }
+ *         ]
  *         ]
  *       }
  *
  * @output
- *   - 201 JSON: { data: { certification, certification_users, media } }
+ *   - 201 JSON: { data: { certification, certification_users, media, certification_information_values } }
  *   - 4xx/5xx JSON: { error: string }
  *
  * @responses
@@ -61,10 +76,11 @@
  *   500: Internal error
  *
  * @behavior
- *   - Creates certification
- *   - Blocks OTPs used by certification_users
- *   - Uploads media files to storage
+ *   - Creates certification with duration and timestamps
+ *   - Blocks OTPs used by certification_users with duration and timestamps
+ *   - Uploads media files to storage with title
  *   - Links media to certification
+ *   - Inserts certification_information_values for general and user-specific values
  *   - Uses SERVICE_ROLE to bypass RLS
  *   - Atomic transaction (rollback on any failure)
  *
@@ -150,7 +166,7 @@ async function readJson(req) {
   }
 }
 
-Deno.serve(async (req) => {
+(Deno as any).serve(async (req: any) => {
   const reqId = crypto.randomUUID();
   const t0 = Date.now();
   const url = new URL(req.url);
@@ -164,8 +180,8 @@ Deno.serve(async (req) => {
 
   // @ts-ignore deno-types
   const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
-  const supabaseUrl = Deno.env.get("SUPABASE_URL");
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const supabaseUrl = (Deno as any).env.get("SUPABASE_URL");
+  const serviceRoleKey = (Deno as any).env.get("SUPABASE_SERVICE_ROLE_KEY");
   
   console.log(`[${reqId}] Env -> URL:${!!supabaseUrl} SRK:${serviceRoleKey ? "present" : "missing"}`);
   
@@ -209,6 +225,7 @@ Deno.serve(async (req) => {
     const certificationUsers = Array.isArray(body.certification_users) ? body.certification_users : [];
     const media = Array.isArray(body.media) ? body.media : [];
     const mediaMetadata = Array.isArray(body.media_metadata) ? body.media_metadata : [];
+    const certificationInformationValues = Array.isArray(body.certification_information_values) ? body.certification_information_values : [];
 
     const required = [
       cert.id_certifier,
@@ -331,7 +348,10 @@ Deno.serve(async (req) => {
       status: cert.status || "sent",
       sent_at: cert.sent_at || nowIso(),
       draft_at: cert.draft_at || nowIso(),
-      closed_at: cert.closed_at ?? null
+      closed_at: cert.closed_at ?? null,
+      duration_h: cert.duration_h ? Number(cert.duration_h) : null,
+      start_timestamp: cert.start_timestamp || null,
+      end_timestamp: cert.end_timestamp || null
     };
 
     console.log(`[${reqId}] Certification insertPayload:`, insertPayload);
@@ -405,7 +425,10 @@ Deno.serve(async (req) => {
         id_user: String(u.id_user),
         id_otp: String(u.id_otp),
         status: u.status || "pending",
-        rejection_reason: u.rejection_reason ?? null
+        rejection_reason: u.rejection_reason ?? null,
+        duration_h: u.duration_h ? Number(u.duration_h) : null,
+        start_timestamp: u.start_timestamp || null,
+        end_timestamp: u.end_timestamp || null
       }));
 
       const { data: cuIns, error: cuErr } = await admin
@@ -460,7 +483,7 @@ Deno.serve(async (req) => {
     }
 
     // 6. PROCESS MEDIA
-    let mediaRows = [];
+    let mediaRows: any[] = [];
     if (media.length > 0) {
       console.log(`[${reqId}] Processing media - START count:${media.length}`);
       const tMedia0 = Date.now();
@@ -506,7 +529,8 @@ Deno.serve(async (req) => {
               acquisition_type: m.acquisition_type || "realtime",
               captured_at: m.captured_at || nowStr,
               id_location: m.id_location || null,
-              file_type
+              file_type,
+              title: m.title || metadata.title || null
             })
             .select("*")
             .single();
@@ -541,18 +565,121 @@ Deno.serve(async (req) => {
       }
     }
 
-    // 7. SUCCESS RESPONSE
+    // 7. INSERT CERTIFICATION INFORMATION VALUES
+    let informationValues: any[] = [];
+    if (certificationInformationValues.length > 0) {
+      console.log(`[${reqId}] Processing certification information values - START`);
+      const tInfo0 = Date.now();
+      
+      try {
+        // Validate that all certification_information_ids exist
+        const infoIds = [...new Set(certificationInformationValues.map(iv => iv.id_certification_information))];
+        const { data: infoRows, error: infoErr } = await admin
+          .from("certification_information")
+          .select("id_certification_information")
+          .in("id_certification_information", infoIds);
+
+        if (infoErr) {
+          console.error(`[${reqId}] Error validating certification_information_ids:`, infoErr);
+          return new Response(JSON.stringify({
+            error: `Failed to validate certification_information_ids: ${infoErr.message}`
+          }), {
+            headers: { "Content-Type": "application/json", ...corsHeaders() },
+            status: 400
+          });
+        }
+
+        const validInfoIds = new Set((infoRows || []).map(r => r.id_certification_information));
+        const invalidInfoIds = infoIds.filter(id => !validInfoIds.has(id));
+        
+        if (invalidInfoIds.length > 0) {
+          return new Response(JSON.stringify({
+            error: `Invalid certification_information_ids: ${invalidInfoIds.join(', ')}`
+          }), {
+            headers: { "Content-Type": "application/json", ...corsHeaders() },
+            status: 400
+          });
+        }
+
+        // Map certification_user IDs for validation
+        const userIdToCertUserId = new Map<string, string>();
+        cuData.forEach((cu: any) => {
+          userIdToCertUserId.set(cu.id_user, cu.id_certification_user);
+        });
+
+        // Prepare values to insert
+        const valuesToInsert = certificationInformationValues.map((iv: any) => {
+          const baseValue: any = {
+            id_certification_information: String(iv.id_certification_information),
+            value: String(iv.value),
+            id_certification: certRow.id_certification
+          };
+
+          // If id_certification_user is provided, validate and include it
+          if (iv.id_certification_user) {
+            const certUserId = userIdToCertUserId.get(iv.id_certification_user);
+            if (!certUserId) {
+              throw new Error(`Invalid id_certification_user: ${iv.id_certification_user}`);
+            }
+            baseValue.id_certification_user = certUserId;
+          }
+
+          return baseValue;
+        });
+
+        // Insert certification information values
+        const { data: infoValuesData, error: infoValuesErr } = await admin
+          .from("certification_information_value")
+          .insert(valuesToInsert)
+          .select("*");
+
+        if (infoValuesErr) {
+          console.error(`[${reqId}] Error inserting certification_information_values:`, infoValuesErr);
+          return new Response(JSON.stringify({
+            error: `Failed to insert certification_information_values: ${infoValuesErr.message}`
+          }), {
+            headers: { "Content-Type": "application/json", ...corsHeaders() },
+            status: 400
+          });
+        }
+
+        informationValues = infoValuesData || [];
+        console.log(`[${reqId}] Certification information values processed OK in ${Date.now() - tInfo0}ms rows:${informationValues.length}`);
+      } catch (infoErr) {
+        console.error(`[${reqId}] Rolling back due to certification information values error...`, infoErr);
+        
+        // Cleanup: delete certification users, media, and certification
+        if (cuData.length > 0) {
+          await admin.from("certification_user").delete().eq("id_certification", certRow.id_certification);
+        }
+        if (mediaRows.length > 0) {
+          await admin.from("certification_has_media").delete().eq("id_certification", certRow.id_certification);
+          await admin.from("certification_media").delete().eq("id_certification", certRow.id_certification);
+        }
+        await admin.from("certification").delete().eq("id_certification", certRow.id_certification);
+        
+        return new Response(JSON.stringify({
+          error: `Failed to process certification information values: ${infoErr.message}`
+        }), {
+          headers: { "Content-Type": "application/json", ...corsHeaders() },
+          status: 400
+        });
+      }
+    }
+
+    // 8. SUCCESS RESPONSE
     const response = {
       data: {
         ...certRow,
         certification_users: cuData,
-        media: mediaRows
+        media: mediaRows,
+        certification_information_values: informationValues
       }
     };
 
     console.log(`[${reqId}] ===== SUCCESS in ${Date.now() - t0}ms =====`);
     console.log(`[${reqId}] Created certification:`, certRow.id_certification);
-    console.log(`[${reqId}] Users: ${cuData.length}, Media: ${mediaRows.length}`);
+    console.log(`[${reqId}] Users: ${cuData.length}, Media: ${mediaRows.length}, Information Values: ${informationValues.length}`);
 
     return new Response(JSON.stringify(response), {
       headers: { "Content-Type": "application/json", ...corsHeaders() },

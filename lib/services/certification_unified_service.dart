@@ -27,9 +27,13 @@ class CertificationUnifiedService {
     String? draftAt,
     String? sentAt,
     String? closedAt,
+    int? durationH,
+    String? startTimestamp,
+    String? endTimestamp,
     List<Map<String, dynamic>>? certificationUsers,
     List<MediaItem>? mediaFiles,
     List<Map<String, dynamic>>? mediaMetadata,
+    List<Map<String, dynamic>>? certificationInformationValues,
   }) async {
     try {
       print(
@@ -41,6 +45,9 @@ class CertificationUnifiedService {
       print('📝 Category: $idCertificationCategory');
       print('📝 Users: ${certificationUsers?.length ?? 0}');
       print('📝 Media: ${mediaFiles?.length ?? 0}');
+      print(
+        '📝 Information Values: ${certificationInformationValues?.length ?? 0}',
+      );
 
       // Prepara i dati della certificazione
       final certificationData = {
@@ -53,6 +60,9 @@ class CertificationUnifiedService {
         'draft_at': draftAt ?? DateTime.now().toIso8601String(),
         'sent_at': sentAt ?? DateTime.now().toIso8601String(),
         'closed_at': closedAt,
+        'duration_h': durationH,
+        'start_timestamp': startTimestamp,
+        'end_timestamp': endTimestamp,
       };
 
       // Prepara i dati degli utenti
@@ -86,6 +96,7 @@ class CertificationUnifiedService {
             'file_type': _inferFileType(media.file.name, null),
             'file_data': fileDataBase64,
             'mime_type': _getMimeType(media.file.name),
+            'title': metadata['title'] ?? media.title,
           });
         }
       }
@@ -93,12 +104,17 @@ class CertificationUnifiedService {
       // Prepara i metadati dei media
       final mediaMetadataData = mediaMetadata ?? [];
 
+      // Prepara i certification information values
+      final certificationInformationValuesData =
+          certificationInformationValues ?? [];
+
       // Prepara il payload completo
       final payload = {
         'certification': certificationData,
         'certification_users': usersData,
         'media': mediaData,
         'media_metadata': mediaMetadataData,
+        'certification_information_values': certificationInformationValuesData,
       };
 
       print('📦 Payload prepared:');
@@ -106,6 +122,9 @@ class CertificationUnifiedService {
       print('  - Users: ${usersData.length}');
       print('  - Media: ${mediaData.length}');
       print('  - Media Metadata: ${mediaMetadataData.length}');
+      print(
+        '  - Certification Information Values: ${certificationInformationValuesData.length}',
+      );
 
       // Chiama la Edge Function
       final response = await http.post(

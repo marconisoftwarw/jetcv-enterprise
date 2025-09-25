@@ -39,7 +39,8 @@ class CreateCertificationScreen extends StatefulWidget {
       _CreateCertificationScreenState();
 }
 
-class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
+class _CreateCertificationScreenState extends State<CreateCertificationScreen>
+    with TickerProviderStateMixin {
   int _currentStep = 0;
   final PageController _pageController = PageController();
 
@@ -54,6 +55,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
 
   // API state
   bool _isCreating = false;
+  List<AnimationController> _pulseAnimations = [];
   String? _errorMessage;
   String? _successMessage;
   bool _isLoadingCategories = true;
@@ -230,6 +232,11 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     _otpController.dispose();
     _locationController.dispose();
     _pageController.dispose();
+    // Pulisci le animazioni
+    for (final controller in _pulseAnimations) {
+      controller.dispose();
+    }
+    _pulseAnimations.clear();
     super.dispose();
   }
 
@@ -449,54 +456,8 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
             ],
           ),
         ),
-        // Overlay di loading durante la creazione
-        if (_isCreating)
-          Container(
-            color: Colors.black.withValues(alpha: 0.5),
-            child: Center(
-              child: Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: AppTheme.pureWhite,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        AppTheme.primaryBlue,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Creazione certificazione in corso...',
-                      style: TextStyle(
-                        color: AppTheme.textPrimary,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Attendere prego...',
-                      style: TextStyle(
-                        color: AppTheme.textSecondary,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
+        // Overlay di loading moderno durante la creazione
+        if (_isCreating) _buildModernLoadingOverlay(),
       ],
     );
   }
@@ -589,6 +550,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 _currentStep >= 1,
                 _currentStep == 1,
                 isTablet,
+                isRequired: true,
               ),
               _buildModernStepConnector(_currentStep > 1, isTablet),
               _buildModernStepIndicator(
@@ -618,8 +580,9 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     String label,
     bool isCompleted,
     bool isCurrent,
-    bool isTablet,
-  ) {
+    bool isTablet, {
+    bool isRequired = false,
+  }) {
     final isActive = isCompleted || isCurrent;
 
     return Column(
@@ -708,14 +671,30 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(isTablet ? 8 : 6),
           ),
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: isTablet ? 13 : 11,
-              color: isActive ? AppTheme.primaryBlack : AppTheme.textSecondary,
-              fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w600,
-            ),
-            textAlign: TextAlign.center,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: isTablet ? 13 : 11,
+                  color: isActive
+                      ? AppTheme.primaryBlack
+                      : AppTheme.textSecondary,
+                  fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              if (isRequired && !isCompleted)
+                Text(
+                  ' *',
+                  style: TextStyle(
+                    fontSize: isTablet ? 13 : 11,
+                    color: AppTheme.errorRed,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+            ],
           ),
         ),
       ],
@@ -1634,32 +1613,9 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                                     topLeft: Radius.circular(16),
                                     bottomLeft: Radius.circular(16),
                                   ),
-                                  child: FutureBuilder<Uint8List>(
-                                    future: mediaItem.file.readAsBytes(),
-                                    builder: (context, snapshot) {
-                                      if (snapshot.hasData) {
-                                        return Image.memory(
-                                          snapshot.data!,
-                                          width: isTablet ? 90 : 80,
-                                          height: isTablet ? 90 : 80,
-                                          fit: BoxFit.cover,
-                                          errorBuilder:
-                                              (context, error, stackTrace) {
-                                                return Icon(
-                                                  Icons.error_outline_rounded,
-                                                  color: AppTheme.errorRed,
-                                                  size: isTablet ? 28 : 24,
-                                                );
-                                              },
-                                        );
-                                      } else {
-                                        return Icon(
-                                          Icons.image_outlined,
-                                          color: AppTheme.textSecondary,
-                                          size: isTablet ? 28 : 24,
-                                        );
-                                      }
-                                    },
+                                  child: _buildMediaPreview(
+                                    mediaItem,
+                                    isTablet,
                                   ),
                                 ),
                               ),
@@ -1840,6 +1796,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           ),
           SizedBox(height: isTablet ? 32 : 24),
 
+          // Sezione per aggiungere utenti con OTP
           _buildAddUserSection(),
           const SizedBox(height: 24),
 
@@ -3034,6 +2991,17 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
   }
 
   void _nextStep() {
+    // Validazione obbligatoria per il terzo step (risultati)
+    if (_currentStep == 1) {
+      if (_addedUsers.isEmpty) {
+        _showErrorDialog(
+          'Attenzione',
+          'Devi aggiungere almeno un utente con OTP per procedere al terzo step.',
+        );
+        return;
+      }
+    }
+
     if (_currentStep < 3) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
@@ -3232,6 +3200,10 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           );
         }
 
+        // Prepara i certification information values
+        final certificationInformationValues =
+            _prepareCertificationInformationValues();
+
         // Usa il servizio unificato per creare certificazione con media
         result = await CertificationUnifiedService.createCertificationUnified(
           idCertifier: certifierId,
@@ -3255,10 +3227,15 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                 },
               )
               .toList(),
+          certificationInformationValues: certificationInformationValues,
         );
       } else {
         // Se non ci sono media, usa il servizio unificato senza media
         print('🚀 Creating certification without media...');
+
+        // Prepara i certification information values
+        final certificationInformationValues =
+            _prepareCertificationInformationValues();
 
         result = await CertificationUnifiedService.createCertificationUnified(
           idCertifier: certifierId,
@@ -3275,6 +3252,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
               : null,
           mediaFiles: null,
           mediaMetadata: null,
+          certificationInformationValues: certificationInformationValues,
         );
       }
 
@@ -3943,7 +3921,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     );
   }
 
-  void _showErrorDialog(String message) {
+  void _showErrorDialog(String message, [String? title]) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -3951,7 +3929,9 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           children: [
             Icon(Icons.error, color: AppTheme.errorRed),
             const SizedBox(width: 8),
-            Text(AppLocalizations.of(context).getString('error_short')),
+            Text(
+              title ?? AppLocalizations.of(context).getString('error_short'),
+            ),
           ],
         ),
         content: Text(
@@ -3975,6 +3955,397 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     );
   }
 
+  Widget _buildMediaPreview(MediaItem mediaItem, bool isTablet) {
+    // Per video e audio, mostra solo l'icona durante l'editing
+    if (mediaItem.type == 'video' || mediaItem.type == 'audio') {
+      return Container(
+        width: isTablet ? 90 : 80,
+        height: isTablet ? 90 : 80,
+        decoration: BoxDecoration(
+          color: mediaItem.type == 'video'
+              ? AppTheme.primaryBlue.withValues(alpha: 0.1)
+              : AppTheme.successGreen.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(
+          mediaItem.type == 'video' ? Icons.videocam : Icons.audiotrack,
+          color: mediaItem.type == 'video'
+              ? AppTheme.primaryBlue
+              : AppTheme.successGreen,
+          size: isTablet ? 28 : 24,
+        ),
+      );
+    }
+
+    // Per le immagini, mostra il preview
+    return FutureBuilder<Uint8List>(
+      future: mediaItem.file.readAsBytes(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return Image.memory(
+            snapshot.data!,
+            width: isTablet ? 90 : 80,
+            height: isTablet ? 90 : 80,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return Icon(
+                Icons.error_outline_rounded,
+                color: AppTheme.errorRed,
+                size: isTablet ? 28 : 24,
+              );
+            },
+          );
+        } else {
+          return Icon(
+            _getMediaIcon(mediaItem.type ?? 'unknown'),
+            color: AppTheme.textSecondary,
+            size: isTablet ? 28 : 24,
+          );
+        }
+      },
+    );
+  }
+
+  IconData _getMediaIcon(String type) {
+    switch (type) {
+      case 'image':
+        return Icons.image_outlined;
+      case 'video':
+        return Icons.videocam;
+      case 'audio':
+        return Icons.audiotrack;
+      default:
+        return Icons.insert_drive_file;
+    }
+  }
+
+  /// Prepara i certification information values basati sui dati della certificazione
+  List<Map<String, dynamic>> _prepareCertificationInformationValues() {
+    final List<Map<String, dynamic>> values = [];
+
+    // ID delle certification_information dal database
+    const String titoloId = '3fdd9fed-d59a-40bc-9a4a-8bf7232fb1b5';
+    const String codiceId = '4a6a862c-05ce-45ad-ac70-358a033c0878';
+    const String dettaglioId = 'c4b61ab7-b949-4b80-9c46-d6612c013e49';
+    const String esitoId = 'bd88ea5d-7ead-422f-bc40-7c61b4d1fa92';
+
+    // Valori generali della certificazione (scope: certification)
+    if (_titleController.text.trim().isNotEmpty) {
+      values.add({
+        'id_certification_information': titoloId,
+        'value': _titleController.text.trim(),
+        'id_certification_user': null, // Valore generale
+      });
+    }
+
+    if (_descriptionController.text.trim().isNotEmpty) {
+      values.add({
+        'id_certification_information': dettaglioId,
+        'value': _descriptionController.text.trim(),
+        'id_certification_user': null, // Valore generale
+      });
+    }
+
+    // Codice della certificazione (potrebbe essere il serial number o altro)
+    // Per ora usiamo un valore di default, ma potresti voler aggiungere un campo specifico
+    values.add({
+      'id_certification_information': codiceId,
+      'value': 'AUTO-GENERATED', // Questo sarà generato dal database
+      'id_certification_user': null, // Valore generale
+    });
+
+    // Valori specifici per utente (scope: certification_user)
+    for (final user in _addedUsers) {
+      // Cerca il valore di esito per questo utente
+      final userFieldValues = _getUserFieldValues(user.idUser);
+      final esitoValue =
+          userFieldValues['esito'] ?? '0'; // Default a '0' se non specificato
+
+      values.add({
+        'id_certification_information': esitoId,
+        'value': esitoValue,
+        'id_certification_user': user.idUser, // Valore specifico per utente
+      });
+    }
+
+    print('📊 Prepared certification information values: ${values.length}');
+    for (final value in values) {
+      print(
+        '  - ${value['id_certification_information']}: "${value['value']}" (user: ${value['id_certification_user'] ?? 'GENERAL'})',
+      );
+    }
+
+    return values;
+  }
+
+  /// Ottiene i valori dei campi per un utente specifico
+  Map<String, String> _getUserFieldValues(String userId) {
+    return _userFieldValues[userId] ?? {};
+  }
+
+  /// Costruisce l'overlay di loading moderno
+  Widget _buildModernLoadingOverlay() {
+    return Container(
+      color: Colors.black.withValues(alpha: 0.6),
+      child: Center(
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 32),
+          padding: const EdgeInsets.all(32),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppTheme.pureWhite,
+                AppTheme.pureWhite.withValues(alpha: 0.95),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.15),
+                blurRadius: 30,
+                offset: const Offset(0, 10),
+                spreadRadius: 0,
+              ),
+              BoxShadow(
+                color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                blurRadius: 20,
+                offset: const Offset(0, 5),
+                spreadRadius: 0,
+              ),
+            ],
+            border: Border.all(
+              color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+              width: 1,
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Icona animata
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AppTheme.primaryBlue,
+                      AppTheme.primaryBlue.withValues(alpha: 0.8),
+                    ],
+                  ),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.primaryBlue.withValues(alpha: 0.3),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Cerchio di sfondo
+                    Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        color: AppTheme.pureWhite.withValues(alpha: 0.2),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    // Icona di certificazione
+                    Icon(
+                      Icons.verified_user_rounded,
+                      color: AppTheme.pureWhite,
+                      size: 32,
+                    ),
+                    // Indicatore di progresso animato
+                    SizedBox(
+                      width: 80,
+                      height: 80,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 3,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppTheme.pureWhite.withValues(alpha: 0.3),
+                        ),
+                        backgroundColor: Colors.transparent,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Titolo principale
+              Text(
+                'Creazione Certificazione',
+                style: TextStyle(
+                  color: AppTheme.textPrimary,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.5,
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 12),
+
+              // Sottotitolo
+              Text(
+                'Stiamo elaborando la tua richiesta...',
+                style: TextStyle(
+                  color: AppTheme.textSecondary,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 24),
+
+              // Barra di progresso moderna
+              Container(
+                width: double.infinity,
+                height: 6,
+                decoration: BoxDecoration(
+                  color: AppTheme.lightGrey.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(3),
+                ),
+                child: Stack(
+                  children: [
+                    // Barra di progresso animata
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 1500),
+                      curve: Curves.easeInOut,
+                      width: double.infinity,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            AppTheme.primaryBlue,
+                            AppTheme.primaryBlue.withValues(alpha: 0.7),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(3),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // Indicatore di caricamento con punti animati
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildAnimatedDot(0),
+                  const SizedBox(width: 8),
+                  _buildAnimatedDot(1),
+                  const SizedBox(width: 8),
+                  _buildAnimatedDot(2),
+                ],
+              ),
+
+              const SizedBox(height: 16),
+
+              // Messaggio di stato
+              Text(
+                'Attendere prego...',
+                style: TextStyle(
+                  color: AppTheme.textSecondary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Costruisce un punto animato per l'indicatore di caricamento
+  Widget _buildAnimatedDot(int index) {
+    // Inizializza le animazioni se necessario
+    if (_pulseAnimations.length <= index) {
+      _pulseAnimations.addAll(
+        List.generate(
+          3,
+          (i) => AnimationController(
+            duration: Duration(milliseconds: 1000 + (i * 200)),
+            vsync: this,
+          ),
+        ),
+      );
+      _pulseAnimations.forEach(
+        (controller) => controller.repeat(reverse: true),
+      );
+    }
+
+    return AnimatedBuilder(
+      animation: _pulseAnimations[index],
+      builder: (context, child) {
+        return Transform.scale(
+          scale: 0.8 + (0.4 * _pulseAnimations[index].value),
+          child: Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              color: AppTheme.primaryBlue.withValues(
+                alpha: 0.3 + (0.7 * _pulseAnimations[index].value),
+              ),
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.primaryBlue.withValues(
+                    alpha: 0.2 * _pulseAnimations[index].value,
+                  ),
+                  blurRadius: 4,
+                  spreadRadius: 1,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<XFile?> _pickAudioFile() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.audio,
+      allowMultiple: false,
+    );
+    if (result != null && result.files.isNotEmpty) {
+      final platformFile = result.files.first;
+      if (kIsWeb) {
+        // Su web, usiamo i bytes per creare XFile
+        if (platformFile.bytes != null) {
+          return XFile.fromData(
+            platformFile.bytes!,
+            name: platformFile.name,
+            mimeType: platformFile.extension != null
+                ? 'audio/${platformFile.extension}'
+                : 'audio/mpeg',
+          );
+        }
+      } else {
+        // Su mobile, usiamo il path
+        if (platformFile.path != null) {
+          return XFile(platformFile.path!);
+        }
+      }
+    }
+    return null;
+  }
+
   void _addMedia() async {
     try {
       // Mostra dialog per selezionare tipo di media
@@ -3992,17 +4363,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           selectedFile = await picker.pickVideo(source: ImageSource.gallery);
           break;
         case 'audio':
-          // Per audio, usiamo file_picker per selezionare file audio
-          final result = await FilePicker.platform.pickFiles(
-            type: FileType.audio,
-            allowMultiple: false,
-          );
-          if (result != null && result.files.isNotEmpty) {
-            final platformFile = result.files.first;
-            if (platformFile.path != null) {
-              selectedFile = XFile(platformFile.path!);
-            }
-          }
+          selectedFile = await _pickAudioFile();
           break;
       }
 
@@ -4055,17 +4416,7 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
           selectedFile = await picker.pickVideo(source: ImageSource.gallery);
           break;
         case 'audio':
-          // Per audio, usiamo file_picker per selezionare file audio
-          final result = await FilePicker.platform.pickFiles(
-            type: FileType.audio,
-            allowMultiple: false,
-          );
-          if (result != null && result.files.isNotEmpty) {
-            final platformFile = result.files.first;
-            if (platformFile.path != null) {
-              selectedFile = XFile(platformFile.path!);
-            }
-          }
+          selectedFile = await _pickAudioFile();
           break;
       }
 
@@ -4465,32 +4816,9 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
                                     topLeft: Radius.circular(16),
                                     bottomLeft: Radius.circular(16),
                                   ),
-                                  child: FutureBuilder<Uint8List>(
-                                    future: mediaItem.file.readAsBytes(),
-                                    builder: (context, snapshot) {
-                                      if (snapshot.hasData) {
-                                        return Image.memory(
-                                          snapshot.data!,
-                                          width: isTablet ? 90 : 80,
-                                          height: isTablet ? 90 : 80,
-                                          fit: BoxFit.cover,
-                                          errorBuilder:
-                                              (context, error, stackTrace) {
-                                                return Icon(
-                                                  Icons.error_outline_rounded,
-                                                  color: AppTheme.errorRed,
-                                                  size: isTablet ? 28 : 24,
-                                                );
-                                              },
-                                        );
-                                      } else {
-                                        return Icon(
-                                          Icons.image_outlined,
-                                          color: AppTheme.textSecondary,
-                                          size: isTablet ? 28 : 24,
-                                        );
-                                      }
-                                    },
+                                  child: _buildMediaPreview(
+                                    mediaItem,
+                                    isTablet,
                                   ),
                                 ),
                               ),
@@ -5201,74 +5529,5 @@ class _CreateCertificationScreenState extends State<CreateCertificationScreen> {
     });
 
     _showSuccessDialog('Utente aggiunto con successo!');
-  }
-
-  // Helper per visualizzare preview dei media
-  Widget _buildMediaPreview(MediaItem mediaItem, bool isTablet) {
-    final mediaType = mediaItem.type ?? 'image';
-
-    switch (mediaType) {
-      case 'image':
-        return FutureBuilder<Uint8List>(
-          future: mediaItem.file.readAsBytes(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return Image.memory(
-                snapshot.data!,
-                width: isTablet ? 90 : 80,
-                height: isTablet ? 90 : 80,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Icon(
-                    Icons.error_outline_rounded,
-                    color: AppTheme.errorRed,
-                    size: isTablet ? 28 : 24,
-                  );
-                },
-              );
-            } else {
-              return Icon(
-                Icons.image_outlined,
-                color: AppTheme.textSecondary,
-                size: isTablet ? 28 : 24,
-              );
-            }
-          },
-        );
-      case 'video':
-        return Container(
-          width: isTablet ? 90 : 80,
-          height: isTablet ? 90 : 80,
-          decoration: BoxDecoration(
-            color: AppTheme.errorRed.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(
-            Icons.play_circle_filled,
-            color: AppTheme.errorRed,
-            size: isTablet ? 40 : 36,
-          ),
-        );
-      case 'audio':
-        return Container(
-          width: isTablet ? 90 : 80,
-          height: isTablet ? 90 : 80,
-          decoration: BoxDecoration(
-            color: AppTheme.successGreen.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(
-            Icons.audiotrack,
-            color: AppTheme.successGreen,
-            size: isTablet ? 40 : 36,
-          ),
-        );
-      default:
-        return Icon(
-          Icons.insert_drive_file,
-          color: AppTheme.textSecondary,
-          size: isTablet ? 40 : 36,
-        );
-    }
   }
 }

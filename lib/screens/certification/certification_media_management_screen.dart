@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
@@ -513,8 +514,22 @@ class _AddCertificationMediaScreenState
         );
         if (result != null && result.files.isNotEmpty) {
           final platformFile = result.files.first;
-          if (platformFile.path != null) {
-            selectedFile = XFile(platformFile.path!);
+          if (kIsWeb) {
+            // Su web, usiamo i bytes per creare XFile
+            if (platformFile.bytes != null) {
+              selectedFile = XFile.fromData(
+                platformFile.bytes!,
+                name: platformFile.name,
+                mimeType: platformFile.extension != null
+                    ? 'audio/${platformFile.extension}'
+                    : 'audio/mpeg',
+              );
+            }
+          } else {
+            // Su mobile, usiamo il path
+            if (platformFile.path != null) {
+              selectedFile = XFile(platformFile.path!);
+            }
           }
         }
         break;
@@ -522,7 +537,13 @@ class _AddCertificationMediaScreenState
 
     if (selectedFile != null) {
       setState(() {
-        _selectedFile = File(selectedFile.path);
+        if (kIsWeb) {
+          // Su web, non possiamo usare File(path) perché path non è disponibile
+          // Usiamo un File temporaneo o gestiamo diversamente
+          _selectedFile = null; // Per ora, su web non salviamo il File
+        } else {
+          _selectedFile = File(selectedFile.path);
+        }
         _selectedFileType = _getFileTypeFromString(mediaType);
       });
     }
