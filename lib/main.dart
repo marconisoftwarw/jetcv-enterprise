@@ -236,7 +236,8 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
               future: _initializationFuture,
               builder: (context, snapshot) {
                 // Se l'utente non è autenticato, mostra immediatamente la home pubblica
-                if (!authProvider.isAuthenticated || authProvider.currentUser == null) {
+                if (!authProvider.isAuthenticated ||
+                    authProvider.currentUser == null) {
                   return const PublicHomeScreen();
                 }
 
@@ -266,7 +267,8 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
               future: _initializationFuture,
               builder: (context, snapshot) {
                 // Se l'utente non è autenticato, mostra immediatamente la home pubblica
-                if (!authProvider.isAuthenticated || authProvider.currentUser == null) {
+                if (!authProvider.isAuthenticated ||
+                    authProvider.currentUser == null) {
                   return const PublicHomeScreen();
                 }
 
@@ -663,10 +665,11 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
                   builder: (context) {
                     final authProvider = context.read<AuthProvider>();
                     // Se l'utente non è autenticato, mostra immediatamente la home pubblica
-                    if (!authProvider.isAuthenticated || authProvider.currentUser == null) {
+                    if (!authProvider.isAuthenticated ||
+                        authProvider.currentUser == null) {
                       return const PublicHomeScreen();
                     }
-                    
+
                     if (authProvider.isAuthenticated &&
                         authProvider.currentUser != null) {
                       // Check if user is admin
@@ -675,7 +678,7 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
                       }
                       return const HomeScreen();
                     }
-                    
+
                     // Fallback: mostra la home pubblica
                     return const PublicHomeScreen();
                   },
