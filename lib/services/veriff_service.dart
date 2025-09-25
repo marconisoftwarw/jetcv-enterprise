@@ -1,11 +1,12 @@
 import '../models/user.dart' as app_models;
+import '../config/app_config.dart';
 import 'supabase_service.dart';
 
 class VeriffService {
   /// Richiede una sessione di verifica Veriff tramite Supabase Edge Function
   Future<Map<String, dynamic>> requestVeriffSession({
     required app_models.AppUser user,
-    String callbackUrl = 'https://example.com/callback',
+    String callbackUrl = AppConfig.veriffCallbackUrl,
   }) async {
     try {
       print('🔍 VeriffService: Starting requestVeriffSession');

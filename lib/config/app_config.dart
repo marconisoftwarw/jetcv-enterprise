@@ -32,6 +32,12 @@ class AppConfig {
     defaultValue: 'https://skqsuxmdfqxbkhmselaz.supabase.co',
   );
 
+  // Veriff KYC configuration
+  static const String veriffCallbackUrl = String.fromEnvironment(
+    'VERIFF_CALLBACK_URL',
+    defaultValue: 'https://jectcv.netlify.app/#/login',
+  );
+
   // Gmail SMTP configuration
   static const String gmailHost = String.fromEnvironment(
     'GMAIL_HOST',

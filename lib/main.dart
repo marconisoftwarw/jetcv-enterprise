@@ -226,7 +226,8 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
             return Stack(
               children: [
                 child ?? const SizedBox(),
-                if (isAuthenticated) const GlobalFloatingLanguageButton(),
+                if (isAuthenticated && MediaQuery.of(context).size.width > 768)
+                  const GlobalFloatingLanguageButton(),
               ],
             );
           },
