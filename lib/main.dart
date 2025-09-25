@@ -169,21 +169,6 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
       print('🏢 Initializing LegalEntityProvider...');
       final legalEntityProvider = context.read<LegalEntityProvider>();
       await legalEntityProvider.initialize();
-      print('✅ LegalEntityProvider initialized');
-
-      // Listen to auth state changes
-      authProvider.addListener(() {
-        if (mounted) {
-          // Use addPostFrameCallback to avoid setState during build
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              setState(() {});
-            }
-          });
-        }
-      });
-
-      print('🚀 App initialization completed');
     } catch (e) {
       print('❌ App initialization failed: $e');
     }

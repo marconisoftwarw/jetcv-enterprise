@@ -244,21 +244,30 @@ class DynamicSidebar extends StatelessWidget {
                 Navigator.of(context).pop();
                 
                 try {
+                  print('🔄 Dynamic Sidebar: Starting logout process...');
                   await authProvider.signOut();
+                  print('✅ Dynamic Sidebar: Auth signOut completed');
+
+                  // Wait a bit to ensure auth state is updated
+                  await Future.delayed(const Duration(milliseconds: 100));
 
                   // Force navigation immediately after logout
                   if (context.mounted) {
+                    print('🔄 Dynamic Sidebar: Context is mounted, attempting navigation...');
                     try {
-                      // Use pushNamedAndRemoveUntil to clear all routes and go to root
-                      Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+                      // Check if Navigator is available
+                      final navigator = Navigator.of(context, rootNavigator: true);
+                      print('🔄 Dynamic Sidebar: Navigator found, navigating to /');
+                      navigator.pushNamedAndRemoveUntil('/', (route) => false);
                       print('✅ Dynamic Sidebar: Navigation to public home successful');
                     } catch (navError) {
                       print('❌ Dynamic Sidebar: Navigation error: $navError');
+                      print('🔄 Dynamic Sidebar: Attempting fallback navigation...');
                       // Fallback: try to navigate after a delay
-                      Future.delayed(const Duration(milliseconds: 300), () {
+                      Future.delayed(const Duration(milliseconds: 500), () {
                         if (context.mounted) {
                           try {
-                            Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+                            Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil('/', (route) => false);
                             print('✅ Dynamic Sidebar: Fallback navigation successful');
                           } catch (fallbackError) {
                             print('❌ Dynamic Sidebar: Fallback navigation failed: $fallbackError');
@@ -266,6 +275,8 @@ class DynamicSidebar extends StatelessWidget {
                         }
                       });
                     }
+                  } else {
+                    print('❌ Dynamic Sidebar: Context not mounted, cannot navigate');
                   }
                 } catch (e) {
                   print('Error during logout: $e');
