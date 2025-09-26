@@ -22,7 +22,7 @@ class _CertifiersContentState extends State<CertifiersContent> {
   final EmailService _emailService = EmailService();
   List<CertifierWithUser> _certifiersWithUser = [];
   List<CertifierWithUser> _filteredCertifiers = [];
-  bool _isLoading = true;
+  bool _isLoading = false;
   String? _errorMessage;
 
   // Filtri
@@ -43,8 +43,17 @@ class _CertifiersContentState extends State<CertifiersContent> {
   @override
   void initState() {
     super.initState();
-    _loadCertifiers();
-    _loadCurrentUserLegalEntity();
+    // Non caricare dati qui per evitare problemi con il contesto
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Carica i dati quando il contesto è pronto
+    if (_certifiersWithUser.isEmpty && !_isLoading) {
+      _loadCertifiers();
+      _loadCurrentUserLegalEntity();
+    }
   }
 
   @override
@@ -122,63 +131,190 @@ class _CertifiersContentState extends State<CertifiersContent> {
         });
       }
 
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final legalEntityProvider = Provider.of<LegalEntityProvider>(
-        context,
-        listen: false,
-      );
-      final isAdmin = authProvider.userType == AppUserType.admin;
-
-      List<CertifierWithUser> certifiersWithUser;
-
-      if (isAdmin) {
-        // Admin vede tutti i certificatori con dati utente
-        print('🔍 Loading all certifiers with user data for admin');
-        certifiersWithUser = await _certifierService
-            .getCertifiersWithUserByLegalEntity('all');
-      } else {
-        // Legal entity vede solo i propri certificatori con dati utente
-        final selectedLegalEntity = legalEntityProvider.selectedLegalEntity;
-
-        if (selectedLegalEntity == null) {
-          if (mounted) {
-            final l10n = AppLocalizations.of(context);
-            setState(() {
-              _errorMessage = l10n.getString('no_legal_entity_selected');
-              _isLoading = false;
-            });
-          }
-          return;
-        }
-
-        print(
-          '🔍 Loading certifiers with user data for legal entity: ${selectedLegalEntity.idLegalEntity}',
-        );
-
-        // Usa la nuova Edge Function per ottenere certificatori con dati utente
-        certifiersWithUser = await _certifierService
-            .getCertifiersWithUserByLegalEntity(
-              selectedLegalEntity.idLegalEntity,
-            );
-      }
-
-      if (mounted) {
-        setState(() {
-          _certifiersWithUser = certifiersWithUser;
-          _filteredCertifiers = certifiersWithUser;
-          _extractFilterOptions();
-          _isLoading = false;
-        });
-      }
+      // Aggiungi un timeout globale per evitare blocchi
+      await Future.any([
+        _performLoadCertifiers(),
+        Future.delayed(const Duration(seconds: 45), () {
+          throw Exception('Timeout loading certifiers');
+        }),
+      ]);
     } catch (e) {
       print('❌ Error loading certifiers: $e');
       if (mounted) {
-        final l10n = AppLocalizations.of(context);
         setState(() {
-          _errorMessage = '${l10n.getString('error_loading_certifiers')}: $e';
+          _errorMessage = 'Errore nel caricamento dei certificatori: $e';
           _isLoading = false;
         });
       }
+    }
+  }
+
+  Future<void> _performLoadCertifiers() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final legalEntityProvider = Provider.of<LegalEntityProvider>(
+      context,
+      listen: false,
+    );
+    final isAdmin = authProvider.userType == AppUserType.admin;
+    final isCertifier = authProvider.userType == AppUserType.certifier;
+
+    List<CertifierWithUser> certifiersWithUser;
+
+    if (isAdmin) {
+      // Admin vede tutti i certificatori con dati utente
+      print('🔍 Loading all certifiers with user data for admin');
+      certifiersWithUser = await _certifierService
+          .getCertifiersWithUserByLegalEntity('all')
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () {
+              print('⏰ Timeout loading all certifiers for admin');
+              return <CertifierWithUser>[];
+            },
+          );
+    } else if (isCertifier) {
+      // Certifier vede solo i certificatori della sua legal entity
+      print('🔍 Loading certifiers for certifier user - filtering by legal entity');
+      
+      // Carica la legal entity dell'utente certifier
+      var selectedLegalEntity = legalEntityProvider.selectedLegalEntity;
+      
+      if (selectedLegalEntity == null) {
+        print('⚠️ No legal entity selected for certifier, trying to load...');
+        
+        try {
+          final currentUser = authProvider.currentUser;
+          if (currentUser != null) {
+            final response = await EdgeFunctionService.getLegalEntitiesByUser(
+              userId: currentUser.idUser,
+            ).timeout(
+              const Duration(seconds: 15),
+              onTimeout: () {
+                print('⏰ Timeout loading user legal entities for certifier');
+                return null;
+              },
+            );
+
+            if (response != null && response['ok'] == true) {
+              final data = response['data'] as List<dynamic>?;
+              if (data != null && data.isNotEmpty) {
+                final legalEntities = data
+                    .map((item) => LegalEntity.fromJson(item))
+                    .toList();
+
+                selectedLegalEntity = legalEntities.first;
+                legalEntityProvider.selectLegalEntity(selectedLegalEntity);
+                print('✅ Auto-selected legal entity for certifier: ${selectedLegalEntity.legalName}');
+              }
+            }
+          }
+        } catch (e) {
+          print('❌ Error loading legal entities for certifier: $e');
+        }
+      }
+
+      if (selectedLegalEntity == null) {
+        if (mounted) {
+          setState(() {
+            _errorMessage = 'Nessuna legal entity disponibile per il certificatore.';
+            _isLoading = false;
+          });
+        }
+        return;
+      }
+
+      print('🔍 Loading certifiers for certifier user - legal entity: ${selectedLegalEntity.idLegalEntity}');
+      certifiersWithUser = await _certifierService
+          .getCertifiersWithUserByLegalEntity(selectedLegalEntity.idLegalEntity)
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () {
+              print('⏰ Timeout loading certifiers for certifier legal entity');
+              return <CertifierWithUser>[];
+            },
+          );
+    } else {
+      // Legal entity vede solo i propri certificatori con dati utente
+      var selectedLegalEntity = legalEntityProvider.selectedLegalEntity;
+
+      // Se non c'è una legal entity selezionata, prova a caricare le legal entity dell'utente
+      if (selectedLegalEntity == null) {
+        print(
+          '⚠️ No legal entity selected, trying to load legal entities created by user...',
+        );
+
+        try {
+          // Carica le legal entity create dall'utente corrente
+          final currentUser = authProvider.currentUser;
+
+          if (currentUser != null) {
+            final response =
+                await EdgeFunctionService.getLegalEntitiesByUser(
+                  userId: currentUser.idUser,
+                ).timeout(
+                  const Duration(seconds: 15),
+                  onTimeout: () {
+                    print('⏰ Timeout loading user legal entities');
+                    return null;
+                  },
+                );
+
+            if (response != null && response['ok'] == true) {
+              final data = response['data'] as List<dynamic>?;
+              if (data != null && data.isNotEmpty) {
+                final legalEntities = data
+                    .map((item) => LegalEntity.fromJson(item))
+                    .toList();
+
+                // Seleziona automaticamente la prima legal entity
+                selectedLegalEntity = legalEntities.first;
+                legalEntityProvider.selectLegalEntity(selectedLegalEntity);
+
+                print(
+                  '✅ Auto-selected legal entity: ${selectedLegalEntity.legalName}',
+                );
+              }
+            }
+          }
+        } catch (e) {
+          print('❌ Error loading user legal entities: $e');
+        }
+      }
+
+      if (selectedLegalEntity == null) {
+        if (mounted) {
+          setState(() {
+            _errorMessage =
+                'Nessuna legal entity disponibile. Assicurati di aver creato una legal entity.';
+            _isLoading = false;
+          });
+        }
+        return;
+      }
+
+      print(
+        '🔍 Loading certifiers with user data for legal entity: ${selectedLegalEntity.idLegalEntity}',
+      );
+
+      // Usa la nuova Edge Function per ottenere certificatori con dati utente
+      certifiersWithUser = await _certifierService
+          .getCertifiersWithUserByLegalEntity(selectedLegalEntity.idLegalEntity)
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () {
+              print('⏰ Timeout loading certifiers for legal entity');
+              return <CertifierWithUser>[];
+            },
+          );
+    }
+
+    if (mounted) {
+      setState(() {
+        _certifiersWithUser = certifiersWithUser;
+        _filteredCertifiers = certifiersWithUser;
+        _extractFilterOptions();
+        _isLoading = false;
+      });
     }
   }
 
@@ -1920,10 +2056,18 @@ class _CertifiersContentState extends State<CertifiersContent> {
                       }
 
                       if (_selectedLegalEntityId == null) {
-                        _showError(
-                          'Nessuna legal entity disponibile per l\'utente corrente',
+                        // Prova a ricaricare la legal entity dell'utente
+                        print(
+                          '⚠️ No legal entity selected, trying to reload...',
                         );
-                        return;
+                        await _loadCurrentUserLegalEntity();
+
+                        if (_selectedLegalEntityId == null) {
+                          _showError(
+                            'Nessuna legal entity disponibile per l\'utente corrente. Assicurati di essere associato a una legal entity.',
+                          );
+                          return;
+                        }
                       }
 
                       setState(() => isLoading = true);
@@ -1973,30 +2117,12 @@ class _CertifiersContentState extends State<CertifiersContent> {
 
                         print('✅ Certifier created successfully');
 
-                        // Invia email di invito al certificatore
-                        try {
-                          await _emailService.sendCertifierInvitationEmail(
-                            email: emailController.text.trim(),
-                            firstName: firstNameController.text.trim(),
-                            lastName: lastNameController.text.trim(),
-                            role: roleController.text.trim(),
-                            legalEntityName: _userLegalEntities.isNotEmpty
-                                ? _userLegalEntities.first.legalName ??
-                                      'Entità Legale'
-                                : 'Entità Legale',
-                          );
-                          print('✅ Invitation email sent successfully');
-                        } catch (e) {
-                          print('❌ Error sending invitation email: $e');
-                          // Non bloccare il processo se l'email fallisce
-                        }
-
                         if (mounted) {
                           Navigator.pop(context);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                '${l10n.getString('certifier_created_successfully')} - Email di invito inviata',
+                                l10n.getString('certifier_created_successfully'),
                               ),
                               backgroundColor: AppTheme.successGreen,
                               duration: Duration(seconds: 4),

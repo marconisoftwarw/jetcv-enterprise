@@ -75,15 +75,23 @@ class CertifierService {
       print('🔍 Getting all certifiers via Edge Function');
 
       // Usa Edge Function per recuperare tutti i certificatori
-      final response = await http.get(
-        Uri.parse('$_baseUrl/functions/v1/get-user-legal-entity'),
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': _apiKey,
-          'Authorization': 'Bearer $_apiKey',
-          'Origin': AppConfig.appUrl,
-        },
-      );
+      final response = await http
+          .get(
+            Uri.parse('$_baseUrl/functions/v1/get-user-legal-entity'),
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': _apiKey,
+              'Authorization': 'Bearer $_apiKey',
+              'Origin': AppConfig.appUrl,
+            },
+          )
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () {
+              print('⏰ Timeout loading all certifiers');
+              throw Exception('Timeout loading all certifiers');
+            },
+          );
 
       print(
         '📊 All certifiers response: ${response.statusCode} - ${response.body}',
@@ -253,12 +261,15 @@ class CertifierService {
           'Content-Type': 'application/json',
           'apikey': _apiKey,
           'Authorization': 'Bearer $_apiKey',
-          'Origin': AppConfig.appUrl,
+          'origin': AppConfig.appUrl,
         },
         body: json.encode({
-          'operation': 'create_with_user',
-          'userData': userData,
-          'certifierData': certifier.toJson(),
+          'operation': 'signup_and_link',
+          'email': userData['email'],
+          'id_legal_entity': certifier.idLegalEntity,
+          'origin': AppConfig.appUrl,
+          'firstName': userData['firstName'],
+          'lastName': userData['lastName'],
         }),
       );
 
@@ -550,15 +561,23 @@ class CertifierService {
       }
 
       // Usa Edge Function per recuperare i certificatori con dati utente
-      final response = await http.get(
-        Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': _apiKey,
-          'Authorization': 'Bearer $_apiKey',
-          'Origin': AppConfig.appUrl,
-        },
-      );
+      final response = await http
+          .get(
+            Uri.parse(url),
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': _apiKey,
+              'Authorization': 'Bearer $_apiKey',
+              'Origin': AppConfig.appUrl,
+            },
+          )
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () {
+              print('⏰ Timeout loading certifiers with user data');
+              throw Exception('Timeout loading certifiers');
+            },
+          );
 
       print(
         '📊 Certifiers with user data response: ${response.statusCode} - ${response.body}',
@@ -572,34 +591,14 @@ class CertifierService {
 
         // Converti i dati della Edge Function nel formato CertifierWithUser
         final certifiersWithUser = certifiersData.map((item) {
-          print('🔍 Processing certifier item: $item');
           final userData = item['user'];
-          print('🔍 User data from item: $userData');
           AppUser? user;
 
           if (userData != null) {
             try {
-              // Debug dei dati utente prima del parsing
-              print('🔍 User data keys: ${userData.keys.toList()}');
-              print('🔍 User data idUser: ${userData['idUser']}');
-              print('🔍 User data fullName: ${userData['fullName']}');
-              print('🔍 User data firstName: ${userData['firstName']}');
-              print('🔍 User data lastName: ${userData['lastName']}');
-              print('🔍 User data email: ${userData['email']}');
-              print('🔍 User data dateOfBirth: ${userData['dateOfBirth']}');
-
               user = AppUser.fromJson(userData);
-              print('✅ Parsed user data successfully:');
-              print('   - idUser: ${user.idUser}');
-              print('   - fullName: ${user.fullName}');
-              print('   - firstName: ${user.firstName}');
-              print('   - lastName: ${user.lastName}');
-              print('   - email: ${user.email}');
-              print('   - dateOfBirth: ${user.dateOfBirth}');
             } catch (e) {
               print('❌ Error parsing user data: $e');
-              print('❌ Raw user data was: $userData');
-
               // Fallback: crea un oggetto AppUser minimo
               try {
                 user = AppUser(
@@ -617,18 +616,11 @@ class CertifierService {
                             DateTime.now()
                       : DateTime.now(),
                 );
-                print(
-                  '✅ Created fallback user: ${user.fullName} (${user.email})',
-                );
               } catch (fallbackError) {
                 print('❌ Fallback also failed: $fallbackError');
                 user = null;
               }
             }
-          } else {
-            print(
-              '⚠️ No user data found for certifier ${item['id_certifier']}',
-            );
           }
 
           return CertifierWithUser(

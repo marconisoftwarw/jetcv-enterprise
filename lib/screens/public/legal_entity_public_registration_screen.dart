@@ -40,6 +40,7 @@ class _LegalEntityPublicRegistrationScreenState
   // Personal information
   final _personalNameController = TextEditingController();
   final _personalEmailController = TextEditingController();
+  final _personalPasswordController = TextEditingController();
   final _personalPhoneController = TextEditingController();
   String _personalCountryCode = '+39'; // Default to Italy
 
@@ -88,6 +89,7 @@ class _LegalEntityPublicRegistrationScreenState
   void dispose() {
     _personalNameController.dispose();
     _personalEmailController.dispose();
+    _personalPasswordController.dispose();
     _personalPhoneController.dispose();
     _legalNameController.dispose();
     _identifierCodeController.dispose();
@@ -632,6 +634,29 @@ class _LegalEntityPublicRegistrationScreenState
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
+                  child: CustomTextField(
+                    controller: _personalPasswordController,
+                    labelText:
+                        '${AppLocalizations.of(context).getString('password')} *',
+                    obscureText: true,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return AppLocalizations.of(
+                          context,
+                        ).getString('enter_password');
+                      }
+                      if (value.length < 6) {
+                        return AppLocalizations.of(
+                          context,
+                        ).getString('password_min_length');
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
                   child: InternationalPhoneField(
                     controller: _personalPhoneController,
                     label: AppLocalizations.of(context).getString('phone'),
@@ -957,6 +982,7 @@ class _LegalEntityPublicRegistrationScreenState
           await EdgeFunctionService.createLegalEntityWithUser(
             userData: user.toJson(),
             legalEntityData: legalEntityData,
+            password: _personalPasswordController.text,
           );
 
       if (edgeFunctionResult == null || !edgeFunctionResult['ok']) {
@@ -965,7 +991,8 @@ class _LegalEntityPublicRegistrationScreenState
         );
       }
 
-      final createdEntity = edgeFunctionResult['data']['legalEntity'];
+      final createdEntityId = edgeFunctionResult['idLegalEntity'];
+      print('✅ Legal entity created with ID: $createdEntityId');
 
       // 4. Handle pricing if selected
       if (_selectedPricing != null) {

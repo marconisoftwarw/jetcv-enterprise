@@ -45,11 +45,28 @@ class _HomeScreenState extends State<HomeScreen> {
         });
       });
     }
+
+    // Ensure user type is loaded when screen is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authProvider = context.read<AuthProvider>();
+      if (authProvider.isAuthenticated && authProvider.userType == null) {
+        print('🔄 HomeScreen: User type not loaded, ensuring it\'s loaded...');
+        authProvider.ensureUserTypeLoaded();
+      }
+    });
   }
 
   void _onDestinationSelected(int index) {
     final authProvider = context.read<AuthProvider>();
     final userType = authProvider.userType;
+
+    // DEBUG: Print user type information
+    print('🔍 HomeScreen: User type from AuthProvider: $userType');
+    print('🔍 HomeScreen: Current user: ${authProvider.currentUser?.email}');
+    print('🔍 HomeScreen: User type enum: ${userType?.toString()}');
+    print(
+      '🔍 HomeScreen: Is legal entity: ${userType == AppUserType.legalEntity}',
+    );
 
     // Valida l'indice prima di procedere
     _validateAndResetSelectedIndex(userType ?? AppUserType.user);
@@ -109,11 +126,11 @@ class _HomeScreenState extends State<HomeScreen> {
       case 0: // Dashboard
         // Rimani nella home
         break;
-      case 1: // Legal Entity
+      case 1: // Certifications
         // Rimani nella home
         break;
       case 2: // Certifiers
-        // Rimani nella home - mostra contenuto certificatori
+        // Rimani nella home
         break;
       case 3: // Profile
         // Rimani nella home
@@ -147,7 +164,8 @@ class _HomeScreenState extends State<HomeScreen> {
         maxIndex = 4; // 5 items (0-4) - rimosso settings
         break;
       case AppUserType.legalEntity:
-        maxIndex = 3; // 4 items (0-3) - rimosso settings
+        maxIndex =
+            3; // 4 items (0-3) - Dashboard, Certifications, Certifiers, Profile
         break;
       case AppUserType.certifier:
         maxIndex = 2; // 3 items (0-2) - già corretto
@@ -180,6 +198,14 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (context, authProvider, child) {
         // Reset selectedIndex if it's out of range for current user type
         final currentUserType = authProvider.userType ?? AppUserType.user;
+
+        // DEBUG: Print user type in build method
+        print('🔍 HomeScreen Build: User type: $currentUserType');
+        print('🔍 HomeScreen Build: Selected index: $_selectedIndex');
+        print(
+          '🔍 HomeScreen Build: Is valid index: ${_isValidIndex(_selectedIndex, currentUserType)}',
+        );
+
         // Non chiamare _validateAndResetSelectedIndex qui per evitare loop infiniti
 
         return ResponsiveLayout(
@@ -196,17 +222,26 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildContent(AppUserType userType) {
+    // DEBUG: Print content selection
+    print('🔍 HomeScreen _buildContent: User type: $userType');
+    print('🔍 HomeScreen _buildContent: Selected index: $_selectedIndex');
+
     // Mostra il contenuto basato sul tipo di utente e sull'indice selezionato
     switch (userType ?? AppUserType.user) {
       case AppUserType.admin:
+        print('🔍 HomeScreen _buildContent: Building admin content');
         return _buildAdminContent();
       case AppUserType.legalEntity:
+        print('🔍 HomeScreen _buildContent: Building legal entity content');
         return _buildLegalEntityContent();
       case AppUserType.certifier:
+        print('🔍 HomeScreen _buildContent: Building certifier content');
         return _buildCertifierContent();
       case AppUserType.user:
+        print('🔍 HomeScreen _buildContent: Building user content');
         return _buildUserContent();
       default:
+        print('🔍 HomeScreen _buildContent: Building default user content');
         return _buildUserContent();
     }
   }
@@ -240,23 +275,47 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildLegalEntityContent() {
     final l10n = AppLocalizations.of(context);
 
+    // DEBUG: Print legal entity content details
+    print(
+      '🔍 HomeScreen _buildLegalEntityContent: Selected index: $_selectedIndex',
+    );
+    print(
+      '🔍 HomeScreen _buildLegalEntityContent: Is valid index: ${_isValidIndex(_selectedIndex, AppUserType.legalEntity)}',
+    );
+
     // Controllo di sicurezza per l'indice
     if (!_isValidIndex(_selectedIndex, AppUserType.legalEntity)) {
+      print(
+        '🔍 HomeScreen _buildLegalEntityContent: Invalid index, showing dashboard',
+      );
       return _DashboardContent(l10n: l10n);
     }
 
     switch (_selectedIndex) {
       case 0:
+        print(
+          '🔍 HomeScreen _buildLegalEntityContent: Showing dashboard (index 0)',
+        );
         return _DashboardContent(l10n: l10n);
       case 1:
-        return _buildLegalEntitiesManagementContent(l10n);
+        print(
+          '🔍 HomeScreen _buildLegalEntityContent: Showing certifications (index 1)',
+        );
+        return const CertificationListScreen();
       case 2:
+        print(
+          '🔍 HomeScreen _buildLegalEntityContent: Showing certifiers (index 2)',
+        );
         return _buildCertifiersContent();
       case 3:
-        return const UserSettingsScreen(hideMenu: true);
-      case 4:
+        print(
+          '🔍 HomeScreen _buildLegalEntityContent: Showing profile (index 3)',
+        );
         return const UserProfileScreen(hideMenu: true);
       default:
+        print(
+          '🔍 HomeScreen _buildLegalEntityContent: Default case, showing dashboard',
+        );
         return _DashboardContent(l10n: l10n);
     }
   }

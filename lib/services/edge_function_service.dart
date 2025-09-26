@@ -95,7 +95,15 @@ class EdgeFunctionService {
       debugPrint(
         '🚀 EdgeFunctionService: About to call _client.functions.invoke...',
       );
-      final response = await _client.functions.invoke(functionName, body: body);
+      final response = await _client.functions
+          .invoke(functionName, body: body)
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () {
+              print('⏰ Timeout calling function $functionName');
+              throw Exception('Timeout calling function $functionName');
+            },
+          );
       debugPrint('🚀 EdgeFunctionService: Edge function call completed');
 
       debugPrint('🔄 EdgeFunctionService: Response status: ${response.status}');
@@ -153,7 +161,15 @@ class EdgeFunctionService {
     T Function(Map<String, dynamic>) fromJson,
   ) async {
     try {
-      final response = await _client.functions.invoke(functionName, body: body);
+      final response = await _client.functions
+          .invoke(functionName, body: body)
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () {
+              print('⏰ Timeout calling function $functionName');
+              throw Exception('Timeout calling function $functionName');
+            },
+          );
 
       if (response.data != null) {
         final data = response.data as Map<String, dynamic>;
@@ -191,7 +207,15 @@ class EdgeFunctionService {
     Map<String, dynamic> body,
   ) async {
     try {
-      final response = await _client.functions.invoke(functionName, body: body);
+      final response = await _client.functions
+          .invoke(functionName, body: body)
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () {
+              print('⏰ Timeout calling function $functionName');
+              throw Exception('Timeout calling function $functionName');
+            },
+          );
 
       if (response.data != null) {
         final data = response.data as Map<String, dynamic>;
@@ -250,10 +274,11 @@ class EdgeFunctionService {
   static Future<Map<String, dynamic>?> createLegalEntityWithUser({
     required Map<String, dynamic> userData,
     required Map<String, dynamic> legalEntityData,
+    required String password,
   }) async {
     try {
       final requestBody = {
-        'userData': userData,
+        'userData': {...userData, 'password': password},
         'legalEntityData': legalEntityData,
       };
       final response = await invokeFunction(
@@ -269,17 +294,80 @@ class EdgeFunctionService {
     }
   }
 
-  /// Chiama l'edge function get-legal-entities-by-user
+  /// Chiama l'edge function get-legal-entity-by-iduser per ottenere le legal entity create dall'utente
   static Future<Map<String, dynamic>?> getLegalEntitiesByUser({
     required String userId,
     String? accessToken,
   }) async {
     try {
       final requestBody = {'id_user': userId};
-      final response = await invokeFunction('get-legal-of-user', requestBody);
+      final response = await invokeFunction(
+        'get-legal-entity-by-iduser',
+        requestBody,
+      );
       return response;
     } catch (e) {
       debugPrint('❌ Get legal entities by user call error: $e');
+      rethrow;
+    }
+  }
+
+  /// Chiama l'edge function get-legal-entities-by-user per ottenere le legal entity associate all'utente tramite certifier
+  static Future<Map<String, dynamic>?> getLegalEntitiesByUserViaCertifier({
+    required String userId,
+    String? accessToken,
+  }) async {
+    try {
+      final requestBody = {'id_user': userId};
+      final response = await invokeFunction(
+        'get-legal-entities-by-user',
+        requestBody,
+      );
+      return response;
+    } catch (e) {
+      debugPrint('❌ Get legal entities by user via certifier call error: $e');
+      rethrow;
+    }
+  }
+
+  /// Chiama l'edge function post-signup-link-certifier per collegare un utente a un certifier
+  static Future<Map<String, dynamic>?> postSignupLinkCertifier({
+    required String email,
+    String? firstName,
+    String? lastName,
+    String? idUser,
+  }) async {
+    try {
+      final requestBody = {
+        'email': email,
+        if (firstName != null) 'firstName': firstName,
+        if (lastName != null) 'lastName': lastName,
+        if (idUser != null) 'id_user': idUser,
+      };
+      final response = await invokeFunction(
+        'post-signup-link-certifier',
+        requestBody,
+      );
+      return response;
+    } catch (e) {
+      debugPrint('❌ Post signup link certifier call error: $e');
+      rethrow;
+    }
+  }
+
+  /// Chiama l'edge function get-legal-entities per ottenere tutte le legal entities
+  static Future<Map<String, dynamic>?> getAllLegalEntities({
+    String? status,
+  }) async {
+    try {
+      final Map<String, dynamic> requestBody = status != null ? {'status': status} : <String, dynamic>{};
+      final response = await invokeFunction(
+        'get-legal-entities',
+        requestBody,
+      );
+      return response;
+    } catch (e) {
+      debugPrint('❌ Get all legal entities call error: $e');
       rethrow;
     }
   }

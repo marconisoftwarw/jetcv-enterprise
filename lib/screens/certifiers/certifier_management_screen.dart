@@ -12,6 +12,7 @@ import '../../services/legal_entity_service.dart';
 import '../../services/edge_function_service.dart';
 import '../../models/user.dart';
 import '../../models/legal_entity.dart';
+import '../admin/invite_certifier_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class CertifierManagementScreen extends StatefulWidget {
@@ -417,6 +418,23 @@ class _CertifierManagementScreenState extends State<CertifierManagementScreen>
               style: TextStyle(
                 fontSize: isTablet ? 16 : 14,
                 color: AppTheme.textSecondary,
+              ),
+            ),
+            SizedBox(height: isTablet ? 24 : 20),
+            ElevatedButton.icon(
+              onPressed: () => _navigateToInviteCertifier(),
+              icon: Icon(Icons.person_add),
+              label: Text('Invita Certificatore'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primaryBlue,
+                foregroundColor: AppTheme.pureWhite,
+                padding: EdgeInsets.symmetric(
+                  horizontal: isTablet ? 24 : 20,
+                  vertical: isTablet ? 16 : 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
             ),
           ],
@@ -1092,5 +1110,20 @@ class _CertifierManagementScreenState extends State<CertifierManagementScreen>
         ],
       ],
     );
+  }
+
+  void _navigateToInviteCertifier() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const InviteCertifierScreen()),
+    ).then((_) {
+      // Ricarica i certificatori dopo l'invito
+      _loadCertifiers();
+    });
+  }
+
+  Future<void> _loadCertifiers() async {
+    final certifierProvider = context.read<CertifierProvider>();
+    await certifierProvider.loadAllCertifiers();
   }
 }

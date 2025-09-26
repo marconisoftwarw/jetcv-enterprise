@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../../theme/app_theme.dart';
 import '../../models/certifier.dart';
+import '../../models/legal_entity.dart';
 import '../../services/certifier_service.dart';
 import '../../services/email_service.dart';
+import '../../services/edge_function_service.dart';
 import '../../providers/legal_entity_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/user_type_service.dart';
 import '../../widgets/enterprise_card.dart';
 import '../../widgets/appbar_language_dropdown.dart';
+import '../admin/invite_certifier_screen.dart';
 import 'package:provider/provider.dart';
 
 class CertifiersScreen extends StatefulWidget {
@@ -87,11 +90,60 @@ class _CertifiersScreenState extends State<CertifiersScreen>
           context,
           listen: false,
         );
-        final selectedLegalEntity = legalEntityProvider.selectedLegalEntity;
+        var selectedLegalEntity = legalEntityProvider.selectedLegalEntity;
+
+        // Se non c'è una legal entity selezionata, prova a caricare le legal entity dell'utente
+        if (selectedLegalEntity == null) {
+          print(
+            '⚠️ No legal entity selected, trying to load user legal entities...',
+          );
+
+          try {
+            // Carica le legal entity dell'utente corrente
+            final authProvider = Provider.of<AuthProvider>(
+              context,
+              listen: false,
+            );
+            final currentUser = authProvider.currentUser;
+
+            if (currentUser != null) {
+              final response =
+                  await EdgeFunctionService.getLegalEntitiesByUser(
+                    userId: currentUser.idUser,
+                  ).timeout(
+                    const Duration(seconds: 15),
+                    onTimeout: () {
+                      print('⏰ Timeout loading user legal entities');
+                      return null;
+                    },
+                  );
+
+              if (response != null && response['ok'] == true) {
+                final data = response['data'] as List<dynamic>?;
+                if (data != null && data.isNotEmpty) {
+                  final legalEntities = data
+                      .map((item) => LegalEntity.fromJson(item))
+                      .toList();
+
+                  // Seleziona automaticamente la prima legal entity
+                  selectedLegalEntity = legalEntities.first;
+                  legalEntityProvider.selectLegalEntity(selectedLegalEntity);
+
+                  print(
+                    '✅ Auto-selected legal entity: ${selectedLegalEntity.legalName}',
+                  );
+                }
+              }
+            }
+          } catch (e) {
+            print('❌ Error loading user legal entities: $e');
+          }
+        }
 
         if (selectedLegalEntity == null) {
           setState(() {
-            _errorMessage = 'Nessuna legal entity selezionata';
+            _errorMessage =
+                'Nessuna legal entity disponibile. Assicurati di essere associato a una legal entity.';
             _isLoading = false;
           });
           return;
@@ -105,6 +157,13 @@ class _CertifiersScreenState extends State<CertifiersScreen>
         certifiersWithUser = await _certifierService
             .getCertifiersWithUserByLegalEntity(
               selectedLegalEntity.idLegalEntity,
+            )
+            .timeout(
+              const Duration(seconds: 30),
+              onTimeout: () {
+                print('⏰ Timeout loading certifiers for legal entity');
+                return <CertifierWithUser>[];
+              },
             );
       }
 
@@ -219,6 +278,23 @@ class _CertifiersScreenState extends State<CertifiersScreen>
               style: TextStyle(
                 fontSize: isTablet ? 14 : 12,
                 color: AppTheme.textSecondary,
+              ),
+            ),
+            SizedBox(height: isTablet ? 24 : 20),
+            ElevatedButton.icon(
+              onPressed: () => _navigateToInviteCertifier(),
+              icon: Icon(Icons.person_add),
+              label: Text('Invita Certificatore'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primaryBlue,
+                foregroundColor: AppTheme.pureWhite,
+                padding: EdgeInsets.symmetric(
+                  horizontal: isTablet ? 24 : 20,
+                  vertical: isTablet ? 16 : 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
             ),
           ],
@@ -971,5 +1047,15 @@ class _CertifiersScreenState extends State<CertifiersScreen>
         ],
       ),
     );
+  }
+
+  void _navigateToInviteCertifier() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const InviteCertifierScreen()),
+    ).then((_) {
+      // Ricarica i certificatori dopo l'invito
+      _loadCertifiers();
+    });
   }
 }

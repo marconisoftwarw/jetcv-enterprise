@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/user.dart';
 import '../services/supabase_service.dart';
-import '../services/user_type_service.dart';
 import '../services/update_user_type_service.dart';
+import '../services/user_type_service.dart';
+import '../services/edge_function_service.dart';
 
 class AuthProvider extends ChangeNotifier {
   final SupabaseService _supabaseService = SupabaseService();
@@ -13,11 +15,13 @@ class AuthProvider extends ChangeNotifier {
   String? _errorMessage;
   bool _isInitialized = false;
   AppUserType? _userType;
+  bool _shouldRedirectToKyc = false;
 
   AppUser? get currentUser => _currentUser;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   bool get isInitialized => _isInitialized;
+  bool get shouldRedirectToKyc => _shouldRedirectToKyc;
   bool get isAuthenticated =>
       _supabaseService.isUserAuthenticated && _currentUser != null;
   bool get isUserDataLoaded => _currentUser != null;
@@ -46,30 +50,52 @@ class AuthProvider extends ChangeNotifier {
           if (_currentUser == null || _currentUser!.idUser != supabaseUser.id) {
             print('🔄 AuthProvider: Restoring/updating user data...');
 
-            _currentUser = AppUser(
-              idUser: supabaseUser.id,
-              email: supabaseUser.email ?? '',
-              firstName: _extractFirstName(
-                supabaseUser.userMetadata?['full_name'],
-              ),
-              lastName: _extractLastName(
-                supabaseUser.userMetadata?['full_name'],
-              ),
-              type: UserType.user, // Default type
-              languageCode: 'it',
-              phone: supabaseUser.phone ?? '',
-              idUserHash: supabaseUser.id, // Usa l'ID come hash
-              createdAt: supabaseUser.createdAt != null
-                  ? DateTime.parse(supabaseUser.createdAt!)
-                  : null,
-              updatedAt: supabaseUser.updatedAt != null
-                  ? DateTime.parse(supabaseUser.updatedAt!)
-                  : null,
-            );
+            // Try to load complete user data from database first
+            try {
+              print(
+                '🔄 AuthProvider: Loading complete user data from database...',
+              );
+              _currentUser = await _supabaseService.getUserById(
+                supabaseUser.id,
+              );
 
-            // Load user type if not already loaded
-            if (_userType == null && supabaseUser.email != null) {
-              await _loadUserType(supabaseUser.email!);
+              if (_currentUser != null) {
+                print('✅ AuthProvider: User data loaded from database');
+                print(
+                  '✅ AuthProvider: User type from database: ${_currentUser!.type}',
+                );
+
+                // Convert UserType to AppUserType for menu navigation
+                _userType = _convertUserTypeToAppUserType(_currentUser!.type);
+                print('✅ AuthProvider: Converted to AppUserType: $_userType');
+              } else {
+                print(
+                  '⚠️ AuthProvider: User not found in database, creating from Supabase data',
+                );
+                _createUserFromSupabaseData(supabaseUser);
+
+                // Try to get user type from edge function as fallback
+                try {
+                  final userTypeString =
+                      await UserTypeService.getUserTypeWithFallback(
+                        supabaseUser.email ?? '',
+                      );
+                  if (userTypeString != null) {
+                    _userType = userTypeString.toUserType;
+                    print(
+                      '✅ AuthProvider: User type loaded from edge function: $_userType',
+                    );
+                  }
+                } catch (e) {
+                  print(
+                    '⚠️ AuthProvider: Could not load user type from edge function: $e',
+                  );
+                }
+              }
+            } catch (e) {
+              print('❌ AuthProvider: Error loading user from database: $e');
+              print('🔄 AuthProvider: Falling back to Supabase data');
+              _createUserFromSupabaseData(supabaseUser);
             }
 
             _safeNotifyListeners();
@@ -184,32 +210,54 @@ class AuthProvider extends ChangeNotifier {
             '🔄 AuthProvider: Restoring user from persisted session: ${supabaseUser.id}',
           );
 
-          // Restore user data from Supabase
-          _currentUser = AppUser(
-            idUser: supabaseUser.id,
-            email: supabaseUser.email ?? '',
-            firstName: _extractFirstName(
-              supabaseUser.userMetadata?['full_name'],
-            ),
-            lastName: _extractLastName(supabaseUser.userMetadata?['full_name']),
-            type: UserType.user, // Default type
-            languageCode: 'it',
-            phone: supabaseUser.phone ?? '',
-            idUserHash: supabaseUser.id,
-            createdAt: supabaseUser.createdAt != null
-                ? DateTime.parse(supabaseUser.createdAt!)
-                : null,
-            updatedAt: supabaseUser.updatedAt != null
-                ? DateTime.parse(supabaseUser.updatedAt!)
-                : null,
-          );
+          // Try to load complete user data from database first
+          try {
+            print(
+              '🔄 AuthProvider: Loading complete user data from database during session restore...',
+            );
+            _currentUser = await _supabaseService.getUserById(supabaseUser.id);
 
-          // Set default user type
-          _userType = AppUserType.user;
+            if (_currentUser != null) {
+              print(
+                '✅ AuthProvider: User data loaded from database during session restore',
+              );
+              print(
+                '✅ AuthProvider: User type from database: ${_currentUser!.type}',
+              );
 
-          // Load user type from service if needed
-          if (supabaseUser.email != null) {
-            await _loadUserType(supabaseUser.email!);
+              // Convert UserType to AppUserType for menu navigation
+              _userType = _convertUserTypeToAppUserType(_currentUser!.type);
+              print('✅ AuthProvider: Converted to AppUserType: $_userType');
+            } else {
+              print(
+                '⚠️ AuthProvider: User not found in database during session restore, creating from Supabase data',
+              );
+              _createUserFromSupabaseData(supabaseUser);
+
+              // Try to get user type from edge function as fallback
+              try {
+                final userTypeString =
+                    await UserTypeService.getUserTypeWithFallback(
+                      supabaseUser.email ?? '',
+                    );
+                if (userTypeString != null) {
+                  _userType = userTypeString.toUserType;
+                  print(
+                    '✅ AuthProvider: User type loaded from edge function: $_userType',
+                  );
+                }
+              } catch (e) {
+                print(
+                  '⚠️ AuthProvider: Could not load user type from edge function: $e',
+                );
+              }
+            }
+          } catch (e) {
+            print(
+              '❌ AuthProvider: Error loading user from database during session restore: $e',
+            );
+            print('🔄 AuthProvider: Falling back to Supabase data');
+            _createUserFromSupabaseData(supabaseUser);
           }
 
           print('✅ AuthProvider: User session restored successfully');
@@ -299,40 +347,62 @@ class AuthProvider extends ChangeNotifier {
           '✅ AuthProvider: Login successful for user: ${response.user!.id}',
         );
 
-        // Crea l'utente direttamente dai dati di Supabase
-        _currentUser = AppUser(
-          idUser: response.user!.id,
-          email: response.user!.email ?? '',
-          firstName: _extractFirstName(
-            response.user!.userMetadata?['full_name'],
-          ),
-          lastName: _extractLastName(response.user!.userMetadata?['full_name']),
-          type: UserType.user, // Default type
-          languageCode: 'it',
-          phone: response.user!.phone ?? '',
-          idUserHash: response.user!.id, // Usa l'ID come hash
-          createdAt: response.user!.createdAt != null
-              ? DateTime.parse(response.user!.createdAt!)
-              : null,
-          updatedAt: response.user!.updatedAt != null
-              ? DateTime.parse(response.user!.updatedAt!)
-              : null,
-        );
+        // Try to load complete user data from database first
+        try {
+          print('🔄 AuthProvider: Loading complete user data from database...');
+          _currentUser = await _supabaseService.getUserById(response.user!.id);
 
-        print('✅ AuthProvider: User created from Supabase response');
+          if (_currentUser != null) {
+            print('✅ AuthProvider: User data loaded from database');
+            print(
+              '✅ AuthProvider: User type from database: ${_currentUser!.type}',
+            );
+
+            // Convert UserType to AppUserType for menu navigation
+            _userType = _convertUserTypeToAppUserType(_currentUser!.type);
+            print('✅ AuthProvider: Converted to AppUserType: $_userType');
+          } else {
+            print(
+              '⚠️ AuthProvider: User not found in database, creating from Supabase data',
+            );
+            _createUserFromSupabaseData(response.user!);
+
+            // Try to get user type from edge function as fallback
+            try {
+              final userTypeString =
+                  await UserTypeService.getUserTypeWithFallback(
+                    response.user!.email ?? '',
+                  );
+              if (userTypeString != null) {
+                _userType = userTypeString.toUserType;
+                print(
+                  '✅ AuthProvider: User type loaded from edge function: $_userType',
+                );
+              }
+            } catch (e) {
+              print(
+                '⚠️ AuthProvider: Could not load user type from edge function: $e',
+              );
+            }
+          }
+        } catch (e) {
+          print('❌ AuthProvider: Error loading user from database: $e');
+          print('🔄 AuthProvider: Falling back to Supabase data');
+          _createUserFromSupabaseData(response.user!);
+        }
+
+        print('✅ AuthProvider: User created/loaded');
         print('  ID: ${_currentUser!.idUser}');
         print('  Email: ${_currentUser!.email}');
         print('  Name: ${_currentUser!.firstName} ${_currentUser!.lastName}');
         print('  Phone: ${_currentUser!.phone}');
+        print('  Type: ${_currentUser!.type}');
+        print('  AppUserType: $_userType');
         print('  Email Verified: ${response.user!.emailConfirmedAt != null}');
 
-        // Carica il tipo di utente dall'edge function
-        if (_currentUser!.email != null && _currentUser!.email!.isNotEmpty) {
-          print('🔄 Loading user type for: ${_currentUser!.email}');
-          await _loadUserType(_currentUser!.email!);
-        } else {
-          print('⚠️ No user email available for type loading');
-          _userType = AppUserType.user;
+        // Controlla se l'utente è certifier e deve completare il KYC
+        if (_userType == AppUserType.certifier) {
+          await _checkAndRedirectToKycIfNeeded();
         }
 
         _safeNotifyListeners();
@@ -447,10 +517,10 @@ class AuthProvider extends ChangeNotifier {
       _userType = null;
       _clearError();
       print('🔄 AuthProvider: User data cleared, notifying listeners...');
-      
+
       // Use safe notification to avoid issues during build
       _safeNotifyListeners();
-      
+
       print('✅ AuthProvider: SignOut completed successfully');
     } catch (e) {
       print('❌ AuthProvider: SignOut error: $e');
@@ -587,55 +657,53 @@ class AuthProvider extends ChangeNotifier {
         return;
       }
 
-      // Crea l'utente direttamente dai dati di Supabase
-      _currentUser = AppUser(
-        idUser: supabaseUser.id,
-        email: supabaseUser.email ?? '',
-        firstName: _extractFirstName(supabaseUser.userMetadata?['full_name']),
-        lastName: _extractLastName(supabaseUser.userMetadata?['full_name']),
-        type: UserType.user, // Default type
-        languageCode: 'it',
-        phone: supabaseUser.phone ?? '',
-        idUserHash: supabaseUser.id, // Usa l'ID come hash
-        createdAt: supabaseUser.createdAt != null
-            ? DateTime.parse(supabaseUser.createdAt!)
-            : null,
-        updatedAt: supabaseUser.updatedAt != null
-            ? DateTime.parse(supabaseUser.updatedAt!)
-            : null,
-      );
+      // Try to load complete user data from database first
+      try {
+        print('🔄 AuthProvider: Loading complete user data from database...');
+        _currentUser = await _supabaseService.getUserById(supabaseUser.id);
+
+        if (_currentUser != null) {
+          print('✅ AuthProvider: User data loaded from database');
+          print(
+            '✅ AuthProvider: User type from database: ${_currentUser!.type}',
+          );
+
+          // Convert UserType to AppUserType for menu navigation
+          _userType = _convertUserTypeToAppUserType(_currentUser!.type);
+          print('✅ AuthProvider: Converted to AppUserType: $_userType');
+        } else {
+          print(
+            '⚠️ AuthProvider: User not found in database, creating from Supabase data',
+          );
+          _createUserFromSupabaseData(supabaseUser);
+
+          // Try to get user type from edge function as fallback
+          try {
+            final userTypeString =
+                await UserTypeService.getUserTypeWithFallback(
+                  supabaseUser.email ?? '',
+                );
+            if (userTypeString != null) {
+              _userType = userTypeString.toUserType;
+              print(
+                '✅ AuthProvider: User type loaded from edge function: $_userType',
+              );
+            }
+          } catch (e) {
+            print(
+              '⚠️ AuthProvider: Could not load user type from edge function: $e',
+            );
+          }
+        }
+      } catch (e) {
+        print('❌ AuthProvider: Error loading user from database: $e');
+        print('🔄 AuthProvider: Falling back to Supabase data');
+        _createUserFromSupabaseData(supabaseUser);
+      }
     } catch (e) {
       _setError('Failed to load user data: $e');
     } finally {
       _setLoading(false);
-    }
-  }
-
-  // Metodo pubblico per caricare il tipo di utente dall'edge function
-  Future<void> loadUserType() async {
-    if (_currentUser?.email == null) {
-      print('No user email available for type loading');
-      return;
-    }
-
-    try {
-      final userTypeString = await UserTypeService.getUserType(
-        _currentUser!.email!,
-      );
-      if (userTypeString != null) {
-        _userType = userTypeString.toUserType;
-        print('✅ User type loaded: $_userType');
-        _safeNotifyListeners();
-      } else {
-        print('⚠️ No user type received, using default');
-        _userType = AppUserType.user;
-        _safeNotifyListeners();
-      }
-    } catch (e) {
-      print('❌ Error loading user type: $e');
-      print('🔄 Using default user type');
-      _userType = AppUserType.user;
-      _safeNotifyListeners();
     }
   }
 
@@ -644,10 +712,54 @@ class AuthProvider extends ChangeNotifier {
     print('🧪 Testing user type loading...');
     print('Current user: $_currentUser');
     print('Current user type: $_userType');
-    if (_currentUser?.email != null) {
-      await loadUserType();
-    } else {
-      print('❌ No user email available for testing');
+    print('✅ User type is already loaded from database');
+  }
+
+  // Metodo per forzare il caricamento del tipo utente se non disponibile
+  Future<void> ensureUserTypeLoaded() async {
+    if (_userType != null) {
+      print('✅ AuthProvider: User type already loaded: $_userType');
+      return;
+    }
+
+    if (_currentUser == null) {
+      print('⚠️ AuthProvider: No current user, cannot load user type');
+      return;
+    }
+
+    try {
+      print('🔄 AuthProvider: User type not loaded, loading from database...');
+      final userData = await _supabaseService.getUserById(_currentUser!.idUser);
+
+      if (userData != null) {
+        _currentUser = userData;
+        _userType = _convertUserTypeToAppUserType(userData.type);
+        print('✅ AuthProvider: User type loaded from database: $_userType');
+        _safeNotifyListeners();
+      } else {
+        print(
+          '⚠️ AuthProvider: User not found in database, trying edge function...',
+        );
+        // Fallback: try to get user type from edge function with database fallback
+        final userTypeString = await UserTypeService.getUserTypeWithFallback(
+          _currentUser!.email ?? '',
+        );
+        if (userTypeString != null) {
+          _userType = userTypeString.toUserType;
+          print(
+            '✅ AuthProvider: User type loaded from edge function: $_userType',
+          );
+          _safeNotifyListeners();
+        } else {
+          print('⚠️ AuthProvider: User type not found, using default type');
+          _userType = AppUserType.user;
+          _safeNotifyListeners();
+        }
+      }
+    } catch (e) {
+      print('❌ AuthProvider: Error loading user type: $e');
+      _userType = AppUserType.user;
+      _safeNotifyListeners();
     }
   }
 
@@ -682,24 +794,64 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  // Metodo privato per caricare il tipo di utente dall'edge function
-  Future<void> _loadUserType(String email) async {
+  // Metodo helper per creare utente dai dati di Supabase (fallback)
+  void _createUserFromSupabaseData(User supabaseUser) {
+    _currentUser = AppUser(
+      idUser: supabaseUser.id,
+      email: supabaseUser.email ?? '',
+      firstName: _extractFirstName(supabaseUser.userMetadata?['full_name']),
+      lastName: _extractLastName(supabaseUser.userMetadata?['full_name']),
+      type: UserType.user, // Default type
+      languageCode: 'it',
+      phone: supabaseUser.phone ?? '',
+      idUserHash: supabaseUser.id, // Usa l'ID come hash
+      createdAt: supabaseUser.createdAt != null
+          ? DateTime.parse(supabaseUser.createdAt!)
+          : null,
+      updatedAt: supabaseUser.updatedAt != null
+          ? DateTime.parse(supabaseUser.updatedAt!)
+          : null,
+    );
+
+    // Set default user type if not already set
+    if (_userType == null) {
+      _userType = AppUserType.user;
+    }
+  }
+
+  // Metodo helper per creare utente dai dati di Supabase con caricamento del tipo utente
+  Future<void> _createUserFromSupabaseDataWithType(User supabaseUser) async {
+    _createUserFromSupabaseData(supabaseUser);
+
+    // Try to get user type from edge function
     try {
-      final userTypeString = await UserTypeService.getUserType(email);
+      final userTypeString = await UserTypeService.getUserType(
+        supabaseUser.email ?? '',
+      );
       if (userTypeString != null) {
         _userType = userTypeString.toUserType;
-        print('✅ User type loaded: $_userType');
-        _safeNotifyListeners();
-      } else {
-        print('⚠️ No user type received, using default');
-        _userType = AppUserType.user;
-        _safeNotifyListeners();
+        print(
+          '✅ AuthProvider: User type loaded from edge function: $_userType',
+        );
       }
     } catch (e) {
-      print('❌ Error loading user type: $e');
-      print('🔄 Using default user type');
-      _userType = AppUserType.user;
-      _safeNotifyListeners();
+      print('⚠️ AuthProvider: Could not load user type from edge function: $e');
+    }
+  }
+
+  // Metodo helper per convertire UserType in AppUserType
+  AppUserType _convertUserTypeToAppUserType(UserType? userType) {
+    if (userType == null) return AppUserType.user;
+
+    switch (userType) {
+      case UserType.admin:
+        return AppUserType.admin;
+      case UserType.legalRepresentative:
+        return AppUserType.legalEntity;
+      case UserType.certifier:
+        return AppUserType.certifier;
+      default:
+        return AppUserType.user;
     }
   }
 
@@ -741,36 +893,96 @@ class AuthProvider extends ChangeNotifier {
   Future<void> _updateUserTypeToCertifier(String userId) async {
     try {
       print(
-        'AuthProvider: Chiamando edge function per aggiornare tipo utente...',
+        'AuthProvider: Chiamando edge function per collegare utente a certifier...',
       );
 
-      final response = await UpdateUserTypeService.updateUserTypeToCertifier(
-        userId: userId,
+      // Ottieni i dati dell'utente corrente
+      final currentUser = _currentUser;
+      if (currentUser == null) {
+        print('❌ AuthProvider: Nessun utente corrente disponibile');
+        return;
+      }
+
+      // Chiama la nuova Edge Function post-signup-link-certifier
+      final response = await EdgeFunctionService.postSignupLinkCertifier(
+        email: currentUser.email ?? '',
+        firstName: currentUser.firstName,
+        lastName: currentUser.lastName,
+        idUser: userId,
       );
 
-      if (UpdateUserTypeService.isUpdateSuccessful(response)) {
-        print(
-          '✅ AuthProvider: Tipo utente aggiornato a certifier con successo',
-        );
+      if (response != null && response['ok'] == true) {
+        print('✅ AuthProvider: Utente collegato a certifier con successo');
+        print('✅ AuthProvider: Dati certifier: ${response['data']}');
 
-        final message = UpdateUserTypeService.getResponseMessage(response);
-        print('✅ AuthProvider: Messaggio: $message');
+        // Aggiorna i dati dell'utente locale
+        if (response['data'] != null) {
+          final data = response['data'] as Map<String, dynamic>;
+          final userData = data['user'] as Map<String, dynamic>?;
+          final certifierData = data['certifier'] as Map<String, dynamic>?;
 
-        if (UpdateUserTypeService.isCertifierCreated(response)) {
-          print('✅ AuthProvider: Record certifier creato con successo');
+          if (userData != null) {
+            _currentUser = AppUser.fromJson(userData);
+            _userType = AppUserType.certifier;
+            print('✅ AuthProvider: Tipo utente aggiornato a certifier');
+          }
         }
+
+        // Reindirizza al KYC Veriff
+        print('🔄 AuthProvider: Reindirizzando al KYC Veriff...');
+        await _redirectToKycVeriff();
       } else {
-        print(
-          '⚠️ AuthProvider: Fallimento nell\'aggiornamento del tipo utente',
-        );
-        final message = UpdateUserTypeService.getResponseMessage(response);
+        print('⚠️ AuthProvider: Fallimento nel collegamento a certifier');
+        final message = response?['message'] ?? 'Errore sconosciuto';
         print('⚠️ AuthProvider: Errore: $message');
       }
     } catch (e) {
-      print(
-        '❌ AuthProvider: Errore durante l\'aggiornamento del tipo utente: $e',
-      );
+      print('❌ AuthProvider: Errore durante il collegamento a certifier: $e');
       // Non bloccare il processo di registrazione se l'aggiornamento del tipo fallisce
+    }
+  }
+
+  Future<void> _redirectToKycVeriff() async {
+    try {
+      print('🔄 AuthProvider: Avviando processo KYC Veriff...');
+
+      // Imposta il flag per il redirect al KYC
+      _shouldRedirectToKyc = true;
+
+      // Notifica i listener che il KYC deve essere avviato
+      _safeNotifyListeners();
+
+      print('✅ AuthProvider: KYC Veriff notificato ai listener');
+    } catch (e) {
+      print('❌ AuthProvider: Errore durante l\'avvio del KYC Veriff: $e');
+    }
+  }
+
+  void clearKycRedirect() {
+    _shouldRedirectToKyc = false;
+    _safeNotifyListeners();
+  }
+
+  Future<void> _checkAndRedirectToKycIfNeeded() async {
+    try {
+      print('🔍 AuthProvider: Checking KYC status for certifier user...');
+      
+      // Controlla se l'utente ha completato il KYC
+      // Per ora assumiamo che se non c'è un campo specifico, il KYC non è completato
+      // In futuro potresti aggiungere un campo nel database per tracciare lo stato KYC
+      
+      // Per ora, reindirizza sempre al KYC per i certifier
+      // TODO: Implementare controllo reale dello stato KYC dal database
+      print('🔄 AuthProvider: Certifier user needs KYC verification, redirecting...');
+      
+      // Imposta il flag per il redirect al KYC
+      _shouldRedirectToKyc = true;
+      _safeNotifyListeners();
+      
+      print('✅ AuthProvider: KYC redirect flag set for certifier user');
+      
+    } catch (e) {
+      print('❌ AuthProvider: Error checking KYC status: $e');
     }
   }
 }

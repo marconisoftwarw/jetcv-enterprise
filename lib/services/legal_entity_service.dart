@@ -4,13 +4,15 @@ import '../models/legal_entity.dart';
 class LegalEntityService {
   final SupabaseClient _supabase = Supabase.instance.client;
 
-  /// Ottiene le legal entity associate a un utente tramite l'edge function get-legal-of-user
+  /// Ottiene le legal entity create da un utente tramite l'edge function get-legal-entity-by-iduser
   Future<List<LegalEntity>> getLegalEntitiesByUser(String userId) async {
     try {
-      print('LegalEntityService: Getting legal entities for user: $userId');
+      print(
+        'LegalEntityService: Getting legal entities created by user: $userId',
+      );
 
       final response = await _supabase.functions.invoke(
-        'get-legal-of-user',
+        'get-legal-entity-by-iduser',
         body: {'id_user': userId},
       );
 

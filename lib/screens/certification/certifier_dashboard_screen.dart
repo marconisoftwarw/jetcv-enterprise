@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../services/certification_edge_service.dart';
+import '../../services/edge_function_service.dart';
+import '../../models/legal_entity.dart';
+import '../../services/user_type_service.dart';
+import '../../providers/auth_provider.dart';
 import 'create_certification_screen.dart';
 import 'certification_category_management_screen.dart';
 import 'certification_information_management_screen.dart';
@@ -21,6 +26,9 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
   List<Map<String, dynamic>> _draftCertifications = [];
   bool _isLoading = false;
   String? _errorMessage;
+
+  // Legal entity per l'utente corrente
+  String? _userLegalEntityId;
 
   @override
   void initState() {
@@ -50,9 +58,27 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
         return;
       }
 
+      // Determina se l'utente è di tipo legal_entity e carica la sua legal entity
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final isLegalEntityUser =
+          authProvider.userType == AppUserType.legalEntity;
+      final isAdmin = authProvider.userType == AppUserType.admin;
+
+      if (isLegalEntityUser) {
+        print('🏢 User is legal_entity type, loading user legal entity...');
+        await _loadUserLegalEntity();
+      } else if (isAdmin) {
+        print(
+          '👑 User is admin, loading all certifications without filters...',
+        );
+      }
+
       // Carica certificazioni emesse (status: completed, closed)
       final issuedResult = await CertificationEdgeService.getCertifications(
         status: 'sent',
+        idLegalEntity: isLegalEntityUser
+            ? _userLegalEntityId
+            : null, // Filtra solo per legal_entity
         limit: 50,
         offset: 0,
       );
@@ -60,6 +86,9 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
       // Carica bozze e in corso (status: draft, submitted)
       final draftResult = await CertificationEdgeService.getCertifications(
         status: 'draft',
+        idLegalEntity: isLegalEntityUser
+            ? _userLegalEntityId
+            : null, // Filtra solo per legal_entity
         limit: 50,
         offset: 0,
       );
@@ -82,6 +111,79 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
           _isLoading = false;
         });
       }
+    }
+  }
+
+  Future<void> _loadUserLegalEntity() async {
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final currentUser = authProvider.currentUser;
+
+      if (currentUser == null) {
+        print('❌ No current user available');
+        return;
+      }
+
+      print('🔍 Loading legal entity for user: ${currentUser.idUser}');
+
+      // Solo gli admin vedono tutte le legal entities
+      // Tutti gli altri utenti vedono solo la propria legal entity
+      final isAdmin = authProvider.userType == AppUserType.admin;
+      
+      print('🔍 DEBUG: User type: ${authProvider.userType}');
+      print('🔍 DEBUG: Is admin: $isAdmin');
+      print('🔍 DEBUG: User ID: ${currentUser.idUser}');
+      
+      final response = isAdmin
+          ? await EdgeFunctionService.getAllLegalEntities().timeout(
+              const Duration(seconds: 15),
+              onTimeout: () {
+                print('⏰ Timeout loading all legal entities for admin');
+                return null;
+              },
+            )
+          : await EdgeFunctionService.getLegalEntitiesByUser(
+              userId: currentUser.idUser,
+            ).timeout(
+              const Duration(seconds: 15),
+              onTimeout: () {
+                print('⏰ Timeout loading user legal entity');
+                return null;
+              },
+            );
+      
+      print('🔍 DEBUG: Method called: ${isAdmin ? "getAllLegalEntities" : "getLegalEntitiesByUser"}');
+      print('🔍 DEBUG: Response received: ${response != null ? "Yes" : "No"}');
+      
+      if (response != null) {
+        print('🔍 DEBUG: Response data: $response');
+        print('🔍 DEBUG: Response ok: ${response['ok']}');
+        if (response['data'] != null) {
+          print('🔍 DEBUG: Data length: ${(response['data'] as List).length}');
+        }
+      }
+
+      if (response != null && response['ok'] == true) {
+        final data = response['data'] as List<dynamic>?;
+        if (data != null && data.isNotEmpty) {
+          final legalEntities = data
+              .map((item) => LegalEntity.fromJson(item))
+              .toList();
+
+          // Seleziona la prima legal entity (la più recente)
+          _userLegalEntityId = legalEntities.first.idLegalEntity;
+
+          print(
+            '✅ Loaded legal entity for user: ${legalEntities.first.legalName} (${_userLegalEntityId})',
+          );
+        } else {
+          print('❌ No legal entities found for user');
+        }
+      } else {
+        print('❌ Failed to load legal entities: ${response?['message']}');
+      }
+    } catch (e) {
+      print('❌ Error loading user legal entity: $e');
     }
   }
 

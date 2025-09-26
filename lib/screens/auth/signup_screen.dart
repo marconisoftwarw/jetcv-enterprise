@@ -10,6 +10,7 @@ import '../../widgets/international_phone_field.dart';
 import '../../services/veriff_service.dart';
 import '../../services/supabase_service.dart';
 import '../../l10n/app_localizations.dart';
+import '../veriff/veriff_verification_screen.dart';
 import 'dart:async';
 
 class SignupScreen extends StatefulWidget {
@@ -148,16 +149,19 @@ class _SignupScreenState extends State<SignupScreen> {
     print('SignupScreen: Iniziando processo di registrazione...');
 
     final authProvider = context.read<AuthProvider>();
-    await authProvider.signUpWithEmail(
+    final success = await authProvider.signUpWithEmail(
       email: _emailController.text.trim(),
       password: _passwordController.text,
       firstName: _firstNameController.text.trim(),
       lastName: _lastNameController.text.trim(),
     );
 
-    // Per tutti gli utenti, procedi con la verifica Veriff dopo la registrazione
-    print('SignupScreen: Procedendo con verifica Veriff...');
-    await _startVeriffVerification();
+    if (success && mounted) {
+      print(
+        'SignupScreen: Registrazione completata, in attesa di redirect al KYC...',
+      );
+      // Il redirect al KYC sarà gestito dal Consumer che ascolta shouldRedirectToKyc
+    }
   }
 
   Future<void> _signInWithGoogle() async {
@@ -559,776 +563,853 @@ class _SignupScreenState extends State<SignupScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
-    // Se la verifica Veriff è attiva, mostra la bellissima schermata di verifica
-    if (_showVeriffWebView && _veriffUrl != null) {
-      return Scaffold(
-        body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFF667eea),
-                Color(0xFF764ba2),
-                Color(0xFFF093FB),
-                Color(0xFFF5576C),
-              ],
-            ),
-          ),
-          child: SafeArea(
-            child: Stack(
-              children: [
-                // Pulsante di chiusura
-                Positioned(
-                  top: 16,
-                  left: 16,
-                  child: IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white),
-                    onPressed: () {
-                      // Cancella il timer del monitoraggio finestra
-                      _windowCheckTimer?.cancel();
-                      setState(() {
-                        _showVeriffWebView = false;
-                        _veriffUrl = null;
-                        _veriffSessionId = null;
-                        _isVeriffWaiting = false;
-                        _isVeriffComplete = false;
-                        _veriffWindowClosed = false;
-                      });
-                    },
-                    style: IconButton.styleFrom(
-                      backgroundColor: Colors.white.withOpacity(0.2),
-                      shape: const CircleBorder(),
-                    ),
-                  ),
+    // Consumer per ascoltare il flag shouldRedirectToKyc
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, child) {
+        // Se deve reindirizzare al KYC, naviga alla VeriffVerificationScreen
+        if (authProvider.shouldRedirectToKyc &&
+            authProvider.currentUser != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            authProvider.clearKycRedirect();
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => VeriffVerificationScreen(
+                  userData: authProvider.currentUser!.toJson(),
                 ),
+              ),
+            );
+          });
+        }
 
-                // Contenuto principale
-                Center(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Icona animata
-                        AnimatedContainer(
-                          duration: const Duration(seconds: 1),
-                          curve: Curves.elasticOut,
-                          width: (_isVeriffComplete || _veriffWindowClosed)
-                              ? 120
-                              : 100,
-                          height: (_isVeriffComplete || _veriffWindowClosed)
-                              ? 120
-                              : 100,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withOpacity(0.9),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.2),
-                                blurRadius: 20,
-                                spreadRadius: 5,
+        // Se la verifica Veriff è attiva, mostra la bellissima schermata di verifica
+        if (_showVeriffWebView && _veriffUrl != null) {
+          return Scaffold(
+            body: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0xFF667eea),
+                    Color(0xFF764ba2),
+                    Color(0xFFF093FB),
+                    Color(0xFFF5576C),
+                  ],
+                ),
+              ),
+              child: SafeArea(
+                child: Stack(
+                  children: [
+                    // Pulsante di chiusura
+                    Positioned(
+                      top: 16,
+                      left: 16,
+                      child: IconButton(
+                        icon: const Icon(Icons.close, color: Colors.white),
+                        onPressed: () {
+                          // Cancella il timer del monitoraggio finestra
+                          _windowCheckTimer?.cancel();
+                          setState(() {
+                            _showVeriffWebView = false;
+                            _veriffUrl = null;
+                            _veriffSessionId = null;
+                            _isVeriffWaiting = false;
+                            _isVeriffComplete = false;
+                            _veriffWindowClosed = false;
+                          });
+                        },
+                        style: IconButton.styleFrom(
+                          backgroundColor: Colors.white.withOpacity(0.2),
+                          shape: const CircleBorder(),
+                        ),
+                      ),
+                    ),
+
+                    // Contenuto principale
+                    Center(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // Icona animata
+                            AnimatedContainer(
+                              duration: const Duration(seconds: 1),
+                              curve: Curves.elasticOut,
+                              width: (_isVeriffComplete || _veriffWindowClosed)
+                                  ? 120
+                                  : 100,
+                              height: (_isVeriffComplete || _veriffWindowClosed)
+                                  ? 120
+                                  : 100,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white.withOpacity(0.9),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.2),
+                                    blurRadius: 20,
+                                    spreadRadius: 5,
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                          child: Icon(
-                            _veriffWindowClosed
-                                ? Icons.cancel
-                                : _isVeriffComplete
-                                ? Icons.check_circle
-                                : _isVeriffWaiting
-                                ? Icons.verified_user
-                                : Icons.open_in_new,
-                            size: (_isVeriffComplete || _veriffWindowClosed)
-                                ? 60
-                                : 50,
-                            color: _veriffWindowClosed
-                                ? Colors.red
-                                : _isVeriffComplete
-                                ? Colors.green
-                                : Color(AppConfig.primaryColorValue),
+                              child: Icon(
+                                _veriffWindowClosed
+                                    ? Icons.cancel
+                                    : _isVeriffComplete
+                                    ? Icons.check_circle
+                                    : _isVeriffWaiting
+                                    ? Icons.verified_user
+                                    : Icons.open_in_new,
+                                size: (_isVeriffComplete || _veriffWindowClosed)
+                                    ? 60
+                                    : 50,
+                                color: _veriffWindowClosed
+                                    ? Colors.red
+                                    : _isVeriffComplete
+                                    ? Colors.green
+                                    : Color(AppConfig.primaryColorValue),
+                              ),
+                            ),
+
+                            const SizedBox(height: 40),
+
+                            // Titolo
+                            AnimatedOpacity(
+                              opacity: 1.0,
+                              duration: const Duration(milliseconds: 500),
+                              child: Text(
+                                _veriffWindowClosed
+                                    ? 'Verifica Annullata'
+                                    : _isVeriffComplete
+                                    ? 'Verifica Completata! 🎉'
+                                    : _isVeriffWaiting
+                                    ? 'Verifica in Corso...'
+                                    : 'Pronto per la Verifica',
+                                style: TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  shadows: [
+                                    Shadow(
+                                      color: Colors.black26,
+                                      blurRadius: 10,
+                                      offset: Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+
+                            const SizedBox(height: 24),
+
+                            // Descrizione
+                            AnimatedOpacity(
+                              opacity: 1.0,
+                              duration: const Duration(milliseconds: 500),
+                              child: Container(
+                                padding: const EdgeInsets.all(20),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(0.2),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Text(
+                                  _veriffWindowClosed
+                                      ? 'Hai chiuso la finestra di verifica.\nSarai reindirizzato alla pagina di login tra poco.'
+                                      : _isVeriffComplete
+                                      ? 'La tua identità è stata verificata con successo!\nSarai reindirizzato alla home tra poco.'
+                                      : _isVeriffWaiting
+                                      ? 'Stiamo monitorando automaticamente lo stato della tua verifica.\nDopo 3 secondi verrai reindirizzato alla pagina di login se non completata.'
+                                      : 'La verifica si aprirà automaticamente in una nuova scheda.\nCompleta tutti i passaggi richiesti entro 3 secondi.',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.white,
+                                    height: 1.5,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(height: 40),
+
+                            // Loader elegante o pulsante
+                            if (_isVeriffWaiting &&
+                                !_isVeriffComplete &&
+                                !_veriffWindowClosed)
+                              Container(
+                                padding: const EdgeInsets.all(24),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(0.2),
+                                  ),
+                                ),
+                                child: Column(
+                                  children: [
+                                    const SizedBox(
+                                      width: 60,
+                                      height: 60,
+                                      child: CircularProgressIndicator(
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              Colors.white,
+                                            ),
+                                        strokeWidth: 4,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    const Text(
+                                      'Monitoraggio verifica...',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Controllo dopo 3 secondi',
+                                      style: TextStyle(
+                                        color: Colors.white.withOpacity(0.7),
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            else if (!_isVeriffComplete)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 12,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(25),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.2),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.open_in_new,
+                                      color: Color(AppConfig.primaryColorValue),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Apertura automatica...',
+                                      style: TextStyle(
+                                        color: Color(
+                                          AppConfig.primaryColorValue,
+                                        ),
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                            const SizedBox(height: 40),
+
+                            // Pulsanti aggiuntivi
+                            if (!_isVeriffWaiting &&
+                                !_isVeriffComplete &&
+                                !_veriffWindowClosed)
+                              Column(
+                                children: [
+                                  TextButton.icon(
+                                    onPressed: _openVeriffInNewTab,
+                                    icon: const Icon(
+                                      Icons.refresh,
+                                      color: Colors.white,
+                                    ),
+                                    label: const Text(
+                                      'Riapri Verifica',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                    style: TextButton.styleFrom(
+                                      backgroundColor: Colors.white.withOpacity(
+                                        0.1,
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 24,
+                                        vertical: 12,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(25),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  TextButton.icon(
+                                    onPressed: () =>
+                                        Navigator.pushReplacementNamed(
+                                          context,
+                                          '/home',
+                                        ),
+                                    icon: const Icon(
+                                      Icons.home,
+                                      color: Colors.white70,
+                                    ),
+                                    label: const Text(
+                                      'Salta per ora',
+                                      style: TextStyle(color: Colors.white70),
+                                    ),
+                                  ),
+                                ],
+                              )
+                            // Messaggio di reindirizzamento quando la finestra è chiusa
+                            else if (_veriffWindowClosed)
+                              Container(
+                                padding: const EdgeInsets.all(20),
+                                decoration: BoxDecoration(
+                                  color: Colors.orange.withOpacity(0.9),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(0.3),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.info_outline,
+                                      color: Colors.white,
+                                      size: 24,
+                                    ),
+                                    SizedBox(width: 12),
+                                    Text(
+                                      'Reindirizzamento automatico alla pagina di login...',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                            // Messaggio di successo
+                            if (_isVeriffComplete)
+                              Container(
+                                padding: const EdgeInsets.all(20),
+                                decoration: BoxDecoration(
+                                  color: Colors.green.withOpacity(0.9),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(0.3),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.check_circle,
+                                      color: Colors.white,
+                                      size: 24,
+                                    ),
+                                    SizedBox(width: 12),
+                                    Text(
+                                      'Verifica completata con successo!',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    // Overlay di sfondo con particelle animate (opzionale)
+                    if (_isVeriffWaiting)
+                      Positioned.fill(
+                        child: IgnorePointer(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: RadialGradient(
+                                center: const Alignment(0.5, 0.5),
+                                radius: 1.5,
+                                colors: [
+                                  Colors.transparent,
+                                  Colors.white.withOpacity(0.02),
+                                  Colors.transparent,
+                                ],
+                              ),
+                            ),
                           ),
                         ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
 
-                        const SizedBox(height: 40),
+        // Altrimenti mostra il form di signup normale
+        return Scaffold(
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: 20),
 
-                        // Titolo
-                        AnimatedOpacity(
-                          opacity: 1.0,
-                          duration: const Duration(milliseconds: 500),
-                          child: Text(
-                            _veriffWindowClosed
-                                ? 'Verifica Annullata'
-                                : _isVeriffComplete
-                                ? 'Verifica Completata! 🎉'
-                                : _isVeriffWaiting
-                                ? 'Verifica in Corso...'
-                                : 'Pronto per la Verifica',
-                            style: TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              shadows: [
-                                Shadow(
-                                  color: Colors.black26,
-                                  blurRadius: 10,
-                                  offset: Offset(0, 2),
-                                ),
-                              ],
+                    // Back Button
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.arrow_back),
+                        style: IconButton.styleFrom(
+                          backgroundColor: Colors.grey[100],
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Logo and Title
+                    Center(
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 80,
+                            height: 80,
+                            decoration: BoxDecoration(
+                              color: Color(AppConfig.primaryColorValue),
+                              borderRadius: BorderRadius.circular(20),
                             ),
+                            child: const Icon(
+                              Icons.person_add,
+                              size: 40,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          Text(
+                            l10n.getString('create_account'),
+                            style: Theme.of(context).textTheme.headlineMedium
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            l10n.getString(
+                              'join_professional_certification_platform',
+                            ),
+                            style: Theme.of(context).textTheme.bodyLarge
+                                ?.copyWith(color: Colors.grey[600]),
                             textAlign: TextAlign.center,
                           ),
-                        ),
-
-                        const SizedBox(height: 24),
-
-                        // Descrizione
-                        AnimatedOpacity(
-                          opacity: 1.0,
-                          duration: const Duration(milliseconds: 500),
-                          child: Container(
-                            padding: const EdgeInsets.all(20),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: Colors.white.withOpacity(0.2),
-                                width: 1,
-                              ),
-                            ),
-                            child: Text(
-                              _veriffWindowClosed
-                                  ? 'Hai chiuso la finestra di verifica.\nSarai reindirizzato alla pagina di login tra poco.'
-                                  : _isVeriffComplete
-                                  ? 'La tua identità è stata verificata con successo!\nSarai reindirizzato alla home tra poco.'
-                                  : _isVeriffWaiting
-                                  ? 'Stiamo monitorando automaticamente lo stato della tua verifica.\nDopo 3 secondi verrai reindirizzato alla pagina di login se non completata.'
-                                  : 'La verifica si aprirà automaticamente in una nuova scheda.\nCompleta tutti i passaggi richiesti entro 3 secondi.',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.white,
-                                height: 1.5,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 40),
-
-                        // Loader elegante o pulsante
-                        if (_isVeriffWaiting &&
-                            !_isVeriffComplete &&
-                            !_veriffWindowClosed)
-                          Container(
-                            padding: const EdgeInsets.all(24),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: Colors.white.withOpacity(0.2),
-                              ),
-                            ),
-                            child: Column(
-                              children: [
-                                const SizedBox(
-                                  width: 60,
-                                  height: 60,
-                                  child: CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white,
-                                    ),
-                                    strokeWidth: 4,
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                const Text(
-                                  'Monitoraggio verifica...',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Controllo dopo 3 secondi',
-                                  style: TextStyle(
-                                    color: Colors.white.withOpacity(0.7),
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        else if (!_isVeriffComplete)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 12,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(25),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.open_in_new,
-                                  color: Color(AppConfig.primaryColorValue),
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'Apertura automatica...',
-                                  style: TextStyle(
-                                    color: Color(AppConfig.primaryColorValue),
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                        const SizedBox(height: 40),
-
-                        // Pulsanti aggiuntivi
-                        if (!_isVeriffWaiting &&
-                            !_isVeriffComplete &&
-                            !_veriffWindowClosed)
-                          Column(
-                            children: [
-                              TextButton.icon(
-                                onPressed: _openVeriffInNewTab,
-                                icon: const Icon(
-                                  Icons.refresh,
-                                  color: Colors.white,
-                                ),
-                                label: const Text(
-                                  'Riapri Verifica',
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                                style: TextButton.styleFrom(
-                                  backgroundColor: Colors.white.withOpacity(
-                                    0.1,
-                                  ),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 24,
-                                    vertical: 12,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(25),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              TextButton.icon(
-                                onPressed: () => Navigator.pushReplacementNamed(
-                                  context,
-                                  '/home',
-                                ),
-                                icon: const Icon(
-                                  Icons.home,
-                                  color: Colors.white70,
-                                ),
-                                label: const Text(
-                                  'Salta per ora',
-                                  style: TextStyle(color: Colors.white70),
-                                ),
-                              ),
-                            ],
-                          )
-                        // Messaggio di reindirizzamento quando la finestra è chiusa
-                        else if (_veriffWindowClosed)
-                          Container(
-                            padding: const EdgeInsets.all(20),
-                            decoration: BoxDecoration(
-                              color: Colors.orange.withOpacity(0.9),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: Colors.white.withOpacity(0.3),
-                                width: 1,
-                              ),
-                            ),
-                            child: const Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.info_outline,
-                                  color: Colors.white,
-                                  size: 24,
-                                ),
-                                SizedBox(width: 12),
-                                Text(
-                                  'Reindirizzamento automatico alla pagina di login...',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                        // Messaggio di successo
-                        if (_isVeriffComplete)
-                          Container(
-                            padding: const EdgeInsets.all(20),
-                            decoration: BoxDecoration(
-                              color: Colors.green.withOpacity(0.9),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: Colors.white.withOpacity(0.3),
-                                width: 1,
-                              ),
-                            ),
-                            child: const Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.check_circle,
-                                  color: Colors.white,
-                                  size: 24,
-                                ),
-                                SizedBox(width: 12),
-                                Text(
-                                  'Verifica completata con successo!',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                // Overlay di sfondo con particelle animate (opzionale)
-                if (_isVeriffWaiting)
-                  Positioned.fill(
-                    child: IgnorePointer(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: RadialGradient(
-                            center: const Alignment(0.5, 0.5),
-                            radius: 1.5,
-                            colors: [
-                              Colors.transparent,
-                              Colors.white.withOpacity(0.02),
-                              Colors.transparent,
-                            ],
-                          ),
-                        ),
+                        ],
                       ),
                     ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
 
-    // Altrimenti mostra il form di signup normale
-    return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: 20),
+                    const SizedBox(height: 32),
 
-                // Back Button
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.arrow_back),
-                    style: IconButton.styleFrom(
-                      backgroundColor: Colors.grey[100],
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-
-                // Logo and Title
-                Center(
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          color: Color(AppConfig.primaryColorValue),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: const Icon(
-                          Icons.person_add,
-                          size: 40,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Text(
-                        l10n.getString('create_account'),
-                        style: Theme.of(context).textTheme.headlineMedium
-                            ?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        l10n.getString(
-                          'join_professional_certification_platform',
-                        ),
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Colors.grey[600],
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 32),
-
-                // Name Fields
-                Row(
-                  children: [
-                    Expanded(
-                      child: NeonTextField(
-                        controller: _firstNameController,
-                        labelText: l10n.getString('first_name'),
-                        hintText: l10n.getString('enter_first_name'),
-                        prefixIcon: const Icon(Icons.person_outline),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return l10n.getString('first_name_required');
-                          }
-                          if (value.length > AppConfig.maxNameLength) {
-                            return l10n.getString('first_name_too_long');
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: NeonTextField(
-                        controller: _lastNameController,
-                        labelText: l10n.getString('last_name'),
-                        hintText: l10n.getString('enter_last_name'),
-                        prefixIcon: const Icon(Icons.person_outline),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return l10n.getString('last_name_required');
-                          }
-                          if (value.length > AppConfig.maxNameLength) {
-                            return l10n.getString('last_name_too_long');
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 20),
-
-                // Email Field
-                NeonTextField(
-                  controller: _emailController,
-                  labelText: l10n.getString('email'),
-                  hintText: l10n.getString('enter_your_email'),
-                  keyboardType: TextInputType.emailAddress,
-                  prefixIcon: const Icon(Icons.email_outlined),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return l10n.getString('email_required');
-                    }
-                    if (!RegExp(
-                      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                    ).hasMatch(value)) {
-                      return l10n.getString('email_invalid');
-                    }
-                    if (value.length > AppConfig.maxEmailLength) {
-                      return l10n.getString('email_too_long');
-                    }
-                    return null;
-                  },
-                ),
-
-                const SizedBox(height: 20),
-
-                // Phone Field
-                InternationalPhoneField(
-                  controller: _phoneController,
-                  label: l10n.getString('phone_optional'),
-                  hint: l10n.getString('enter_phone_number'),
-                  initialCountryCode: _selectedCountryCode,
-                  onCountryCodeChanged: (countryCode) {
-                    setState(() {
-                      _selectedCountryCode = countryCode;
-                    });
-                  },
-                  onPhoneNumberChanged: (phoneNumber) {
-                    // Il controller viene aggiornato automaticamente
-                  },
-                  validator: (value) {
-                    if (value != null &&
-                        value.isNotEmpty &&
-                        value.length > AppConfig.maxPhoneLength) {
-                      return l10n.getString('phone_number_too_long');
-                    }
-                    return null;
-                  },
-                ),
-
-                const SizedBox(height: 20),
-
-                // Password Fields
-                Row(
-                  children: [
-                    Expanded(
-                      child: NeonTextField(
-                        controller: _passwordController,
-                        labelText: l10n.getString('password'),
-                        hintText: l10n.getString('enter_password'),
-                        obscureText: _obscurePassword,
-                        prefixIcon: const Icon(Icons.lock_outlined),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility
-                                : Icons.visibility_off,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _obscurePassword = !_obscurePassword;
-                            });
-                          },
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return l10n.getString('password_required');
-                          }
-                          if (value.length < AppConfig.minPasswordLength) {
-                            return l10n.getString('password_min_length');
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: NeonTextField(
-                        controller: _confirmPasswordController,
-                        labelText: l10n.getString('confirm_password'),
-                        hintText: l10n.getString('confirm_password'),
-                        obscureText: _obscureConfirmPassword,
-                        prefixIcon: const Icon(Icons.lock_outlined),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscureConfirmPassword
-                                ? Icons.visibility
-                                : Icons.visibility_off,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _obscureConfirmPassword =
-                                  !_obscureConfirmPassword;
-                            });
-                          },
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return l10n.getString('please_confirm_password');
-                          }
-                          if (value != _passwordController.text) {
-                            return l10n.getString('passwords_do_not_match');
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 24),
-
-                // Terms and Privacy
-                Column(
-                  children: [
+                    // Name Fields
                     Row(
                       children: [
-                        Checkbox(
-                          value: _agreeToTerms,
-                          onChanged: (value) {
-                            setState(() {
-                              _agreeToTerms = value ?? false;
-                            });
-                          },
-                        ),
                         Expanded(
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _agreeToTerms = !_agreeToTerms;
-                              });
+                          child: NeonTextField(
+                            controller: _firstNameController,
+                            labelText: l10n.getString('first_name'),
+                            hintText: l10n.getString('enter_first_name'),
+                            prefixIcon: const Icon(Icons.person_outline),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return l10n.getString('first_name_required');
+                              }
+                              if (value.length > AppConfig.maxNameLength) {
+                                return l10n.getString('first_name_too_long');
+                              }
+                              return null;
                             },
-                            child: RichText(
-                              text: TextSpan(
-                                text: l10n.getString('i_accept_the'),
-                                style: TextStyle(color: Colors.grey[700]),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: NeonTextField(
+                            controller: _lastNameController,
+                            labelText: l10n.getString('last_name'),
+                            hintText: l10n.getString('enter_last_name'),
+                            prefixIcon: const Icon(Icons.person_outline),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return l10n.getString('last_name_required');
+                              }
+                              if (value.length > AppConfig.maxNameLength) {
+                                return l10n.getString('last_name_too_long');
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // Email Field
+                    NeonTextField(
+                      controller: _emailController,
+                      labelText: l10n.getString('email'),
+                      hintText: l10n.getString('enter_your_email'),
+                      keyboardType: TextInputType.emailAddress,
+                      prefixIcon: const Icon(Icons.email_outlined),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return l10n.getString('email_required');
+                        }
+                        if (!RegExp(
+                          r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                        ).hasMatch(value)) {
+                          return l10n.getString('email_invalid');
+                        }
+                        if (value.length > AppConfig.maxEmailLength) {
+                          return l10n.getString('email_too_long');
+                        }
+                        return null;
+                      },
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // Phone Field
+                    InternationalPhoneField(
+                      controller: _phoneController,
+                      label: l10n.getString('phone_optional'),
+                      hint: l10n.getString('enter_phone_number'),
+                      initialCountryCode: _selectedCountryCode,
+                      onCountryCodeChanged: (countryCode) {
+                        setState(() {
+                          _selectedCountryCode = countryCode;
+                        });
+                      },
+                      onPhoneNumberChanged: (phoneNumber) {
+                        // Il controller viene aggiornato automaticamente
+                      },
+                      validator: (value) {
+                        if (value != null &&
+                            value.isNotEmpty &&
+                            value.length > AppConfig.maxPhoneLength) {
+                          return l10n.getString('phone_number_too_long');
+                        }
+                        return null;
+                      },
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // Password Fields
+                    Row(
+                      children: [
+                        Expanded(
+                          child: NeonTextField(
+                            controller: _passwordController,
+                            labelText: l10n.getString('password'),
+                            hintText: l10n.getString('enter_password'),
+                            obscureText: _obscurePassword,
+                            prefixIcon: const Icon(Icons.lock_outlined),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscurePassword
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _obscurePassword = !_obscurePassword;
+                                });
+                              },
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return l10n.getString('password_required');
+                              }
+                              if (value.length < AppConfig.minPasswordLength) {
+                                return l10n.getString('password_min_length');
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: NeonTextField(
+                            controller: _confirmPasswordController,
+                            labelText: l10n.getString('confirm_password'),
+                            hintText: l10n.getString('confirm_password'),
+                            obscureText: _obscureConfirmPassword,
+                            prefixIcon: const Icon(Icons.lock_outlined),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscureConfirmPassword
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _obscureConfirmPassword =
+                                      !_obscureConfirmPassword;
+                                });
+                              },
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return l10n.getString(
+                                  'please_confirm_password',
+                                );
+                              }
+                              if (value != _passwordController.text) {
+                                return l10n.getString('passwords_do_not_match');
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Terms and Privacy
+                    Column(
+                      children: [
+                        Row(
+                          children: [
+                            Checkbox(
+                              value: _agreeToTerms,
+                              onChanged: (value) {
+                                setState(() {
+                                  _agreeToTerms = value ?? false;
+                                });
+                              },
+                            ),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _agreeToTerms = !_agreeToTerms;
+                                  });
+                                },
+                                child: RichText(
+                                  text: TextSpan(
+                                    text: l10n.getString('i_accept_the'),
+                                    style: TextStyle(color: Colors.grey[700]),
+                                    children: [
+                                      TextSpan(
+                                        text: l10n.getString(
+                                          'terms_of_service',
+                                        ),
+                                        style: TextStyle(
+                                          color: Color(
+                                            AppConfig.primaryColorValue,
+                                          ),
+                                          decoration: TextDecoration.underline,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Checkbox(
+                              value: _agreeToPrivacy,
+                              onChanged: (value) {
+                                setState(() {
+                                  _agreeToPrivacy = value ?? false;
+                                });
+                              },
+                            ),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _agreeToPrivacy = !_agreeToPrivacy;
+                                  });
+                                },
+                                child: RichText(
+                                  text: TextSpan(
+                                    text: l10n.getString('i_accept_the'),
+                                    style: TextStyle(color: Colors.grey[700]),
+                                    children: [
+                                      TextSpan(
+                                        text: l10n.getString('privacy_policy'),
+                                        style: TextStyle(
+                                          color: Color(
+                                            AppConfig.primaryColorValue,
+                                          ),
+                                          decoration: TextDecoration.underline,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 32),
+
+                    // Sign Up Button
+                    Consumer<AuthProvider>(
+                      builder: (context, authProvider, child) {
+                        return NeonButton(
+                          onPressed: _signUp,
+                          text: _isVeriffLoading
+                              ? l10n.getString('verification_in_progress')
+                              : l10n.getString('create_account'),
+                          icon: _isVeriffLoading
+                              ? Icons.hourglass_empty
+                              : Icons.person_add,
+                          isLoading: authProvider.isLoading || _isVeriffLoading,
+                          neonColor: AppTheme.accentGreen,
+                        );
+                      },
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Divider
+                    Row(
+                      children: [
+                        Expanded(child: Divider(color: AppTheme.primaryBlack)),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Text(
+                            l10n.getString('or'),
+                            style: TextStyle(
+                              color: AppTheme.primaryBlack,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        Expanded(child: Divider(color: AppTheme.primaryBlack)),
+                      ],
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Google Sign Up Button
+                    Consumer<AuthProvider>(
+                      builder: (context, authProvider, child) {
+                        return NeonButton(
+                          onPressed: authProvider.isLoading
+                              ? null
+                              : _signInWithGoogle,
+                          text: l10n.getString('sign_up_with_google'),
+                          icon: Icons.g_mobiledata,
+                          isLoading: authProvider.isLoading,
+                          isOutlined: true,
+                          neonColor: AppTheme.accentBlue,
+                        );
+                      },
+                    ),
+
+                    const SizedBox(height: 32),
+
+                    // Login Link
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          l10n.getString('already_have_account'),
+                          style: TextStyle(color: AppTheme.primaryBlack),
+                        ),
+                        TextButton(
+                          onPressed: () =>
+                              Navigator.pushReplacementNamed(context, '/login'),
+                          child: Text(
+                            l10n.getString('sign_in'),
+                            style: TextStyle(color: AppTheme.accentGreen),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    // Error Message
+                    Consumer<AuthProvider>(
+                      builder: (context, authProvider, child) {
+                        if (authProvider.errorMessage != null) {
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 16),
+                            child: Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: AppTheme.accentOrange.withValues(
+                                  alpha: 0.1,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: AppTheme.accentOrange,
+                                ),
+                              ),
+                              child: Row(
                                 children: [
-                                  TextSpan(
-                                    text: l10n.getString('terms_of_service'),
-                                    style: TextStyle(
-                                      color: Color(AppConfig.primaryColorValue),
-                                      decoration: TextDecoration.underline,
+                                  Icon(
+                                    Icons.error_outline,
+                                    color: AppTheme.accentOrange,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      authProvider.errorMessage!,
+                                      style: TextStyle(
+                                        color: AppTheme.accentOrange,
+                                      ),
                                     ),
+                                  ),
+                                  IconButton(
+                                    icon: Icon(
+                                      Icons.close,
+                                      color: AppTheme.accentOrange,
+                                    ),
+                                    onPressed: authProvider.clearError,
+                                    iconSize: 20,
                                   ),
                                 ],
                               ),
                             ),
-                          ),
-                        ),
-                      ],
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      },
                     ),
-                    Row(
-                      children: [
-                        Checkbox(
-                          value: _agreeToPrivacy,
-                          onChanged: (value) {
-                            setState(() {
-                              _agreeToPrivacy = value ?? false;
-                            });
-                          },
-                        ),
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _agreeToPrivacy = !_agreeToPrivacy;
-                              });
-                            },
-                            child: RichText(
-                              text: TextSpan(
-                                text: l10n.getString('i_accept_the'),
-                                style: TextStyle(color: Colors.grey[700]),
-                                children: [
-                                  TextSpan(
-                                    text: l10n.getString('privacy_policy'),
-                                    style: TextStyle(
-                                      color: Color(AppConfig.primaryColorValue),
-                                      decoration: TextDecoration.underline,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
 
-                const SizedBox(height: 32),
-
-                // Sign Up Button
-                Consumer<AuthProvider>(
-                  builder: (context, authProvider, child) {
-                    return NeonButton(
-                      onPressed: _signUp,
-                      text: _isVeriffLoading
-                          ? l10n.getString('verification_in_progress')
-                          : l10n.getString('create_account'),
-                      icon: _isVeriffLoading
-                          ? Icons.hourglass_empty
-                          : Icons.person_add,
-                      isLoading: authProvider.isLoading || _isVeriffLoading,
-                      neonColor: AppTheme.accentGreen,
-                    );
-                  },
-                ),
-
-                const SizedBox(height: 24),
-
-                // Divider
-                Row(
-                  children: [
-                    Expanded(child: Divider(color: AppTheme.primaryBlack)),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        l10n.getString('or'),
-                        style: TextStyle(
-                          color: AppTheme.primaryBlack,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                    Expanded(child: Divider(color: AppTheme.primaryBlack)),
-                  ],
-                ),
-
-                const SizedBox(height: 24),
-
-                // Google Sign Up Button
-                Consumer<AuthProvider>(
-                  builder: (context, authProvider, child) {
-                    return NeonButton(
-                      onPressed: authProvider.isLoading
-                          ? null
-                          : _signInWithGoogle,
-                      text: l10n.getString('sign_up_with_google'),
-                      icon: Icons.g_mobiledata,
-                      isLoading: authProvider.isLoading,
-                      isOutlined: true,
-                      neonColor: AppTheme.accentBlue,
-                    );
-                  },
-                ),
-
-                const SizedBox(height: 32),
-
-                // Login Link
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      l10n.getString('already_have_account'),
-                      style: TextStyle(color: AppTheme.primaryBlack),
-                    ),
-                    TextButton(
-                      onPressed: () =>
-                          Navigator.pushReplacementNamed(context, '/login'),
-                      child: Text(
-                        l10n.getString('sign_in'),
-                        style: TextStyle(color: AppTheme.accentGreen),
-                      ),
-                    ),
-                  ],
-                ),
-
-                // Error Message
-                Consumer<AuthProvider>(
-                  builder: (context, authProvider, child) {
-                    if (authProvider.errorMessage != null) {
-                      return Padding(
+                    // Veriff Error Message
+                    if (_veriffErrorMessage != null)
+                      Padding(
                         padding: const EdgeInsets.only(top: 16),
                         child: Container(
                           padding: const EdgeInsets.all(12),
@@ -1346,9 +1427,9 @@ class _SignupScreenState extends State<SignupScreen> {
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
-                                  authProvider.errorMessage!,
+                                  _veriffErrorMessage!,
                                   style: TextStyle(
-                                    color: AppTheme.accentOrange,
+                                    color: AppTheme.primaryBlack,
                                   ),
                                 ),
                               ),
@@ -1357,63 +1438,24 @@ class _SignupScreenState extends State<SignupScreen> {
                                   Icons.close,
                                   color: AppTheme.accentOrange,
                                 ),
-                                onPressed: authProvider.clearError,
+                                onPressed: () {
+                                  setState(() {
+                                    _veriffErrorMessage = null;
+                                  });
+                                },
                                 iconSize: 20,
                               ),
                             ],
                           ),
                         ),
-                      );
-                    }
-                    return const SizedBox.shrink();
-                  },
+                      ),
+                  ],
                 ),
-
-                // Veriff Error Message
-                if (_veriffErrorMessage != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16),
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppTheme.accentOrange.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: AppTheme.accentOrange),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.error_outline,
-                            color: AppTheme.accentOrange,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              _veriffErrorMessage!,
-                              style: TextStyle(color: AppTheme.primaryBlack),
-                            ),
-                          ),
-                          IconButton(
-                            icon: Icon(
-                              Icons.close,
-                              color: AppTheme.accentOrange,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _veriffErrorMessage = null;
-                              });
-                            },
-                            iconSize: 20,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 

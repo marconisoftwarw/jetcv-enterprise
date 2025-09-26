@@ -21,6 +21,16 @@ class DynamicSidebar extends StatelessWidget {
 
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
+        // Ensure user type is loaded if not available
+        if (authProvider.isAuthenticated && authProvider.userType == null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            print(
+              '🔄 DynamicSidebar: User type not loaded, ensuring it\'s loaded...',
+            );
+            authProvider.ensureUserTypeLoaded();
+          });
+        }
+
         final userType = authProvider.userType ?? AppUserType.user;
 
         return Column(
@@ -108,14 +118,20 @@ class DynamicSidebar extends StatelessWidget {
     AppUserType userType,
     AppLocalizations l10n,
   ) {
+    print('🔍 DynamicSidebar: Getting destinations for user type: $userType');
+
     switch (userType) {
       case AppUserType.admin:
+        print('🔍 DynamicSidebar: Returning admin destinations');
         return _getAdminDestinations(l10n);
       case AppUserType.legalEntity:
+        print('🔍 DynamicSidebar: Returning legal entity destinations');
         return _getLegalEntityDestinations(l10n);
       case AppUserType.certifier:
+        print('🔍 DynamicSidebar: Returning certifier destinations');
         return _getCertifierDestinations(l10n);
       case AppUserType.user:
+        print('🔍 DynamicSidebar: Returning user destinations');
         return _getUserDestinations(l10n);
     }
   }
@@ -153,6 +169,13 @@ class DynamicSidebar extends StatelessWidget {
   List<NavigationRailDestination> _getLegalEntityDestinations(
     AppLocalizations l10n,
   ) {
+    print(
+      '🔍 DynamicSidebar _getLegalEntityDestinations: Creating legal entity menu items',
+    );
+    print(
+      '🔍 DynamicSidebar _getLegalEntityDestinations: Dashboard, Certifications, Certifiers, Profile',
+    );
+
     return [
       NavigationRailDestination(
         icon: const Icon(Icons.dashboard_rounded),
@@ -163,6 +186,11 @@ class DynamicSidebar extends StatelessWidget {
         icon: const Icon(Icons.verified_rounded),
         selectedIcon: const Icon(Icons.verified_rounded),
         label: Text(l10n.getString('my_certifications')),
+      ),
+      NavigationRailDestination(
+        icon: const Icon(Icons.people_rounded),
+        selectedIcon: const Icon(Icons.people_rounded),
+        label: Text(l10n.getString('certifiers')),
       ),
       NavigationRailDestination(
         icon: const Icon(Icons.person_rounded),
@@ -242,7 +270,7 @@ class DynamicSidebar extends StatelessWidget {
             ElevatedButton(
               onPressed: () async {
                 Navigator.of(context).pop();
-                
+
                 try {
                   print('🔄 Dynamic Sidebar: Starting logout process...');
                   await authProvider.signOut();
@@ -253,30 +281,50 @@ class DynamicSidebar extends StatelessWidget {
 
                   // Force navigation immediately after logout
                   if (context.mounted) {
-                    print('🔄 Dynamic Sidebar: Context is mounted, attempting navigation...');
+                    print(
+                      '🔄 Dynamic Sidebar: Context is mounted, attempting navigation...',
+                    );
                     try {
                       // Check if Navigator is available
-                      final navigator = Navigator.of(context, rootNavigator: true);
-                      print('🔄 Dynamic Sidebar: Navigator found, navigating to /');
+                      final navigator = Navigator.of(
+                        context,
+                        rootNavigator: true,
+                      );
+                      print(
+                        '🔄 Dynamic Sidebar: Navigator found, navigating to /',
+                      );
                       navigator.pushNamedAndRemoveUntil('/', (route) => false);
-                      print('✅ Dynamic Sidebar: Navigation to public home successful');
+                      print(
+                        '✅ Dynamic Sidebar: Navigation to public home successful',
+                      );
                     } catch (navError) {
                       print('❌ Dynamic Sidebar: Navigation error: $navError');
-                      print('🔄 Dynamic Sidebar: Attempting fallback navigation...');
+                      print(
+                        '🔄 Dynamic Sidebar: Attempting fallback navigation...',
+                      );
                       // Fallback: try to navigate after a delay
                       Future.delayed(const Duration(milliseconds: 500), () {
                         if (context.mounted) {
                           try {
-                            Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil('/', (route) => false);
-                            print('✅ Dynamic Sidebar: Fallback navigation successful');
+                            Navigator.of(
+                              context,
+                              rootNavigator: true,
+                            ).pushNamedAndRemoveUntil('/', (route) => false);
+                            print(
+                              '✅ Dynamic Sidebar: Fallback navigation successful',
+                            );
                           } catch (fallbackError) {
-                            print('❌ Dynamic Sidebar: Fallback navigation failed: $fallbackError');
+                            print(
+                              '❌ Dynamic Sidebar: Fallback navigation failed: $fallbackError',
+                            );
                           }
                         }
                       });
                     }
                   } else {
-                    print('❌ Dynamic Sidebar: Context not mounted, cannot navigate');
+                    print(
+                      '❌ Dynamic Sidebar: Context not mounted, cannot navigate',
+                    );
                   }
                 } catch (e) {
                   print('Error during logout: $e');

@@ -669,18 +669,28 @@ class GlobalHamburgerMenu extends StatelessWidget {
                 if (context.mounted) {
                   try {
                     // Use pushNamedAndRemoveUntil to clear all routes and go to root
-                    Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
-                    print('✅ Global Menu: Navigation to public home successful');
+                    Navigator.of(
+                      context,
+                    ).pushNamedAndRemoveUntil('/', (route) => false);
+                    print(
+                      '✅ Global Menu: Navigation to public home successful',
+                    );
                   } catch (navError) {
                     print('❌ Global Menu: Navigation error: $navError');
                     // Fallback: try to navigate after a delay
                     Future.delayed(const Duration(milliseconds: 300), () {
                       if (context.mounted) {
                         try {
-                          Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
-                          print('✅ Global Menu: Fallback navigation successful');
+                          Navigator.of(
+                            context,
+                          ).pushNamedAndRemoveUntil('/', (route) => false);
+                          print(
+                            '✅ Global Menu: Fallback navigation successful',
+                          );
                         } catch (fallbackError) {
-                          print('❌ Global Menu: Fallback navigation failed: $fallbackError');
+                          print(
+                            '❌ Global Menu: Fallback navigation failed: $fallbackError',
+                          );
                         }
                       }
                     });

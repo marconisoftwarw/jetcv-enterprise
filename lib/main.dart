@@ -28,9 +28,9 @@ import 'screens/public/public_home_screen.dart';
 import 'screens/certification/create_certification_screen.dart';
 import 'screens/certification/certification_detail_screen.dart';
 import 'screens/certifiers/certifiers_screen.dart';
+import 'screens/veriff/veriff_verification_screen.dart';
 import 'screens/profile/user_profile_screen.dart';
 import 'screens/settings/user_settings_screen.dart';
-import 'screens/veriff/veriff_verification_screen.dart';
 import 'screens/public/cv_list_screen.dart';
 import 'screens/public/legal_entity_pricing_screen.dart';
 import 'screens/public/legal_entity_public_registration_screen.dart';
@@ -221,42 +221,61 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
           },
           initialRoute: _getInitialRoute(),
           routes: {
-            '/': (context) => FutureBuilder(
-              future: _initializationFuture,
-              builder: (context, snapshot) {
-                print(
-                  '🔄 Main: Route builder called - isAuthenticated: ${authProvider.isAuthenticated}, currentUser: ${authProvider.currentUser != null}',
+            '/': (context) => Consumer<AuthProvider>(
+              builder: (context, authProvider, child) {
+                // Se deve reindirizzare al KYC, naviga alla VeriffVerificationScreen
+                if (authProvider.shouldRedirectToKyc && authProvider.currentUser != null) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    authProvider.clearKycRedirect();
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => VeriffVerificationScreen(
+                          userData: authProvider.currentUser!.toJson(),
+                        ),
+                      ),
+                    );
+                  });
+                }
+
+                return FutureBuilder(
+                  future: _initializationFuture,
+                  builder: (context, snapshot) {
+                    print(
+                      '🔄 Main: Route builder called - isAuthenticated: ${authProvider.isAuthenticated}, currentUser: ${authProvider.currentUser != null}',
+                    );
+
+                    // Se l'utente non è autenticato, mostra immediatamente la home pubblica
+                    if (!authProvider.isAuthenticated ||
+                        authProvider.currentUser == null) {
+                      print(
+                        '🔄 Main: User not authenticated, showing PublicHomeScreen',
+                      );
+                      return const PublicHomeScreen();
+                    }
+
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const SplashScreen();
+                    }
+
+                    if (snapshot.hasError) {
+                      return const SplashScreen();
+                    }
+
+                    // Se l'utente è autenticato e ha un utente valido, mostra la schermata appropriata
+                    if (authProvider.isAuthenticated &&
+                        authProvider.currentUser != null) {
+                      // Check if user is admin
+                      if (authProvider.currentUser?.type == UserType.admin) {
+                        return const AdminDashboardScreen();
+                      }
+                      return const HomeScreen();
+                    }
+
+                    // Fallback: mostra la home pubblica
+                    return const PublicHomeScreen();
+                  },
                 );
-
-                // Se l'utente non è autenticato, mostra immediatamente la home pubblica
-                if (!authProvider.isAuthenticated ||
-                    authProvider.currentUser == null) {
-                  print(
-                    '🔄 Main: User not authenticated, showing PublicHomeScreen',
-                  );
-                  return const PublicHomeScreen();
-                }
-
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const SplashScreen();
-                }
-
-                if (snapshot.hasError) {
-                  return const SplashScreen();
-                }
-
-                // Se l'utente è autenticato e ha un utente valido, mostra la schermata appropriata
-                if (authProvider.isAuthenticated &&
-                    authProvider.currentUser != null) {
-                  // Check if user is admin
-                  if (authProvider.currentUser?.type == UserType.admin) {
-                    return const AdminDashboardScreen();
-                  }
-                  return const HomeScreen();
-                }
-
-                // Fallback: mostra la home pubblica
-                return const PublicHomeScreen();
               },
             ),
             '/#/': (context) => FutureBuilder(

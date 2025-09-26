@@ -97,10 +97,11 @@ class SupabaseService {
       );
 
       if (response.user != null && userData != null && createUserRecord) {
-        // Usa sempre l'Edge Function per creare il record utente
-        print('🔍 Creating user record via _createUserRecord...');
-        await _createUserRecord(response.user!, userData);
-        print('User record created successfully');
+        // Il record utente verrà creato tramite post-signup-link-certifier
+        // Non chiamiamo più _createUserRecord qui
+        print(
+          '🔍 User record will be created via post-signup-link-certifier Edge Function',
+        );
       } else {
         print(
           '🔍 Skipping user record creation (createUserRecord: $createUserRecord)',
@@ -652,6 +653,7 @@ class SupabaseService {
   Future<Map<String, dynamic>?> createLegalEntityWithUser({
     required Map<String, dynamic> userData,
     required Map<String, dynamic> legalEntityData,
+    required String password,
   }) async {
     try {
       print(
@@ -662,7 +664,10 @@ class SupabaseService {
 
       final response = await _client.functions.invoke(
         'create-legal-entity-with-user',
-        body: {'userData': userData, 'legalEntityData': legalEntityData},
+        body: {
+          'userData': {...userData, 'password': password},
+          'legalEntityData': legalEntityData,
+        },
       );
 
       print(
