@@ -61,8 +61,8 @@
  *             "value": string,
  *             "id_certification_user": string | null  // null for general certification values
  *           }
- *         ]
- *         ]
+ *         ],
+ *         "certifier_user_id": string  // NEW: ID of the user creating the certification
  *       }
  *
  * @output
@@ -81,6 +81,7 @@
  *   - Uploads media files to storage with title
  *   - Links media to certification
  *   - Inserts certification_information_values for general and user-specific values
+ *   - Sets certifier id_user when creating certifier
  *   - Uses SERVICE_ROLE to bypass RLS
  *   - Atomic transaction (rollback on any failure)
  *
@@ -117,32 +118,30 @@ function inferEnumFileType(contentType, filename) {
   const ct = (contentType || "").toLowerCase();
   const name = (filename || "").toLowerCase();
   const ext = name.includes(".") ? name.split(".").pop() : "";
-  
+
   if (ct.startsWith("image/")) return "image";
   if (ct.startsWith("video/")) return "video";
   if (ct.startsWith("audio/")) return "audio";
-  if (ct === "application/pdf" || ct === "application/msword" || 
-      ct === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
-      ct === "text/plain" || ct === "text/csv") {
+  if (ct === "application/pdf" || ct === "application/msword" || ct === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" || ct === "text/plain" || ct === "text/csv") {
     return "document";
   }
-  
+
   const imgExt = new Set(["jpg", "jpeg", "png", "gif", "webp", "avif", "heic", "heif", "tif", "tiff", "bmp", "svg"]);
   const vidExt = new Set(["mp4", "mov", "avi", "mkv", "webm", "mpeg", "mpg", "3gp", "m4v"]);
   const audExt = new Set(["mp3", "m4a", "wav", "flac", "aac", "ogg", "opus"]);
   const docExt = new Set(["pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "txt", "rtf", "odt", "ods", "odp", "csv", "json"]);
-  
+
   if (imgExt.has(ext)) return "image";
   if (vidExt.has(ext)) return "video";
   if (audExt.has(ext)) return "audio";
   if (docExt.has(ext)) return "document";
-  
+
   return null;
 }
 
 async function sha256Hex(bytes) {
   const h = await crypto.subtle.digest("SHA-256", bytes);
-  return Array.from(new Uint8Array(h)).map((b) => b.toString(16).padStart(2, "0")).join("");
+  return Array.from(new Uint8Array(h)).map(b => b.toString(16).padStart(2, "0")).join("");
 }
 
 async function base64ToBytes(base64) {
@@ -157,7 +156,6 @@ async function base64ToBytes(base64) {
 async function readJson(req) {
   const ct = req.headers.get("content-type") || "";
   if (!ct.includes("application/json")) return undefined;
-  
   try {
     return await req.json();
   } catch (e) {
@@ -166,22 +164,22 @@ async function readJson(req) {
   }
 }
 
-(Deno as any).serve(async (req: any) => {
+Deno.serve(async (req) => {
   const reqId = crypto.randomUUID();
   const t0 = Date.now();
   const url = new URL(req.url);
   
   console.log(`[${reqId}] ===== Incoming ${nowIso()} =====`);
   console.log(`[${reqId}] ${req.method} ${url.pathname}${url.search}`);
-  
+
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders() });
   }
 
   // @ts-ignore deno-types
   const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
-  const supabaseUrl = (Deno as any).env.get("SUPABASE_URL");
-  const serviceRoleKey = (Deno as any).env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   
   console.log(`[${reqId}] Env -> URL:${!!supabaseUrl} SRK:${serviceRoleKey ? "present" : "missing"}`);
   
@@ -195,7 +193,11 @@ async function readJson(req) {
   }
 
   const admin = createClient(supabaseUrl, serviceRoleKey, {
-    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false
+    }
   });
 
   try {
@@ -226,6 +228,7 @@ async function readJson(req) {
     const media = Array.isArray(body.media) ? body.media : [];
     const mediaMetadata = Array.isArray(body.media_metadata) ? body.media_metadata : [];
     const certificationInformationValues = Array.isArray(body.certification_information_values) ? body.certification_information_values : [];
+    const certifierUserId = body.certifier_user_id; // NEW: Get certifier user ID
 
     const required = [
       cert.id_certifier,
@@ -235,7 +238,7 @@ async function readJson(req) {
       cert.id_certification_category
     ];
 
-    if (required.some((v) => !v)) {
+    if (required.some(v => !v)) {
       return new Response(JSON.stringify({
         error: "Missing required fields in certification"
       }), {
@@ -244,7 +247,7 @@ async function readJson(req) {
       });
     }
 
-    console.log(`[${reqId}] Processing: cert=${!!cert}, users=${certificationUsers.length}, media=${media.length}`);
+    console.log(`[${reqId}] Processing: cert=${!!cert}, users=${certificationUsers.length}, media=${media.length}, certifierUserId=${certifierUserId}`);
 
     // 2. FK PRECHECKS
     console.log(`[${reqId}] FK prechecks - START`);
@@ -296,7 +299,7 @@ async function readJson(req) {
     const certifierId = String(cert.id_certifier);
     const { data: certifierRow, error: certifierErr } = await admin
       .from("certifier")
-      .select("id_certifier")
+      .select("id_certifier, id_user")
       .eq("id_certifier", certifierId)
       .maybeSingle();
 
@@ -312,11 +315,44 @@ async function readJson(req) {
 
     if (!certifierRow) {
       console.log(`[${reqId}] Creating certifier...`);
-      const { error: createCertifierErr } = await admin.from("certifier").insert({
-        id_certifier: certifierId,
-        id_certifier_hash: crypto.randomUUID(),
-        id_legal_entity: String(cert.id_legal_entity)
-      }).single();
+      
+      // Validate certifier user ID if provided
+      if (certifierUserId) {
+        const { data: userRow, error: userErr } = await admin
+          .from("user")
+          .select("idUser")
+          .eq("idUser", certifierUserId)
+          .maybeSingle();
+        
+        if (userErr) {
+          console.error(`[${reqId}] User validation error:`, userErr);
+          return new Response(JSON.stringify({
+            error: `User validation failed: ${userErr.message}`
+          }), {
+            headers: { "Content-Type": "application/json", ...corsHeaders() },
+            status: 400
+          });
+        }
+        
+        if (!userRow) {
+          return new Response(JSON.stringify({
+            error: "Invalid certifier_user_id: user not found"
+          }), {
+            headers: { "Content-Type": "application/json", ...corsHeaders() },
+            status: 400
+          });
+        }
+      }
+      
+      const { error: createCertifierErr } = await admin
+        .from("certifier")
+        .insert({
+          id_certifier: certifierId,
+          id_certifier_hash: crypto.randomUUID(),
+          id_legal_entity: String(cert.id_legal_entity),
+          id_user: certifierUserId || null  // NEW: Set the certifier user ID
+        })
+        .single();
 
       if (createCertifierErr) {
         console.error(`[${reqId}] Create certifier error:`, createCertifierErr);
@@ -327,9 +363,56 @@ async function readJson(req) {
           status: 400
         });
       }
-      console.log(`[${reqId}] Certifier created OK`);
+      console.log(`[${reqId}] Certifier created OK with id_user: ${certifierUserId || 'null'}`);
     } else {
-      console.log(`[${reqId}] Certifier exists:`, certifierRow.id_certifier);
+      console.log(`[${reqId}] Certifier exists:`, certifierRow.id_certifier, 'id_user:', certifierRow.id_user);
+      
+      // If certifier exists but doesn't have id_user set, and we have certifierUserId, update it
+      if (!certifierRow.id_user && certifierUserId) {
+        console.log(`[${reqId}] Updating existing certifier with id_user...`);
+        
+        // Validate certifier user ID
+        const { data: userRow, error: userErr } = await admin
+          .from("user")
+          .select("idUser")
+          .eq("idUser", certifierUserId)
+          .maybeSingle();
+        
+        if (userErr) {
+          console.error(`[${reqId}] User validation error:`, userErr);
+          return new Response(JSON.stringify({
+            error: `User validation failed: ${userErr.message}`
+          }), {
+            headers: { "Content-Type": "application/json", ...corsHeaders() },
+            status: 400
+          });
+        }
+        
+        if (!userRow) {
+          return new Response(JSON.stringify({
+            error: "Invalid certifier_user_id: user not found"
+          }), {
+            headers: { "Content-Type": "application/json", ...corsHeaders() },
+            status: 400
+          });
+        }
+        
+        const { error: updateCertifierErr } = await admin
+          .from("certifier")
+          .update({ id_user: certifierUserId })
+          .eq("id_certifier", certifierId);
+        
+        if (updateCertifierErr) {
+          console.error(`[${reqId}] Update certifier error:`, updateCertifierErr);
+          return new Response(JSON.stringify({
+            error: `Failed to update certifier: ${updateCertifierErr.message}`
+          }), {
+            headers: { "Content-Type": "application/json", ...corsHeaders() },
+            status: 400
+          });
+        }
+        console.log(`[${reqId}] Certifier updated with id_user: ${certifierUserId}`);
+      }
     }
 
     console.log(`[${reqId}] Certifier precheck - OK in ${Date.now() - tCert0}ms`);
@@ -452,7 +535,7 @@ async function readJson(req) {
       // Block OTPs
       console.log(`[${reqId}] Blocking OTPs - START`);
       const now = nowIso();
-      
+
       // Aggiorna ogni OTP individualmente per evitare problemi con campi obbligatori
       for (const user of certificationUsers) {
         const { error: otpBlockErr } = await admin
@@ -483,11 +566,10 @@ async function readJson(req) {
     }
 
     // 6. PROCESS MEDIA
-    let mediaRows: any[] = [];
+    let mediaRows = [];
     if (media.length > 0) {
       console.log(`[${reqId}] Processing media - START count:${media.length}`);
       const tMedia0 = Date.now();
-
       const bucket = admin.storage.from("media");
       const nowStr = nowIso();
 
@@ -512,7 +594,7 @@ async function readJson(req) {
 
           // Infer file type
           const inferredEnum = inferEnumFileType(m.mime_type || "", safeName);
-          const file_type = isValidEnumFileType(m.file_type) ? m.file_type : (inferredEnum ?? null);
+          const file_type = isValidEnumFileType(m.file_type) ? m.file_type : inferredEnum ?? null;
 
           // Get metadata for this media item
           const metadata = mediaMetadata[index] || {};
@@ -524,7 +606,7 @@ async function readJson(req) {
             .insert({
               id_media_hash,
               id_certification: certRow.id_certification,
-              name: m.file_data ? key : (m.name || null),
+              name: m.file_data ? key : m.name || null,
               description,
               acquisition_type: m.acquisition_type || "realtime",
               captured_at: m.captured_at || nowStr,
@@ -538,10 +620,12 @@ async function readJson(req) {
           if (insErr) throw insErr;
 
           // Link media to certification
-          await admin.from("certification_has_media").insert({
-            id_certification: certRow.id_certification,
-            id_certification_media: mRow.id_certification_media
-          });
+          await admin
+            .from("certification_has_media")
+            .insert({
+              id_certification: certRow.id_certification,
+              id_certification_media: mRow.id_certification_media
+            });
 
           return mRow;
         }));
@@ -549,13 +633,11 @@ async function readJson(req) {
         console.log(`[${reqId}] Media processed OK in ${Date.now() - tMedia0}ms rows:${mediaRows.length}`);
       } catch (mediaErr) {
         console.error(`[${reqId}] Rolling back due to media error...`, mediaErr);
-        
         // Cleanup: delete certification users and certification
         if (cuData.length > 0) {
           await admin.from("certification_user").delete().eq("id_certification", certRow.id_certification);
         }
         await admin.from("certification").delete().eq("id_certification", certRow.id_certification);
-        
         return new Response(JSON.stringify({
           error: `Failed to process media: ${mediaErr.message}`
         }), {
@@ -566,11 +648,11 @@ async function readJson(req) {
     }
 
     // 7. INSERT CERTIFICATION INFORMATION VALUES
-    let informationValues: any[] = [];
+    let informationValues = [];
     if (certificationInformationValues.length > 0) {
       console.log(`[${reqId}] Processing certification information values - START`);
       const tInfo0 = Date.now();
-      
+
       try {
         // Validate that all certification_information_ids exist
         const infoIds = [...new Set(certificationInformationValues.map(iv => iv.id_certification_information))];
@@ -591,7 +673,7 @@ async function readJson(req) {
 
         const validInfoIds = new Set((infoRows || []).map(r => r.id_certification_information));
         const invalidInfoIds = infoIds.filter(id => !validInfoIds.has(id));
-        
+
         if (invalidInfoIds.length > 0) {
           return new Response(JSON.stringify({
             error: `Invalid certification_information_ids: ${invalidInfoIds.join(', ')}`
@@ -602,14 +684,14 @@ async function readJson(req) {
         }
 
         // Map certification_user IDs for validation
-        const userIdToCertUserId = new Map<string, string>();
-        cuData.forEach((cu: any) => {
+        const userIdToCertUserId = new Map();
+        cuData.forEach(cu => {
           userIdToCertUserId.set(cu.id_user, cu.id_certification_user);
         });
 
         // Prepare values to insert
-        const valuesToInsert = certificationInformationValues.map((iv: any) => {
-          const baseValue: any = {
+        const valuesToInsert = certificationInformationValues.map(iv => {
+          const baseValue = {
             id_certification_information: String(iv.id_certification_information),
             value: String(iv.value),
             id_certification: certRow.id_certification
@@ -647,7 +729,6 @@ async function readJson(req) {
         console.log(`[${reqId}] Certification information values processed OK in ${Date.now() - tInfo0}ms rows:${informationValues.length}`);
       } catch (infoErr) {
         console.error(`[${reqId}] Rolling back due to certification information values error...`, infoErr);
-        
         // Cleanup: delete certification users, media, and certification
         if (cuData.length > 0) {
           await admin.from("certification_user").delete().eq("id_certification", certRow.id_certification);
@@ -657,7 +738,6 @@ async function readJson(req) {
           await admin.from("certification_media").delete().eq("id_certification", certRow.id_certification);
         }
         await admin.from("certification").delete().eq("id_certification", certRow.id_certification);
-        
         return new Response(JSON.stringify({
           error: `Failed to process certification information values: ${infoErr.message}`
         }), {

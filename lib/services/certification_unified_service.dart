@@ -23,6 +23,7 @@ class CertificationUnifiedService {
     required String idLocation,
     required int nUsers,
     required String idCertificationCategory,
+    required String createdByUserId,
     String? status,
     String? draftAt,
     String? sentAt,
@@ -43,6 +44,7 @@ class CertificationUnifiedService {
       print('📝 Legal Entity: $idLegalEntity');
       print('📝 Location: $idLocation');
       print('📝 Category: $idCertificationCategory');
+      print('📝 Created By User: $createdByUserId');
       print('📝 Users: ${certificationUsers?.length ?? 0}');
       print('📝 Media: ${mediaFiles?.length ?? 0}');
       print(
@@ -115,6 +117,7 @@ class CertificationUnifiedService {
         'media': mediaData,
         'media_metadata': mediaMetadataData,
         'certification_information_values': certificationInformationValuesData,
+        'created_by_id_user': createdByUserId,
       };
 
       print('📦 Payload prepared:');
@@ -125,6 +128,7 @@ class CertificationUnifiedService {
       print(
         '  - Certification Information Values: ${certificationInformationValuesData.length}',
       );
+      print('  - Certifier User ID: $createdByUserId');
 
       // Chiama la Edge Function
       final response = await http.post(
