@@ -96,22 +96,17 @@ class _CertificationListScreenState extends State<CertificationListScreen>
         '📋 Loaded ${_categoryNames.length} categories and ${_locationNames.length} locations',
       );
 
-      // Prima testa la connessione alla Edge Function
-      print('🧪 Testing certifications Edge Function connection...');
-      final connectionOk = await CertificationServiceV2.testConnection();
-
-      if (!connectionOk) {
-        print('⚠️ Edge Function not available, using mock data for testing');
-        _loadMockData();
-        return;
-      }
 
       print('✅ Edge Function connection OK, loading certifications...');
 
       // Determina se l'utente è di tipo legal_entity e carica la sua legal entity
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final isLegalEntityUser =
+      var isLegalEntityUser =
           authProvider.userType == AppUserType.legalEntity;
+          if(isLegalEntityUser==false){
+            isLegalEntityUser =
+          authProvider.userType == AppUserType.certifier;
+          }
       final isAdmin = authProvider.userType == AppUserType.admin;
 
       if (isLegalEntityUser) {
@@ -124,7 +119,7 @@ class _CertificationListScreenState extends State<CertificationListScreen>
       }
 
       // Carica certificazioni in bozza (status: draft)
-      print('📝 Loading draft certifications...');
+      print('📝 Loading draft certifications...: '+isLegalEntityUser.toString());
       final draftResult = await CertificationServiceV2.getCertifications(
         status: 'draft',
         idLegalEntity: isLegalEntityUser
@@ -317,6 +312,8 @@ class _CertificationListScreenState extends State<CertificationListScreen>
       print('🔍 DEBUG: User type: ${authProvider.userType}');
       print('🔍 DEBUG: Is admin: $isAdmin');
       print('🔍 DEBUG: User ID: ${currentUser.idUser}');
+      print('🔍 DEBUG: User email: ${currentUser.email}');
+      print('🔍 DEBUG: User full name: ${currentUser.fullName}');
       
       final response = isAdmin
           ? await EdgeFunctionService.getAllLegalEntities().timeout(
@@ -371,143 +368,9 @@ class _CertificationListScreenState extends State<CertificationListScreen>
     }
   }
 
-  void _loadMockData() {
-    print('📝 Loading mock data for testing in CertificationListScreen...');
+ 
 
-    final mockDrafts = [
-      {
-        'id_certification': 'cert-001',
-        'serial_number': 'ABC12-DEF34',
-        'status': 'draft',
-        'created_at': DateTime.now()
-            .subtract(const Duration(days: 1))
-            .toIso8601String(),
-        'n_users': 1,
-        'id_certification_category': 'tech-skills',
-      },
-      {
-        'id_certification': 'cert-002',
-        'serial_number': 'GHI56-JKL78',
-        'status': 'draft',
-        'created_at': DateTime.now()
-            .subtract(const Duration(days: 2))
-            .toIso8601String(),
-        'n_users': 1,
-        'id_certification_category': 'design-skills',
-      },
-    ];
-
-    final mockSent = [
-      {
-        'id_certification': 'cert-003',
-        'serial_number': 'MNO90-PQR12',
-        'status': 'sent',
-        'created_at': DateTime.now()
-            .subtract(const Duration(hours: 6))
-            .toIso8601String(),
-        'n_users': 2,
-        'id_certification_category': 'soft-skills',
-      },
-    ];
-
-    final mockClosed = [
-      {
-        'id_certification': 'cert-004',
-        'serial_number': 'STU34-VWX56',
-        'status': 'closed',
-        'created_at': DateTime.now()
-            .subtract(const Duration(days: 7))
-            .toIso8601String(),
-        'n_users': 1,
-        'id_certification_category': 'leadership',
-      },
-    ];
-
-    if (mounted) {
-      setState(() {
-        _draftCertifications = mockDrafts;
-        _sentCertifications = mockSent;
-        _closedCertifications = mockClosed;
-        _isLoading = false;
-        _errorMessage = null;
-      });
-
-      // Aggiunge dati mock per gli utenti
-      _loadMockUserData();
-    }
-  }
-
-  void _loadMockUserData() {
-    // Crea dati mock per gli utenti e i dettagli delle certificazioni
-    final mockUsers = [
-      {
-        'idUser': 'user-001',
-        'firstName': 'Marco',
-        'lastName': 'Rossi',
-        'email': 'marco.rossi@example.com',
-      },
-      {
-        'idUser': 'user-002',
-        'firstName': 'Cristina',
-        'lastName': 'Bianchi',
-        'email': 'cristina.bianchi@example.com',
-      },
-      {
-        'idUser': 'user-003',
-        'firstName': 'Giuseppe',
-        'lastName': 'Verdi',
-        'email': 'giuseppe.verdi@example.com',
-      },
-    ];
-
-    // Crea dettagli mock per le certificazioni
-    final mockDetails = <String, Map<String, dynamic>>{
-      'cert-001': {
-        'certification': {
-          'id_certification': 'cert-001',
-          'category': {'name': 'Tech Skills', 'type': 'standard'},
-          'title': 'Certificazione React',
-          'description':
-              'Certificazione avanzata per React e JavaScript moderno',
-        },
-        'users': [mockUsers[0], mockUsers[1]], // Marco e Cristina
-      },
-      'cert-002': {
-        'certification': {
-          'id_certification': 'cert-002',
-          'category': {'name': 'Design Skills', 'type': 'standard'},
-          'title': 'UI/UX Design',
-          'description': 'Certificazione per design di interfacce utente',
-        },
-        'users': [mockUsers[1]], // Solo Cristina
-      },
-      'cert-003': {
-        'certification': {
-          'id_certification': 'cert-003',
-          'category': {'name': 'Soft Skills', 'type': 'standard'},
-          'title': 'Leadership',
-          'description': 'Certificazione per competenze di leadership',
-        },
-        'users': [mockUsers[0], mockUsers[2]], // Marco e Giuseppe
-      },
-      'cert-004': {
-        'certification': {
-          'id_certification': 'cert-004',
-          'category': {'name': 'Leadership', 'type': 'standard'},
-          'title': 'Project Management',
-          'description': 'Certificazione per gestione progetti',
-        },
-        'users': [mockUsers[2]], // Solo Giuseppe
-      },
-    };
-
-    // Raccoglie gli utenti disponibili
-    _collectAvailableUsers(mockDetails);
-
-    setState(() {
-      _certificationDetails = mockDetails;
-    });
-  }
+ 
 
   @override
   void dispose() {

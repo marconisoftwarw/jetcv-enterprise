@@ -412,8 +412,8 @@ class GlobalHamburgerMenu extends StatelessWidget {
           'index': 0,
         },
         {
-          'icon': Icons.business,
-          'label': l10n.getString('legal_entities'),
+          'icon': Icons.verified,
+          'label': l10n.getString('certifications'),
           'index': 1,
         },
         {

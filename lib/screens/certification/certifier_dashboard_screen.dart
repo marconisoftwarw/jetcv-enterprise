@@ -133,6 +133,8 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
       print('🔍 DEBUG: User type: ${authProvider.userType}');
       print('🔍 DEBUG: Is admin: $isAdmin');
       print('🔍 DEBUG: User ID: ${currentUser.idUser}');
+      print('🔍 DEBUG: User email: ${currentUser.email}');
+      print('🔍 DEBUG: User full name: ${currentUser.fullName}');
       
       final response = isAdmin
           ? await EdgeFunctionService.getAllLegalEntities().timeout(
