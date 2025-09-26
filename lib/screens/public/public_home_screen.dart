@@ -155,6 +155,11 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
 
                     const SizedBox(height: 80),
 
+                    // User Types Section
+                    _buildUserTypesSection(context, l10n, isDesktop, isTablet),
+
+                    const SizedBox(height: 80),
+
                     // Pricing Section
                     _buildPricingSection(context, l10n, isDesktop, isTablet),
 
@@ -371,16 +376,6 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
                                       '/legal-entity/pricing',
                                     ),
                                   ),
-                                  const SizedBox(width: 24),
-                                  _buildModernCTAButton(
-                                    context,
-                                    l10n.getString('explore_cvs'),
-                                    () => Navigator.pushNamed(
-                                      context,
-                                      '/cv-list',
-                                    ),
-                                    isSecondary: true,
-                                  ),
                                 ],
                               )
                             else
@@ -397,31 +392,14 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
                                     isFullWidth: true,
                                   ),
                                   const SizedBox(height: 16),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: _buildModernCTAButton(
-                                          context,
-                                          l10n.getString('view_pricing'),
-                                          () => Navigator.pushNamed(
-                                            context,
-                                            '/legal-entity/pricing',
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 16),
-                                      Expanded(
-                                        child: _buildModernCTAButton(
-                                          context,
-                                          l10n.getString('explore_cvs'),
-                                          () => Navigator.pushNamed(
-                                            context,
-                                            '/cv-list',
-                                          ),
-                                          isSecondary: true,
-                                        ),
-                                      ),
-                                    ],
+                                  _buildModernCTAButton(
+                                    context,
+                                    l10n.getString('view_pricing'),
+                                    () => Navigator.pushNamed(
+                                      context,
+                                      '/legal-entity/pricing',
+                                    ),
+                                    isFullWidth: true,
                                   ),
                                   const SizedBox(height: 16),
                                   // Login button for mobile
@@ -532,19 +510,11 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
               // Navigation Items
               Row(
                 children: [
-                  if (isDesktop) ...[
-                    _buildGlassNavItem(
-                      l10n.getString('public_cvs'),
-                      () => Navigator.pushNamed(context, '/cv-list'),
-                    ),
-                    const SizedBox(width: 8),
-                    _buildGlassNavItem(
-                      l10n.getString('pricing'),
-                      () =>
-                          Navigator.pushNamed(context, '/legal-entity/pricing'),
-                    ),
-                    const SizedBox(width: 16),
-                  ],
+                  _buildGlassNavItem(
+                    l10n.getString('public_cvs'),
+                    () => Navigator.pushNamed(context, '/cv-list'),
+                  ),
+                  const SizedBox(width: 16),
                   _buildGlassNavButton(
                     l10n.getString('login'),
                     () => Navigator.pushNamed(context, '/login'),
@@ -825,7 +795,7 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
     return Column(
       children: [
         Text(
-          l10n.getString('professional_certification_platform'),
+          'Piattaforma per Certificatori e Aziende',
           style: Theme.of(context).textTheme.displayMedium?.copyWith(
             color: AppTheme.textPrimary,
             fontWeight: FontWeight.w700,
@@ -838,90 +808,18 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
         SizedBox(height: isDesktop ? 24 : 16),
 
         Text(
-          l10n.getString('streamline_business_verification'),
+          'I certificatori possono verificare competenze e rilasciare certificazioni. Le aziende possono registrarsi e gestire le proprie certificazioni.',
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
             color: AppTheme.textGray,
             fontSize: isDesktop ? 20 : 18,
             height: 1.6,
           ),
           textAlign: TextAlign.center,
-          maxLines: 2,
+          maxLines: 3,
           overflow: TextOverflow.ellipsis,
         ),
 
         SizedBox(height: isDesktop ? 48 : 32),
-
-        // CTA Buttons Grid
-        if (isDesktop)
-          Row(
-            children: [
-              Expanded(
-                child: _buildModernButton(
-                  context,
-                  l10n.getString('create_certification'),
-                  () => _showLoginPrompt(context, l10n),
-                  icon: Icons.verified_user_rounded,
-                  isPrimary: true,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildModernButton(
-                  context,
-                  l10n.getString('register_company'),
-                  () => Navigator.pushNamed(context, '/legal-entity/register'),
-                  icon: Icons.business_rounded,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildModernButton(
-                  context,
-                  l10n.getString('explore_cvs'),
-                  () => Navigator.pushNamed(context, '/cv-list'),
-                  icon: Icons.description_rounded,
-                ),
-              ),
-            ],
-          )
-        else
-          Column(
-            children: [
-              _buildModernButton(
-                context,
-                l10n.getString('create_certification'),
-                () => _showLoginPrompt(context, l10n),
-                icon: Icons.verified_user_rounded,
-                isPrimary: true,
-                isFullWidth: true,
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildModernButton(
-                      context,
-                      l10n.getString('register_company'),
-                      () => Navigator.pushNamed(
-                        context,
-                        '/legal-entity/register',
-                      ),
-                      icon: Icons.business_rounded,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildModernButton(
-                      context,
-                      l10n.getString('explore_cvs'),
-                      () => Navigator.pushNamed(context, '/cv-list'),
-                      icon: Icons.description_rounded,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
       ],
     );
   }
@@ -1011,26 +909,30 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
     final features = [
       {
         'icon': Icons.verified_user_rounded,
-        'title': l10n.getString('identity_verification'),
-        'description': l10n.getString('secure_reliable_verification'),
+        'title': 'Per Certificatori',
+        'description':
+            'Verifica competenze e rilascia certificazioni professionali in modo sicuro e tracciabile',
         'color': AppTheme.successGreen,
       },
       {
         'icon': Icons.business_rounded,
-        'title': l10n.getString('legal_entity_management'),
-        'description': l10n.getString('comprehensive_management'),
+        'title': 'Per Aziende',
+        'description':
+            'Registra la tua azienda e gestisci le certificazioni dei tuoi dipendenti',
         'color': AppTheme.primaryBlue,
       },
       {
         'icon': Icons.security_rounded,
-        'title': l10n.getString('secure_platform'),
-        'description': l10n.getString('enterprise_grade_security'),
+        'title': 'Sicurezza Avanzata',
+        'description':
+            'Piattaforma sicura con crittografia end-to-end per proteggere i dati sensibili',
         'color': AppTheme.warningOrange,
       },
       {
         'icon': Icons.analytics_rounded,
-        'title': l10n.getString('analytics_reporting'),
-        'description': l10n.getString('advanced_analytics'),
+        'title': 'Gestione Completa',
+        'description':
+            'Dashboard avanzate per monitorare e gestire tutte le certificazioni',
         'color': AppTheme.purple,
       },
     ];
@@ -1039,7 +941,7 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          l10n.getString('key_features'),
+          'Per Certificatori e Aziende',
           style: Theme.of(context).textTheme.headlineLarge?.copyWith(
             color: AppTheme.textPrimary,
             fontWeight: FontWeight.w700,
@@ -1131,6 +1033,190 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: AppTheme.textGray,
               height: 1.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // User Types Section
+  Widget _buildUserTypesSection(
+    BuildContext context,
+    AppLocalizations l10n,
+    bool isDesktop,
+    bool isTablet,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Due Tipi di Utenti',
+          style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+            color: AppTheme.textPrimary,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.3,
+            fontSize: isDesktop ? 32 : 28,
+          ),
+        ),
+
+        SizedBox(height: isDesktop ? 48 : 32),
+
+        if (isDesktop)
+          Row(
+            children: [
+              Expanded(
+                child: _buildUserTypeCard(
+                  context,
+                  'Certificatori',
+                  'I professionisti che verificano competenze e rilasciano certificazioni',
+                  [
+                    'Verifica competenze professionali',
+                    'Rilascia certificazioni digitali',
+                    'Gestisci il tuo profilo certificatore',
+                    'Traccia tutte le certificazioni emesse',
+                  ],
+                  Icons.verified_user_rounded,
+                  AppTheme.successGreen,
+                ),
+              ),
+              const SizedBox(width: 24),
+              Expanded(
+                child: _buildUserTypeCard(
+                  context,
+                  'Aziende',
+                  'Le organizzazioni che gestiscono le certificazioni dei dipendenti',
+                  [
+                    'Registra la tua azienda',
+                    'Gestisci certificazioni dipendenti',
+                    'Visualizza piani e prezzi',
+                    'Monitora le competenze aziendali',
+                  ],
+                  Icons.business_rounded,
+                  AppTheme.primaryBlue,
+                ),
+              ),
+            ],
+          )
+        else
+          Column(
+            children: [
+              _buildUserTypeCard(
+                context,
+                'Certificatori',
+                'I professionisti che verificano competenze e rilasciano certificazioni',
+                [
+                  'Verifica competenze professionali',
+                  'Rilascia certificazioni digitali',
+                  'Gestisci il tuo profilo certificatore',
+                  'Traccia tutte le certificazioni emesse',
+                ],
+                Icons.verified_user_rounded,
+                AppTheme.successGreen,
+              ),
+              const SizedBox(height: 24),
+              _buildUserTypeCard(
+                context,
+                'Aziende',
+                'Le organizzazioni che gestiscono le certificazioni dei dipendenti',
+                [
+                  'Registra la tua azienda',
+                  'Gestisci certificazioni dipendenti',
+                  'Visualizza piani e prezzi',
+                  'Monitora le competenze aziendali',
+                ],
+                Icons.business_rounded,
+                AppTheme.primaryBlue,
+              ),
+            ],
+          ),
+      ],
+    );
+  }
+
+  // User Type Card
+  Widget _buildUserTypeCard(
+    BuildContext context,
+    String title,
+    String description,
+    List<String> features,
+    IconData icon,
+    Color color,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: AppTheme.pureWhite,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: 0.1),
+            blurRadius: 20,
+            spreadRadius: 0,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [color, color.withValues(alpha: 0.8)],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Icon(icon, color: AppTheme.pureWhite, size: 28),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  title,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: AppTheme.textPrimary,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.1,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+
+          Text(
+            description,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: AppTheme.textGray,
+              height: 1.5,
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          ...features.map(
+            (feature) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                children: [
+                  Icon(Icons.check_circle, color: color, size: 20),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      feature,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppTheme.textPrimary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -1675,7 +1761,7 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Piani e Listini',
+          'Piani per Aziende',
           style: Theme.of(context).textTheme.headlineLarge?.copyWith(
             color: AppTheme.textPrimary,
             fontWeight: FontWeight.w700,
@@ -1685,12 +1771,41 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
         ),
         const SizedBox(height: 16),
         Text(
-          'Scegli il piano più adatto alle tue esigenze aziendali',
+          'Solo le aziende pagano per utilizzare la piattaforma. I certificatori accedono gratuitamente.',
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
             color: AppTheme.textGray,
             fontSize: isDesktop ? 18 : 16,
           ),
         ),
+        const SizedBox(height: 24),
+
+        // Note for Certifiers
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: AppTheme.successGreen.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: AppTheme.successGreen.withValues(alpha: 0.3),
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.info_outline, color: AppTheme.successGreen, size: 24),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'I certificatori accedono gratuitamente alla piattaforma per verificare competenze e rilasciare certificazioni.',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppTheme.successGreen,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+
         const SizedBox(height: 48),
         ResponsiveBreakpoints.isMobile(context)
             ? Column(

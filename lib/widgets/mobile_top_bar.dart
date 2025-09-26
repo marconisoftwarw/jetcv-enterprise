@@ -141,15 +141,16 @@ class _MobileTopBarState extends State<MobileTopBar>
                 children: [
                   // Pulsante principale lingua
                   Container(
-                    width: 44,
-                    height: 44,
+                    width: 40,
+                    height: 40,
                     decoration: BoxDecoration(
-                      color: AppTheme.primaryBlue,
-                      borderRadius: BorderRadius.circular(12),
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: AppTheme.primaryBlue, width: 2),
                       boxShadow: [
                         BoxShadow(
-                          color: AppTheme.primaryBlue.withOpacity(0.3),
-                          blurRadius: 8,
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 4,
                           offset: const Offset(0, 2),
                         ),
                       ],
@@ -157,11 +158,11 @@ class _MobileTopBarState extends State<MobileTopBar>
                     child: Material(
                       color: Colors.transparent,
                       child: InkWell(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(10),
                         onTap: _toggleLanguageExpanded,
                         child: Icon(
                           Icons.language,
-                          color: Colors.white,
+                          color: Colors.black,
                           size: isMobile ? 20 : 22,
                         ),
                       ),
@@ -180,16 +181,16 @@ class _MobileTopBarState extends State<MobileTopBar>
                         child: ScaleTransition(
                           scale: _languageScaleAnimation,
                           child: Container(
-                            width: 44,
-                            height: 44,
+                            width: 40,
+                            height: 40,
                             decoration: BoxDecoration(
-                              color: isSelected
-                                  ? AppTheme.primaryBlue
-                                  : Colors.white,
-                              borderRadius: BorderRadius.circular(12),
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10),
                               border: Border.all(
-                                color: AppTheme.primaryBlue,
-                                width: 2,
+                                color: isSelected
+                                    ? AppTheme.primaryBlue
+                                    : Colors.grey.shade300,
+                                width: isSelected ? 2 : 1,
                               ),
                               boxShadow: [
                                 BoxShadow(
@@ -202,7 +203,7 @@ class _MobileTopBarState extends State<MobileTopBar>
                             child: Material(
                               color: Colors.transparent,
                               child: InkWell(
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(10),
                                 onTap: () {
                                   final newLocale = Locale(
                                     language['code']!,
@@ -216,9 +217,7 @@ class _MobileTopBarState extends State<MobileTopBar>
                                     language['flag']!,
                                     style: TextStyle(
                                       fontSize: isMobile ? 18 : 20,
-                                      color: isSelected
-                                          ? Colors.white
-                                          : AppTheme.primaryBlue,
+                                      color: Colors.black,
                                     ),
                                   ),
                                 ),

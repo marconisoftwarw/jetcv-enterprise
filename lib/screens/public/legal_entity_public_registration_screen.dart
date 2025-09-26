@@ -314,39 +314,139 @@ class _LegalEntityPublicRegistrationScreenState
     print('🔍 Current route: ${ModalRoute.of(context)?.settings.name}');
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          AppLocalizations.of(context).getString('legal_entity_registration'),
+      backgroundColor: Colors.white,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF0A0E27),
+              Color(0xFF1A1F3A),
+              Color(0xFF2D1B69),
+              Color(0xFF6366F1),
+            ],
+            stops: [0.0, 0.3, 0.7, 1.0],
+          ),
         ),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
-      ),
-      body: Form(
-        key: _formKey,
-        child: Column(
-          children: [
-            // Progress indicator
-            _buildProgressIndicator(),
+        child: SafeArea(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                // Top Navigation Bar
+                _buildTopNavigationBar(context),
 
-            // Content
-            Expanded(
-              child: IndexedStack(
-                index: _currentStep,
-                children: [_buildPricingStep(), _buildPersonalInfoStep()],
+                // Content
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.all(32),
+                      child: Column(
+                        children: [
+                          // Progress indicator
+                          _buildProgressIndicator(),
+
+                          const SizedBox(height: 32),
+
+                          // Content
+                          IndexedStack(
+                            index: _currentStep,
+                            children: [
+                              _buildPricingStep(),
+                              _buildPersonalInfoStep(),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Complete button (only show on second step) - positioned at bottom
+                if (_currentStep == 1) _buildCompleteButton(),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTopNavigationBar(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Logo
+          Row(
+            children: [
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [
+                      Color(0xFF06B6D4),
+                      Color(0xFF3B82F6),
+                      Color(0xFF8B5CF6),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.verified_user_rounded,
+                  color: Colors.white,
+                  size: 28,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'JetCV Enterprise',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 24,
+                ),
+              ),
+            ],
+          ),
+
+          // Back Button
+          Container(
+            height: 56,
+            width: 56,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.3),
+                width: 1,
               ),
             ),
-
-            // Navigation buttons
-            _buildNavigationButtons(),
-          ],
-        ),
+            child: IconButton(
+              onPressed: () => Navigator.pop(context),
+              icon: const Icon(
+                Icons.arrow_back_ios,
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildProgressIndicator() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.2)),
+      ),
       child: Row(
         children: List.generate(_totalSteps, (index) {
           final isActive = index <= _currentStep;
@@ -354,40 +454,58 @@ class _LegalEntityPublicRegistrationScreenState
 
           return Expanded(
             child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 4),
+              margin: const EdgeInsets.symmetric(horizontal: 8),
               child: Column(
                 children: [
                   Container(
-                    width: 40,
-                    height: 40,
+                    width: 50,
+                    height: 50,
                     decoration: BoxDecoration(
-                      color: isCompleted
-                          ? Colors.green
+                      gradient: isCompleted
+                          ? const LinearGradient(
+                              colors: [Color(0xFF10B981), Color(0xFF059669)],
+                            )
                           : isActive
-                          ? Colors.blue
-                          : Colors.grey,
+                          ? const LinearGradient(
+                              colors: [Color(0xFF3B82F6), Color(0xFF1D4ED8)],
+                            )
+                          : LinearGradient(
+                              colors: [
+                                Colors.white.withOpacity(0.3),
+                                Colors.white.withOpacity(0.1),
+                              ],
+                            ),
                       shape: BoxShape.circle,
+                      boxShadow: isActive || isCompleted
+                          ? [
+                              BoxShadow(
+                                color:
+                                    (isCompleted ? Colors.green : Colors.blue)
+                                        .withOpacity(0.3),
+                                blurRadius: 10,
+                                spreadRadius: 0,
+                                offset: const Offset(0, 4),
+                              ),
+                            ]
+                          : null,
                     ),
                     child: Icon(
                       isCompleted ? Icons.check : Icons.circle,
                       color: Colors.white,
-                      size: 20,
+                      size: 24,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 12),
                   Text(
-                    index == 0
-                        ? AppLocalizations.of(context).getString('pricing')
-                        : AppLocalizations.of(
-                            context,
-                          ).getString('legal_entity'),
+                    index == 0 ? 'Seleziona Piano' : 'Informazioni Azienda',
                     style: TextStyle(
-                      fontSize: 12,
-                      color: isActive ? Colors.blue : Colors.grey,
-                      fontWeight: isActive
-                          ? FontWeight.bold
-                          : FontWeight.normal,
+                      fontSize: 14,
+                      color: isActive
+                          ? Colors.white
+                          : Colors.white.withOpacity(0.7),
+                      fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
                     ),
+                    textAlign: TextAlign.center,
                   ),
                 ],
               ),
@@ -402,7 +520,24 @@ class _LegalEntityPublicRegistrationScreenState
     return Consumer<PricingProvider>(
       builder: (context, pricingProvider, child) {
         if (pricingProvider.isLoading) {
-          return const Center(child: CircularProgressIndicator());
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Caricamento piani...',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.8),
+                    fontSize: 16,
+                  ),
+                ),
+              ],
+            ),
+          );
         }
 
         if (pricingProvider.hasError) {
@@ -410,48 +545,90 @@ class _LegalEntityPublicRegistrationScreenState
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.error, size: 64, color: Colors.red),
+                Icon(Icons.error_outline, size: 64, color: Colors.red.shade300),
                 const SizedBox(height: 16),
                 Text(
-                  '${AppLocalizations.of(context).getString('pricing_plans_loading_error')}: ${pricingProvider.errorMessage}',
-                  style: TextStyle(color: Colors.red),
+                  'Errore nel caricamento dei piani',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 8),
+                Text(
+                  pricingProvider.errorMessage ?? 'Errore sconosciuto',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.7),
+                    fontSize: 14,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: () => pricingProvider.loadPricings(),
-                  child: Text(AppLocalizations.of(context).getString('retry')),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: const Color(0xFF6366F1),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text('Riprova'),
                 ),
               ],
             ),
           );
         }
 
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                AppLocalizations.of(context).getString('select_plan'),
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.white.withOpacity(0.2)),
               ),
-              const SizedBox(height: 16),
-              Text(
-                AppLocalizations.of(context).getString('choose_plan_subtitle'),
-                style: const TextStyle(fontSize: 16, color: Colors.grey),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Seleziona il Piano',
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                      letterSpacing: -1.0,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Scegli il piano più adatto alle esigenze della tua azienda',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.white.withOpacity(0.8),
+                      height: 1.4,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 24),
+            ),
 
-              // Pricing cards
-              ...pricingProvider.pricings.map(
-                (pricing) => _buildPricingCard(pricing),
-              ),
-            ],
-          ),
+            const SizedBox(height: 32),
+
+            // Pricing cards
+            ...pricingProvider.pricings.map(
+              (pricing) => _buildPricingCard(pricing),
+            ),
+          ],
         );
       },
     );
@@ -461,106 +638,189 @@ class _LegalEntityPublicRegistrationScreenState
     final isSelected = _selectedPricing?.idPricing == pricing.idPricing;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: Card(
-        elevation: isSelected ? 8 : 2,
-        color: isSelected ? Colors.blue.shade50 : null,
-        child: InkWell(
-          onTap: () {
-            setState(() {
-              _selectedPricing = pricing;
-            });
-          },
-          borderRadius: BorderRadius.circular(8),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            pricing.name,
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: isSelected ? Colors.blue : Colors.black,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            pricing.description,
-                            style: TextStyle(fontSize: 14, color: Colors.grey),
-                          ),
-                        ],
-                      ),
+      margin: const EdgeInsets.only(bottom: 24),
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            _selectedPricing = pricing;
+            // Auto-advance to next step when plan is selected
+            if (_currentStep == 0) {
+              Future.delayed(const Duration(milliseconds: 500), () {
+                if (mounted) {
+                  setState(() {
+                    _currentStep = 1;
+                  });
+                }
+              });
+            }
+          });
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            gradient: isSelected
+                ? const LinearGradient(
+                    colors: [Color(0xFF3B82F6), Color(0xFF1D4ED8)],
+                  )
+                : LinearGradient(
+                    colors: [
+                      Colors.white.withOpacity(0.15),
+                      Colors.white.withOpacity(0.05),
+                    ],
+                  ),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isSelected ? Colors.white : Colors.white.withOpacity(0.3),
+              width: isSelected ? 2 : 1,
+            ),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: const Color(0xFF3B82F6).withOpacity(0.4),
+                      blurRadius: 20,
+                      spreadRadius: 0,
+                      offset: const Offset(0, 10),
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          pricing.formattedPrice,
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: isSelected ? Colors.blue : Colors.green,
-                          ),
-                        ),
-                        Text(
-                          AppLocalizations.of(context).getString('per_year'),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ],
+                  ]
+                : [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      spreadRadius: 0,
+                      offset: const Offset(0, 5),
                     ),
                   ],
-                ),
-                const SizedBox(height: 16),
-                // Features
-                ...pricing.features.map(
-                  (feature) => Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
-                    child: Row(
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(
-                          Icons.check_circle,
-                          size: 16,
-                          color: isSelected ? Colors.blue : Colors.green,
+                        Text(
+                          pricing.name,
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w800,
+                            color: isSelected ? Colors.white : Colors.white,
+                            letterSpacing: -0.5,
+                          ),
                         ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(feature, style: TextStyle(fontSize: 14)),
+                        const SizedBox(height: 8),
+                        Text(
+                          pricing.description,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: isSelected
+                                ? Colors.white.withOpacity(0.9)
+                                : Colors.white.withOpacity(0.7),
+                            height: 1.4,
+                          ),
                         ),
                       ],
                     ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                if (isSelected)
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.blue,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      AppLocalizations.of(context).getString('plan_selected'),
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        pricing.formattedPrice,
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.w900,
+                          color: isSelected
+                              ? Colors.white
+                              : const Color(0xFF10B981),
+                          letterSpacing: -1.0,
+                        ),
                       ),
-                    ),
+                      Text(
+                        'all\'anno',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: isSelected
+                              ? Colors.white.withOpacity(0.8)
+                              : Colors.white.withOpacity(0.6),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ),
-              ],
-            ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              // Features
+              ...pricing.features.map(
+                (feature) => Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.check_circle_rounded,
+                        size: 20,
+                        color: isSelected
+                            ? Colors.white
+                            : const Color(0xFF10B981),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          feature,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: isSelected
+                                ? Colors.white.withOpacity(0.9)
+                                : Colors.white.withOpacity(0.8),
+                            height: 1.4,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              if (isSelected)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 8,
+                        spreadRadius: 0,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.check_circle_rounded,
+                        color: const Color(0xFF10B981),
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Piano Selezionato',
+                        style: TextStyle(
+                          color: const Color(0xFF1F2937),
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
           ),
         ),
       ),
@@ -568,362 +828,387 @@ class _LegalEntityPublicRegistrationScreenState
   }
 
   Widget _buildPersonalInfoStep() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            AppLocalizations.of(context).getString('personal_and_company_info'),
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header with selected plan
+        Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.white.withOpacity(0.2)),
           ),
-          const SizedBox(height: 16),
-          Text(
-            AppLocalizations.of(
-              context,
-            ).getString('enter_personal_company_info'),
-            style: const TextStyle(fontSize: 16, color: Colors.grey),
-          ),
-          const SizedBox(height: 24),
-          // Personal information form
-          Form(
-            key: _personalFormKey,
-            child: Column(
-              children: [
-                SizedBox(
-                  width: double.infinity,
-                  child: CustomTextField(
-                    controller: _personalNameController,
-                    labelText:
-                        '${AppLocalizations.of(context).getString('full_name')} *',
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return AppLocalizations.of(
-                          context,
-                        ).getString('enter_full_name');
-                      }
-                      return null;
-                    },
-                  ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Informazioni Azienda',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white,
+                  letterSpacing: -1.0,
                 ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: CustomTextField(
-                    controller: _personalEmailController,
-                    labelText:
-                        '${AppLocalizations.of(context).getString('email_label')} *',
-                    keyboardType: TextInputType.emailAddress,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return AppLocalizations.of(
-                          context,
-                        ).getString('enter_email');
-                      }
-                      if (!RegExp(
-                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                      ).hasMatch(value)) {
-                        return AppLocalizations.of(
-                          context,
-                        ).getString('enter_valid_email');
-                      }
-                      return null;
-                    },
-                  ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Completa i dati della tua azienda per completare la registrazione',
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.white.withOpacity(0.8),
+                  height: 1.4,
                 ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: CustomTextField(
-                    controller: _personalPasswordController,
-                    labelText:
-                        '${AppLocalizations.of(context).getString('password')} *',
-                    obscureText: true,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return AppLocalizations.of(
-                          context,
-                        ).getString('enter_password');
-                      }
-                      if (value.length < 6) {
-                        return AppLocalizations.of(
-                          context,
-                        ).getString('password_min_length');
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: InternationalPhoneField(
-                    controller: _personalPhoneController,
-                    label: AppLocalizations.of(context).getString('phone'),
-                    initialCountryCode: _personalCountryCode,
-                    onCountryCodeChanged: (countryCode) {
-                      setState(() {
-                        _personalCountryCode = countryCode;
-                      });
-                    },
-                    onPhoneNumberChanged: (phoneNumber) {
-                      // Il controller viene aggiornato automaticamente
-                    },
-                  ),
-                ),
-                const SizedBox(height: 32),
-
-                // Sezione Azienda
-                Text(
-                  AppLocalizations.of(context).getString('company_data'),
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Note about image upload after registration
+              ),
+              if (_selectedPricing != null) ...[
+                const SizedBox(height: 20),
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.blue.shade200),
+                    color: const Color(0xFF3B82F6).withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color(0xFF3B82F6).withOpacity(0.3),
+                    ),
                   ),
-                  child: Column(
+                  child: Row(
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.info_outline,
-                            size: 20,
-                            color: Colors.blue.shade600,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            AppLocalizations.of(context).getString(
-                                  'image_upload_after_registration',
-                                ) ??
-                                'Logo e foto azienda',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.blue.shade700,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
+                      const Icon(
+                        Icons.check_circle_rounded,
+                        color: Color(0xFF10B981),
+                        size: 24,
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        AppLocalizations.of(context).getString(
-                              'image_upload_after_registration_info',
-                            ) ??
-                            'Potrai caricare il logo azienda e la foto azienda dopo aver completato la registrazione e aver effettuato l\'accesso al portale.',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.blue.shade600,
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Piano Selezionato',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Text(
+                              '${_selectedPricing!.name} - ${_selectedPricing!.formattedPrice}',
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.8),
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
                         ),
-                        textAlign: TextAlign.center,
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 24),
-
-                // Campi aziendali
-                SizedBox(
-                  width: double.infinity,
-                  child: CustomTextField(
-                    controller: _legalNameController,
-                    labelText:
-                        '${AppLocalizations.of(context).getString('legal_entity_name')} *',
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return AppLocalizations.of(
-                          context,
-                        ).getString('enter_legal_entity_name');
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: CustomTextField(
-                    controller: _identifierCodeController,
-                    labelText:
-                        '${AppLocalizations.of(context).getString('identifier_code')} *',
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return AppLocalizations.of(
-                          context,
-                        ).getString('enter_identifier_code');
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: CustomTextField(
-                    controller: _entityEmailController,
-                    labelText:
-                        '${AppLocalizations.of(context).getString('company_email')} *',
-                    keyboardType: TextInputType.emailAddress,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return AppLocalizations.of(
-                          context,
-                        ).getString('enter_company_email');
-                      }
-                      if (!RegExp(
-                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                      ).hasMatch(value)) {
-                        return AppLocalizations.of(
-                          context,
-                        ).getString('enter_valid_email');
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: CustomTextField(
-                    controller: _legalRepresentativeController,
-                    labelText:
-                        '${AppLocalizations.of(context).getString('legal_representative')} *',
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return AppLocalizations.of(
-                          context,
-                        ).getString('enter_legal_representative');
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: InternationalPhoneField(
-                    controller: _phoneController,
-                    label: AppLocalizations.of(
-                      context,
-                    ).getString('company_phone'),
-                    initialCountryCode: _entityCountryCode,
-                    onCountryCodeChanged: (countryCode) {
-                      setState(() {
-                        _entityCountryCode = countryCode;
-                      });
-                    },
-                    onPhoneNumberChanged: (phoneNumber) {
-                      // Il controller viene aggiornato automaticamente
-                    },
-                  ),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: CustomTextField(
-                    controller: _pecController,
-                    labelText: 'PEC',
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: CustomTextField(
-                    controller: _websiteController,
-                    labelText: 'Sito Web',
-                    keyboardType: TextInputType.url,
-                  ),
-                ),
               ],
-            ),
+            ],
           ),
-        ],
-      ),
-    );
-  }
+        ),
 
-  Widget _buildNavigationButtons() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          if (_currentStep > 0)
-            Expanded(
-              child: CustomButton(
-                onPressed: _previousStep,
-                text: AppLocalizations.of(context).getString('back'),
-                backgroundColor: Colors.grey,
+        const SizedBox(height: 32),
+
+        // Form
+        Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.white.withOpacity(0.2)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Personal information form
+              Form(
+                key: _personalFormKey,
+                child: Column(
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      child: CustomTextField(
+                        controller: _personalNameController,
+                        labelText:
+                            '${AppLocalizations.of(context).getString('full_name')} *',
+
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return AppLocalizations.of(
+                              context,
+                            ).getString('enter_full_name');
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: CustomTextField(
+                        controller: _personalEmailController,
+                        labelText:
+                            '${AppLocalizations.of(context).getString('email_label')} *',
+
+                        keyboardType: TextInputType.emailAddress,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return AppLocalizations.of(
+                              context,
+                            ).getString('enter_email');
+                          }
+                          if (!RegExp(
+                            r'^[\w\-\.]+@([\w\-]+\.)+[\w\-]{2,4}$',
+                          ).hasMatch(value)) {
+                            return AppLocalizations.of(
+                              context,
+                            ).getString('enter_valid_email');
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: CustomTextField(
+                        controller: _personalPasswordController,
+                        labelText:
+                            '${AppLocalizations.of(context).getString('password')} *',
+
+                        obscureText: true,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return AppLocalizations.of(
+                              context,
+                            ).getString('enter_password');
+                          }
+                          if (value.length < 6) {
+                            return AppLocalizations.of(
+                              context,
+                            ).getString('password_min_length');
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: InternationalPhoneField(
+                        controller: _personalPhoneController,
+                        label: AppLocalizations.of(context).getString('phone'),
+                        initialCountryCode: _personalCountryCode,
+                        onCountryCodeChanged: (countryCode) {
+                          setState(() {
+                            _personalCountryCode = countryCode;
+                          });
+                        },
+                        onPhoneNumberChanged: (phoneNumber) {
+                          // Il controller viene aggiornato automaticamente
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+
+                    // Sezione Azienda
+                    Text(
+                      AppLocalizations.of(context).getString('company_data'),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Campi aziendali
+                    SizedBox(
+                      width: double.infinity,
+                      child: CustomTextField(
+                        controller: _legalNameController,
+                        labelText:
+                            '${AppLocalizations.of(context).getString('legal_entity_name')} *',
+
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return AppLocalizations.of(
+                              context,
+                            ).getString('enter_legal_entity_name');
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: CustomTextField(
+                        controller: _identifierCodeController,
+                        labelText:
+                            '${AppLocalizations.of(context).getString('identifier_code')} *',
+
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return AppLocalizations.of(
+                              context,
+                            ).getString('enter_identifier_code');
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: CustomTextField(
+                        controller: _entityEmailController,
+                        labelText:
+                            '${AppLocalizations.of(context).getString('company_email')} *',
+
+                        keyboardType: TextInputType.emailAddress,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return AppLocalizations.of(
+                              context,
+                            ).getString('enter_company_email');
+                          }
+                          if (!RegExp(
+                            r'^[\w\-\.]+@([\w\-]+\.)+[\w\-]{2,4}$',
+                          ).hasMatch(value)) {
+                            return AppLocalizations.of(
+                              context,
+                            ).getString('enter_valid_email');
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: CustomTextField(
+                        controller: _legalRepresentativeController,
+                        labelText:
+                            '${AppLocalizations.of(context).getString('legal_representative')} *',
+
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return AppLocalizations.of(
+                              context,
+                            ).getString('enter_legal_representative');
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: InternationalPhoneField(
+                        controller: _phoneController,
+                        label: AppLocalizations.of(
+                          context,
+                        ).getString('company_phone'),
+                        initialCountryCode: _entityCountryCode,
+                        onCountryCodeChanged: (countryCode) {
+                          setState(() {
+                            _entityCountryCode = countryCode;
+                          });
+                        },
+                        onPhoneNumberChanged: (phoneNumber) {
+                          // Il controller viene aggiornato automaticamente
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: CustomTextField(
+                        controller: _pecController,
+                        labelText: 'PEC',
+
+                        keyboardType: TextInputType.emailAddress,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: CustomTextField(
+                        controller: _websiteController,
+                        labelText: 'Sito Web',
+
+                        keyboardType: TextInputType.url,
+                      ),
+                    ),
+                  ],
+                ),
               ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCompleteButton() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(32, 16, 32, 32),
+      child: Column(
+        children: [
+          SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: ElevatedButton(
+              onPressed: _isLoading ? null : _completeRegistration,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF10B981),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                elevation: 8,
+                shadowColor: const Color(0xFF10B981).withOpacity(0.4),
+              ),
+              child: _isLoading
+                  ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.check_circle_rounded, size: 24),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Completa Registrazione',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
             ),
-          if (_currentStep > 0) const SizedBox(width: 16),
-          Expanded(
-            child: CustomButton(
-              onPressed: _isLoading ? null : () => _nextStep(),
-              text: _currentStep == _totalSteps - 1
-                  ? AppLocalizations.of(
-                      context,
-                    ).getString('complete_registration')
-                  : AppLocalizations.of(context).getString('next'),
-              backgroundColor: _currentStep == _totalSteps - 1
-                  ? Colors.green
-                  : Colors.blue,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Cliccando su "Completa Registrazione" accetti i termini e condizioni',
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.7),
+              fontSize: 14,
             ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
     );
-  }
-
-  void _previousStep() {
-    if (_currentStep > 0) {
-      setState(() {
-        _currentStep--;
-      });
-    }
-  }
-
-  void _nextStep() async {
-    if (_currentStep == _totalSteps - 1) {
-      await _completeRegistration();
-    } else {
-      if (_validateCurrentStep()) {
-        setState(() {
-          _currentStep++;
-        });
-      }
-    }
-  }
-
-  bool _validateCurrentStep() {
-    switch (_currentStep) {
-      case 0:
-        if (_selectedPricing == null) {
-          _showError(
-            AppLocalizations.of(context).getString('select_plan_to_continue'),
-          );
-          return false;
-        }
-        break;
-      case 1:
-        if (_personalFormKey.currentState == null ||
-            !_personalFormKey.currentState!.validate()) {
-          return false;
-        }
-        break;
-    }
-    return true;
   }
 
   Future<void> _completeRegistration() async {

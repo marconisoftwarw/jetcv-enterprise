@@ -174,26 +174,31 @@ class _CertifiersContentState extends State<CertifiersContent> {
           );
     } else if (isCertifier) {
       // Certifier vede solo i certificatori della sua legal entity
-      print('🔍 Loading certifiers for certifier user - filtering by legal entity');
-      
+      print(
+        '🔍 Loading certifiers for certifier user - filtering by legal entity',
+      );
+
       // Carica la legal entity dell'utente certifier
       var selectedLegalEntity = legalEntityProvider.selectedLegalEntity;
-      
+
       if (selectedLegalEntity == null) {
         print('⚠️ No legal entity selected for certifier, trying to load...');
-        
+
         try {
           final currentUser = authProvider.currentUser;
           if (currentUser != null) {
-            final response = await EdgeFunctionService.getLegalEntitiesByUser(
-              userId: currentUser.idUser,
-            ).timeout(
-              const Duration(seconds: 15),
-              onTimeout: () {
-                print('⏰ Timeout loading user legal entities for certifier');
-                return null;
-              },
-            );
+            final response =
+                await EdgeFunctionService.getLegalEntitiesByUser(
+                  userId: currentUser.idUser,
+                ).timeout(
+                  const Duration(seconds: 15),
+                  onTimeout: () {
+                    print(
+                      '⏰ Timeout loading user legal entities for certifier',
+                    );
+                    return null;
+                  },
+                );
 
             if (response != null && response['ok'] == true) {
               final data = response['data'] as List<dynamic>?;
@@ -204,7 +209,9 @@ class _CertifiersContentState extends State<CertifiersContent> {
 
                 selectedLegalEntity = legalEntities.first;
                 legalEntityProvider.selectLegalEntity(selectedLegalEntity);
-                print('✅ Auto-selected legal entity for certifier: ${selectedLegalEntity.legalName}');
+                print(
+                  '✅ Auto-selected legal entity for certifier: ${selectedLegalEntity.legalName}',
+                );
               }
             }
           }
@@ -216,14 +223,17 @@ class _CertifiersContentState extends State<CertifiersContent> {
       if (selectedLegalEntity == null) {
         if (mounted) {
           setState(() {
-            _errorMessage = 'Nessuna legal entity disponibile per il certificatore.';
+            _errorMessage =
+                'Nessuna legal entity disponibile per il certificatore.';
             _isLoading = false;
           });
         }
         return;
       }
 
-      print('🔍 Loading certifiers for certifier user - legal entity: ${selectedLegalEntity.idLegalEntity}');
+      print(
+        '🔍 Loading certifiers for certifier user - legal entity: ${selectedLegalEntity.idLegalEntity}',
+      );
       certifiersWithUser = await _certifierService
           .getCertifiersWithUserByLegalEntity(selectedLegalEntity.idLegalEntity)
           .timeout(
@@ -2122,7 +2132,9 @@ class _CertifiersContentState extends State<CertifiersContent> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                l10n.getString('certifier_created_successfully'),
+                                l10n.getString(
+                                  'certifier_created_successfully',
+                                ),
                               ),
                               backgroundColor: AppTheme.successGreen,
                               duration: Duration(seconds: 4),

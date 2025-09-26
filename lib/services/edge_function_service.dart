@@ -360,11 +360,10 @@ class EdgeFunctionService {
     String? status,
   }) async {
     try {
-      final Map<String, dynamic> requestBody = status != null ? {'status': status} : <String, dynamic>{};
-      final response = await invokeFunction(
-        'get-legal-entities',
-        requestBody,
-      );
+      final Map<String, dynamic> requestBody = status != null
+          ? {'status': status}
+          : <String, dynamic>{};
+      final response = await invokeFunction('get-legal-entities', requestBody);
       return response;
     } catch (e) {
       debugPrint('❌ Get all legal entities call error: $e');

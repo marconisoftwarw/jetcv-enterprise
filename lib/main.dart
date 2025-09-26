@@ -25,6 +25,7 @@ import 'screens/auth/set_password_screen.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/admin/admin_dashboard_screen.dart';
 import 'screens/public/public_home_screen.dart';
+import 'screens/public/user_type_selection_screen.dart';
 import 'screens/certification/create_certification_screen.dart';
 import 'screens/certification/certification_detail_screen.dart';
 import 'screens/certifiers/certifiers_screen.dart';
@@ -224,7 +225,8 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
             '/': (context) => Consumer<AuthProvider>(
               builder: (context, authProvider, child) {
                 // Se deve reindirizzare al KYC, naviga alla VeriffVerificationScreen
-                if (authProvider.shouldRedirectToKyc && authProvider.currentUser != null) {
+                if (authProvider.shouldRedirectToKyc &&
+                    authProvider.currentUser != null) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     authProvider.clearKycRedirect();
                     Navigator.pushReplacement(
@@ -245,13 +247,13 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
                       '🔄 Main: Route builder called - isAuthenticated: ${authProvider.isAuthenticated}, currentUser: ${authProvider.currentUser != null}',
                     );
 
-                    // Se l'utente non è autenticato, mostra immediatamente la home pubblica
+                    // Se l'utente non è autenticato, mostra la schermata di selezione del tipo di utente
                     if (!authProvider.isAuthenticated ||
                         authProvider.currentUser == null) {
                       print(
-                        '🔄 Main: User not authenticated, showing PublicHomeScreen',
+                        '🔄 Main: User not authenticated, showing UserTypeSelectionScreen',
                       );
-                      return const PublicHomeScreen();
+                      return const UserTypeSelectionScreen();
                     }
 
                     if (snapshot.connectionState == ConnectionState.waiting) {
@@ -285,13 +287,13 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
                   '🔄 Main: Hash route builder called - isAuthenticated: ${authProvider.isAuthenticated}, currentUser: ${authProvider.currentUser != null}',
                 );
 
-                // Se l'utente non è autenticato, mostra immediatamente la home pubblica
+                // Se l'utente non è autenticato, mostra la schermata di selezione del tipo di utente
                 if (!authProvider.isAuthenticated ||
                     authProvider.currentUser == null) {
                   print(
-                    '🔄 Main: User not authenticated in hash route, showing PublicHomeScreen',
+                    '🔄 Main: User not authenticated in hash route, showing UserTypeSelectionScreen',
                   );
-                  return const PublicHomeScreen();
+                  return const UserTypeSelectionScreen();
                 }
 
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -357,6 +359,8 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
             // Removed '/legal-entity/register' from static routes - handled in onGenerateRoute
             '/legal-entity-registration': (context) =>
                 const LegalEntityRegistrationScreen(),
+            '/certifier/register': (context) => const SignupScreen(),
+            '/public-home': (context) => const PublicHomeScreen(),
           },
           onGenerateRoute: (settings) {
             // Handle direct URL access and ensure authentication state is restored
@@ -456,8 +460,8 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
                         return const HomeScreen();
                       }
 
-                      // Se l'utente non è autenticato, mostra la home pubblica
-                      return const PublicHomeScreen();
+                      // Se l'utente non è autenticato, mostra la schermata di selezione del tipo di utente
+                      return const UserTypeSelectionScreen();
                     },
                   ),
                 );
@@ -597,6 +601,12 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
                 return MaterialPageRoute(
                   builder: (_) => const LegalEntityPricingScreen(),
                 );
+              case '/certifier/register':
+                return MaterialPageRoute(builder: (_) => const SignupScreen());
+              case '/public-home':
+                return MaterialPageRoute(
+                  builder: (_) => const PublicHomeScreen(),
+                );
               case '/legal-entity/register':
               case '/#/legal-entity/register':
                 // Gestisci parametri URL per inviti via email
@@ -686,10 +696,10 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
                 return MaterialPageRoute(
                   builder: (context) {
                     final authProvider = context.read<AuthProvider>();
-                    // Se l'utente non è autenticato, mostra immediatamente la home pubblica
+                    // Se l'utente non è autenticato, mostra la schermata di selezione del tipo di utente
                     if (!authProvider.isAuthenticated ||
                         authProvider.currentUser == null) {
-                      return const PublicHomeScreen();
+                      return const UserTypeSelectionScreen();
                     }
 
                     if (authProvider.isAuthenticated &&

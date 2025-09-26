@@ -966,21 +966,22 @@ class AuthProvider extends ChangeNotifier {
   Future<void> _checkAndRedirectToKycIfNeeded() async {
     try {
       print('🔍 AuthProvider: Checking KYC status for certifier user...');
-      
+
       // Controlla se l'utente ha completato il KYC
       // Per ora assumiamo che se non c'è un campo specifico, il KYC non è completato
       // In futuro potresti aggiungere un campo nel database per tracciare lo stato KYC
-      
+
       // Per ora, reindirizza sempre al KYC per i certifier
       // TODO: Implementare controllo reale dello stato KYC dal database
-      print('🔄 AuthProvider: Certifier user needs KYC verification, redirecting...');
-      
+      print(
+        '🔄 AuthProvider: Certifier user needs KYC verification, redirecting...',
+      );
+
       // Imposta il flag per il redirect al KYC
       _shouldRedirectToKyc = true;
       _safeNotifyListeners();
-      
+
       print('✅ AuthProvider: KYC redirect flag set for certifier user');
-      
     } catch (e) {
       print('❌ AuthProvider: Error checking KYC status: $e');
     }

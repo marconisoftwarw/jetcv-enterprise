@@ -42,6 +42,7 @@ class CertificationServiceV2 {
     String? idCertifier,
     String? idLocation,
     String? serialNumber,
+    String? idUser,
     int limit = 20,
     int offset = 0,
   }) async {
@@ -56,6 +57,7 @@ class CertificationServiceV2 {
       if (idCertifier != null) queryParams['id_certifier'] = idCertifier;
       if (idLocation != null) queryParams['id_location'] = idLocation;
       if (serialNumber != null) queryParams['serial_number'] = serialNumber;
+      if (idUser != null) queryParams['id_user'] = idUser;
 
       final uri = Uri.parse(
         '$_baseUrl/functions/v1/certification-crud',

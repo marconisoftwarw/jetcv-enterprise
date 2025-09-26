@@ -62,6 +62,7 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final isLegalEntityUser =
           authProvider.userType == AppUserType.legalEntity;
+      final isCertifier = authProvider.userType == AppUserType.certifier;
       final isAdmin = authProvider.userType == AppUserType.admin;
 
       if (isLegalEntityUser) {
@@ -79,6 +80,7 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
         idLegalEntity: isLegalEntityUser
             ? _userLegalEntityId
             : null, // Filtra solo per legal_entity
+        idUser: isCertifier ? authProvider.currentUser?.idUser : null,
         limit: 50,
         offset: 0,
       );
@@ -89,6 +91,7 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
         idLegalEntity: isLegalEntityUser
             ? _userLegalEntityId
             : null, // Filtra solo per legal_entity
+        idUser: isCertifier ? authProvider.currentUser?.idUser : null,
         limit: 50,
         offset: 0,
       );
@@ -129,13 +132,13 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
       // Solo gli admin vedono tutte le legal entities
       // Tutti gli altri utenti vedono solo la propria legal entity
       final isAdmin = authProvider.userType == AppUserType.admin;
-      
+
       print('🔍 DEBUG: User type: ${authProvider.userType}');
       print('🔍 DEBUG: Is admin: $isAdmin');
       print('🔍 DEBUG: User ID: ${currentUser.idUser}');
       print('🔍 DEBUG: User email: ${currentUser.email}');
       print('🔍 DEBUG: User full name: ${currentUser.fullName}');
-      
+
       final response = isAdmin
           ? await EdgeFunctionService.getAllLegalEntities().timeout(
               const Duration(seconds: 15),
@@ -153,10 +156,12 @@ class _CertifierDashboardScreenState extends State<CertifierDashboardScreen>
                 return null;
               },
             );
-      
-      print('🔍 DEBUG: Method called: ${isAdmin ? "getAllLegalEntities" : "getLegalEntitiesByUser"}');
+
+      print(
+        '🔍 DEBUG: Method called: ${isAdmin ? "getAllLegalEntities" : "getLegalEntitiesByUser"}',
+      );
       print('🔍 DEBUG: Response received: ${response != null ? "Yes" : "No"}');
-      
+
       if (response != null) {
         print('🔍 DEBUG: Response data: $response');
         print('🔍 DEBUG: Response ok: ${response['ok']}');

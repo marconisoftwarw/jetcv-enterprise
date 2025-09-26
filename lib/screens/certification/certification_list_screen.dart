@@ -96,22 +96,23 @@ class _CertificationListScreenState extends State<CertificationListScreen>
         '📋 Loaded ${_categoryNames.length} categories and ${_locationNames.length} locations',
       );
 
-
       print('✅ Edge Function connection OK, loading certifications...');
 
-      // Determina se l'utente è di tipo legal_entity e carica la sua legal entity
+      // Determina il tipo di utente e carica la sua legal entity
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      var isLegalEntityUser =
+      final isLegalEntityUser =
           authProvider.userType == AppUserType.legalEntity;
-          if(isLegalEntityUser==false){
-            isLegalEntityUser =
-          authProvider.userType == AppUserType.certifier;
-          }
+      final isCertifierUser = authProvider.userType == AppUserType.certifier;
       final isAdmin = authProvider.userType == AppUserType.admin;
 
       if (isLegalEntityUser) {
         print('🏢 User is legal_entity type, loading user legal entity...');
         await _loadUserLegalEntity();
+      } else if (isCertifierUser) {
+        print(
+          '👨‍💼 User is certifier type, loading certifier legal entity...',
+        );
+        await _loadUserLegalEntity(); // Questo metodo ora gestisce anche i certificatori
       } else if (isAdmin) {
         print(
           '👑 User is admin, loading all certifications without filters...',
@@ -119,12 +120,15 @@ class _CertificationListScreenState extends State<CertificationListScreen>
       }
 
       // Carica certificazioni in bozza (status: draft)
-      print('📝 Loading draft certifications...: '+isLegalEntityUser.toString());
+      print(
+        '📝 Loading draft certifications...: isLegalEntityUser=$isLegalEntityUser, isCertifierUser=$isCertifierUser',
+      );
       final draftResult = await CertificationServiceV2.getCertifications(
         status: 'draft',
-        idLegalEntity: isLegalEntityUser
+        idLegalEntity: (isLegalEntityUser || isCertifierUser)
             ? _userLegalEntityId
-            : null, // Filtra solo per legal_entity
+            : null, // Filtra per legal_entity o certifier
+        idUser: isCertifierUser ? authProvider.currentUser?.idUser : null,
         limit: 50,
         offset: 0,
       );
@@ -133,9 +137,10 @@ class _CertificationListScreenState extends State<CertificationListScreen>
       print('📤 Loading sent certifications...');
       final sentResult = await CertificationServiceV2.getCertifications(
         status: 'sent',
-        idLegalEntity: isLegalEntityUser
+        idLegalEntity: (isLegalEntityUser || isCertifierUser)
             ? _userLegalEntityId
-            : null, // Filtra solo per legal_entity
+            : null, // Filtra per legal_entity o certifier
+        idUser: isCertifierUser ? authProvider.currentUser?.idUser : null,
         limit: 50,
         offset: 0,
       );
@@ -144,9 +149,10 @@ class _CertificationListScreenState extends State<CertificationListScreen>
       print('🔒 Loading closed certifications...');
       final closedResult = await CertificationServiceV2.getCertifications(
         status: 'closed',
-        idLegalEntity: isLegalEntityUser
+        idLegalEntity: (isLegalEntityUser || isCertifierUser)
             ? _userLegalEntityId
-            : null, // Filtra solo per legal_entity
+            : null, // Filtra per legal_entity o certifier
+        idUser: isCertifierUser ? authProvider.currentUser?.idUser : null,
         limit: 50,
         offset: 0,
       );
@@ -308,13 +314,13 @@ class _CertificationListScreenState extends State<CertificationListScreen>
       // Solo gli admin vedono tutte le legal entities
       // Tutti gli altri utenti vedono solo la propria legal entity
       final isAdmin = authProvider.userType == AppUserType.admin;
-      
+
       print('🔍 DEBUG: User type: ${authProvider.userType}');
       print('🔍 DEBUG: Is admin: $isAdmin');
       print('🔍 DEBUG: User ID: ${currentUser.idUser}');
       print('🔍 DEBUG: User email: ${currentUser.email}');
       print('🔍 DEBUG: User full name: ${currentUser.fullName}');
-      
+
       final response = isAdmin
           ? await EdgeFunctionService.getAllLegalEntities().timeout(
               const Duration(seconds: 15),
@@ -332,10 +338,12 @@ class _CertificationListScreenState extends State<CertificationListScreen>
                 return null;
               },
             );
-      
-      print('🔍 DEBUG: Method called: ${isAdmin ? "getAllLegalEntities" : "getLegalEntitiesByUser"}');
+
+      print(
+        '🔍 DEBUG: Method called: ${isAdmin ? "getAllLegalEntities" : "getLegalEntitiesByUser"}',
+      );
       print('🔍 DEBUG: Response received: ${response != null ? "Yes" : "No"}');
-      
+
       if (response != null) {
         print('🔍 DEBUG: Response data: $response');
         print('🔍 DEBUG: Response ok: ${response['ok']}');
@@ -367,10 +375,6 @@ class _CertificationListScreenState extends State<CertificationListScreen>
       print('❌ Error loading user legal entity: $e');
     }
   }
-
- 
-
- 
 
   @override
   void dispose() {

@@ -25,6 +25,7 @@ class CustomTextField extends StatelessWidget {
   final bool autofocus;
   final bool autocorrect;
   final bool enableSuggestions;
+  final Color? labelColor;
 
   const CustomTextField({
     super.key,
@@ -52,6 +53,7 @@ class CustomTextField extends StatelessWidget {
     this.autofocus = false,
     this.autocorrect = true,
     this.enableSuggestions = true,
+    this.labelColor,
   });
 
   @override
@@ -117,7 +119,9 @@ class CustomTextField extends StatelessWidget {
           horizontal: 16,
           vertical: 16,
         ),
-        labelStyle: TextStyle(color: enabled ? Colors.black : Colors.grey[600]),
+        labelStyle: TextStyle(
+          color: enabled ? (labelColor ?? Colors.black) : Colors.grey[600],
+        ),
         hintStyle: TextStyle(color: Colors.grey[600]),
         errorStyle: TextStyle(color: Colors.red[600], fontSize: 12),
       ),
