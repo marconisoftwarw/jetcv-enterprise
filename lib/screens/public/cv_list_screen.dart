@@ -5,6 +5,7 @@ import '../../theme/app_theme.dart';
 import '../../widgets/linkedin_card.dart';
 import '../../widgets/linkedin_button.dart';
 import '../../widgets/linkedin_text_field.dart';
+import '../../widgets/public_top_bar.dart';
 
 class CVListScreen extends StatefulWidget {
   const CVListScreen({super.key});
@@ -161,57 +162,80 @@ class _CVListScreenState extends State<CVListScreen> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: CustomScrollView(
-        slivers: [
-          // Modern Hero Section
-          SliverAppBar(
-            expandedHeight: isMobile ? 200 : (isDesktop ? 300 : 250),
-            floating: false,
-            pinned: true,
-            elevation: 0,
-            backgroundColor: const Color(0xFF0A0E27),
-            automaticallyImplyLeading: false,
-            flexibleSpace: FlexibleSpaceBar(
-              titlePadding: EdgeInsets.zero,
-              background: _buildModernHeroSection(
-                isDesktop,
-                isTablet,
-                isMobile,
+      body: Column(
+        children: [
+          // Top Bar
+          const PublicTopBar(showBackButton: true, title: 'Registro Pubblico'),
+
+          // Main Content
+          Expanded(
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFF0A0E27),
+                    Color(0xFF1A1F3A),
+                    Color(0xFF2D1B69),
+                    Color(0xFF6366F1),
+                  ],
+                  stops: [0.0, 0.3, 0.7, 1.0],
+                ),
               ),
-            ),
-            bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(0),
-              child: Container(
-                height: 30,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(30),
-                    topRight: Radius.circular(30),
-                  ),
+              child: SafeArea(
+                child: Column(
+                  children: [
+                    // Hero Section
+                    _buildModernHeroSection(isDesktop, isTablet, isMobile),
+
+                    // White content area
+                    Expanded(
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(30),
+                            topRight: Radius.circular(30),
+                          ),
+                        ),
+                        child: CustomScrollView(
+                          slivers: [
+                            // Search and Filters Section
+                            SliverToBoxAdapter(
+                              child: _buildSearchAndFilters(
+                                isDesktop,
+                                isTablet,
+                                isMobile,
+                              ),
+                            ),
+
+                            // CV List Section
+                            _isLoading
+                                ? const SliverToBoxAdapter(
+                                    child: Center(
+                                      child: Padding(
+                                        padding: EdgeInsets.all(40),
+                                        child: CircularProgressIndicator(),
+                                      ),
+                                    ),
+                                  )
+                                : _filteredCVs.isEmpty
+                                ? SliverToBoxAdapter(child: _buildEmptyState())
+                                : _buildCVListSliver(
+                                    isDesktop,
+                                    isTablet,
+                                    isMobile,
+                                  ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
-
-          // Search and Filters Section
-          SliverToBoxAdapter(
-            child: _buildSearchAndFilters(isDesktop, isTablet, isMobile),
-          ),
-
-          // CV List Section
-          _isLoading
-              ? const SliverToBoxAdapter(
-                  child: Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(40),
-                      child: CircularProgressIndicator(),
-                    ),
-                  ),
-                )
-              : _filteredCVs.isEmpty
-              ? SliverToBoxAdapter(child: _buildEmptyState())
-              : _buildCVListSliver(isDesktop, isTablet, isMobile),
         ],
       ),
     );
@@ -219,147 +243,108 @@ class _CVListScreenState extends State<CVListScreen> {
 
   Widget _buildModernHeroSection(bool isDesktop, bool isTablet, bool isMobile) {
     return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF0A0E27),
-            Color(0xFF1A1F3A),
-            Color(0xFF2D1B69),
-            Color(0xFF6366F1),
-          ],
-          stops: [0.0, 0.3, 0.7, 1.0],
-        ),
-      ),
+      height: isMobile ? 200 : (isDesktop ? 300 : 250),
       child: Stack(
         children: [
           // Animated particles background
           _buildParticleBackground(),
 
           // Main content
-          SafeArea(
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: isMobile ? 16 : (isDesktop ? 80 : 40),
-                vertical: isMobile ? 20 : 40,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Back button and title
-                  Row(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.3),
-                            width: 1,
-                          ),
-                        ),
-                        child: IconButton(
-                          onPressed: () => Navigator.pop(context),
-                          icon: const Icon(
-                            Icons.arrow_back_ios,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Text(
-                          'Registro Pubblico',
-                          style: AppTheme.title1.copyWith(
-                            color: Colors.white,
-                            fontSize: isMobile ? 24 : (isDesktop ? 32 : 28),
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
+          Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: isMobile ? 16 : (isDesktop ? 80 : 40),
+              vertical: isMobile ? 20 : 40,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Title
+                Text(
+                  'Registro Pubblico',
+                  style: AppTheme.title1.copyWith(
+                    color: Colors.white,
+                    fontSize: isMobile ? 24 : (isDesktop ? 32 : 28),
+                    fontWeight: FontWeight.bold,
                   ),
+                ),
 
-                  SizedBox(height: isMobile ? 20 : 30),
+                SizedBox(height: isMobile ? 20 : 30),
 
-                  // Stats and description
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Scopri i migliori talenti',
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.9),
-                                fontSize: isMobile ? 16 : (isDesktop ? 20 : 18),
-                                fontWeight: FontWeight.w500,
-                              ),
+                // Stats and description
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Scopri i migliori talenti',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.9),
+                              fontSize: isMobile ? 16 : (isDesktop ? 20 : 18),
+                              fontWeight: FontWeight.w500,
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Trova professionisti verificati e competenti per il tuo team',
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.7),
-                                fontSize: isMobile ? 14 : (isDesktop ? 16 : 15),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: isMobile ? 16 : 20,
-                          vertical: isMobile ? 12 : 16,
-                        ),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.white.withValues(alpha: 0.15),
-                              Colors.white.withValues(alpha: 0.08),
-                            ],
                           ),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.3),
-                            width: 1,
+                          const SizedBox(height: 8),
+                          Text(
+                            'Trova professionisti verificati e competenti per il tuo team',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.7),
+                              fontSize: isMobile ? 14 : (isDesktop ? 16 : 15),
+                            ),
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.15),
-                              blurRadius: 20,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          children: [
-                            Text(
-                              '${_filteredCVs.length}',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: isMobile ? 24 : (isDesktop ? 32 : 28),
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              'CV Disponibili',
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.8),
-                                fontSize: isMobile ? 12 : 14,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
+                        ],
                       ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isMobile ? 16 : 20,
+                        vertical: isMobile ? 12 : 16,
+                      ),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.white.withValues(alpha: 0.15),
+                            Colors.white.withValues(alpha: 0.08),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.3),
+                          width: 1,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.15),
+                            blurRadius: 20,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            '${_filteredCVs.length}',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: isMobile ? 24 : (isDesktop ? 32 : 28),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            'CV Disponibili',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.8),
+                              fontSize: isMobile ? 12 : 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ],

@@ -47,8 +47,24 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
         return Scaffold(
+          backgroundColor: Colors.white,
           appBar: _buildAppBar(isMobile, isTablet, isDesktop),
-          body: _buildBody(isMobile, isTablet, isDesktop, authProvider),
+          body: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF0A0E27),
+                  Color(0xFF1A1F3A),
+                  Color(0xFF2D1B69),
+                  Color(0xFF6366F1),
+                ],
+                stops: [0.0, 0.3, 0.7, 1.0],
+              ),
+            ),
+            child: _buildBody(isMobile, isTablet, isDesktop, authProvider),
+          ),
         );
       },
     );
@@ -105,7 +121,16 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
     AuthProvider authProvider,
   ) {
     if (!widget.showMenu) {
-      return widget.child;
+      return Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(30),
+            topRight: Radius.circular(30),
+          ),
+        ),
+        child: widget.child,
+      );
     }
 
     // Desktop layout - sidebar sempre visibile
@@ -113,7 +138,18 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
       return Row(
         children: [
           _buildNavigationMenu(isMobile, isTablet, isDesktop, authProvider),
-          Expanded(child: widget.child),
+          Expanded(
+            child: Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(30),
+                  topRight: Radius.circular(30),
+                ),
+              ),
+              child: widget.child,
+            ),
+          ),
         ],
       );
     }
@@ -140,7 +176,16 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
           child: Stack(
             children: [
               // Main content
-              widget.child,
+              Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30),
+                  ),
+                ),
+                child: widget.child,
+              ),
 
               // Navigation Menu - slide in from left on mobile
               if (_isMenuExpanded)
@@ -185,16 +230,31 @@ class _ResponsiveLayoutState extends State<ResponsiveLayout> {
     return Container(
       width: menuWidth,
       decoration: BoxDecoration(
-        color: Colors.white,
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF0A0E27),
+            Color(0xFF1A1F3A),
+            Color(0xFF2D1B69),
+            Color(0xFF6366F1),
+          ],
+          stops: [0.0, 0.3, 0.7, 1.0],
+        ),
         border: isDesktop
-            ? Border(right: BorderSide(color: Colors.grey[200]!, width: 1))
+            ? Border(
+                right: BorderSide(
+                  color: Colors.white.withOpacity(0.2),
+                  width: 1,
+                ),
+              )
             : null,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(isDesktop ? 0.05 : 0.2),
-            blurRadius: isDesktop ? 8 : 16,
+            color: Colors.black.withOpacity(isDesktop ? 0.1 : 0.3),
+            blurRadius: isDesktop ? 12 : 20,
             spreadRadius: 0,
-            offset: Offset(isDesktop ? 2 : 4, 0),
+            offset: Offset(isDesktop ? 4 : 6, 0),
           ),
         ],
       ),

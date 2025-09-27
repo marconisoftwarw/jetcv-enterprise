@@ -43,25 +43,22 @@ class DynamicSidebar extends StatelessWidget {
                 labelType: NavigationRailLabelType.all,
                 destinations: _getDestinationsForUserType(userType, l10n),
                 backgroundColor: Colors.transparent,
-                selectedIconTheme: IconThemeData(
-                  color: AppTheme.primaryBlue,
-                  size: 24,
-                ),
+                selectedIconTheme: IconThemeData(color: Colors.white, size: 24),
                 unselectedIconTheme: IconThemeData(
-                  color: AppTheme.textGray,
+                  color: Colors.white.withOpacity(0.7),
                   size: 24,
                 ),
                 selectedLabelTextStyle: TextStyle(
-                  color: AppTheme.primaryBlue,
+                  color: Colors.white,
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
                 ),
                 unselectedLabelTextStyle: TextStyle(
-                  color: AppTheme.textGray,
+                  color: Colors.white.withOpacity(0.8),
                   fontWeight: FontWeight.w500,
                   fontSize: 14,
                 ),
-                indicatorColor: AppTheme.lightBlue,
+                indicatorColor: Colors.white.withOpacity(0.2),
                 indicatorShape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),

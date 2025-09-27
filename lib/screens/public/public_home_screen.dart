@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import '../../config/app_config.dart';
 import '../../theme/app_theme.dart';
-import '../../widgets/page_with_floating_language.dart';
+import '../../widgets/public_top_bar.dart';
 import '../../widgets/responsive_card.dart';
 import '../../widgets/responsive_layout.dart';
 import '../../l10n/app_localizations.dart';
@@ -98,96 +98,118 @@ class _PublicHomeScreenState extends State<PublicHomeScreen>
     final isTablet = screenWidth > 768;
     final isDesktop = screenWidth > 1200;
 
-    return PageWithFloatingLanguage(
-      topPosition: 80, // Abbassa il pulsante delle lingue
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        body: CustomScrollView(
-          slivers: [
-            // Ultra Modern Hero Section
-            SliverAppBar(
-              expandedHeight: isDesktop ? 800 : (isTablet ? 650 : 400),
-              floating: false,
-              pinned: true,
-              elevation: 0,
-              backgroundColor: const Color(0xFF0A0E27),
-              automaticallyImplyLeading: false,
-              flexibleSpace: FlexibleSpaceBar(
-                titlePadding: EdgeInsets.zero,
-                background: _buildModernHeroSection(
-                  context,
-                  l10n,
-                  isDesktop,
-                  isTablet,
-                ),
-              ),
-              bottom: PreferredSize(
-                preferredSize: const Size.fromHeight(0),
-                child: Container(
-                  height: 30,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(30),
-                      topRight: Radius.circular(30),
-                    ),
-                  ),
-                ),
-              ),
-            ),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Column(
+        children: [
+          // Top Bar
+          const PublicTopBar(),
 
-            // Main Content Section
-            SliverToBoxAdapter(
-              child: Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: isDesktop ? 80 : (isTablet ? 40 : 24),
-                  vertical: isDesktop ? 80 : 40,
-                ),
-                child: Column(
-                  children: [
-                    // Main CTA Section
-                    _buildMainCTASection(context, l10n, isDesktop, isTablet),
-
-                    const SizedBox(height: 80),
-
-                    // Features Grid
-                    _buildFeaturesGrid(context, l10n, isDesktop, isTablet),
-
-                    const SizedBox(height: 80),
-
-                    // User Types Section
-                    _buildUserTypesSection(context, l10n, isDesktop, isTablet),
-
-                    const SizedBox(height: 80),
-
-                    // Pricing Section
-                    _buildPricingSection(context, l10n, isDesktop, isTablet),
-
-                    const SizedBox(height: 80),
-
-                    // Stats Section
-                    _buildStatsSection(context, l10n, isDesktop, isTablet),
-
-                    const SizedBox(height: 80),
-
-                    // Testimonials Section
-                    _buildTestimonialsSection(
+          // Main Content
+          Expanded(
+            child: CustomScrollView(
+              slivers: [
+                // Ultra Modern Hero Section
+                SliverAppBar(
+                  expandedHeight: isDesktop ? 800 : (isTablet ? 650 : 400),
+                  floating: false,
+                  pinned: true,
+                  elevation: 0,
+                  backgroundColor: const Color(0xFF0A0E27),
+                  automaticallyImplyLeading: false,
+                  flexibleSpace: FlexibleSpaceBar(
+                    titlePadding: EdgeInsets.zero,
+                    background: _buildModernHeroSection(
                       context,
                       l10n,
                       isDesktop,
                       isTablet,
                     ),
-                  ],
+                  ),
+                  bottom: PreferredSize(
+                    preferredSize: const Size.fromHeight(0),
+                    child: Container(
+                      height: 30,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(30),
+                          topRight: Radius.circular(30),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ),
 
-            // Modern Footer
-            SliverToBoxAdapter(
-              child: _buildModernFooter(context, l10n, isDesktop),
+                // Main Content Section
+                SliverToBoxAdapter(
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isDesktop ? 80 : (isTablet ? 40 : 24),
+                      vertical: isDesktop ? 80 : 40,
+                    ),
+                    child: Column(
+                      children: [
+                        // Main CTA Section
+                        _buildMainCTASection(
+                          context,
+                          l10n,
+                          isDesktop,
+                          isTablet,
+                        ),
+
+                        const SizedBox(height: 80),
+
+                        // Features Grid
+                        _buildFeaturesGrid(context, l10n, isDesktop, isTablet),
+
+                        const SizedBox(height: 80),
+
+                        // User Types Section
+                        _buildUserTypesSection(
+                          context,
+                          l10n,
+                          isDesktop,
+                          isTablet,
+                        ),
+
+                        const SizedBox(height: 80),
+
+                        // Pricing Section
+                        _buildPricingSection(
+                          context,
+                          l10n,
+                          isDesktop,
+                          isTablet,
+                        ),
+
+                        const SizedBox(height: 80),
+
+                        // Stats Section
+                        _buildStatsSection(context, l10n, isDesktop, isTablet),
+
+                        const SizedBox(height: 80),
+
+                        // Testimonials Section
+                        _buildTestimonialsSection(
+                          context,
+                          l10n,
+                          isDesktop,
+                          isTablet,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Modern Footer
+                SliverToBoxAdapter(
+                  child: _buildModernFooter(context, l10n, isDesktop),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

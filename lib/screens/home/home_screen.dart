@@ -208,14 +208,32 @@ class _HomeScreenState extends State<HomeScreen> {
 
         // Non chiamare _validateAndResetSelectedIndex qui per evitare loop infiniti
 
-        return ResponsiveLayout(
-          showMenu: true,
-          selectedIndex: _selectedIndex,
-          onDestinationSelected: _onDestinationSelected,
-          // title: 'JetCV', // Rimosso
-          // actions: [const AppBarLanguageDropdown()], // Rimosso
-          // hideAppBar: false, // Rimosso - usa il default true
-          child: _buildContent(authProvider.userType ?? AppUserType.user),
+        return Scaffold(
+          backgroundColor: Colors.white,
+          body: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF0A0E27),
+                  Color(0xFF1A1F3A),
+                  Color(0xFF2D1B69),
+                  Color(0xFF6366F1),
+                ],
+                stops: [0.0, 0.3, 0.7, 1.0],
+              ),
+            ),
+            child: ResponsiveLayout(
+              showMenu: true,
+              selectedIndex: _selectedIndex,
+              onDestinationSelected: _onDestinationSelected,
+              // title: 'JetCV', // Rimosso
+              // actions: [const AppBarLanguageDropdown()], // Rimosso
+              // hideAppBar: false, // Rimosso - usa il default true
+              child: _buildContent(authProvider.userType ?? AppUserType.user),
+            ),
+          ),
         );
       },
     );
@@ -382,7 +400,13 @@ class _DashboardContent extends StatelessWidget {
         if (user == null) return const SizedBox();
 
         return Container(
-          color: AppTheme.offWhite,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(30),
+              topRight: Radius.circular(30),
+            ),
+          ),
           child: SingleChildScrollView(
             padding: ResponsivePadding.screen(context),
             child: Column(
@@ -1025,7 +1049,13 @@ class _UserSettingsContentState extends State<UserSettingsContent> {
     final isTablet = screenWidth > 768;
 
     return Container(
-      color: AppTheme.offWhite,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(30),
+          topRight: Radius.circular(30),
+        ),
+      ),
       child: SingleChildScrollView(
         padding: ResponsivePadding.screen(context),
         child: Column(

@@ -7,6 +7,7 @@ import '../../theme/app_theme.dart';
 import '../../widgets/neon_text_field.dart';
 import '../../widgets/neon_button.dart';
 import '../../widgets/international_phone_field.dart';
+import '../../widgets/public_top_bar.dart';
 import '../../services/veriff_service.dart';
 import '../../services/supabase_service.dart';
 import '../../l10n/app_localizations.dart';
@@ -968,491 +969,567 @@ class _SignupScreenState extends State<SignupScreen> {
 
         // Altrimenti mostra il form di signup normale
         return Scaffold(
-          body: SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const SizedBox(height: 20),
+          backgroundColor: Colors.white,
+          body: Column(
+            children: [
+              // Top Bar
+              const PublicTopBar(showBackButton: true),
 
-                    // Back Button
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.arrow_back),
-                        style: IconButton.styleFrom(
-                          backgroundColor: Colors.grey[100],
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // Logo and Title
-                    Center(
-                      child: Column(
-                        children: [
-                          Container(
-                            width: 80,
-                            height: 80,
-                            decoration: BoxDecoration(
-                              color: Color(AppConfig.primaryColorValue),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: const Icon(
-                              Icons.person_add,
-                              size: 40,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          Text(
-                            l10n.getString('create_account'),
-                            style: Theme.of(context).textTheme.headlineMedium
-                                ?.copyWith(fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            l10n.getString(
-                              'join_professional_certification_platform',
-                            ),
-                            style: Theme.of(context).textTheme.bodyLarge
-                                ?.copyWith(color: Colors.grey[600]),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 32),
-
-                    // Name Fields
-                    Row(
-                      children: [
-                        Expanded(
-                          child: NeonTextField(
-                            controller: _firstNameController,
-                            labelText: l10n.getString('first_name'),
-                            hintText: l10n.getString('enter_first_name'),
-                            prefixIcon: const Icon(Icons.person_outline),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return l10n.getString('first_name_required');
-                              }
-                              if (value.length > AppConfig.maxNameLength) {
-                                return l10n.getString('first_name_too_long');
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: NeonTextField(
-                            controller: _lastNameController,
-                            labelText: l10n.getString('last_name'),
-                            hintText: l10n.getString('enter_last_name'),
-                            prefixIcon: const Icon(Icons.person_outline),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return l10n.getString('last_name_required');
-                              }
-                              if (value.length > AppConfig.maxNameLength) {
-                                return l10n.getString('last_name_too_long');
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
+              // Main Content
+              Expanded(
+                child: Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Color(0xFF0A0E27),
+                        Color(0xFF1A1F3A),
+                        Color(0xFF2D1B69),
+                        Color(0xFF6366F1),
                       ],
+                      stops: [0.0, 0.3, 0.7, 1.0],
                     ),
-
-                    const SizedBox(height: 20),
-
-                    // Email Field
-                    NeonTextField(
-                      controller: _emailController,
-                      labelText: l10n.getString('email'),
-                      hintText: l10n.getString('enter_your_email'),
-                      keyboardType: TextInputType.emailAddress,
-                      prefixIcon: const Icon(Icons.email_outlined),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return l10n.getString('email_required');
-                        }
-                        if (!RegExp(
-                          r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                        ).hasMatch(value)) {
-                          return l10n.getString('email_invalid');
-                        }
-                        if (value.length > AppConfig.maxEmailLength) {
-                          return l10n.getString('email_too_long');
-                        }
-                        return null;
-                      },
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // Phone Field
-                    InternationalPhoneField(
-                      controller: _phoneController,
-                      label: l10n.getString('phone_optional'),
-                      hint: l10n.getString('enter_phone_number'),
-                      initialCountryCode: _selectedCountryCode,
-                      onCountryCodeChanged: (countryCode) {
-                        setState(() {
-                          _selectedCountryCode = countryCode;
-                        });
-                      },
-                      onPhoneNumberChanged: (phoneNumber) {
-                        // Il controller viene aggiornato automaticamente
-                      },
-                      validator: (value) {
-                        if (value != null &&
-                            value.isNotEmpty &&
-                            value.length > AppConfig.maxPhoneLength) {
-                          return l10n.getString('phone_number_too_long');
-                        }
-                        return null;
-                      },
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // Password Fields
-                    Row(
-                      children: [
-                        Expanded(
-                          child: NeonTextField(
-                            controller: _passwordController,
-                            labelText: l10n.getString('password'),
-                            hintText: l10n.getString('enter_password'),
-                            obscureText: _obscurePassword,
-                            prefixIcon: const Icon(Icons.lock_outlined),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _obscurePassword
-                                    ? Icons.visibility
-                                    : Icons.visibility_off,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _obscurePassword = !_obscurePassword;
-                                });
-                              },
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return l10n.getString('password_required');
-                              }
-                              if (value.length < AppConfig.minPasswordLength) {
-                                return l10n.getString('password_min_length');
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: NeonTextField(
-                            controller: _confirmPasswordController,
-                            labelText: l10n.getString('confirm_password'),
-                            hintText: l10n.getString('confirm_password'),
-                            obscureText: _obscureConfirmPassword,
-                            prefixIcon: const Icon(Icons.lock_outlined),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _obscureConfirmPassword
-                                    ? Icons.visibility
-                                    : Icons.visibility_off,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _obscureConfirmPassword =
-                                      !_obscureConfirmPassword;
-                                });
-                              },
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return l10n.getString(
-                                  'please_confirm_password',
-                                );
-                              }
-                              if (value != _passwordController.text) {
-                                return l10n.getString('passwords_do_not_match');
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // Terms and Privacy
-                    Column(
-                      children: [
-                        Row(
+                  ),
+                  child: SafeArea(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(24),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Checkbox(
-                              value: _agreeToTerms,
-                              onChanged: (value) {
-                                setState(() {
-                                  _agreeToTerms = value ?? false;
-                                });
-                              },
-                            ),
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    _agreeToTerms = !_agreeToTerms;
-                                  });
-                                },
-                                child: RichText(
-                                  text: TextSpan(
-                                    text: l10n.getString('i_accept_the'),
-                                    style: TextStyle(color: Colors.grey[700]),
-                                    children: [
-                                      TextSpan(
-                                        text: l10n.getString(
-                                          'terms_of_service',
-                                        ),
-                                        style: TextStyle(
-                                          color: Color(
-                                            AppConfig.primaryColorValue,
-                                          ),
-                                          decoration: TextDecoration.underline,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Checkbox(
-                              value: _agreeToPrivacy,
-                              onChanged: (value) {
-                                setState(() {
-                                  _agreeToPrivacy = value ?? false;
-                                });
-                              },
-                            ),
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    _agreeToPrivacy = !_agreeToPrivacy;
-                                  });
-                                },
-                                child: RichText(
-                                  text: TextSpan(
-                                    text: l10n.getString('i_accept_the'),
-                                    style: TextStyle(color: Colors.grey[700]),
-                                    children: [
-                                      TextSpan(
-                                        text: l10n.getString('privacy_policy'),
-                                        style: TextStyle(
-                                          color: Color(
-                                            AppConfig.primaryColorValue,
-                                          ),
-                                          decoration: TextDecoration.underline,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                            const SizedBox(height: 20),
 
-                    const SizedBox(height: 32),
-
-                    // Sign Up Button
-                    Consumer<AuthProvider>(
-                      builder: (context, authProvider, child) {
-                        return NeonButton(
-                          onPressed: _signUp,
-                          text: _isVeriffLoading
-                              ? l10n.getString('verification_in_progress')
-                              : l10n.getString('create_account'),
-                          icon: _isVeriffLoading
-                              ? Icons.hourglass_empty
-                              : Icons.person_add,
-                          isLoading: authProvider.isLoading || _isVeriffLoading,
-                          neonColor: AppTheme.accentGreen,
-                        );
-                      },
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // Divider
-                    Row(
-                      children: [
-                        Expanded(child: Divider(color: AppTheme.primaryBlack)),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Text(
-                            l10n.getString('or'),
-                            style: TextStyle(
-                              color: AppTheme.primaryBlack,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                        Expanded(child: Divider(color: AppTheme.primaryBlack)),
-                      ],
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // Google Sign Up Button
-                    Consumer<AuthProvider>(
-                      builder: (context, authProvider, child) {
-                        return NeonButton(
-                          onPressed: authProvider.isLoading
-                              ? null
-                              : _signInWithGoogle,
-                          text: l10n.getString('sign_up_with_google'),
-                          icon: Icons.g_mobiledata,
-                          isLoading: authProvider.isLoading,
-                          isOutlined: true,
-                          neonColor: AppTheme.accentBlue,
-                        );
-                      },
-                    ),
-
-                    const SizedBox(height: 32),
-
-                    // Login Link
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          l10n.getString('already_have_account'),
-                          style: TextStyle(color: AppTheme.primaryBlack),
-                        ),
-                        TextButton(
-                          onPressed: () =>
-                              Navigator.pushReplacementNamed(context, '/login'),
-                          child: Text(
-                            l10n.getString('sign_in'),
-                            style: TextStyle(color: AppTheme.accentGreen),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    // Error Message
-                    Consumer<AuthProvider>(
-                      builder: (context, authProvider, child) {
-                        if (authProvider.errorMessage != null) {
-                          return Padding(
-                            padding: const EdgeInsets.only(top: 16),
-                            child: Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: AppTheme.accentOrange.withValues(
-                                  alpha: 0.1,
-                                ),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: AppTheme.accentOrange,
-                                ),
-                              ),
-                              child: Row(
+                            // Logo and Title
+                            Center(
+                              child: Column(
                                 children: [
-                                  Icon(
-                                    Icons.error_outline,
-                                    color: AppTheme.accentOrange,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      authProvider.errorMessage!,
-                                      style: TextStyle(
-                                        color: AppTheme.accentOrange,
-                                      ),
+                                  Container(
+                                    width: 80,
+                                    height: 80,
+                                    decoration: BoxDecoration(
+                                      color: Color(AppConfig.primaryColorValue),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: const Icon(
+                                      Icons.person_add,
+                                      size: 40,
+                                      color: Colors.white,
                                     ),
                                   ),
-                                  IconButton(
-                                    icon: Icon(
-                                      Icons.close,
-                                      color: AppTheme.accentOrange,
+                                  const SizedBox(height: 24),
+                                  Text(
+                                    l10n.getString('create_account'),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineMedium
+                                        ?.copyWith(fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    l10n.getString(
+                                      'join_professional_certification_platform',
                                     ),
-                                    onPressed: authProvider.clearError,
-                                    iconSize: 20,
+                                    style: Theme.of(context).textTheme.bodyLarge
+                                        ?.copyWith(color: Colors.grey[600]),
+                                    textAlign: TextAlign.center,
                                   ),
                                 ],
                               ),
                             ),
-                          );
-                        }
-                        return const SizedBox.shrink();
-                      },
-                    ),
 
-                    // Veriff Error Message
-                    if (_veriffErrorMessage != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 16),
-                        child: Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: AppTheme.accentOrange.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: AppTheme.accentOrange),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.error_outline,
-                                color: AppTheme.accentOrange,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  _veriffErrorMessage!,
+                            const SizedBox(height: 32),
+
+                            // Name Fields
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: NeonTextField(
+                                    controller: _firstNameController,
+                                    labelText: l10n.getString('first_name'),
+                                    hintText: l10n.getString(
+                                      'enter_first_name',
+                                    ),
+                                    prefixIcon: const Icon(
+                                      Icons.person_outline,
+                                    ),
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return l10n.getString(
+                                          'first_name_required',
+                                        );
+                                      }
+                                      if (value.length >
+                                          AppConfig.maxNameLength) {
+                                        return l10n.getString(
+                                          'first_name_too_long',
+                                        );
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: NeonTextField(
+                                    controller: _lastNameController,
+                                    labelText: l10n.getString('last_name'),
+                                    hintText: l10n.getString('enter_last_name'),
+                                    prefixIcon: const Icon(
+                                      Icons.person_outline,
+                                    ),
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return l10n.getString(
+                                          'last_name_required',
+                                        );
+                                      }
+                                      if (value.length >
+                                          AppConfig.maxNameLength) {
+                                        return l10n.getString(
+                                          'last_name_too_long',
+                                        );
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 20),
+
+                            // Email Field
+                            NeonTextField(
+                              controller: _emailController,
+                              labelText: l10n.getString('email'),
+                              hintText: l10n.getString('enter_your_email'),
+                              keyboardType: TextInputType.emailAddress,
+                              prefixIcon: const Icon(Icons.email_outlined),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return l10n.getString('email_required');
+                                }
+                                if (!RegExp(
+                                  r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                                ).hasMatch(value)) {
+                                  return l10n.getString('email_invalid');
+                                }
+                                if (value.length > AppConfig.maxEmailLength) {
+                                  return l10n.getString('email_too_long');
+                                }
+                                return null;
+                              },
+                            ),
+
+                            const SizedBox(height: 20),
+
+                            // Phone Field
+                            InternationalPhoneField(
+                              controller: _phoneController,
+                              label: l10n.getString('phone_optional'),
+                              hint: l10n.getString('enter_phone_number'),
+                              initialCountryCode: _selectedCountryCode,
+                              onCountryCodeChanged: (countryCode) {
+                                setState(() {
+                                  _selectedCountryCode = countryCode;
+                                });
+                              },
+                              onPhoneNumberChanged: (phoneNumber) {
+                                // Il controller viene aggiornato automaticamente
+                              },
+                              validator: (value) {
+                                if (value != null &&
+                                    value.isNotEmpty &&
+                                    value.length > AppConfig.maxPhoneLength) {
+                                  return l10n.getString(
+                                    'phone_number_too_long',
+                                  );
+                                }
+                                return null;
+                              },
+                            ),
+
+                            const SizedBox(height: 20),
+
+                            // Password Fields
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: NeonTextField(
+                                    controller: _passwordController,
+                                    labelText: l10n.getString('password'),
+                                    hintText: l10n.getString('enter_password'),
+                                    obscureText: _obscurePassword,
+                                    prefixIcon: const Icon(Icons.lock_outlined),
+                                    suffixIcon: IconButton(
+                                      icon: Icon(
+                                        _obscurePassword
+                                            ? Icons.visibility
+                                            : Icons.visibility_off,
+                                      ),
+                                      onPressed: () {
+                                        setState(() {
+                                          _obscurePassword = !_obscurePassword;
+                                        });
+                                      },
+                                    ),
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return l10n.getString(
+                                          'password_required',
+                                        );
+                                      }
+                                      if (value.length <
+                                          AppConfig.minPasswordLength) {
+                                        return l10n.getString(
+                                          'password_min_length',
+                                        );
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: NeonTextField(
+                                    controller: _confirmPasswordController,
+                                    labelText: l10n.getString(
+                                      'confirm_password',
+                                    ),
+                                    hintText: l10n.getString(
+                                      'confirm_password',
+                                    ),
+                                    obscureText: _obscureConfirmPassword,
+                                    prefixIcon: const Icon(Icons.lock_outlined),
+                                    suffixIcon: IconButton(
+                                      icon: Icon(
+                                        _obscureConfirmPassword
+                                            ? Icons.visibility
+                                            : Icons.visibility_off,
+                                      ),
+                                      onPressed: () {
+                                        setState(() {
+                                          _obscureConfirmPassword =
+                                              !_obscureConfirmPassword;
+                                        });
+                                      },
+                                    ),
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return l10n.getString(
+                                          'please_confirm_password',
+                                        );
+                                      }
+                                      if (value != _passwordController.text) {
+                                        return l10n.getString(
+                                          'passwords_do_not_match',
+                                        );
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 24),
+
+                            // Terms and Privacy
+                            Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    Checkbox(
+                                      value: _agreeToTerms,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          _agreeToTerms = value ?? false;
+                                        });
+                                      },
+                                    ),
+                                    Expanded(
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          setState(() {
+                                            _agreeToTerms = !_agreeToTerms;
+                                          });
+                                        },
+                                        child: RichText(
+                                          text: TextSpan(
+                                            text: l10n.getString(
+                                              'i_accept_the',
+                                            ),
+                                            style: TextStyle(
+                                              color: Colors.grey[700],
+                                            ),
+                                            children: [
+                                              TextSpan(
+                                                text: l10n.getString(
+                                                  'terms_of_service',
+                                                ),
+                                                style: TextStyle(
+                                                  color: Color(
+                                                    AppConfig.primaryColorValue,
+                                                  ),
+                                                  decoration:
+                                                      TextDecoration.underline,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    Checkbox(
+                                      value: _agreeToPrivacy,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          _agreeToPrivacy = value ?? false;
+                                        });
+                                      },
+                                    ),
+                                    Expanded(
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          setState(() {
+                                            _agreeToPrivacy = !_agreeToPrivacy;
+                                          });
+                                        },
+                                        child: RichText(
+                                          text: TextSpan(
+                                            text: l10n.getString(
+                                              'i_accept_the',
+                                            ),
+                                            style: TextStyle(
+                                              color: Colors.grey[700],
+                                            ),
+                                            children: [
+                                              TextSpan(
+                                                text: l10n.getString(
+                                                  'privacy_policy',
+                                                ),
+                                                style: TextStyle(
+                                                  color: Color(
+                                                    AppConfig.primaryColorValue,
+                                                  ),
+                                                  decoration:
+                                                      TextDecoration.underline,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 32),
+
+                            // Sign Up Button
+                            Consumer<AuthProvider>(
+                              builder: (context, authProvider, child) {
+                                return NeonButton(
+                                  onPressed: _signUp,
+                                  text: _isVeriffLoading
+                                      ? l10n.getString(
+                                          'verification_in_progress',
+                                        )
+                                      : l10n.getString('create_account'),
+                                  icon: _isVeriffLoading
+                                      ? Icons.hourglass_empty
+                                      : Icons.person_add,
+                                  isLoading:
+                                      authProvider.isLoading ||
+                                      _isVeriffLoading,
+                                  neonColor: AppTheme.accentGreen,
+                                );
+                              },
+                            ),
+
+                            const SizedBox(height: 24),
+
+                            // Divider
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Divider(color: AppTheme.primaryBlack),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                  ),
+                                  child: Text(
+                                    l10n.getString('or'),
+                                    style: TextStyle(
+                                      color: AppTheme.primaryBlack,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Divider(color: AppTheme.primaryBlack),
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 24),
+
+                            // Google Sign Up Button
+                            Consumer<AuthProvider>(
+                              builder: (context, authProvider, child) {
+                                return NeonButton(
+                                  onPressed: authProvider.isLoading
+                                      ? null
+                                      : _signInWithGoogle,
+                                  text: l10n.getString('sign_up_with_google'),
+                                  icon: Icons.g_mobiledata,
+                                  isLoading: authProvider.isLoading,
+                                  isOutlined: true,
+                                  neonColor: AppTheme.accentBlue,
+                                );
+                              },
+                            ),
+
+                            const SizedBox(height: 32),
+
+                            // Login Link
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  l10n.getString('already_have_account'),
                                   style: TextStyle(
                                     color: AppTheme.primaryBlack,
                                   ),
                                 ),
-                              ),
-                              IconButton(
-                                icon: Icon(
-                                  Icons.close,
-                                  color: AppTheme.accentOrange,
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.pushReplacementNamed(
+                                        context,
+                                        '/login',
+                                      ),
+                                  child: Text(
+                                    l10n.getString('sign_in'),
+                                    style: TextStyle(
+                                      color: AppTheme.accentGreen,
+                                    ),
+                                  ),
                                 ),
-                                onPressed: () {
-                                  setState(() {
-                                    _veriffErrorMessage = null;
-                                  });
-                                },
-                                iconSize: 20,
+                              ],
+                            ),
+
+                            // Error Message
+                            Consumer<AuthProvider>(
+                              builder: (context, authProvider, child) {
+                                if (authProvider.errorMessage != null) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(top: 16),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color: AppTheme.accentOrange.withValues(
+                                          alpha: 0.1,
+                                        ),
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(
+                                          color: AppTheme.accentOrange,
+                                        ),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.error_outline,
+                                            color: AppTheme.accentOrange,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: Text(
+                                              authProvider.errorMessage!,
+                                              style: TextStyle(
+                                                color: AppTheme.accentOrange,
+                                              ),
+                                            ),
+                                          ),
+                                          IconButton(
+                                            icon: Icon(
+                                              Icons.close,
+                                              color: AppTheme.accentOrange,
+                                            ),
+                                            onPressed: authProvider.clearError,
+                                            iconSize: 20,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                }
+                                return const SizedBox.shrink();
+                              },
+                            ),
+
+                            // Veriff Error Message
+                            if (_veriffErrorMessage != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 16),
+                                child: Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.accentOrange.withValues(
+                                      alpha: 0.1,
+                                    ),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: AppTheme.accentOrange,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.error_outline,
+                                        color: AppTheme.accentOrange,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          _veriffErrorMessage!,
+                                          style: TextStyle(
+                                            color: AppTheme.primaryBlack,
+                                          ),
+                                        ),
+                                      ),
+                                      IconButton(
+                                        icon: Icon(
+                                          Icons.close,
+                                          color: AppTheme.accentOrange,
+                                        ),
+                                        onPressed: () {
+                                          setState(() {
+                                            _veriffErrorMessage = null;
+                                          });
+                                        },
+                                        iconSize: 20,
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
-                            ],
-                          ),
+                          ],
                         ),
                       ),
-                  ],
+                    ),
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
         );
       },

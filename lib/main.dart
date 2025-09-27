@@ -26,6 +26,10 @@ import 'screens/home/home_screen.dart';
 import 'screens/admin/admin_dashboard_screen.dart';
 import 'screens/public/public_home_screen.dart';
 import 'screens/public/user_type_selection_screen.dart';
+import 'screens/public/certifier_info_screen.dart';
+import 'screens/public/legal_entity_info_screen.dart';
+import 'screens/public/features_screen.dart';
+import 'screens/public/contacts_screen.dart';
 import 'screens/certification/create_certification_screen.dart';
 import 'screens/certification/certification_detail_screen.dart';
 import 'screens/certifiers/certifiers_screen.dart';
@@ -361,6 +365,10 @@ class _AppContentState extends State<AppContent> with WidgetsBindingObserver {
                 const LegalEntityRegistrationScreen(),
             '/certifier/register': (context) => const SignupScreen(),
             '/public-home': (context) => const PublicHomeScreen(),
+            '/certifier-info': (context) => const CertifierInfoScreen(),
+            '/legal-entity-info': (context) => const LegalEntityInfoScreen(),
+            '/features': (context) => const FeaturesScreen(),
+            '/contacts': (context) => const ContactsScreen(),
           },
           onGenerateRoute: (settings) {
             // Handle direct URL access and ensure authentication state is restored

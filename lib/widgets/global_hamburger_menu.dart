@@ -80,32 +80,17 @@ class GlobalHamburgerMenu extends StatelessWidget {
         if (authProvider.isLoading) {
           return Container(
             width: menuWidth,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 10,
-                  offset: const Offset(2, 0),
-                ),
-              ],
-            ),
             child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      AppTheme.primaryBlue,
-                    ),
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                   ),
                   SizedBox(height: 16),
                   Text(
                     l10n.getString('loading'),
-                    style: TextStyle(
-                      color: AppTheme.textSecondary,
-                      fontSize: 12,
-                    ),
+                    style: TextStyle(color: Colors.white, fontSize: 12),
                   ),
                 ],
               ),
@@ -117,16 +102,6 @@ class GlobalHamburgerMenu extends StatelessWidget {
         if (authProvider.errorMessage != null) {
           return Container(
             width: menuWidth,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 10,
-                  offset: const Offset(2, 0),
-                ),
-              ],
-            ),
             child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -135,10 +110,7 @@ class GlobalHamburgerMenu extends StatelessWidget {
                   SizedBox(height: 16),
                   Text(
                     l10n.getString('error_loading_data'),
-                    style: TextStyle(
-                      color: AppTheme.textSecondary,
-                      fontSize: 12,
-                    ),
+                    style: TextStyle(color: Colors.white, fontSize: 12),
                     textAlign: TextAlign.center,
                   ),
                   SizedBox(height: 8),
@@ -149,7 +121,7 @@ class GlobalHamburgerMenu extends StatelessWidget {
                     },
                     child: Text(
                       l10n.getString('retry'),
-                      style: TextStyle(fontSize: 10),
+                      style: TextStyle(fontSize: 10, color: Colors.white),
                     ),
                   ),
                 ],
@@ -161,16 +133,6 @@ class GlobalHamburgerMenu extends StatelessWidget {
         return AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           width: menuWidth,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 10,
-                offset: const Offset(2, 0),
-              ),
-            ],
-          ),
           child: Column(
             children: [
               // Header del menu
@@ -244,23 +206,39 @@ class GlobalHamburgerMenu extends StatelessWidget {
                                             }
                                           },
                                           itemBuilder: (context) => [
-                                            const PopupMenuItem(
+                                            PopupMenuItem(
                                               value: 'profile',
                                               child: Row(
                                                 children: [
-                                                  Icon(Icons.person),
+                                                  Icon(
+                                                    Icons.person,
+                                                    color: Colors.black,
+                                                  ),
                                                   SizedBox(width: 8),
-                                                  Text('Profilo'),
+                                                  Text(
+                                                    l10n.getString('profile'),
+                                                    style: TextStyle(
+                                                      color: Colors.black,
+                                                    ),
+                                                  ),
                                                 ],
                                               ),
                                             ),
-                                            const PopupMenuItem(
+                                            PopupMenuItem(
                                               value: 'logout',
                                               child: Row(
                                                 children: [
-                                                  Icon(Icons.logout),
+                                                  Icon(
+                                                    Icons.logout,
+                                                    color: Colors.black,
+                                                  ),
                                                   SizedBox(width: 8),
-                                                  Text('Logout'),
+                                                  Text(
+                                                    l10n.getString('logout'),
+                                                    style: TextStyle(
+                                                      color: Colors.black,
+                                                    ),
+                                                  ),
                                                 ],
                                               ),
                                             ),
@@ -487,9 +465,7 @@ class GlobalHamburgerMenu extends StatelessWidget {
             : 2,
       ),
       child: Material(
-        color: isSelected
-            ? AppTheme.primaryBlue.withOpacity(0.1)
-            : Colors.transparent,
+        color: isSelected ? Colors.white.withOpacity(0.15) : Colors.transparent,
         borderRadius: BorderRadius.circular(8),
         child: InkWell(
           borderRadius: BorderRadius.circular(8),
@@ -514,8 +490,8 @@ class GlobalHamburgerMenu extends StatelessWidget {
                 Icon(
                   icon,
                   color: isSelected
-                      ? AppTheme.primaryBlue
-                      : AppTheme.textSecondary,
+                      ? Colors.white
+                      : Colors.white.withOpacity(0.7),
                   size: isExtraSmall
                       ? 16
                       : isMobile
@@ -535,8 +511,8 @@ class GlobalHamburgerMenu extends StatelessWidget {
                       label,
                       style: TextStyle(
                         color: isSelected
-                            ? AppTheme.primaryBlue
-                            : AppTheme.textPrimary,
+                            ? Colors.white
+                            : Colors.white.withOpacity(0.8),
                         fontWeight: isSelected
                             ? FontWeight.w600
                             : FontWeight.normal,
@@ -572,7 +548,7 @@ class GlobalHamburgerMenu extends StatelessWidget {
             : 8,
       ),
       child: Material(
-        color: Colors.red[50],
+        color: Colors.red.withOpacity(0.1),
         borderRadius: BorderRadius.circular(8),
         child: InkWell(
           borderRadius: BorderRadius.circular(8),
@@ -612,7 +588,7 @@ class GlobalHamburgerMenu extends StatelessWidget {
                   child: Text(
                     l10n.getString('logout'),
                     style: TextStyle(
-                      color: Colors.red[600],
+                      color: Colors.red[400],
                       fontWeight: FontWeight.w500,
                       fontSize: isExtraSmall
                           ? 12

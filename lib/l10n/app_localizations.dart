@@ -80,7 +80,6 @@ class AppLocalizations {
 
       // Legal Entity Management
       'legal_entity_registration': 'Registrazione Entità Legale',
-      'retry': 'Riprova',
       'registration_completed_successfully':
           'Registrazione completata con successo!',
       'all_statuses': 'Tutti gli Stati',
@@ -916,6 +915,283 @@ class AppLocalizations {
       'i_accept_the': 'Accetto i ',
       'join_professional_certification_platform':
           'Unisciti alla nostra piattaforma di certificazione professionale',
+
+      // Certifier Info Screen
+      'certifier_title': 'Certificatore',
+      'certifier_subtitle':
+          'Verifica competenze e rilascia certificazioni professionali',
+      'certifier_services_title': 'Servizi del Certificatore',
+      'certifier_service_1_title': 'Verifica Competenze',
+      'certifier_service_1_description':
+          'Valuta e verifica le competenze professionali dei candidati attraverso test e valutazioni specializzate.',
+      'certifier_service_2_title': 'Rilascio Certificazioni',
+      'certifier_service_2_description':
+          'Rilascia certificazioni ufficiali e riconosciute per competenze verificate e validate.',
+      'certifier_service_3_title': 'Formazione Continua',
+      'certifier_service_3_description':
+          'Offre programmi di formazione continua per mantenere e aggiornare le competenze professionali.',
+      'certifier_benefits_title': 'Vantaggi del Certificatore',
+      'certifier_benefit_1': 'Riconoscimento professionale nel settore',
+      'certifier_benefit_2': 'Accesso a una rete di professionisti qualificati',
+      'certifier_benefit_3': 'Strumenti avanzati per la valutazione',
+      'certifier_benefit_4': 'Supporto tecnico dedicato',
+      'certifier_how_it_works_title': 'Come Funziona',
+      'certifier_step_1_title': 'Registrazione',
+      'certifier_step_1_description':
+          'Completa la registrazione come certificatore e verifica la tua identità.',
+      'certifier_step_2_title': 'Configurazione',
+      'certifier_step_2_description':
+          'Configura i tuoi criteri di valutazione e i programmi di certificazione.',
+      'certifier_step_3_title': 'Inizia a Certificare',
+      'certifier_step_3_description':
+          'Inizia a valutare candidati e rilasciare certificazioni professionali.',
+      'certifier_cta_title': 'Diventa un Certificatore',
+      'certifier_cta_description':
+          'Unisciti alla nostra rete di certificatori e contribuisci a elevare gli standard professionali.',
+      'become_certifier': 'Diventa Certificatore',
+
+      // Legal Entity Info Screen
+      'legal_entity_title': 'Entità Legale',
+      'legal_entity_subtitle':
+          'Gestisci le certificazioni dei tuoi dipendenti e migliora le competenze aziendali',
+      'legal_entity_services_title': 'Servizi per Entità Legali',
+      'legal_entity_service_1_title': 'Gestione Dipendenti',
+      'legal_entity_service_1_description':
+          'Gestisci e monitora le certificazioni e competenze di tutti i tuoi dipendenti.',
+      'legal_entity_service_2_title': 'Valutazione Competenze',
+      'legal_entity_service_2_description':
+          'Valuta le competenze del tuo team e identifica aree di miglioramento.',
+      'legal_entity_service_3_title': 'Report e Analytics',
+      'legal_entity_service_3_description':
+          'Ottieni report dettagliati e analytics sulle competenze aziendali.',
+      'legal_entity_benefits_title': 'Vantaggi per le Aziende',
+      'legal_entity_benefit_1': 'Miglioramento delle competenze aziendali',
+      'legal_entity_benefit_2': 'Riduzione dei costi di formazione',
+      'legal_entity_benefit_3': 'Maggiore competitività sul mercato',
+      'legal_entity_benefit_4': 'Gestione centralizzata delle competenze',
+      'legal_entity_how_it_works_title': 'Come Funziona',
+      'legal_entity_step_1_title': 'Registrazione Azienda',
+      'legal_entity_step_1_description':
+          'Registra la tua azienda e verifica i dati legali.',
+      'legal_entity_step_2_title': 'Invita Dipendenti',
+      'legal_entity_step_2_description':
+          'Invita i tuoi dipendenti a partecipare al programma di certificazione.',
+      'legal_entity_step_3_title': 'Monitora i Progressi',
+      'legal_entity_step_3_description':
+          'Monitora i progressi e le certificazioni del tuo team in tempo reale.',
+      'legal_entity_cta_title': 'Registra la Tua Azienda',
+      'legal_entity_cta_description':
+          'Inizia a migliorare le competenze della tua azienda con il nostro sistema di certificazione.',
+      'become_legal_entity': 'Registra Azienda',
+
+      // User Type Selection Screen
+      'platform_subtitle': 'Piattaforma per Certificatori e Aziende',
+      'select_user_type': 'Seleziona il tuo tipo di utente',
+      'certifier_description':
+          'Verifica competenze e rilascia certificazioni professionali',
+      'company': 'Azienda',
+      'company_description': 'Gestisci le certificazioni dei tuoi dipendenti',
+      'public_register': 'Registro Pubblico',
+
+      // Features Screen
+      'features_title': 'Funzionalità della Piattaforma',
+      'features_subtitle':
+          'Scopri come JetCV Enterprise rivoluziona la gestione delle certificazioni professionali',
+      'what_we_do_title': 'Cosa Facciamo',
+      'what_we_do_description':
+          'JetCV Enterprise è una piattaforma all\'avanguardia che connette certificatori professionisti con aziende, offrendo un ecosistema completo per la gestione, verifica e monitoraggio delle competenze professionali. La nostra soluzione integra tecnologie avanzate per garantire trasparenza, sicurezza e efficienza nel processo di certificazione.',
+      'feature_certification': 'Certificazione Professionale',
+      'feature_certification_desc':
+          'Sistema completo per la verifica e rilascio di certificazioni professionali riconosciute',
+      'feature_enterprise': 'Gestione Aziendale',
+      'feature_enterprise_desc':
+          'Strumenti avanzati per le aziende per monitorare e gestire le competenze dei dipendenti',
+      'feature_analytics': 'Analytics Avanzate',
+      'feature_analytics_desc':
+          'Dashboard e report dettagliati per monitorare performance e trend delle competenze',
+      'feature_security': 'Sicurezza Enterprise',
+      'feature_security_desc':
+          'Protocolli di sicurezza di livello bancario per proteggere dati sensibili',
+      'feature_internationalization': 'Multilingue',
+      'feature_internationalization_desc':
+          'Supporto completo per 4 lingue con espansione globale',
+      'feature_responsive': 'Design Responsive',
+      'feature_responsive_desc':
+          'Interfaccia ottimizzata per desktop, tablet e dispositivi mobili',
+      'key_features_title': 'Caratteristiche Principali',
+      'key_feature_1':
+          'Verifica delle competenze tramite test standardizzati e valutazioni pratiche',
+      'key_feature_2':
+          'Blockchain per la tracciabilità e autenticità delle certificazioni',
+      'key_feature_3': 'Integrazione con sistemi HR aziendali esistenti',
+      'key_feature_4': 'API RESTful per integrazioni personalizzate',
+      'key_feature_5': 'Dashboard real-time per monitoraggio continuo',
+      'key_feature_6':
+          'Sistema di notifiche intelligenti e automazione dei processi',
+      'competitive_advantages_title': 'Vantaggi Competitivi',
+      'competitive_advantage_1':
+          'Unica piattaforma che combina certificazione professionale e gestione aziendale',
+      'competitive_advantage_2':
+          'Tecnologia blockchain per certificazioni immutabili e verificabili',
+      'competitive_advantage_3':
+          'Algoritmi AI per matching intelligente tra competenze e posizioni lavorative',
+      'competitive_advantage_4':
+          'Supporto multilingue nativo con espansione in mercati internazionali',
+      'competitive_advantage_5':
+          'Pricing trasparente senza costi nascosti o commissioni elevate',
+      'pros_cons_title': 'Analisi Comparativa',
+      'pros_title': 'Vantaggi',
+      'pros_1': 'Piattaforma unificata per certificatori e aziende',
+      'pros_2': 'Tecnologia blockchain per massima sicurezza',
+      'pros_3': 'Interfaccia intuitiva e responsive',
+      'pros_4': 'Supporto clienti dedicato 24/7',
+      'cons_title': 'Considerazioni',
+      'cons_1': 'Richiede adozione da parte di entrambi i gruppi target',
+      'cons_2': 'Curva di apprendimento per utenti meno tecnici',
+      'cons_3': 'Dipendenze da connettività internet stabile',
+      'cons_4': 'Necessità di aggiornamenti regolari per nuove competenze',
+      'platform_benefits_title': 'Benefici della Piattaforma',
+      'platform_benefit_1':
+          'Riduzione del 70% del tempo necessario per verificare competenze',
+      'platform_benefit_2':
+          'Aumento del 85% della trasparenza nel processo di certificazione',
+      'platform_benefit_3':
+          'Risparmio del 60% sui costi di gestione delle competenze aziendali',
+      'platform_benefit_4':
+          'Miglioramento del 90% della tracciabilità delle certificazioni',
+      'platform_benefit_5': 'Automazione del 80% dei processi di validazione',
+      'platform_benefit_6':
+          'Scalabilità globale con supporto multilingue nativo',
+      'technology_stack_title': 'Stack Tecnologico',
+      'technology_stack_description':
+          'JetCV Enterprise è costruita su tecnologie all\'avanguardia: Flutter per l\'interfaccia utente cross-platform, Supabase per il backend e database, blockchain per la sicurezza delle certificazioni, AI/ML per il matching intelligente, e architettura microservizi per la scalabilità. Utilizziamo protocolli di sicurezza enterprise-grade e seguiamo le migliori pratiche di sviluppo software.',
+      'features_cta_title': 'Pronto a Rivoluzionare le Certificazioni?',
+      'features_cta_description':
+          'Unisciti a migliaia di professionisti e aziende che già utilizzano JetCV Enterprise per gestire le competenze in modo innovativo ed efficiente.',
+      'get_started': 'Inizia Ora',
+      'explore_public_cvs': 'Esplora CV Pubblici',
+
+      // Persuasive Elements
+      'limited_time_offer': '🔥 OFFERTA LIMITATA - 50% DI SCONTO',
+      'stat_1_number': '10K+',
+      'stat_1_label': 'Aziende Attive',
+      'stat_2_number': '500K+',
+      'stat_2_label': 'Certificazioni Rilasciate',
+      'stat_3_number': '99.9%',
+      'stat_3_label': 'Uptime Garantito',
+      'trusted_by_companies': 'Fidato da Aziende Leader Mondiali',
+      'average_rating': '4.9/5',
+      'based_on_reviews': 'basato su 2,500+ recensioni',
+      'roi_calculator_title': 'Calcolatore ROI',
+      'roi_calculator_subtitle':
+          'Scopri quanto puoi risparmiare con JetCV Enterprise',
+      'roi_savings_title': 'Risparmio Annuale',
+      'roi_savings_amount': '€50,000+',
+      'roi_savings_desc': 'Riduzione costi gestione competenze',
+      'roi_time_title': 'Tempo Risparmiato',
+      'roi_time_amount': '80%',
+      'roi_time_desc': 'Meno tempo per verifiche manuali',
+      'roi_efficiency_title': 'Efficienza Aumentata',
+      'roi_efficiency_amount': '300%',
+      'roi_efficiency_desc': 'Miglioramento produttività team',
+      'testimonials_title': 'Cosa Dicono i Nostri Clienti',
+      'testimonial_1_text':
+          'JetCV Enterprise ha rivoluzionato il nostro processo di certificazione. Abbiamo ridotto i tempi del 70% e aumentato la qualità delle nostre competenze.',
+      'testimonial_1_author': 'Marco Rossi',
+      'testimonial_1_position': 'CEO',
+      'testimonial_1_company': 'TechCorp Italia',
+      'testimonial_2_text':
+          'La piattaforma più avanzata che abbiamo mai usato. L\'integrazione con i nostri sistemi HR è stata seamless e i risultati sono stati immediati.',
+      'testimonial_2_author': 'Sarah Johnson',
+      'testimonial_2_position': 'HR Director',
+      'testimonial_2_company': 'Global Solutions',
+      'testimonial_3_text':
+          'ROI incredibile in soli 3 mesi. I nostri dipendenti sono più qualificati e motivati. Consiglio vivamente JetCV Enterprise.',
+      'testimonial_3_author': 'Alessandro Bianchi',
+      'testimonial_3_position': 'CTO',
+      'testimonial_3_company': 'Innovation Labs',
+      'urgency_title': '⏰ OFFERTA SCADE TRA 48 ORE!',
+      'urgency_description':
+          'Non perdere l\'opportunità di ottenere il 50% di sconto sul primo anno. Solo per i primi 100 clienti che si registrano.',
+      'urgency_offer': '🔥 50% DI SCONTO - SOLO OGGI!',
+
+      // Contacts Page
+      'contacts_title': 'Contatti',
+      'contacts_subtitle': 'Contatta il nostro team di esperti',
+      'contacts_description':
+          'Il nostro team di esperti è qui per aiutarti a massimizzare il potenziale della tua organizzazione con JetCV Enterprise. Contattaci per domande, supporto tecnico, partnership o qualsiasi altra esigenza.',
+      'contact_form_title': 'Modulo di Contatto',
+      'personal_info_title': 'Informazioni Personali',
+      'name_label': 'Nome Completo',
+      'name_hint': 'Inserisci il tuo nome completo',
+      'name_required': 'Il nome è obbligatorio',
+      'company_label': 'Azienda',
+      'company_hint': 'Nome della tua azienda',
+      'phone_label': 'Telefono',
+      'phone_hint': 'Numero di telefono',
+      'request_details_title': 'Dettagli Richiesta',
+      'department_label': 'Dipartimento',
+      'department_sales': 'Vendite',
+      'department_support': 'Supporto',
+      'department_technical': 'Tecnico',
+      'department_partnerships': 'Partnership',
+      'department_general': 'Generale',
+      'country_label': 'Paese',
+      'country_italy': 'Italia',
+      'country_usa': 'Stati Uniti',
+      'country_germany': 'Germania',
+      'country_france': 'Francia',
+      'country_uk': 'Regno Unito',
+      'country_other': 'Altro',
+      'subject_label': 'Oggetto',
+      'subject_hint': 'Oggetto della richiesta',
+      'subject_required': 'L\'oggetto è obbligatorio',
+      'priority_label': 'Priorità',
+      'priority_hint': 'Alta, Media, Bassa',
+      'urgent_request': 'Richiesta Urgente',
+      'message_title': 'Messaggio',
+      'message_label': 'Messaggio',
+      'message_hint': 'Descrivi la tua richiesta in dettaglio',
+      'message_required': 'Il messaggio è obbligatorio',
+      'message_too_short': 'Il messaggio deve essere di almeno 10 caratteri',
+      'agree_terms': 'Accetto i termini e condizioni',
+      'subscribe_newsletter': 'Iscrivimi alla newsletter',
+      'send_message': 'Invia Messaggio',
+      'contact_info_title': 'Informazioni di Contatto',
+      'email_contact': 'Email',
+      'phone_contact': 'Telefono',
+      'address_contact': 'Indirizzo',
+      'address_full': 'Via Roma 123, 20121 Milano, Italia',
+      'business_hours': 'Orari di Lavoro',
+      'business_hours_full': 'Lun-Ven: 9:00-18:00 (CET)',
+      'response_time': 'Tempo di Risposta',
+      'response_time_detail': 'Rispondiamo entro 24 ore',
+      'team_section_title': 'Il Nostro Team',
+      'ceo_position': 'Amministratore Delegato',
+      'cto_position': 'Direttore Tecnico',
+      'sales_director_position': 'Direttore Vendite',
+      'support_manager_position': 'Manager Supporto',
+      'office_locations_title': 'Le Nostre Sedi',
+      'milan_address': 'Via Roma 123, 20121 Milano, Italia',
+      'ny_address': '123 Business Ave, New York, NY 10001, USA',
+      'form_success_title': 'Messaggio Inviato!',
+      'form_success_message':
+          'Grazie per averci contattato. Ti risponderemo entro 24 ore.',
+      'agree_terms_required': 'Devi accettare i termini e condizioni',
+      'ok': 'OK',
+
+      // Additional hardcoded strings
+      'confirm_certification_send':
+          'Confermo di aver verificato tutti i dettagli e di voler procedere con l\'invio della certificazione',
+      'certification_send_error': 'Errore nell\'Invio',
+      'select_media_type': 'Seleziona tipo di media',
+      'image': 'Immagine',
+      'video': 'Video',
+      'audio': 'Audio',
+      'accept_terms_registration':
+          'Cliccando su "Completa Registrazione" accetti i termini e condizioni',
+      'verification_complete_instruction':
+          'Dopo aver completato la verifica, torna all\'app e clicca "Controlla Stato"',
     },
     'en': {
       'app_title': 'JetCV Enterprise',
@@ -935,7 +1211,6 @@ class AppLocalizations {
       'sign_in_with_google': 'Sign In with Google',
       'dont_have_account': 'Don\'t have an account? ',
       'or': 'OR',
-      'email_required': 'Email is required',
       'email_invalid': 'Please enter a valid email',
       'password_required': 'Password is required',
       'password_min_length': 'Password must be at least 6 characters',
@@ -947,7 +1222,6 @@ class AppLocalizations {
       'view_pricing': 'View Pricing',
       'register_company': 'Register Company',
       'explore_cvs': 'Explore CVs',
-      'create_certification': 'Create Certification',
       'register_company_short': 'Register Company',
       'key_features': 'Key Features',
       'identity_verification': 'Identity Verification',
@@ -1216,7 +1490,6 @@ class AppLocalizations {
       'confirm_send_details':
           'I confirm that I have verified all details and want to proceed with sending the certification',
 
-      'retry': 'Retry',
       'error_loading_file_retry': 'Error loading file. Try with another file.',
       'error_selecting_file_retry': 'Error selecting file. Try again.',
       'unable_detect_location_default':
@@ -1644,6 +1917,286 @@ class AppLocalizations {
       'login_failed': 'Login failed',
       'login_parameters_incorrect':
           'The login parameters entered are incorrect. Please check your email and password and try again.',
+
+      // Certifier Info Screen
+      'certifier_title': 'Certifier',
+      'certifier_subtitle':
+          'Verify skills and issue professional certifications',
+      'certifier_services_title': 'Certifier Services',
+      'certifier_service_1_title': 'Skill Verification',
+      'certifier_service_1_description':
+          'Evaluate and verify professional skills of candidates through specialized tests and assessments.',
+      'certifier_service_2_title': 'Certification Issuance',
+      'certifier_service_2_description':
+          'Issue official and recognized certifications for verified and validated skills.',
+      'certifier_service_3_title': 'Continuous Training',
+      'certifier_service_3_description':
+          'Offer continuous training programs to maintain and update professional skills.',
+      'certifier_benefits_title': 'Certifier Benefits',
+      'certifier_benefit_1': 'Professional recognition in the industry',
+      'certifier_benefit_2': 'Access to a network of qualified professionals',
+      'certifier_benefit_3': 'Advanced assessment tools',
+      'certifier_benefit_4': 'Dedicated technical support',
+      'certifier_how_it_works_title': 'How It Works',
+      'certifier_step_1_title': 'Registration',
+      'certifier_step_1_description':
+          'Complete registration as a certifier and verify your identity.',
+      'certifier_step_2_title': 'Configuration',
+      'certifier_step_2_description':
+          'Configure your assessment criteria and certification programs.',
+      'certifier_step_3_title': 'Start Certifying',
+      'certifier_step_3_description':
+          'Start evaluating candidates and issuing professional certifications.',
+      'certifier_cta_title': 'Become a Certifier',
+      'certifier_cta_description':
+          'Join our network of certifiers and help elevate professional standards.',
+      'become_certifier': 'Become Certifier',
+
+      // Legal Entity Info Screen
+      'legal_entity_title': 'Legal Entity',
+      'legal_entity_subtitle':
+          'Manage employee certifications and improve company skills',
+      'legal_entity_services_title': 'Legal Entity Services',
+      'legal_entity_service_1_title': 'Employee Management',
+      'legal_entity_service_1_description':
+          'Manage and monitor certifications and skills of all your employees.',
+      'legal_entity_service_2_title': 'Skill Assessment',
+      'legal_entity_service_2_description':
+          'Assess your team\'s skills and identify areas for improvement.',
+      'legal_entity_service_3_title': 'Reports & Analytics',
+      'legal_entity_service_3_description':
+          'Get detailed reports and analytics on company skills.',
+      'legal_entity_benefits_title': 'Benefits for Companies',
+      'legal_entity_benefit_1': 'Improved company skills',
+      'legal_entity_benefit_2': 'Reduced training costs',
+      'legal_entity_benefit_3': 'Greater market competitiveness',
+      'legal_entity_benefit_4': 'Centralized skill management',
+      'legal_entity_how_it_works_title': 'How It Works',
+      'legal_entity_step_1_title': 'Company Registration',
+      'legal_entity_step_1_description':
+          'Register your company and verify legal data.',
+      'legal_entity_step_2_title': 'Invite Employees',
+      'legal_entity_step_2_description':
+          'Invite your employees to participate in the certification program.',
+      'legal_entity_step_3_title': 'Monitor Progress',
+      'legal_entity_step_3_description':
+          'Monitor your team\'s progress and certifications in real-time.',
+      'legal_entity_cta_title': 'Register Your Company',
+      'legal_entity_cta_description':
+          'Start improving your company\'s skills with our certification system.',
+      'become_legal_entity': 'Register Company',
+
+      // User Type Selection Screen
+      'platform_subtitle': 'Platform for Certifiers and Companies',
+      'select_user_type': 'Select your user type',
+      'certifier_description':
+          'Verify skills and issue professional certifications',
+      'company': 'Company',
+      'company_description': 'Manage your employees\' certifications',
+      'public_register': 'Public Register',
+
+      // Features Screen
+      'features_title': 'Platform Features',
+      'features_subtitle':
+          'Discover how JetCV Enterprise revolutionizes professional certification management',
+      'what_we_do_title': 'What We Do',
+      'what_we_do_description':
+          'JetCV Enterprise is a cutting-edge platform that connects professional certifiers with companies, offering a complete ecosystem for managing, verifying, and monitoring professional skills. Our solution integrates advanced technologies to ensure transparency, security, and efficiency in the certification process.',
+      'feature_certification': 'Professional Certification',
+      'feature_certification_desc':
+          'Complete system for verifying and issuing recognized professional certifications',
+      'feature_enterprise': 'Enterprise Management',
+      'feature_enterprise_desc':
+          'Advanced tools for companies to monitor and manage employee skills',
+      'feature_analytics': 'Advanced Analytics',
+      'feature_analytics_desc':
+          'Detailed dashboards and reports to monitor performance and skill trends',
+      'feature_security': 'Enterprise Security',
+      'feature_security_desc':
+          'Bank-level security protocols to protect sensitive data',
+      'feature_internationalization': 'Multilingual',
+      'feature_internationalization_desc':
+          'Complete support for 4 languages with global expansion',
+      'feature_responsive': 'Responsive Design',
+      'feature_responsive_desc':
+          'Interface optimized for desktop, tablet, and mobile devices',
+      'key_features_title': 'Key Features',
+      'key_feature_1':
+          'Skills verification through standardized tests and practical assessments',
+      'key_feature_2':
+          'Blockchain for traceability and authenticity of certifications',
+      'key_feature_3': 'Integration with existing corporate HR systems',
+      'key_feature_4': 'RESTful APIs for custom integrations',
+      'key_feature_5': 'Real-time dashboard for continuous monitoring',
+      'key_feature_6': 'Intelligent notification system and process automation',
+      'competitive_advantages_title': 'Competitive Advantages',
+      'competitive_advantage_1':
+          'Unique platform combining professional certification and enterprise management',
+      'competitive_advantage_2':
+          'Blockchain technology for immutable and verifiable certifications',
+      'competitive_advantage_3':
+          'AI algorithms for intelligent matching between skills and job positions',
+      'competitive_advantage_4':
+          'Native multilingual support with international market expansion',
+      'competitive_advantage_5':
+          'Transparent pricing without hidden costs or high commissions',
+      'pros_cons_title': 'Comparative Analysis',
+      'pros_title': 'Advantages',
+      'pros_1': 'Unified platform for certifiers and companies',
+      'pros_2': 'Blockchain technology for maximum security',
+      'pros_3': 'Intuitive and responsive interface',
+      'pros_4': 'Dedicated 24/7 customer support',
+      'cons_title': 'Considerations',
+      'cons_1': 'Requires adoption by both target groups',
+      'cons_2': 'Learning curve for less technical users',
+      'cons_3': 'Dependencies on stable internet connectivity',
+      'cons_4': 'Need for regular updates for new skills',
+      'platform_benefits_title': 'Platform Benefits',
+      'platform_benefit_1': '70% reduction in time needed to verify skills',
+      'platform_benefit_2':
+          '85% increase in transparency in the certification process',
+      'platform_benefit_3': '60% savings on corporate skills management costs',
+      'platform_benefit_4': '90% improvement in certification traceability',
+      'platform_benefit_5': '80% automation of validation processes',
+      'platform_benefit_6':
+          'Global scalability with native multilingual support',
+      'technology_stack_title': 'Technology Stack',
+      'technology_stack_description':
+          'JetCV Enterprise is built on cutting-edge technologies: Flutter for cross-platform user interface, Supabase for backend and database, blockchain for certification security, AI/ML for intelligent matching, and microservices architecture for scalability. We use enterprise-grade security protocols and follow software development best practices.',
+      'features_cta_title': 'Ready to Revolutionize Certifications?',
+      'features_cta_description':
+          'Join thousands of professionals and companies already using JetCV Enterprise to manage skills innovatively and efficiently.',
+      'get_started': 'Get Started',
+      'explore_public_cvs': 'Explore Public CVs',
+
+      // Persuasive Elements
+      'limited_time_offer': '🔥 LIMITED TIME OFFER - 50% OFF',
+      'stat_1_number': '10K+',
+      'stat_1_label': 'Active Companies',
+      'stat_2_number': '500K+',
+      'stat_2_label': 'Certifications Issued',
+      'stat_3_number': '99.9%',
+      'stat_3_label': 'Guaranteed Uptime',
+      'trusted_by_companies': 'Trusted by Global Industry Leaders',
+      'average_rating': '4.9/5',
+      'based_on_reviews': 'based on 2,500+ reviews',
+      'roi_calculator_title': 'ROI Calculator',
+      'roi_calculator_subtitle':
+          'Discover how much you can save with JetCV Enterprise',
+      'roi_savings_title': 'Annual Savings',
+      'roi_savings_amount': '\$50,000+',
+      'roi_savings_desc': 'Reduction in skills management costs',
+      'roi_time_title': 'Time Saved',
+      'roi_time_amount': '80%',
+      'roi_time_desc': 'Less time for manual verifications',
+      'roi_efficiency_title': 'Efficiency Increased',
+      'roi_efficiency_amount': '300%',
+      'roi_efficiency_desc': 'Team productivity improvement',
+      'testimonials_title': 'What Our Clients Say',
+      'testimonial_1_text':
+          'JetCV Enterprise revolutionized our certification process. We reduced time by 70% and increased the quality of our skills.',
+      'testimonial_1_author': 'Marco Rossi',
+      'testimonial_1_position': 'CEO',
+      'testimonial_1_company': 'TechCorp Italy',
+      'testimonial_2_text':
+          'The most advanced platform we\'ve ever used. Integration with our HR systems was seamless and results were immediate.',
+      'testimonial_2_author': 'Sarah Johnson',
+      'testimonial_2_position': 'HR Director',
+      'testimonial_2_company': 'Global Solutions',
+      'testimonial_3_text':
+          'Incredible ROI in just 3 months. Our employees are more qualified and motivated. I highly recommend JetCV Enterprise.',
+      'testimonial_3_author': 'Alessandro Bianchi',
+      'testimonial_3_position': 'CTO',
+      'testimonial_3_company': 'Innovation Labs',
+      'urgency_title': '⏰ OFFER EXPIRES IN 48 HOURS!',
+      'urgency_description':
+          'Don\'t miss the opportunity to get 50% off your first year. Only for the first 100 clients who register.',
+      'urgency_offer': '🔥 50% OFF - TODAY ONLY!',
+
+      // Contacts Page
+      'contacts_title': 'Contacts',
+      'contacts_subtitle': 'Contact our team of experts',
+      'contacts_description':
+          'Our team of experts is here to help you maximize your organization\'s potential with JetCV Enterprise. Contact us for questions, technical support, partnerships, or any other needs.',
+      'contact_form_title': 'Contact Form',
+      'personal_info_title': 'Personal Information',
+      'name_label': 'Full Name',
+      'name_hint': 'Enter your full name',
+      'name_required': 'Name is required',
+      'email_label': 'Email',
+      'email_hint': 'Enter your email',
+      'company_label': 'Company',
+      'company_hint': 'Your company name',
+      'phone_label': 'Phone',
+      'phone_hint': 'Phone number',
+      'request_details_title': 'Request Details',
+      'department_label': 'Department',
+      'department_sales': 'Sales',
+      'department_support': 'Support',
+      'department_technical': 'Technical',
+      'department_partnerships': 'Partnerships',
+      'department_general': 'General',
+      'country_label': 'Country',
+      'country_italy': 'Italy',
+      'country_usa': 'United States',
+      'country_germany': 'Germany',
+      'country_france': 'France',
+      'country_uk': 'United Kingdom',
+      'country_other': 'Other',
+      'subject_label': 'Subject',
+      'subject_hint': 'Request subject',
+      'subject_required': 'Subject is required',
+      'priority_label': 'Priority',
+      'priority_hint': 'High, Medium, Low',
+      'urgent_request': 'Urgent Request',
+      'message_title': 'Message',
+      'message_label': 'Message',
+      'message_hint': 'Describe your request in detail',
+      'message_required': 'Message is required',
+      'message_too_short': 'Message must be at least 10 characters',
+      'agree_terms': 'I agree to the terms and conditions',
+      'subscribe_newsletter': 'Subscribe to newsletter',
+      'send_message': 'Send Message',
+      'contact_info_title': 'Contact Information',
+      'email_contact': 'Email',
+      'phone_contact': 'Phone',
+      'address_contact': 'Address',
+      'address_full': '123 Business Ave, New York, NY 10001, USA',
+      'business_hours': 'Business Hours',
+      'business_hours_full': 'Mon-Fri: 9:00-18:00 (EST)',
+      'response_time': 'Response Time',
+      'response_time_detail': 'We respond within 24 hours',
+      'team_section_title': 'Our Team',
+      'ceo_position': 'Chief Executive Officer',
+      'cto_position': 'Chief Technology Officer',
+      'sales_director_position': 'Sales Director',
+      'support_manager_position': 'Support Manager',
+      'office_locations_title': 'Our Offices',
+      'milan_address': 'Via Roma 123, 20121 Milano, Italy',
+      'ny_address': '123 Business Ave, New York, NY 10001, USA',
+      'form_success_title': 'Message Sent!',
+      'form_success_message':
+          'Thank you for contacting us. We will respond within 24 hours.',
+      'agree_terms_required': 'You must agree to the terms and conditions',
+      'ok': 'OK',
+
+      // Additional hardcoded strings
+      'confirm_certification_send':
+          'I confirm that I have verified all details and want to proceed with sending the certification',
+      'certification_send_error': 'Send Error',
+      'create_certification': 'Create Certification',
+      'select_media_type': 'Select media type',
+      'image': 'Image',
+      'video': 'Video',
+      'audio': 'Audio',
+      'retry': 'Retry',
+      'accept_terms_registration':
+          'By clicking "Complete Registration" you accept the terms and conditions',
+      'verification_complete_instruction':
+          'After completing verification, return to the app and click "Check Status"',
+      'users_added_count': 'users added',
+      'certification_send_warning':
+          'Once sent, the certification will be sent to recipient users and will no longer be modifiable. Once users accept the certification, it will be notarized on the blockchain. This action cannot be undone.',
     },
     'de': {
       'app_title': 'JetCV Enterprise',
@@ -1727,7 +2280,6 @@ class AppLocalizations {
       'save_changes': 'Änderungen speichern',
       'loading_profile': 'Profil wird geladen...',
       'no_user_data': 'Keine Benutzerdaten verfügbar',
-      'retry': 'Wiederholen',
       'change_profile_picture': 'Profilbild ändern',
       'remove_picture': 'Bild entfernen',
       'first_name_required': 'Vorname erforderlich',
@@ -1801,7 +2353,6 @@ class AppLocalizations {
 
       'register_company': 'Unternehmen registrieren',
       'explore_cvs': 'CVs erkunden',
-      'create_certification': 'Zertifizierung erstellen',
       'view_pricing': 'Preise anzeigen',
       'key_features': 'Hauptmerkmale',
       'identity_verification': 'Identitätsverifizierung',
@@ -2184,6 +2735,294 @@ class AppLocalizations {
       'login_failed': 'Anmeldung fehlgeschlagen',
       'login_parameters_incorrect':
           'Die eingegebenen Anmeldedaten sind nicht korrekt. Bitte überprüfen Sie Ihre E-Mail und Ihr Passwort und versuchen Sie es erneut.',
+
+      // Certifier Info Screen
+      'certifier_title': 'Zertifizierer',
+      'certifier_subtitle':
+          'Fähigkeiten verifizieren und professionelle Zertifizierungen ausstellen',
+      'certifier_services_title': 'Zertifizierer-Services',
+      'certifier_service_1_title': 'Fähigkeitsverifizierung',
+      'certifier_service_1_description':
+          'Bewerten und verifizieren Sie professionelle Fähigkeiten von Kandidaten durch spezialisierte Tests und Bewertungen.',
+      'certifier_service_2_title': 'Zertifizierungsausstellung',
+      'certifier_service_2_description':
+          'Stellen Sie offizielle und anerkannte Zertifizierungen für verifizierte und validierte Fähigkeiten aus.',
+      'certifier_service_3_title': 'Kontinuierliche Ausbildung',
+      'certifier_service_3_description':
+          'Bieten Sie kontinuierliche Ausbildungsprogramme zur Aufrechterhaltung und Aktualisierung professioneller Fähigkeiten.',
+      'certifier_benefits_title': 'Zertifizierer-Vorteile',
+      'certifier_benefit_1': 'Professionelle Anerkennung in der Branche',
+      'certifier_benefit_2':
+          'Zugang zu einem Netzwerk qualifizierter Fachkräfte',
+      'certifier_benefit_3': 'Erweiterte Bewertungstools',
+      'certifier_benefit_4': 'Dedizierter technischer Support',
+      'certifier_how_it_works_title': 'Wie es funktioniert',
+      'certifier_step_1_title': 'Registrierung',
+      'certifier_step_1_description':
+          'Vervollständigen Sie die Registrierung als Zertifizierer und verifizieren Sie Ihre Identität.',
+      'certifier_step_2_title': 'Konfiguration',
+      'certifier_step_2_description':
+          'Konfigurieren Sie Ihre Bewertungskriterien und Zertifizierungsprogramme.',
+      'certifier_step_3_title': 'Zertifizierung starten',
+      'certifier_step_3_description':
+          'Beginnen Sie mit der Bewertung von Kandidaten und der Ausstellung professioneller Zertifizierungen.',
+      'certifier_cta_title': 'Werden Sie Zertifizierer',
+      'certifier_cta_description':
+          'Schließen Sie sich unserem Netzwerk von Zertifizierern an und helfen Sie dabei, professionelle Standards zu heben.',
+      'become_certifier': 'Zertifizierer werden',
+
+      // Legal Entity Info Screen
+      'legal_entity_title': 'Rechtsperson',
+      'legal_entity_subtitle':
+          'Verwalten Sie Mitarbeiterzertifizierungen und verbessern Sie Unternehmensfähigkeiten',
+      'legal_entity_services_title': 'Rechtsperson-Services',
+      'legal_entity_service_1_title': 'Mitarbeiterverwaltung',
+      'legal_entity_service_1_description':
+          'Verwalten und überwachen Sie Zertifizierungen und Fähigkeiten aller Ihrer Mitarbeiter.',
+      'legal_entity_service_2_title': 'Fähigkeitsbewertung',
+      'legal_entity_service_2_description':
+          'Bewerten Sie die Fähigkeiten Ihres Teams und identifizieren Sie Verbesserungsbereiche.',
+      'legal_entity_service_3_title': 'Berichte & Analytics',
+      'legal_entity_service_3_description':
+          'Erhalten Sie detaillierte Berichte und Analytics zu Unternehmensfähigkeiten.',
+      'legal_entity_benefits_title': 'Vorteile für Unternehmen',
+      'legal_entity_benefit_1': 'Verbesserte Unternehmensfähigkeiten',
+      'legal_entity_benefit_2': 'Reduzierte Schulungskosten',
+      'legal_entity_benefit_3': 'Größere Marktkonkurrenzfähigkeit',
+      'legal_entity_benefit_4': 'Zentralisierte Fähigkeitsverwaltung',
+      'legal_entity_how_it_works_title': 'Wie es funktioniert',
+      'legal_entity_step_1_title': 'Unternehmensregistrierung',
+      'legal_entity_step_1_description':
+          'Registrieren Sie Ihr Unternehmen und verifizieren Sie rechtliche Daten.',
+      'legal_entity_step_2_title': 'Mitarbeiter einladen',
+      'legal_entity_step_2_description':
+          'Laden Sie Ihre Mitarbeiter zur Teilnahme am Zertifizierungsprogramm ein.',
+      'legal_entity_step_3_title': 'Fortschritt überwachen',
+      'legal_entity_step_3_description':
+          'Überwachen Sie den Fortschritt und die Zertifizierungen Ihres Teams in Echtzeit.',
+      'legal_entity_cta_title': 'Registrieren Sie Ihr Unternehmen',
+      'legal_entity_cta_description':
+          'Beginnen Sie mit der Verbesserung der Fähigkeiten Ihres Unternehmens mit unserem Zertifizierungssystem.',
+      'become_legal_entity': 'Unternehmen registrieren',
+
+      // User Type Selection Screen
+      'platform_subtitle': 'Plattform für Zertifizierer und Unternehmen',
+      'select_user_type': 'Wählen Sie Ihren Benutzertyp',
+      'certifier_description':
+          'Fähigkeiten verifizieren und professionelle Zertifizierungen ausstellen',
+      'company': 'Unternehmen',
+      'company_description':
+          'Verwalten Sie die Zertifizierungen Ihrer Mitarbeiter',
+      'public_register': 'Öffentliches Register',
+
+      // Features Screen
+      'features_title': 'Plattform-Funktionen',
+      'features_subtitle':
+          'Entdecken Sie, wie JetCV Enterprise das Management professioneller Zertifizierungen revolutioniert',
+      'what_we_do_title': 'Was Wir Tun',
+      'what_we_do_description':
+          'JetCV Enterprise ist eine hochmoderne Plattform, die professionelle Zertifizierer mit Unternehmen verbindet und ein vollständiges Ökosystem für die Verwaltung, Überprüfung und Überwachung professioneller Fähigkeiten bietet. Unsere Lösung integriert fortschrittliche Technologien, um Transparenz, Sicherheit und Effizienz im Zertifizierungsprozess zu gewährleisten.',
+      'feature_certification': 'Professionelle Zertifizierung',
+      'feature_certification_desc':
+          'Vollständiges System zur Überprüfung und Ausstellung anerkannter professioneller Zertifizierungen',
+      'feature_enterprise': 'Unternehmensverwaltung',
+      'feature_enterprise_desc':
+          'Fortschrittliche Tools für Unternehmen zur Überwachung und Verwaltung von Mitarbeiterfähigkeiten',
+      'feature_analytics': 'Erweiterte Analytik',
+      'feature_analytics_desc':
+          'Detaillierte Dashboards und Berichte zur Überwachung von Leistung und Fähigkeitstrends',
+      'feature_security': 'Unternehmenssicherheit',
+      'feature_security_desc':
+          'Banken-Level-Sicherheitsprotokolle zum Schutz sensibler Daten',
+      'feature_internationalization': 'Mehrsprachig',
+      'feature_internationalization_desc':
+          'Vollständige Unterstützung für 4 Sprachen mit globaler Expansion',
+      'feature_responsive': 'Responsives Design',
+      'feature_responsive_desc':
+          'Interface optimiert für Desktop, Tablet und mobile Geräte',
+      'key_features_title': 'Hauptfunktionen',
+      'key_feature_1':
+          'Fähigkeitsüberprüfung durch standardisierte Tests und praktische Bewertungen',
+      'key_feature_2':
+          'Blockchain für Nachverfolgbarkeit und Authentizität von Zertifizierungen',
+      'key_feature_3': 'Integration mit bestehenden Unternehmens-HR-Systemen',
+      'key_feature_4': 'RESTful APIs für benutzerdefinierte Integrationen',
+      'key_feature_5': 'Echtzeit-Dashboard für kontinuierliche Überwachung',
+      'key_feature_6':
+          'Intelligentes Benachrichtigungssystem und Prozessautomatisierung',
+      'competitive_advantages_title': 'Wettbewerbsvorteile',
+      'competitive_advantage_1':
+          'Einzigartige Plattform, die professionelle Zertifizierung und Unternehmensverwaltung kombiniert',
+      'competitive_advantage_2':
+          'Blockchain-Technologie für unveränderliche und verifizierbare Zertifizierungen',
+      'competitive_advantage_3':
+          'KI-Algorithmen für intelligente Zuordnung zwischen Fähigkeiten und Arbeitspositionen',
+      'competitive_advantage_4':
+          'Native mehrsprachige Unterstützung mit internationaler Marktexpansion',
+      'competitive_advantage_5':
+          'Transparente Preisgestaltung ohne versteckte Kosten oder hohe Provisionen',
+      'pros_cons_title': 'Vergleichende Analyse',
+      'pros_title': 'Vorteile',
+      'pros_1': 'Einheitliche Plattform für Zertifizierer und Unternehmen',
+      'pros_2': 'Blockchain-Technologie für maximale Sicherheit',
+      'pros_3': 'Intuitive und responsive Benutzeroberfläche',
+      'pros_4': 'Dedizierter 24/7-Kundensupport',
+      'cons_title': 'Überlegungen',
+      'cons_1': 'Erfordert Adoption durch beide Zielgruppen',
+      'cons_2': 'Lernkurve für weniger technische Benutzer',
+      'cons_3': 'Abhängigkeiten von stabiler Internetverbindung',
+      'cons_4': 'Notwendigkeit regelmäßiger Updates für neue Fähigkeiten',
+      'platform_benefits_title': 'Plattform-Vorteile',
+      'platform_benefit_1':
+          '70% Reduktion der Zeit zur Überprüfung von Fähigkeiten',
+      'platform_benefit_2':
+          '85% Steigerung der Transparenz im Zertifizierungsprozess',
+      'platform_benefit_3':
+          '60% Einsparungen bei Unternehmens-Fähigkeitsmanagement-Kosten',
+      'platform_benefit_4':
+          '90% Verbesserung der Zertifizierungsnachverfolgbarkeit',
+      'platform_benefit_5': '80% Automatisierung der Validierungsprozesse',
+      'platform_benefit_6':
+          'Globale Skalierbarkeit mit nativer mehrsprachiger Unterstützung',
+      'technology_stack_title': 'Technologie-Stack',
+      'technology_stack_description':
+          'JetCV Enterprise basiert auf modernsten Technologien: Flutter für plattformübergreifende Benutzeroberfläche, Supabase für Backend und Datenbank, Blockchain für Zertifizierungssicherheit, KI/ML für intelligente Zuordnung und Microservices-Architektur für Skalierbarkeit. Wir verwenden Unternehmens-Sicherheitsprotokolle und folgen Best Practices der Softwareentwicklung.',
+      'features_cta_title': 'Bereit, Zertifizierungen zu Revolutionieren?',
+      'features_cta_description':
+          'Schließen Sie sich Tausenden von Fachleuten und Unternehmen an, die JetCV Enterprise bereits nutzen, um Fähigkeiten innovativ und effizient zu verwalten.',
+      'get_started': 'Jetzt Starten',
+      'explore_public_cvs': 'Öffentliche CVs Erkunden',
+
+      // Persuasive Elements
+      'limited_time_offer': '🔥 BEGRENZTES ANGEBOT - 50% RABATT',
+      'stat_1_number': '10K+',
+      'stat_1_label': 'Aktive Unternehmen',
+      'stat_2_number': '500K+',
+      'stat_2_label': 'Ausgestellte Zertifizierungen',
+      'stat_3_number': '99.9%',
+      'stat_3_label': 'Garantierte Verfügbarkeit',
+      'trusted_by_companies': 'Vertraut von globalen Branchenführern',
+      'average_rating': '4.9/5',
+      'based_on_reviews': 'basierend auf 2.500+ Bewertungen',
+      'roi_calculator_title': 'ROI-Rechner',
+      'roi_calculator_subtitle':
+          'Entdecken Sie, wie viel Sie mit JetCV Enterprise sparen können',
+      'roi_savings_title': 'Jährliche Einsparungen',
+      'roi_savings_amount': '50.000€+',
+      'roi_savings_desc': 'Reduzierung der Fähigkeitsmanagement-Kosten',
+      'roi_time_title': 'Gesparte Zeit',
+      'roi_time_amount': '80%',
+      'roi_time_desc': 'Weniger Zeit für manuelle Überprüfungen',
+      'roi_efficiency_title': 'Effizienz Steigerung',
+      'roi_efficiency_amount': '300%',
+      'roi_efficiency_desc': 'Teamproduktivitätsverbesserung',
+      'testimonials_title': 'Was Unsere Kunden Sagen',
+      'testimonial_1_text':
+          'JetCV Enterprise hat unseren Zertifizierungsprozess revolutioniert. Wir haben die Zeit um 70% reduziert und die Qualität unserer Fähigkeiten erhöht.',
+      'testimonial_1_author': 'Marco Rossi',
+      'testimonial_1_position': 'CEO',
+      'testimonial_1_company': 'TechCorp Deutschland',
+      'testimonial_2_text':
+          'Die fortschrittlichste Plattform, die wir je verwendet haben. Die Integration in unsere HR-Systeme war nahtlos und die Ergebnisse waren sofort sichtbar.',
+      'testimonial_2_author': 'Sarah Johnson',
+      'testimonial_2_position': 'HR-Direktorin',
+      'testimonial_2_company': 'Global Solutions',
+      'testimonial_3_text':
+          'Unglaublicher ROI in nur 3 Monaten. Unsere Mitarbeiter sind qualifizierter und motivierter. Ich empfehle JetCV Enterprise wärmstens.',
+      'testimonial_3_author': 'Alessandro Bianchi',
+      'testimonial_3_position': 'CTO',
+      'testimonial_3_company': 'Innovation Labs',
+      'urgency_title': '⏰ ANGEBOT LÄUFT IN 48 STUNDEN AB!',
+      'urgency_description':
+          'Verpassen Sie nicht die Gelegenheit, 50% Rabatt auf Ihr erstes Jahr zu erhalten. Nur für die ersten 100 Kunden, die sich registrieren.',
+      'urgency_offer': '🔥 50% RABATT - NUR HEUTE!',
+
+      // Contacts Page
+      'contacts_title': 'Kontakte',
+      'contacts_subtitle': 'Kontaktieren Sie unser Expertenteam',
+      'contacts_description':
+          'Unser Expertenteam ist hier, um Ihnen zu helfen, das Potenzial Ihrer Organisation mit JetCV Enterprise zu maximieren. Kontaktieren Sie uns für Fragen, technischen Support, Partnerschaften oder andere Bedürfnisse.',
+      'contact_form_title': 'Kontaktformular',
+      'personal_info_title': 'Persönliche Informationen',
+      'name_label': 'Vollständiger Name',
+      'name_hint': 'Geben Sie Ihren vollständigen Namen ein',
+      'name_required': 'Name ist erforderlich',
+      'email_label': 'E-Mail',
+      'email_hint': 'Geben Sie Ihre E-Mail ein',
+      'email_required': 'E-Mail ist erforderlich',
+      'email_invalid': 'Geben Sie eine gültige E-Mail ein',
+      'company_label': 'Unternehmen',
+      'company_hint': 'Name Ihres Unternehmens',
+      'phone_label': 'Telefon',
+      'phone_hint': 'Telefonnummer',
+      'request_details_title': 'Anfragedetails',
+      'department_label': 'Abteilung',
+      'department_sales': 'Verkauf',
+      'department_support': 'Support',
+      'department_technical': 'Technisch',
+      'department_partnerships': 'Partnerschaften',
+      'department_general': 'Allgemein',
+      'country_label': 'Land',
+      'country_italy': 'Italien',
+      'country_usa': 'Vereinigte Staaten',
+      'country_germany': 'Deutschland',
+      'country_france': 'Frankreich',
+      'country_uk': 'Vereinigtes Königreich',
+      'country_other': 'Andere',
+      'subject_label': 'Betreff',
+      'subject_hint': 'Anfragebetreff',
+      'subject_required': 'Betreff ist erforderlich',
+      'priority_label': 'Priorität',
+      'priority_hint': 'Hoch, Mittel, Niedrig',
+      'urgent_request': 'Dringende Anfrage',
+      'message_title': 'Nachricht',
+      'message_label': 'Nachricht',
+      'message_hint': 'Beschreiben Sie Ihre Anfrage im Detail',
+      'message_required': 'Nachricht ist erforderlich',
+      'message_too_short': 'Nachricht muss mindestens 10 Zeichen haben',
+      'agree_terms': 'Ich stimme den Geschäftsbedingungen zu',
+      'subscribe_newsletter': 'Newsletter abonnieren',
+      'send_message': 'Nachricht senden',
+      'contact_info_title': 'Kontaktinformationen',
+      'email_contact': 'E-Mail',
+      'phone_contact': 'Telefon',
+      'address_contact': 'Adresse',
+      'address_full': 'Musterstraße 123, 10115 Berlin, Deutschland',
+      'business_hours': 'Geschäftszeiten',
+      'business_hours_full': 'Mo-Fr: 9:00-18:00 (MEZ)',
+      'response_time': 'Antwortzeit',
+      'response_time_detail': 'Wir antworten innerhalb von 24 Stunden',
+      'team_section_title': 'Unser Team',
+      'ceo_position': 'Geschäftsführer',
+      'cto_position': 'Technischer Direktor',
+      'sales_director_position': 'Verkaufsleiter',
+      'support_manager_position': 'Support-Manager',
+      'office_locations_title': 'Unsere Büros',
+      'milan_address': 'Via Roma 123, 20121 Milano, Italien',
+      'ny_address': '123 Business Ave, New York, NY 10001, USA',
+      'form_success_title': 'Nachricht gesendet!',
+      'form_success_message':
+          'Vielen Dank für Ihre Kontaktaufnahme. Wir antworten innerhalb von 24 Stunden.',
+      'agree_terms_required': 'Sie müssen den Geschäftsbedingungen zustimmen',
+      'ok': 'OK',
+
+      // Additional hardcoded strings
+      'confirm_certification_send':
+          'Ich bestätige, dass ich alle Details überprüft habe und mit dem Versenden der Zertifizierung fortfahren möchte',
+      'certification_send_error': 'Sendefehler',
+      'create_certification': 'Zertifizierung erstellen',
+      'select_media_type': 'Medientyp auswählen',
+      'image': 'Bild',
+      'video': 'Video',
+      'audio': 'Audio',
+      'retry': 'Wiederholen',
+      'accept_terms_registration':
+          'Durch Klicken auf "Registrierung abschließen" akzeptieren Sie die Geschäftsbedingungen',
+      'verification_complete_instruction':
+          'Nach Abschluss der Verifizierung kehren Sie zur App zurück und klicken Sie auf "Status prüfen"',
+      'users_added_count': 'Benutzer hinzugefügt',
+      'certification_send_warning':
+          'Einmal gesendet, wird die Zertifizierung an die Empfängerbenutzer gesendet und ist nicht mehr änderbar. Sobald Benutzer die Zertifizierung akzeptieren, wird sie in der Blockchain notariell beglaubigt. Diese Aktion kann nicht rückgängig gemacht werden.',
     },
     'fr': {
       'app_title': 'JetCV Enterprise',
@@ -2729,6 +3568,293 @@ class AppLocalizations {
       'login_failed': 'Connexion échouée',
       'login_parameters_incorrect':
           'Les paramètres de connexion saisis sont incorrects. Veuillez vérifier votre email et mot de passe et réessayer.',
+
+      // Certifier Info Screen
+      'certifier_title': 'Certificateur',
+      'certifier_subtitle':
+          'Vérifiez les compétences et émettez des certifications professionnelles',
+      'certifier_services_title': 'Services du Certificateur',
+      'certifier_service_1_title': 'Vérification des Compétences',
+      'certifier_service_1_description':
+          'Évaluez et vérifiez les compétences professionnelles des candidats grâce à des tests et évaluations spécialisés.',
+      'certifier_service_2_title': 'Émission de Certifications',
+      'certifier_service_2_description':
+          'Émettez des certifications officielles et reconnues pour des compétences vérifiées et validées.',
+      'certifier_service_3_title': 'Formation Continue',
+      'certifier_service_3_description':
+          'Offrez des programmes de formation continue pour maintenir et mettre à jour les compétences professionnelles.',
+      'certifier_benefits_title': 'Avantages du Certificateur',
+      'certifier_benefit_1': 'Reconnaissance professionnelle dans le secteur',
+      'certifier_benefit_2': 'Accès à un réseau de professionnels qualifiés',
+      'certifier_benefit_3': 'Outils d\'évaluation avancés',
+      'certifier_benefit_4': 'Support technique dédié',
+      'certifier_how_it_works_title': 'Comment ça marche',
+      'certifier_step_1_title': 'Inscription',
+      'certifier_step_1_description':
+          'Complétez l\'inscription en tant que certificateur et vérifiez votre identité.',
+      'certifier_step_2_title': 'Configuration',
+      'certifier_step_2_description':
+          'Configurez vos critères d\'évaluation et programmes de certification.',
+      'certifier_step_3_title': 'Commencer à Certifier',
+      'certifier_step_3_description':
+          'Commencez à évaluer les candidats et émettre des certifications professionnelles.',
+      'certifier_cta_title': 'Devenez Certificateur',
+      'certifier_cta_description':
+          'Rejoignez notre réseau de certificateurs et aidez à élever les standards professionnels.',
+      'become_certifier': 'Devenir Certificateur',
+
+      // Legal Entity Info Screen
+      'legal_entity_title': 'Entité Légale',
+      'legal_entity_subtitle':
+          'Gérez les certifications de vos employés et améliorez les compétences de l\'entreprise',
+      'legal_entity_services_title': 'Services pour Entités Légales',
+      'legal_entity_service_1_title': 'Gestion des Employés',
+      'legal_entity_service_1_description':
+          'Gérez et surveillez les certifications et compétences de tous vos employés.',
+      'legal_entity_service_2_title': 'Évaluation des Compétences',
+      'legal_entity_service_2_description':
+          'Évaluez les compétences de votre équipe et identifiez les domaines d\'amélioration.',
+      'legal_entity_service_3_title': 'Rapports et Analytics',
+      'legal_entity_service_3_description':
+          'Obtenez des rapports détaillés et des analytics sur les compétences de l\'entreprise.',
+      'legal_entity_benefits_title': 'Avantages pour les Entreprises',
+      'legal_entity_benefit_1': 'Amélioration des compétences de l\'entreprise',
+      'legal_entity_benefit_2': 'Réduction des coûts de formation',
+      'legal_entity_benefit_3': 'Plus grande compétitivité sur le marché',
+      'legal_entity_benefit_4': 'Gestion centralisée des compétences',
+      'legal_entity_how_it_works_title': 'Comment ça marche',
+      'legal_entity_step_1_title': 'Inscription de l\'Entreprise',
+      'legal_entity_step_1_description':
+          'Inscrivez votre entreprise et vérifiez les données légales.',
+      'legal_entity_step_2_title': 'Inviter les Employés',
+      'legal_entity_step_2_description':
+          'Invitez vos employés à participer au programme de certification.',
+      'legal_entity_step_3_title': 'Surveiller les Progrès',
+      'legal_entity_step_3_description':
+          'Surveillez les progrès et certifications de votre équipe en temps réel.',
+      'legal_entity_cta_title': 'Inscrivez Votre Entreprise',
+      'legal_entity_cta_description':
+          'Commencez à améliorer les compétences de votre entreprise avec notre système de certification.',
+      'become_legal_entity': 'Inscrire l\'Entreprise',
+
+      // User Type Selection Screen
+      'platform_subtitle': 'Plateforme pour Certificateurs et Entreprises',
+      'select_user_type': 'Sélectionnez votre type d\'utilisateur',
+      'certifier_description':
+          'Vérifiez les compétences et émettez des certifications professionnelles',
+      'company': 'Entreprise',
+      'company_description': 'Gérez les certifications de vos employés',
+      'public_register': 'Registre Public',
+
+      // Features Screen
+      'features_title': 'Fonctionnalités de la Plateforme',
+      'features_subtitle':
+          'Découvrez comment JetCV Enterprise révolutionne la gestion des certifications professionnelles',
+      'what_we_do_title': 'Ce Que Nous Faisons',
+      'what_we_do_description':
+          'JetCV Enterprise est une plateforme de pointe qui connecte les certificateurs professionnels avec les entreprises, offrant un écosystème complet pour gérer, vérifier et surveiller les compétences professionnelles. Notre solution intègre des technologies avancées pour garantir la transparence, la sécurité et l\'efficacité dans le processus de certification.',
+      'feature_certification': 'Certification Professionnelle',
+      'feature_certification_desc':
+          'Système complet pour vérifier et délivrer des certifications professionnelles reconnues',
+      'feature_enterprise': 'Gestion d\'Entreprise',
+      'feature_enterprise_desc':
+          'Outils avancés pour les entreprises pour surveiller et gérer les compétences des employés',
+      'feature_analytics': 'Analytiques Avancées',
+      'feature_analytics_desc':
+          'Tableaux de bord détaillés et rapports pour surveiller les performances et tendances des compétences',
+      'feature_security': 'Sécurité d\'Entreprise',
+      'feature_security_desc':
+          'Protocoles de sécurité de niveau bancaire pour protéger les données sensibles',
+      'feature_internationalization': 'Multilingue',
+      'feature_internationalization_desc':
+          'Support complet pour 4 langues avec expansion mondiale',
+      'feature_responsive': 'Design Responsive',
+      'feature_responsive_desc':
+          'Interface optimisée pour desktop, tablette et appareils mobiles',
+      'key_features_title': 'Fonctionnalités Clés',
+      'key_feature_1':
+          'Vérification des compétences via des tests standardisés et évaluations pratiques',
+      'key_feature_2':
+          'Blockchain pour la traçabilité et l\'authenticité des certifications',
+      'key_feature_3':
+          'Intégration avec les systèmes RH d\'entreprise existants',
+      'key_feature_4': 'APIs RESTful pour intégrations personnalisées',
+      'key_feature_5':
+          'Tableau de bord en temps réel pour surveillance continue',
+      'key_feature_6':
+          'Système de notifications intelligentes et automatisation des processus',
+      'competitive_advantages_title': 'Avantages Concurrentiels',
+      'competitive_advantage_1':
+          'Plateforme unique combinant certification professionnelle et gestion d\'entreprise',
+      'competitive_advantage_2':
+          'Technologie blockchain pour certifications immuables et vérifiables',
+      'competitive_advantage_3':
+          'Algorithmes IA pour correspondance intelligente entre compétences et postes',
+      'competitive_advantage_4':
+          'Support multilingue natif avec expansion sur marchés internationaux',
+      'competitive_advantage_5':
+          'Tarification transparente sans coûts cachés ou commissions élevées',
+      'pros_cons_title': 'Analyse Comparative',
+      'pros_title': 'Avantages',
+      'pros_1': 'Plateforme unifiée pour certificateurs et entreprises',
+      'pros_2': 'Technologie blockchain pour sécurité maximale',
+      'pros_3': 'Interface intuitive et responsive',
+      'pros_4': 'Support client dédié 24/7',
+      'cons_title': 'Considérations',
+      'cons_1': 'Nécessite adoption par les deux groupes cibles',
+      'cons_2': 'Courbe d\'apprentissage pour utilisateurs moins techniques',
+      'cons_3': 'Dépendances de connectivité internet stable',
+      'cons_4':
+          'Nécessité de mises à jour régulières pour nouvelles compétences',
+      'platform_benefits_title': 'Avantages de la Plateforme',
+      'platform_benefit_1':
+          'Réduction de 70% du temps nécessaire pour vérifier les compétences',
+      'platform_benefit_2':
+          'Augmentation de 85% de la transparence dans le processus de certification',
+      'platform_benefit_3':
+          'Économies de 60% sur les coûts de gestion des compétences d\'entreprise',
+      'platform_benefit_4':
+          'Amélioration de 90% de la traçabilité des certifications',
+      'platform_benefit_5': 'Automatisation de 80% des processus de validation',
+      'platform_benefit_6':
+          'Scalabilité mondiale avec support multilingue natif',
+      'technology_stack_title': 'Stack Technologique',
+      'technology_stack_description':
+          'JetCV Enterprise est construite sur des technologies de pointe : Flutter pour l\'interface utilisateur cross-platform, Supabase pour le backend et base de données, blockchain pour la sécurité des certifications, IA/ML pour correspondance intelligente, et architecture microservices pour la scalabilité. Nous utilisons des protocoles de sécurité de niveau entreprise et suivons les meilleures pratiques de développement logiciel.',
+      'features_cta_title': 'Prêt à Révolutionner les Certifications ?',
+      'features_cta_description':
+          'Rejoignez des milliers de professionnels et entreprises utilisant déjà JetCV Enterprise pour gérer les compétences de manière innovante et efficace.',
+      'get_started': 'Commencer',
+      'explore_public_cvs': 'Explorer les CV Publics',
+
+      // Persuasive Elements
+      'limited_time_offer': '🔥 OFFRE LIMITÉE - 50% DE RÉDUCTION',
+      'stat_1_number': '10K+',
+      'stat_1_label': 'Entreprises Actives',
+      'stat_2_number': '500K+',
+      'stat_2_label': 'Certifications Délivrées',
+      'stat_3_number': '99.9%',
+      'stat_3_label': 'Disponibilité Garantie',
+      'trusted_by_companies': 'Fait Confiance par les Leaders Mondiaux',
+      'average_rating': '4.9/5',
+      'based_on_reviews': 'basé sur 2 500+ avis',
+      'roi_calculator_title': 'Calculateur ROI',
+      'roi_calculator_subtitle':
+          'Découvrez combien vous pouvez économiser avec JetCV Enterprise',
+      'roi_savings_title': 'Économies Annuelles',
+      'roi_savings_amount': '50 000€+',
+      'roi_savings_desc': 'Réduction des coûts de gestion des compétences',
+      'roi_time_title': 'Temps Économisé',
+      'roi_time_amount': '80%',
+      'roi_time_desc': 'Moins de temps pour les vérifications manuelles',
+      'roi_efficiency_title': 'Efficacité Augmentée',
+      'roi_efficiency_amount': '300%',
+      'roi_efficiency_desc': 'Amélioration de la productivité de l\'équipe',
+      'testimonials_title': 'Ce Que Disent Nos Clients',
+      'testimonial_1_text':
+          'JetCV Enterprise a révolutionné notre processus de certification. Nous avons réduit le temps de 70% et augmenté la qualité de nos compétences.',
+      'testimonial_1_author': 'Marco Rossi',
+      'testimonial_1_position': 'PDG',
+      'testimonial_1_company': 'TechCorp France',
+      'testimonial_2_text':
+          'La plateforme la plus avancée que nous ayons jamais utilisée. L\'intégration avec nos systèmes RH a été transparente et les résultats ont été immédiats.',
+      'testimonial_2_author': 'Sarah Johnson',
+      'testimonial_2_position': 'Directrice RH',
+      'testimonial_2_company': 'Global Solutions',
+      'testimonial_3_text':
+          'ROI incroyable en seulement 3 mois. Nos employés sont plus qualifiés et motivés. Je recommande vivement JetCV Enterprise.',
+      'testimonial_3_author': 'Alessandro Bianchi',
+      'testimonial_3_position': 'CTO',
+      'testimonial_3_company': 'Innovation Labs',
+      'urgency_title': '⏰ OFFRE EXPIRE DANS 48 HEURES !',
+      'urgency_description':
+          'Ne manquez pas l\'opportunité d\'obtenir 50% de réduction sur votre première année. Seulement pour les 100 premiers clients qui s\'inscrivent.',
+      'urgency_offer': '🔥 50% DE RÉDUCTION - AUJOURD\'HUI SEULEMENT !',
+
+      // Contacts Page
+      'contacts_title': 'Contact',
+      'contacts_subtitle': 'Contatta il nostro team di esperti',
+      'contacts_description':
+          'Il nostro team di esperti è qui per aiutarti a massimizzare il potenziale della tua organizzazione con JetCV Enterprise. Contattaci per domande, supporto tecnico, partnership o qualsiasi altra esigenza.',
+      'contact_form_title': 'Modulo di Contatto',
+      'personal_info_title': 'Informazioni Personali',
+      'name_label': 'Nome Completo',
+      'name_hint': 'Inserisci il tuo nome completo',
+      'name_required': 'Il nome è obbligatorio',
+      'email_label': 'Email',
+      'email_hint': 'Inserisci la tua email',
+      'email_required': 'L\'email è obbligatoria',
+      'email_invalid': 'Inserisci un\'email valida',
+      'company_label': 'Azienda',
+      'company_hint': 'Nome della tua azienda',
+      'phone_label': 'Telefono',
+      'phone_hint': 'Numero di telefono',
+      'request_details_title': 'Dettagli Richiesta',
+      'department_label': 'Dipartimento',
+      'department_sales': 'Vendite',
+      'department_support': 'Supporto',
+      'department_technical': 'Tecnico',
+      'department_partnerships': 'Partnership',
+      'department_general': 'Generale',
+      'country_label': 'Paese',
+      'country_italy': 'Italia',
+      'country_usa': 'Stati Uniti',
+      'country_germany': 'Germania',
+      'country_france': 'Francia',
+      'country_uk': 'Regno Unito',
+      'country_other': 'Altro',
+      'subject_label': 'Oggetto',
+      'subject_hint': 'Oggetto della richiesta',
+      'subject_required': 'L\'oggetto è obbligatorio',
+      'priority_label': 'Priorità',
+      'priority_hint': 'Alta, Media, Bassa',
+      'urgent_request': 'Richiesta Urgente',
+      'message_title': 'Messaggio',
+      'message_label': 'Messaggio',
+      'message_hint': 'Descrivi la tua richiesta in dettaglio',
+      'message_required': 'Il messaggio è obbligatorio',
+      'message_too_short': 'Il messaggio deve essere di almeno 10 caratteri',
+      'agree_terms': 'Accetto i termini e condizioni',
+      'subscribe_newsletter': 'Iscrivimi alla newsletter',
+      'send_message': 'Invia Messaggio',
+      'contact_info_title': 'Informazioni di Contatto',
+      'email_contact': 'Email',
+      'phone_contact': 'Telefono',
+      'address_contact': 'Indirizzo',
+      'address_full': 'Via Roma 123, 20121 Milano, Italia',
+      'business_hours': 'Orari di Lavoro',
+      'business_hours_full': 'Lun-Ven: 9:00-18:00 (CET)',
+      'response_time': 'Tempo di Risposta',
+      'response_time_detail': 'Rispondiamo entro 24 ore',
+      'team_section_title': 'Il Nostro Team',
+      'ceo_position': 'Amministratore Delegato',
+      'cto_position': 'Direttore Tecnico',
+      'sales_director_position': 'Direttore Vendite',
+      'support_manager_position': 'Manager Supporto',
+      'office_locations_title': 'Le Nostre Sedi',
+      'milan_address': 'Via Roma 123, 20121 Milano, Italia',
+      'ny_address': '123 Business Ave, New York, NY 10001, USA',
+      'form_success_title': 'Messaggio Inviato!',
+      'form_success_message':
+          'Grazie per averci contattato. Ti risponderemo entro 24 ore.',
+      'agree_terms_required': 'Devi accettare i termini e condizioni',
+      'ok': 'OK',
+
+      // Additional hardcoded strings
+      'confirm_certification_send':
+          'Confermo di aver verificato tutti i dettagli e di voler procedere con l\'invio della certificazione',
+      'certification_send_error': 'Errore nell\'Invio',
+      'select_media_type': 'Seleziona tipo di media',
+      'image': 'Immagine',
+      'video': 'Video',
+      'audio': 'Audio',
+      'accept_terms_registration':
+          'Cliccando su "Completa Registrazione" accetti i termini e condizioni',
+      'verification_complete_instruction':
+          'Dopo aver completato la verifica, torna all\'app e clicca "Controlla Stato"',
+      'users_added_count': 'utenti aggiunti',
+      'certification_send_warning':
+          'Una volta inviata, la certificazione verrà inviata agli utenti destinatari e non sarà più modificabile. Una volta che gli utenti accetteranno la certificazione, questa verrà notarizzata sulla blockchain. Questa azione non può essere annullata.',
     },
   };
 

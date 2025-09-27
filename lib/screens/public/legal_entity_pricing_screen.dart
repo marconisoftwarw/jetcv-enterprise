@@ -5,7 +5,9 @@ import '../../providers/pricing_provider.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/responsive_card.dart';
 import '../../widgets/responsive_layout.dart';
+import '../../widgets/public_top_bar.dart';
 import '../../theme/app_theme.dart';
+import '../../l10n/app_localizations.dart';
 
 class LegalEntityPricingScreen extends StatefulWidget {
   const LegalEntityPricingScreen({super.key});
@@ -29,137 +31,233 @@ class _LegalEntityPricingScreenState extends State<LegalEntityPricingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return ResponsiveLayout(
-      showMenu: false,
-      hideAppBar: false, // Mostra l'AppBar per questa pagina
-      title: 'Seleziona Licenza',
-      child: Consumer<PricingProvider>(
-        builder: (context, pricingProvider, child) {
-          if (pricingProvider.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
+    final l10n = AppLocalizations.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth <= 768;
+    final isTablet = screenWidth > 768 && screenWidth <= 1200;
+    final isDesktop = screenWidth > 1200;
 
-          if (pricingProvider.errorMessage != null) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Errore: ${pricingProvider.errorMessage}',
-                    style: TextStyle(color: Colors.red),
-                  ),
-                  const SizedBox(height: 16),
-                  CustomButton(
-                    onPressed: () => pricingProvider.loadPricings(),
-                    text: 'Riprova',
-                  ),
-                ],
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Column(
+        children: [
+          // Top Bar
+          const PublicTopBar(showBackButton: true, title: 'Seleziona Licenza'),
+
+          // Main Content
+          Expanded(
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFF0A0E27),
+                    Color(0xFF1A1F3A),
+                    Color(0xFF2D1B69),
+                    Color(0xFF6366F1),
+                  ],
+                  stops: [0.0, 0.3, 0.7, 1.0],
+                ),
               ),
-            );
-          }
+              child: SafeArea(
+                child: Consumer<PricingProvider>(
+                  builder: (context, pricingProvider, child) {
+                    if (pricingProvider.isLoading) {
+                      return const Center(
+                        child: CircularProgressIndicator(color: Colors.white),
+                      );
+                    }
 
-          final availablePricings = pricingProvider.pricings
-              .where((pricing) => pricing.isAvailable)
-              .toList();
+                    if (pricingProvider.errorMessage != null) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Errore: ${pricingProvider.errorMessage}',
+                              style: const TextStyle(color: Colors.red),
+                            ),
+                            const SizedBox(height: 16),
+                            CustomButton(
+                              onPressed: () => pricingProvider.loadPricings(),
+                              text: 'Riprova',
+                            ),
+                          ],
+                        ),
+                      );
+                    }
 
-          if (availablePricings.isEmpty) {
-            return const Center(
-              child: Text('Nessun piano disponibile al momento'),
-            );
-          }
+                    final availablePricings = pricingProvider.pricings
+                        .where((pricing) => pricing.isAvailable)
+                        .toList();
 
-          return SingleChildScrollView(
-            padding: ResponsivePadding.screen(context),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ResponsiveText(
-                  'Scegli il piano più adatto alla tua azienda',
-                  textType: TextType.titleLarge,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.textPrimary,
-                  ),
-                ),
-                SizedBox(
-                  height: ResponsiveBreakpoints.isMobile(context) ? 8 : 12,
-                ),
-                ResponsiveText(
-                  'Seleziona una licenza per continuare con la registrazione della tua entità legale',
-                  textType: TextType.bodyLarge,
-                  style: TextStyle(color: AppTheme.textGray),
-                ),
-                SizedBox(
-                  height: ResponsiveBreakpoints.isMobile(context) ? 24 : 32,
-                ),
-                ResponsiveBreakpoints.isMobile(context)
-                    ? Column(
-                        children: availablePricings
-                            .map(
-                              (pricing) => Padding(
-                                padding: const EdgeInsets.only(bottom: 16),
-                                child: _buildPricingCard(pricing),
-                              ),
-                            )
-                            .toList(),
-                      )
-                    : Row(
-                        children: availablePricings
-                            .map(
-                              (pricing) => Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                  ),
-                                  child: _buildPricingCard(pricing),
-                                ),
-                              ),
-                            )
-                            .toList(),
+                    if (availablePricings.isEmpty) {
+                      return const Center(
+                        child: Text(
+                          'Nessun piano disponibile al momento',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      );
+                    }
+
+                    return SingleChildScrollView(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isDesktop ? 120 : (isTablet ? 60 : 32),
+                        vertical: isDesktop ? 40 : 30,
                       ),
-                SizedBox(
-                  height: ResponsiveBreakpoints.isMobile(context) ? 24 : 32,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Header
+                          Center(
+                            child: Column(
+                              children: [
+                                Text(
+                                  'Scegli il piano più adatto alla tua azienda',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineMedium
+                                      ?.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: isDesktop ? 32 : 28,
+                                      ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                SizedBox(height: isDesktop ? 16 : 12),
+                                Text(
+                                  'Seleziona una licenza per continuare con la registrazione della tua entità legale',
+                                  style: Theme.of(context).textTheme.titleLarge
+                                      ?.copyWith(
+                                        color: Colors.white.withOpacity(0.9),
+                                        fontWeight: FontWeight.w400,
+                                        fontSize: isDesktop
+                                            ? 20
+                                            : (isTablet ? 18 : 16),
+                                      ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: isDesktop ? 48 : 32),
+
+                          // Pricing Cards
+                          isMobile
+                              ? Column(
+                                  children: availablePricings
+                                      .map(
+                                        (pricing) => Padding(
+                                          padding: const EdgeInsets.only(
+                                            bottom: 16,
+                                          ),
+                                          child: _buildPricingCard(
+                                            pricing,
+                                            isMobile,
+                                            isTablet,
+                                            isDesktop,
+                                          ),
+                                        ),
+                                      )
+                                      .toList(),
+                                )
+                              : Row(
+                                  children: availablePricings
+                                      .map(
+                                        (pricing) => Expanded(
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                            ),
+                                            child: _buildPricingCard(
+                                              pricing,
+                                              isMobile,
+                                              isTablet,
+                                              isDesktop,
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                      .toList(),
+                                ),
+                          SizedBox(height: isDesktop ? 32 : 24),
+
+                          // Selected Pricing Summary
+                          if (selectedPricing != null) ...[
+                            _buildSelectedPricingSummary(
+                              isMobile,
+                              isTablet,
+                              isDesktop,
+                            ),
+                            SizedBox(height: isDesktop ? 24 : 16),
+                            SizedBox(
+                              width: double.infinity,
+                              child: CustomButton(
+                                onPressed: () => _proceedToRegistration(),
+                                text: 'Continua con la Registrazione',
+                                backgroundColor: AppTheme.successGreen,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    );
+                  },
                 ),
-                if (selectedPricing != null) ...[
-                  _buildSelectedPricingSummary(),
-                  SizedBox(
-                    height: ResponsiveBreakpoints.isMobile(context) ? 16 : 24,
-                  ),
-                  SizedBox(
-                    width: double.infinity,
-                    child: CustomButton(
-                      onPressed: () => _proceedToRegistration(),
-                      text: 'Continua con la Registrazione',
-                      backgroundColor: AppTheme.successGreen,
-                    ),
-                  ),
-                ],
-              ],
+              ),
             ),
-          );
-        },
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildPricingCard(Pricing pricing) {
+  Widget _buildPricingCard(
+    Pricing pricing,
+    bool isMobile,
+    bool isTablet,
+    bool isDesktop,
+  ) {
     final isSelected = selectedPricing?.idPricing == pricing.idPricing;
 
-    return ResponsiveCard(
-      margin: const EdgeInsets.only(bottom: 16),
-      backgroundColor: isSelected
-          ? AppTheme.primaryBlue.withValues(alpha: 0.1)
-          : AppTheme.pureWhite,
-      border: isSelected
-          ? Border.all(color: AppTheme.primaryBlue, width: 2)
-          : Border.all(color: AppTheme.borderGray, width: 1),
-      child: InkWell(
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
         onTap: () => setState(() => selectedPricing = pricing),
-        borderRadius: BorderRadius.circular(
-          ResponsiveBreakpoints.isMobile(context) ? 12 : 16,
-        ),
-        child: Container(
-          padding: ResponsivePadding.card(context),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: EdgeInsets.all(isMobile ? 16 : 24),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: isSelected
+                  ? [
+                      Colors.white.withOpacity(0.25),
+                      Colors.white.withOpacity(0.15),
+                    ]
+                  : [
+                      Colors.white.withOpacity(0.15),
+                      Colors.white.withOpacity(0.05),
+                    ],
+            ),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: isSelected
+                  ? Colors.white.withOpacity(0.6)
+                  : Colors.white.withOpacity(0.3),
+              width: isSelected ? 2 : 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: isSelected
+                    ? AppTheme.primaryBlue.withOpacity(0.3)
+                    : Colors.black.withOpacity(0.1),
+                blurRadius: 20,
+                spreadRadius: 0,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -170,23 +268,23 @@ class _LegalEntityPricingScreenState extends State<LegalEntityPricingScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        ResponsiveText(
+                        Text(
                           pricing.name,
-                          textType: TextType.titleLarge,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.textPrimary,
-                          ),
+                          style: Theme.of(context).textTheme.headlineSmall
+                              ?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                                fontSize: isMobile ? 16 : 18,
+                              ),
                         ),
-                        SizedBox(
-                          height: ResponsiveBreakpoints.isMobile(context)
-                              ? 4
-                              : 6,
-                        ),
-                        ResponsiveText(
+                        SizedBox(height: isMobile ? 4 : 6),
+                        Text(
                           pricing.description,
-                          textType: TextType.bodyMedium,
-                          style: TextStyle(color: AppTheme.textGray),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: Colors.white.withOpacity(0.8),
+                                fontSize: isMobile ? 12 : 13,
+                              ),
                         ),
                       ],
                     ),
@@ -197,58 +295,80 @@ class _LegalEntityPricingScreenState extends State<LegalEntityPricingScreen> {
                       Text(
                         pricing.formattedPrice,
                         style: TextStyle(
-                          fontSize: 24,
+                          fontSize: isMobile ? 20 : 24,
                           fontWeight: FontWeight.bold,
-                          color: Colors.green,
+                          color: AppTheme.successGreen,
                         ),
                       ),
                       Text(
                         'per ${pricing.validityDays} giorni',
-                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                        style: TextStyle(
+                          fontSize: isMobile ? 10 : 12,
+                          color: Colors.white.withOpacity(0.7),
+                        ),
                       ),
                     ],
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: isMobile ? 12 : 16),
               Text(
                 'Caratteristiche:',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: isMobile ? 14 : 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: isMobile ? 6 : 8),
               ...pricing.features.map(
                 (feature) => Padding(
                   padding: const EdgeInsets.only(bottom: 4),
                   child: Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.check_circle,
-                        color: Colors.green,
-                        size: 16,
+                        color: AppTheme.successGreen,
+                        size: isMobile ? 14 : 16,
                       ),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: Text(feature, style: TextStyle(fontSize: 14)),
+                        child: Text(
+                          feature,
+                          style: TextStyle(
+                            fontSize: isMobile ? 12 : 14,
+                            color: Colors.white.withOpacity(0.9),
+                          ),
+                        ),
                       ),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: isMobile ? 12 : 16),
               if (isSelected)
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.blue,
-                    borderRadius: BorderRadius.circular(4),
+                  padding: EdgeInsets.symmetric(
+                    vertical: isMobile ? 6 : 8,
+                    horizontal: isMobile ? 12 : 16,
                   ),
-                  child: const Text(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        AppTheme.primaryBlue,
+                        AppTheme.primaryBlue.withOpacity(0.8),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
                     '✓ Selezionato',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
+                      fontSize: isMobile ? 12 : 14,
                     ),
                   ),
                 ),
@@ -259,34 +379,61 @@ class _LegalEntityPricingScreenState extends State<LegalEntityPricingScreen> {
     );
   }
 
-  Widget _buildSelectedPricingSummary() {
+  Widget _buildSelectedPricingSummary(
+    bool isMobile,
+    bool isTablet,
+    bool isDesktop,
+  ) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(isMobile ? 16 : 20),
       decoration: BoxDecoration(
-        color: Colors.green.shade50,
-        border: Border.all(color: Colors.green),
-        borderRadius: BorderRadius.circular(8),
+        gradient: LinearGradient(
+          colors: [
+            AppTheme.successGreen.withOpacity(0.2),
+            AppTheme.successGreen.withOpacity(0.1),
+          ],
+        ),
+        border: Border.all(
+          color: AppTheme.successGreen.withOpacity(0.5),
+          width: 1,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.successGreen.withOpacity(0.2),
+            blurRadius: 15,
+            spreadRadius: 0,
+            offset: const Offset(0, 5),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Piano Selezionato:',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: isMobile ? 14 : 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: isMobile ? 6 : 8),
           Text(
             '${selectedPricing!.name} - ${selectedPricing!.formattedPrice}',
             style: TextStyle(
-              fontSize: 18,
+              fontSize: isMobile ? 16 : 18,
               fontWeight: FontWeight.bold,
-              color: Colors.green,
+              color: AppTheme.successGreen,
             ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: isMobile ? 2 : 4),
           Text(
             'Validità: ${selectedPricing!.validityDays} giorni',
-            style: TextStyle(fontSize: 14),
+            style: TextStyle(
+              fontSize: isMobile ? 12 : 14,
+              color: Colors.white.withOpacity(0.8),
+            ),
           ),
         ],
       ),

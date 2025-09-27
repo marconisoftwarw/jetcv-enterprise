@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/app_config.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/public_top_bar.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/locale_provider.dart';
 
@@ -62,221 +63,83 @@ class _UserTypeSelectionScreenState extends State<UserTypeSelectionScreen>
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF0A0E27),
-              Color(0xFF1A1F3A),
-              Color(0xFF2D1B69),
-              Color(0xFF6366F1),
-            ],
-            stops: [0.0, 0.3, 0.7, 1.0],
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              // Top Navigation Bar
-              _buildTopNavigationBar(
-                context,
-                l10n,
-                isDesktop,
-                isTablet,
-                isMobile,
-              ),
-
-              // Main Content
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: isDesktop ? 120 : (isTablet ? 60 : 32),
-                      vertical: isDesktop ? 40 : 30,
-                    ),
-                    child: FadeTransition(
-                      opacity: _fadeAnimation,
-                      child: SlideTransition(
-                        position: _slideAnimation,
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(
-                            minHeight:
-                                MediaQuery.of(context).size.height -
-                                (isDesktop ? 240 : (isTablet ? 200 : 200)),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              // Logo and Title
-                              _buildHeader(
-                                context,
-                                isDesktop,
-                                isTablet,
-                                isMobile,
-                              ),
-
-                              SizedBox(height: isDesktop ? 60 : 40),
-
-                              // User Type Selection
-                              _buildUserTypeSelection(
-                                context,
-                                l10n,
-                                isDesktop,
-                                isTablet,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTopNavigationBar(
-    BuildContext context,
-    AppLocalizations l10n,
-    bool isDesktop,
-    bool isTablet,
-    bool isMobile,
-  ) {
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: isDesktop ? 120 : (isTablet ? 60 : 16),
-        vertical: isDesktop ? 20 : (isMobile ? 12 : 16),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: Column(
         children: [
-          // Logo
-          Row(
-            children: [
-              Container(
-                width: isDesktop ? 50 : 40,
-                height: isDesktop ? 50 : 40,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFF06B6D4),
-                      Color(0xFF3B82F6),
-                      Color(0xFF8B5CF6),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.verified_user_rounded,
-                  color: Colors.white,
-                  size: isDesktop ? 28 : 22,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                AppConfig.appName,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                  fontSize: isDesktop ? 24 : 20,
-                ),
-              ),
-            ],
-          ),
+          // Top Bar
+          const PublicTopBar(),
 
-          // Navigation Buttons
-          isMobile
-              ? Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Language Dropdown
-                    _buildLanguageDropdown(context, isDesktop, isMobile),
-                    const SizedBox(width: 8),
-                    ElevatedButton(
-                      onPressed: () => Navigator.pushNamed(context, '/login'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: const Color(0xFF6366F1),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: const Text(
-                        'Accedi',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
+          // Main Content
+          Expanded(
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFF0A0E27),
+                    Color(0xFF1A1F3A),
+                    Color(0xFF2D1B69),
+                    Color(0xFF6366F1),
                   ],
-                )
-              : Row(
-                  mainAxisSize: MainAxisSize.min,
+                  stops: [0.0, 0.3, 0.7, 1.0],
+                ),
+              ),
+              child: SafeArea(
+                child: Column(
                   children: [
-                    TextButton(
-                      onPressed: () {
-                        // Navigate to CV list page
-                        Navigator.pushNamed(context, '/cv-list');
-                      },
-                      style: TextButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(
-                          horizontal: isDesktop ? 20 : 16,
-                          vertical: isDesktop ? 12 : 8,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          side: BorderSide(
-                            color: Colors.white.withOpacity(0.3),
+                    // Main Content
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isDesktop ? 120 : (isTablet ? 60 : 32),
+                            vertical: isDesktop ? 40 : 30,
+                          ),
+                          child: FadeTransition(
+                            opacity: _fadeAnimation,
+                            child: SlideTransition(
+                              position: _slideAnimation,
+                              child: ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  minHeight:
+                                      MediaQuery.of(context).size.height -
+                                      (isDesktop
+                                          ? 240
+                                          : (isTablet ? 200 : 200)),
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    // Logo and Title
+                                    _buildHeader(
+                                      context,
+                                      isDesktop,
+                                      isTablet,
+                                      isMobile,
+                                    ),
+
+                                    SizedBox(height: isDesktop ? 60 : 40),
+
+                                    // User Type Selection
+                                    _buildUserTypeSelection(
+                                      context,
+                                      l10n,
+                                      isDesktop,
+                                      isTablet,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                      child: Text(
-                        'Registro Pubblico',
-                        style: TextStyle(
-                          fontSize: isDesktop ? 14 : 12,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
                     ),
-                    const SizedBox(width: 12),
-                    ElevatedButton(
-                      onPressed: () => Navigator.pushNamed(context, '/login'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: const Color(0xFF6366F1),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: isDesktop ? 20 : 16,
-                          vertical: isDesktop ? 12 : 8,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: Text(
-                        'Accedi',
-                        style: TextStyle(
-                          fontSize: isDesktop ? 14 : 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    // Language Dropdown
-                    _buildLanguageDropdown(context, isDesktop, isMobile),
                   ],
                 ),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -288,6 +151,7 @@ class _UserTypeSelectionScreenState extends State<UserTypeSelectionScreen>
     bool isTablet,
     bool isMobile,
   ) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       children: [
         // Logo
@@ -340,7 +204,7 @@ class _UserTypeSelectionScreenState extends State<UserTypeSelectionScreen>
 
         // Subtitle
         Text(
-          'Piattaforma per Certificatori e Aziende',
+          l10n.getString('platform_subtitle'),
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
             color: Colors.white.withOpacity(0.9),
             fontWeight: FontWeight.w400,
@@ -368,7 +232,7 @@ class _UserTypeSelectionScreenState extends State<UserTypeSelectionScreen>
     return Column(
       children: [
         Text(
-          'Seleziona il tuo tipo di utente',
+          l10n.getString('select_user_type'),
           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
             color: Colors.white,
             fontWeight: FontWeight.w700,
@@ -385,8 +249,8 @@ class _UserTypeSelectionScreenState extends State<UserTypeSelectionScreen>
               Expanded(
                 child: _buildUserTypeCard(
                   context,
-                  'Certificatore',
-                  'Verifica competenze e rilascia certificazioni professionali',
+                  l10n.getString('certifier'),
+                  l10n.getString('certifier_description'),
                   Icons.verified_user_rounded,
                   AppTheme.successGreen,
                   () => _navigateToCertifier(context),
@@ -396,8 +260,8 @@ class _UserTypeSelectionScreenState extends State<UserTypeSelectionScreen>
               Expanded(
                 child: _buildUserTypeCard(
                   context,
-                  'Azienda',
-                  'Gestisci le certificazioni dei tuoi dipendenti',
+                  l10n.getString('company'),
+                  l10n.getString('company_description'),
                   Icons.business_rounded,
                   AppTheme.primaryBlue,
                   () => _navigateToLegalEntity(context),
@@ -412,8 +276,8 @@ class _UserTypeSelectionScreenState extends State<UserTypeSelectionScreen>
                 width: double.infinity,
                 child: _buildUserTypeCard(
                   context,
-                  'Certificatore',
-                  'Verifica competenze e rilascia certificazioni professionali',
+                  l10n.getString('certifier'),
+                  l10n.getString('certifier_description'),
                   Icons.verified_user_rounded,
                   AppTheme.successGreen,
                   () => _navigateToCertifier(context),
@@ -425,8 +289,8 @@ class _UserTypeSelectionScreenState extends State<UserTypeSelectionScreen>
                 width: double.infinity,
                 child: _buildUserTypeCard(
                   context,
-                  'Azienda',
-                  'Gestisci le certificazioni dei tuoi dipendenti',
+                  l10n.getString('company'),
+                  l10n.getString('company_description'),
                   Icons.business_rounded,
                   AppTheme.primaryBlue,
                   () => _navigateToLegalEntity(context),
@@ -448,6 +312,7 @@ class _UserTypeSelectionScreenState extends State<UserTypeSelectionScreen>
     VoidCallback onTap, {
     bool isMobile = false,
   }) {
+    final l10n = AppLocalizations.of(context);
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
@@ -545,7 +410,7 @@ class _UserTypeSelectionScreenState extends State<UserTypeSelectionScreen>
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  'Seleziona',
+                  l10n.getString('select'),
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
@@ -561,14 +426,15 @@ class _UserTypeSelectionScreenState extends State<UserTypeSelectionScreen>
   }
 
   void _navigateToCertifier(BuildContext context) {
-    Navigator.pushNamed(context, '/login');
+    Navigator.pushNamed(context, '/certifier-info');
   }
 
   void _navigateToLegalEntity(BuildContext context) {
-    Navigator.pushNamed(context, '/legal-entity/register');
+    Navigator.pushNamed(context, '/legal-entity-info');
   }
 
   Widget _buildRegistroPubblicoButton(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       width: double.infinity,
       child: ElevatedButton(
@@ -592,7 +458,7 @@ class _UserTypeSelectionScreenState extends State<UserTypeSelectionScreen>
             Icon(Icons.public_rounded, size: 20, color: Colors.white),
             const SizedBox(width: 12),
             Text(
-              'Registro Pubblico',
+              l10n.getString('public_register'),
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
